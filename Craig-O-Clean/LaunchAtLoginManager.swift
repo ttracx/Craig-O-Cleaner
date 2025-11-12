@@ -22,9 +22,11 @@ class LaunchAtLoginManager: ObservableObject {
         if #available(macOS 13.0, *) {
             do {
                 if isEnabled {
-                    try SMAppService.mainApp.unregister()
-                } else {
+                    // isEnabled is true (ON) - register the app to launch at login
                     try SMAppService.mainApp.register()
+                } else {
+                    // isEnabled is false (OFF) - unregister from launch at login
+                    try SMAppService.mainApp.unregister()
                 }
             } catch {
                 print("Failed to toggle launch at login: \(error.localizedDescription)")
