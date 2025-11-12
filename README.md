@@ -3,7 +3,7 @@
   
   # Craig-O-Clean App
   
-  A native macOS SwiftUI application for monitoring and managing system memory usage. Craig-O-Clean provides a menu bar utility that displays running processes sorted by memory usage and allows users to force quit applications or purge system memory.
+  A native macOS SwiftUI application for monitoring and managing system memory usage for our Chief Product Officer, Craig Ross at NeuralQuantum.ai | VibeCaaS.com | Tunaas.ai | Neuro Equality, LLC. Craig-O-Clean provides a menu bar utility that displays running processes sorted by memory usage and allows users to force quit applications or purge system memory.
   
   ![macOS](https://img.shields.io/badge/macOS-13.0+-blue.svg)
   ![Swift](https://img.shields.io/badge/Swift-5.0-orange.svg)
