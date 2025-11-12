@@ -1,10 +1,14 @@
-# Craig-O-Clean App
-
-A native macOS SwiftUI application for monitoring and managing system memory usage. Craig-O-Clean provides a menu bar utility that displays running processes sorted by memory usage and allows users to force quit applications or purge system memory.
-
-![macOS](https://img.shields.io/badge/macOS-13.0+-blue.svg)
-![Swift](https://img.shields.io/badge/Swift-5.0-orange.svg)
-![Xcode](https://img.shields.io/badge/Xcode-15.0+-blue.svg)
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/485d839f-c025-4db7-94d3-823379e02d77" alt="Craig-O-Clean Logo" width="200"/>
+  
+  # Craig-O-Clean App
+  
+  A native macOS SwiftUI application for monitoring and managing system memory usage. Craig-O-Clean provides a menu bar utility that displays running processes sorted by memory usage and allows users to force quit applications or purge system memory.
+  
+  ![macOS](https://img.shields.io/badge/macOS-13.0+-blue.svg)
+  ![Swift](https://img.shields.io/badge/Swift-5.0-orange.svg)
+  ![Xcode](https://img.shields.io/badge/Xcode-15.0+-blue.svg)
+</div>
 
 ## Features
 

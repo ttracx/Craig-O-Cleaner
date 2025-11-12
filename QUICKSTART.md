@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/485d839f-c025-4db7-94d3-823379e02d77" alt="Craig-O-Clean Logo" width="150"/>
+</div>
+
 # Quick Start Guide
 
 Get Craig-O-Clean up and running in 5 minutes!
