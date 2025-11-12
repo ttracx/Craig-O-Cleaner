@@ -99,10 +99,10 @@ struct SettingsView: View {
             
             Divider()
             
-            // Footer with Quit button
+            // Footer with Quit button and copyright
             footerView
         }
-        .frame(width: 400, height: 500)
+        .frame(width: 420, height: 550)
     }
     
     private var headerView: some View {
@@ -122,7 +122,7 @@ struct SettingsView: View {
     }
     
     private var footerView: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
             Button(action: {
                 NSApplication.shared.terminate(nil)
             }) {
@@ -141,6 +141,30 @@ struct SettingsView: View {
             Text("This will close the application")
                 .font(.caption2)
                 .foregroundColor(.secondary)
+            
+            Divider()
+                .padding(.vertical, 4)
+            
+            // Copyright notice
+            VStack(spacing: 4) {
+                Text("© 2025 Craig-O-Cleaner")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                
+                Text("powered by VibeCaaS.com")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                
+                Text("a division of NeuralQuantum.ai LLC")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                
+                Text("All rights reserved.")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+            .multilineTextAlignment(.center)
+            .padding(.bottom, 4)
         }
         .padding()
         .background(Color(NSColor.controlBackgroundColor))

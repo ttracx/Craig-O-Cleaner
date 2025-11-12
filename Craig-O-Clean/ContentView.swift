@@ -34,7 +34,8 @@ struct ContentView: View {
                 }
                 .tag(1)
         }
-        .frame(width: 400, height: 500)
+        .frame(width: 420, height: 550)
+        .padding(.top, 8)
         .onAppear {
             systemMemoryManager.refreshMemoryInfo()
         }
