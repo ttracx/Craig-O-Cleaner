@@ -72,18 +72,22 @@ struct SettingsView: View {
                     .background(Color(NSColor.controlBackgroundColor))
                     .cornerRadius(8)
                     
-                    // Permissions section
+                    // Features section
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Permissions")
+                        Text("Features")
                             .font(.headline)
                             .foregroundColor(.primary)
                         
                         VStack(alignment: .leading, spacing: 8) {
-                            Label("Administrator privileges required for memory purge", systemImage: "lock.shield")
+                            Label("Real-time memory monitoring", systemImage: "chart.bar.fill")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             
-                            Label("Process termination requires system access", systemImage: "terminal")
+                            Label("One-click memory optimization", systemImage: "bolt.fill")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            Label("Process management and termination", systemImage: "terminal.fill")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -102,7 +106,7 @@ struct SettingsView: View {
             // Footer with Quit button and copyright
             footerView
         }
-        .frame(width: 420, height: 550)
+        .frame(width: 440, height: 580)
     }
     
     private var headerView: some View {

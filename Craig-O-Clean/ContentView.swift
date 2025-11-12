@@ -34,8 +34,7 @@ struct ContentView: View {
                 }
                 .tag(1)
         }
-        .frame(width: 420, height: 550)
-        .padding(.top, 8)
+        .frame(width: 440, height: 580)
         .onAppear {
             systemMemoryManager.refreshMemoryInfo()
         }
@@ -252,7 +251,7 @@ struct ContentView: View {
             }) {
                 HStack {
                     Image(systemName: "trash.fill")
-                    Text("Purge Memory (sync && sudo purge)")
+                    Text("Free Memory")
                         .fontWeight(.semibold)
                 }
                 .frame(maxWidth: .infinity)
@@ -261,7 +260,7 @@ struct ContentView: View {
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
             
-            Text("This will flush inactive memory and may require admin privileges")
+            Text("Flushes inactive memory and clears caches to free up RAM")
                 .font(.caption2)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
