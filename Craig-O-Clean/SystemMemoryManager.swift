@@ -79,7 +79,9 @@ class SystemMemoryManager: ObservableObject {
         let wiredMemory = Double(wiredPages * pageSize) / bytesPerGB
         let compressedMemory = Double(compressedPages * pageSize) / bytesPerGB
         
-        let usedMem = activeMemory + inactiveMemory + wiredMemory + compressedMemory
+        // Used memory = active + wired + compressed (truly in use)
+        // Inactive memory is reclaimable, so it's counted as available
+        let usedMem = activeMemory + wiredMemory + compressedMemory
         let availableMem = freeMemory + inactiveMemory
         let percentage = (usedMem / totalPhysicalMemory) * 100
         
