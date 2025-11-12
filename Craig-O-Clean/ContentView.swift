@@ -270,11 +270,22 @@ struct ContentView: View {
     }
     
     private func forceQuitProcess(_ process: ProcessInfo) {
-        alertTitle = "Force Quit"
-        alertMessage = "Force quit \(process.name) (PID: \(process.pid))?"
-        showingAlert = true
+        let alert = NSAlert()
+        alert.messageText = "Force Quit Process?"
+        alert.informativeText = "Are you sure you want to force quit \"\(process.name)\" (PID: \(process.pid))?\n\nMemory usage: \(process.formattedMemory)\n\nThis action cannot be undone and may cause data loss."
+        alert.alertStyle = .critical
+        alert.addButton(withTitle: "Force Quit")
+        alert.addButton(withTitle: "Cancel")
         
-        processManager.forceQuitProcess(pid: process.pid)
+        let response = alert.runModal()
+        
+        if response == .alertFirstButtonReturn {
+            processManager.forceQuitProcess(pid: process.pid)
+            
+            alertTitle = "Success"
+            alertMessage = "Process \(process.name) has been terminated."
+            showingAlert = true
+        }
     }
     
     private func purgeMemory() {
@@ -292,13 +303,36 @@ struct ProcessRow: View {
     let onSelect: () -> Void
     let onForceQuit: () -> Void
     
+    private var isMemoryIntensive: Bool {
+        process.memoryUsage >= 500 // 500 MB or more
+    }
+    
     var body: some View {
         HStack {
+            // Warning indicator for memory-intensive processes
+            if isMemoryIntensive {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.caption)
+                    .foregroundColor(.orange)
+            }
+            
             VStack(alignment: .leading, spacing: 4) {
-                Text(process.name)
-                    .font(.system(.body, design: .monospaced))
-                    .lineLimit(1)
-                    .truncationMode(.tail)
+                HStack(spacing: 4) {
+                    Text(process.name)
+                        .font(.system(.body, design: .monospaced))
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                    
+                    if isMemoryIntensive {
+                        Text("HIGH")
+                            .font(.system(size: 8, weight: .bold))
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 2)
+                            .background(Color.orange.opacity(0.2))
+                            .foregroundColor(.orange)
+                            .cornerRadius(3)
+                    }
+                }
                 
                 Text("PID: \(process.pid)")
                     .font(.caption)
@@ -310,24 +344,43 @@ struct ProcessRow: View {
             VStack(alignment: .trailing, spacing: 4) {
                 Text(process.formattedMemory)
                     .font(.headline)
-                    .foregroundColor(.primary)
+                    .foregroundColor(isMemoryIntensive ? .orange : .primary)
+                    .fontWeight(isMemoryIntensive ? .bold : .regular)
                 
                 Button(action: onForceQuit) {
-                    Text("Force Quit")
-                        .font(.caption)
-                        .foregroundColor(.red)
+                    HStack(spacing: 2) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.caption2)
+                        Text("Force Quit")
+                            .font(.caption)
+                    }
+                    .foregroundColor(.red)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background(Color.red.opacity(0.1))
+                    .cornerRadius(4)
                 }
                 .buttonStyle(.plain)
             }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(isSelected ? Color.blue.opacity(0.1) : Color.clear)
+        .background(backgroundForRow)
         .contentShape(Rectangle())
         .onTapGesture {
             onSelect()
         }
         .hoverEffect()
+    }
+    
+    private var backgroundForRow: Color {
+        if isSelected {
+            return Color.blue.opacity(0.1)
+        } else if isMemoryIntensive {
+            return Color.orange.opacity(0.05)
+        } else {
+            return Color.clear
+        }
     }
 }
 
