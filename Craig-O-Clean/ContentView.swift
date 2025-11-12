@@ -21,42 +21,96 @@ struct ContentView: View {
     }
     
     var body: some View {
-        TabView(selection: $selectedTab) {
-            mainView
-                .tabItem {
+        VStack(spacing: 0) {
+            // Top navigation buttons
+            HStack(spacing: 8) {
+                Button {
+                    withAnimation(nil) {
+                        selectedTab = 0
+                    }
+                } label: {
                     Label("Processes", systemImage: "memorychip")
+                        .font(.callout)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(selectedTab == 0 ? Color.accentColor.opacity(0.15) : Color.clear)
+                        .foregroundColor(selectedTab == 0 ? .accentColor : .primary)
+                        .cornerRadius(6)
                 }
-                .tag(0)
-            
-            SettingsView()
-                .tabItem {
+                .buttonStyle(.plain)
+
+                Button {
+                    withAnimation(nil) {
+                        selectedTab = 1
+                    }
+                } label: {
                     Label("Settings", systemImage: "gearshape")
+                        .font(.callout)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(selectedTab == 1 ? Color.accentColor.opacity(0.15) : Color.clear)
+                        .foregroundColor(selectedTab == 1 ? .accentColor : .primary)
+                        .cornerRadius(6)
                 }
-                .tag(1)
+                .buttonStyle(.plain)
+
+                Spacer()
+            }
+            .animation(nil, value: selectedTab)
+            .padding(.horizontal)
+            .padding(.top, 100)
+            .padding(.bottom, 14)
+            .background(Color(NSColor.windowBackgroundColor))
+
+            Divider()
+
+            // Content area
+            ZStack(alignment: .top) {
+                // Main view layer
+                TabContainer {
+                    mainView
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                }
+                .id("main")
+                .transition(.identity)
+                .opacity(selectedTab == 0 ? 1 : 0)
+
+                // Settings view layer
+                TabContainer {
+                    SettingsView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                }
+                .id("settings")
+                .transition(.identity)
+                .opacity(selectedTab == 1 ? 1 : 0)
+            }
+            .animation(nil, value: selectedTab)
         }
-        .frame(width: 440, height: 580)
+        .animation(nil, value: selectedTab)
+        .frame(width: 440, height: 600)
         .onAppear {
             systemMemoryManager.refreshMemoryInfo()
         }
     }
     
     private var mainView: some View {
-        VStack(spacing: 0) {
-            // Header
-            headerView
-            
-            Divider()
-            
-            // System Memory Info
-            systemMemoryView
-            
-            Divider()
-            
-            // Search bar
-            searchBar
-            
-            // Process list
-            ScrollView {
+        ScrollView {
+            LazyVStack(spacing: 10, pinnedViews: []) {
+                // Header
+                headerView
+                    .padding()
+
+                Divider()
+
+                // System Memory Info
+                systemMemoryView
+
+                Divider()
+
+                // Search bar
+                searchBar
+
+                // Process list
                 LazyVStack(spacing: 1) {
                     ForEach(filteredProcesses) { process in
                         ProcessRow(
@@ -69,12 +123,14 @@ struct ContentView: View {
                         )
                     }
                 }
+
+                Divider()
+
+                // Footer with Purge button
+                footerView
             }
-            
-            Divider()
-            
-            // Footer with Purge button
-            footerView
+            .padding(.horizontal, 0)
+            .frame(maxWidth: .infinity, alignment: .top)
         }
         .alert(alertTitle, isPresented: $showingAlert) {
             Button("OK", role: .cancel) { }
@@ -86,13 +142,65 @@ struct ContentView: View {
     private var headerView: some View {
         VStack(spacing: 8) {
             HStack {
-                Image(systemName: "memorychip.fill")
-                    .font(.title2)
-                    .foregroundColor(.blue)
-                
-                Text("Craig-O-Clean")
-                    .font(.title2)
-                    .fontWeight(.bold)
+                HStack(spacing: 8) {
+                    // App logo (replace "AppLogo" with your asset name if different)
+#if os(macOS)
+                    if let appIcon = NSApplication.shared.applicationIconImage {
+                        Image(nsImage: appIcon)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 100, height: 100)
+                            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                            .accessibilityHidden(true)
+                    } else if let nsImage = NSImage(named: "AppIcon") {
+                        Image(nsImage: nsImage)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 100, height: 100)
+                            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                            .accessibilityHidden(true)
+                    } else {
+                        Image(systemName: "app.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 100, height: 100)
+                            .foregroundColor(.accentColor)
+                            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                            .accessibilityHidden(true)
+                    }
+#else
+                    if UIImage(named: "AppIcon") != nil {
+                        Image("AppIcon")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 100, height: 100)
+                            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                    .stroke(Color.primary.opacity(0.06), lineWidth: 1)
+                            )
+                            .accessibilityHidden(true)
+                    } else {
+                        Image(systemName: "app.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 100, height: 100)
+                            .foregroundColor(.accentColor)
+                            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                    .stroke(Color.primary.opacity(0.06), lineWidth: 1)
+                            )
+                            .accessibilityHidden(true)
+                    }
+#endif
+
+
+                    Text("Craig-O-Clean")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.accentColor)
+                }
                 
                 Spacer()
                 
@@ -297,6 +405,22 @@ struct ContentView: View {
     }
 }
 
+private struct TabContainer<Content: View>: View {
+    @ViewBuilder let content: Content
+    var body: some View {
+        ZStack(alignment: .top) {
+            Color.clear
+            content
+                .padding(.top, 16)
+                .padding(.bottom, 16)
+                .padding(.horizontal, 0)
+        }
+        .ignoresSafeArea(.container, edges: .top)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .clipped()
+    }
+}
+
 struct ProcessRow: View {
     let process: ProcessInfo
     let isSelected: Bool
@@ -398,3 +522,4 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
+

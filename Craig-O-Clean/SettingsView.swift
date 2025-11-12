@@ -5,7 +5,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 10) {
             // Header
             headerView
             
@@ -36,7 +36,7 @@ struct SettingsView: View {
                             }
                         }
                     }
-                    .padding()
+                    .padding(20)
                     .background(Color(NSColor.controlBackgroundColor))
                     .cornerRadius(8)
                     
@@ -47,20 +47,70 @@ struct SettingsView: View {
                             .foregroundColor(.primary)
                         
                         HStack {
-                            Image(systemName: "memorychip.fill")
-                                .font(.largeTitle)
-                                .foregroundColor(.blue)
+                            // App logo (replace "AppLogo" with your asset name if different)
+        #if os(macOS)
+                            if let appIcon = NSApplication.shared.applicationIconImage {
+                                Image(nsImage: appIcon)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 90, height: 90)
+                                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                    .accessibilityHidden(true)
+                            } else if let nsImage = NSImage(named: "AppIcon") {
+                                Image(nsImage: nsImage)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 90, height: 90)
+                                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                    .accessibilityHidden(true)
+                            } else {
+                                Image(systemName: "app.fill")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 90, height: 90)
+                                    .foregroundColor(.accentColor)
+                                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                    .accessibilityHidden(true)
+                            }
+        #else
+                            if UIImage(named: "AppIcon") != nil {
+                                Image("AppIcon")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 90, height: 90)
+                                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                            .stroke(Color.primary.opacity(0.06), lineWidth: 1)
+                                    )
+                                    .accessibilityHidden(true)
+                            } else {
+                                Image(systemName: "app.fill")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 90, height: 90)
+                                    .foregroundColor(.accentColor)
+                                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                            .stroke(Color.primary.opacity(0.06), lineWidth: 1)
+                                    )
+                                    .accessibilityHidden(true)
+                            }
+        #endif
                             
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Craig-O-Clean")
                                     .font(.title3)
                                     .fontWeight(.bold)
+                                    .foregroundColor(.accentColor)
+
                                 
                                 Text("Version 1.0")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                                 
-                                Text("macOS Memory Manager")
+                                Text("macOS Memory Manager for Craig Ross")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
@@ -106,14 +156,14 @@ struct SettingsView: View {
             // Footer with Quit button and copyright
             footerView
         }
-        .frame(width: 440, height: 580)
+        .frame(width: 440, height: 600)
     }
     
     private var headerView: some View {
         HStack {
             Image(systemName: "gearshape.fill")
                 .font(.title2)
-                .foregroundColor(.blue)
+                .foregroundColor(.accentColor)
             
             Text("Settings")
                 .font(.title2)
@@ -139,7 +189,7 @@ struct SettingsView: View {
                 .padding(.vertical, 10)
             }
             .buttonStyle(.borderedProminent)
-            .tint(.red)
+            .tint(.accentColor)
             .controlSize(.large)
             
             Text("This will close the application")
@@ -153,13 +203,9 @@ struct SettingsView: View {
             VStack(spacing: 4) {
                 Text("© 2025 Craig-O-Cleaner")
                     .font(.caption2)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.accentColor)
                 
-                Text("powered by VibeCaaS.com")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                
-                Text("a division of NeuralQuantum.ai LLC")
+                Text("Powered by VibeCaaS.com, a division of NeuralQuantum.ai")
                     .font(.caption2)
                     .foregroundColor(.secondary)
                 
