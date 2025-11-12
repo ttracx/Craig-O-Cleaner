@@ -261,3 +261,7 @@ For issues, questions, or suggestions:
 ---
 
 **Note**: This application is designed for macOS and leverages native system commands. Use the force quit and memory purge features responsibly as they can affect system stability if misused.
+
+---
+
+© 2025 Craig-O-Cleaner powered by VibeCaaS.com a division of NeuralQuantum.ai LLC. All rights reserved.
