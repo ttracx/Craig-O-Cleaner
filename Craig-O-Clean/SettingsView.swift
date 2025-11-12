@@ -20,18 +20,19 @@ struct SettingsView: View {
                             .font(.headline)
                             .foregroundColor(.primary)
                         
-                        Toggle(isOn: $launchAtLoginManager.isEnabled) {
+                        Toggle(isOn: Binding(
+                            get: { launchAtLoginManager.isEnabled },
+                            set: { newValue in
+                                launchAtLoginManager.isEnabled = newValue
+                                launchAtLoginManager.toggleLaunchAtLogin()
+                            }
+                        )) {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Launch at Login")
                                     .font(.body)
                                 Text("Automatically start Craig-O-Clean when you log in")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
-                            }
-                        }
-                        .onChange(of: launchAtLoginManager.isEnabled) { oldValue, newValue in
-                            if oldValue != newValue {
-                                launchAtLoginManager.toggleLaunchAtLogin()
                             }
                         }
                     }

@@ -16,7 +16,7 @@ class SystemMemoryManager: ObservableObject {
     
     private func fetchSystemMemory() {
         // Get physical memory
-        let physicalMemory = Double(ProcessInfo.processInfo.physicalMemory) / (1024 * 1024 * 1024)
+        let physicalMemory = Double(Foundation.ProcessInfo.processInfo.physicalMemory) / (1024 * 1024 * 1024)
         
         // Get memory statistics using vm_stat
         let task = Process()
