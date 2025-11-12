@@ -21,6 +21,13 @@
 - **Auto-refresh**: Process list updates automatically every 5 seconds
 - **Native SwiftUI Interface**: Modern macOS design with smooth animations
 
+## Demo
+
+<div align="center">
+  <img src="demo.gif" alt="Craig-O-Clean Demo" width="600"/>
+  <p><em>Craig-O-Clean in action - Monitor memory usage and manage processes effortlessly</em></p>
+</div>
+
 ## Requirements
 
 - macOS 13.0 (Ventura) or later
