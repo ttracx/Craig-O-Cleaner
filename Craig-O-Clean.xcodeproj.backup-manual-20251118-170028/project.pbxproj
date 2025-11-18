@@ -1,0 +1,466 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1A000001000000000000001 /* Craig_O_CleanApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000002000000000000001 /* Craig_O_CleanApp.swift */; };
+		1A000003000000000000001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000004000000000000001 /* ContentView.swift */; };
+		1A000005000000000000001 /* ProcessManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000006000000000000001 /* ProcessManager.swift */; };
+		1A000007000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A000008000000000000001 /* Assets.xcassets */; };
+		1A000009000000000000001 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A00000A000000000000001 /* Preview Assets.xcassets */; };
+		1A00000B000000000000001 /* ProcessInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A00000C000000000000001 /* ProcessInfo.swift */; };
+		1A00001F000000000000001 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000020000000000000001 /* SettingsView.swift */; };
+		1A000021000000000000001 /* SystemMemoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000022000000000000001 /* SystemMemoryManager.swift */; };
+		1A000023000000000000001 /* LaunchAtLoginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000024000000000000001 /* LaunchAtLoginManager.swift */; };
+		39A6371450012AA1BC7A372B /* LaunchAtLoginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7574FF566423A7BE18273C89 /* LaunchAtLoginManager.swift */; };
+		60F5F6F2A0B8D42682BD941A /* SystemMemoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9AD40E7A7ADE624FC7FC352 /* SystemMemoryManager.swift */; };
+		73C0E9049689A9C0C9EABA8B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A9E44A3D2EDC5CCDC073FC /* SettingsView.swift */; };
+		7AFCF4447447A3CECE83F2F9 /* ProcessExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 229D0E99C65D314926BC1E47 /* ProcessExtensions.swift */; };
+		81D55D5C000E606FCD14EBFC /* ProcessManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8909EEADED8C594DD6639BD /* ProcessManager.swift */; };
+		A898388E5BAA7C586AFE8481 /* EnhancedProcessManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DDBB258CC737380EF77E83D /* EnhancedProcessManager.swift */; };
+		AE9CB127107DAC4E45FDCB77 /* Craig_O_CleanApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 564EEDF17EC62DF66495CEE9 /* Craig_O_CleanApp.swift */; };
+		C841F29CC6072C078EF0850C /* SystemCPUMonitorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C1C6BB4F888CDB7149C215B /* SystemCPUMonitorView.swift */; };
+		DA98A72E4BECCC5E3B399FCB /* ProcessDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D9D84288077AC9A123C62B /* ProcessDetailsView.swift */; };
+		FA14658BF72BB09A3EE30FB5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D121E6B0416131CE890AEBF8 /* ContentView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1A000002000000000000001 /* Craig_O_CleanApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Craig_O_CleanApp.swift; sourceTree = "<group>"; };
+		1A000004000000000000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		1A000006000000000000001 /* ProcessManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessManager.swift; sourceTree = "<group>"; };
+		1A000008000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		1A00000A000000000000001 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		1A00000C000000000000001 /* ProcessInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessInfo.swift; sourceTree = "<group>"; };
+		1A00000E000000000000001 /* Craig-O-Clean.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Craig-O-Clean.entitlements"; sourceTree = "<group>"; };
+		1A00000F000000000000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1A000020000000000000001 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		1A000022000000000000001 /* SystemMemoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMemoryManager.swift; sourceTree = "<group>"; };
+		1A000024000000000000001 /* LaunchAtLoginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLoginManager.swift; sourceTree = "<group>"; };
+		229D0E99C65D314926BC1E47 /* ProcessExtensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ProcessExtensions.swift; path = "Craig-O-Clean/ProcessExtensions.swift"; sourceTree = "<group>"; };
+		3DDBB258CC737380EF77E83D /* EnhancedProcessManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EnhancedProcessManager.swift; path = "Craig-O-Clean/EnhancedProcessManager.swift"; sourceTree = "<group>"; };
+		48D9D84288077AC9A123C62B /* ProcessDetailsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ProcessDetailsView.swift; path = "Craig-O-Clean/ProcessDetailsView.swift"; sourceTree = "<group>"; };
+		52A9E44A3D2EDC5CCDC073FC /* SettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SettingsView.swift; path = "Craig-O-Clean/SettingsView.swift"; sourceTree = "<group>"; };
+		564EEDF17EC62DF66495CEE9 /* Craig_O_CleanApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Craig_O_CleanApp.swift; path = "Craig-O-Clean/Craig_O_CleanApp.swift"; sourceTree = "<group>"; };
+		6C1C6BB4F888CDB7149C215B /* SystemCPUMonitorView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SystemCPUMonitorView.swift; path = "Craig-O-Clean/SystemCPUMonitorView.swift"; sourceTree = "<group>"; };
+		7574FF566423A7BE18273C89 /* LaunchAtLoginManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LaunchAtLoginManager.swift; path = "Craig-O-Clean/LaunchAtLoginManager.swift"; sourceTree = "<group>"; };
+		A8909EEADED8C594DD6639BD /* ProcessManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ProcessManager.swift; path = "Craig-O-Clean/ProcessManager.swift"; sourceTree = "<group>"; };
+		B9AD40E7A7ADE624FC7FC352 /* SystemMemoryManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SystemMemoryManager.swift; path = "Craig-O-Clean/SystemMemoryManager.swift"; sourceTree = "<group>"; };
+		D121E6B0416131CE890AEBF8 /* ContentView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ContentView.swift; path = "Craig-O-Clean/ContentView.swift"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1A000010000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1A000011000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				1A000012000000000000001 /* Craig-O-Clean */,
+				1A000013000000000000001 /* Products */,
+				A93EDA3C406687FBCAFE960D /* Craig-O-Clean */,
+			);
+			sourceTree = "<group>";
+		};
+		1A000012000000000000001 /* Craig-O-Clean */ = {
+			isa = PBXGroup;
+			children = (
+				1A000002000000000000001 /* Craig_O_CleanApp.swift */,
+				1A000004000000000000001 /* ContentView.swift */,
+				1A000020000000000000001 /* SettingsView.swift */,
+				1A000006000000000000001 /* ProcessManager.swift */,
+				1A000022000000000000001 /* SystemMemoryManager.swift */,
+				1A000024000000000000001 /* LaunchAtLoginManager.swift */,
+				1A00000C000000000000001 /* ProcessInfo.swift */,
+				1A000008000000000000001 /* Assets.xcassets */,
+				1A00000E000000000000001 /* Craig-O-Clean.entitlements */,
+				1A00000F000000000000001 /* Info.plist */,
+				1A000014000000000000001 /* Preview Content */,
+			);
+			path = "Craig-O-Clean";
+			sourceTree = "<group>";
+		};
+		1A000013000000000000001 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1A000014000000000000001 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				1A00000A000000000000001 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		A93EDA3C406687FBCAFE960D /* Craig-O-Clean */ = {
+			isa = PBXGroup;
+			children = (
+				D121E6B0416131CE890AEBF8 /* ContentView.swift */,
+				564EEDF17EC62DF66495CEE9 /* Craig_O_CleanApp.swift */,
+				3DDBB258CC737380EF77E83D /* EnhancedProcessManager.swift */,
+				7574FF566423A7BE18273C89 /* LaunchAtLoginManager.swift */,
+				48D9D84288077AC9A123C62B /* ProcessDetailsView.swift */,
+				229D0E99C65D314926BC1E47 /* ProcessExtensions.swift */,
+				A8909EEADED8C594DD6639BD /* ProcessManager.swift */,
+				52A9E44A3D2EDC5CCDC073FC /* SettingsView.swift */,
+				6C1C6BB4F888CDB7149C215B /* SystemCPUMonitorView.swift */,
+				B9AD40E7A7ADE624FC7FC352 /* SystemMemoryManager.swift */,
+			);
+			name = "Craig-O-Clean";
+			path = "Craig-O-Clean";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1A000015000000000000001 /* Craig-O-Clean */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1A000016000000000000001 /* Build configuration list for PBXNativeTarget "Craig-O-Clean" */;
+			buildPhases = (
+				1A000017000000000000001 /* Sources */,
+				1A000010000000000000001 /* Frameworks */,
+				1A000018000000000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Craig-O-Clean";
+			productName = "Craig-O-Clean";
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1A000019000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					1A000015000000000000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = 1A00001A000000000000001 /* Build configuration list for PBXProject "Craig-O-Clean" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 1A000011000000000000001;
+			productRefGroup = 1A000013000000000000001 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1A000015000000000000001 /* Craig-O-Clean */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1A000018000000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1A000009000000000000001 /* Preview Assets.xcassets in Resources */,
+				1A000007000000000000001 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1A000017000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1A000003000000000000001 /* ContentView.swift in Sources */,
+				1A00001F000000000000001 /* SettingsView.swift in Sources */,
+				1A000005000000000000001 /* ProcessManager.swift in Sources */,
+				1A000021000000000000001 /* SystemMemoryManager.swift in Sources */,
+				1A000023000000000000001 /* LaunchAtLoginManager.swift in Sources */,
+				1A00000B000000000000001 /* ProcessInfo.swift in Sources */,
+				1A000001000000000000001 /* Craig_O_CleanApp.swift in Sources */,
+				FA14658BF72BB09A3EE30FB5 /* ContentView.swift in Sources */,
+				AE9CB127107DAC4E45FDCB77 /* Craig_O_CleanApp.swift in Sources */,
+				A898388E5BAA7C586AFE8481 /* EnhancedProcessManager.swift in Sources */,
+				39A6371450012AA1BC7A372B /* LaunchAtLoginManager.swift in Sources */,
+				DA98A72E4BECCC5E3B399FCB /* ProcessDetailsView.swift in Sources */,
+				7AFCF4447447A3CECE83F2F9 /* ProcessExtensions.swift in Sources */,
+				81D55D5C000E606FCD14EBFC /* ProcessManager.swift in Sources */,
+				73C0E9049689A9C0C9EABA8B /* SettingsView.swift in Sources */,
+				C841F29CC6072C078EF0850C /* SystemCPUMonitorView.swift in Sources */,
+				60F5F6F2A0B8D42682BD941A /* SystemMemoryManager.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1A00001B000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = K36LFHM32T;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		1A00001C000000000000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = K36LFHM32T;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		1A00001D000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = "Craig-O-Clean/Craig-O-Clean.entitlements";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 2;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_ASSET_PATHS = "\"Craig-O-Clean/Preview Content\"";
+				DEVELOPMENT_TEAM = K36LFHM32T;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_FILE_ACCESS_DOWNLOADS_FOLDER = readwrite;
+				ENABLE_FILE_ACCESS_MOVIES_FOLDER = readwrite;
+				ENABLE_FILE_ACCESS_MUSIC_FOLDER = readwrite;
+				ENABLE_FILE_ACCESS_PICTURE_FOLDER = readwrite;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = YES;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = YES;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = YES;
+				ENABLE_RESOURCE_ACCESS_CAMERA = YES;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = YES;
+				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
+				ENABLE_RESOURCE_ACCESS_PRINTING = YES;
+				ENABLE_RESOURCE_ACCESS_USB = YES;
+				ENABLE_USER_SELECTED_FILES = readwrite;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Craig-O-Clean/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Craig-O-Clean";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.vibecaas.Craig-O-Clean";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		1A00001E000000000000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = "Craig-O-Clean/Craig-O-Clean.entitlements";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 2;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_ASSET_PATHS = "\"Craig-O-Clean/Preview Content\"";
+				DEVELOPMENT_TEAM = K36LFHM32T;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_FILE_ACCESS_DOWNLOADS_FOLDER = readwrite;
+				ENABLE_FILE_ACCESS_MOVIES_FOLDER = readwrite;
+				ENABLE_FILE_ACCESS_MUSIC_FOLDER = readwrite;
+				ENABLE_FILE_ACCESS_PICTURE_FOLDER = readwrite;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = YES;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = YES;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = YES;
+				ENABLE_RESOURCE_ACCESS_CAMERA = YES;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = YES;
+				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
+				ENABLE_RESOURCE_ACCESS_PRINTING = YES;
+				ENABLE_RESOURCE_ACCESS_USB = YES;
+				ENABLE_USER_SELECTED_FILES = readwrite;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Craig-O-Clean/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Craig-O-Clean";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.vibecaas.Craig-O-Clean";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1A000016000000000000001 /* Build configuration list for PBXNativeTarget "Craig-O-Clean" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1A00001D000000000000001 /* Debug */,
+				1A00001E000000000000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1A00001A000000000000001 /* Build configuration list for PBXProject "Craig-O-Clean" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1A00001B000000000000001 /* Debug */,
+				1A00001C000000000000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1A000019000000000000001 /* Project object */;
+}

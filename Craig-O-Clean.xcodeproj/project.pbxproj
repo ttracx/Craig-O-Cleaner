@@ -171,17 +171,25 @@
 				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Craig-O-Clean/Preview Content\"";
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = NO;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = YES;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
 				ENABLE_RESOURCE_ACCESS_CALENDARS = YES;
 				ENABLE_RESOURCE_ACCESS_CAMERA = YES;
 				ENABLE_RESOURCE_ACCESS_CONTACTS = YES;
 				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
 				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = YES;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "Craig-O-Clean/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Craig-O-Clean\n/Users/knightdev/Craig-O-Cleaner/Craig-O-Clean/ContentView.swift\n/Users/knightdev/Craig-O-Cleaner/Craig-O-Clean/ContentView.swift:150:43 'headerColor' was deprecated in macOS 11.0: Use NSVisualEffectMaterialHeaderView\n\n/Users/knightdev/Craig-O-Cleaner/Craig-O-Clean/SystemCPUMonitorView.swift\n/Users/knightdev/Craig-O-Cleaner/Craig-O-Clean/SystemCPUMonitorView.swift:62:32 Immutable value 'cpuInfo' was never used; consider replacing with '_' or removing it\n";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -343,17 +351,25 @@
 				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Craig-O-Clean/Preview Content\"";
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = NO;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = YES;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
 				ENABLE_RESOURCE_ACCESS_CALENDARS = YES;
 				ENABLE_RESOURCE_ACCESS_CAMERA = YES;
 				ENABLE_RESOURCE_ACCESS_CONTACTS = YES;
 				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
 				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = YES;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "Craig-O-Clean/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Craig-O-Clean\n/Users/knightdev/Craig-O-Cleaner/Craig-O-Clean/ContentView.swift\n/Users/knightdev/Craig-O-Cleaner/Craig-O-Clean/ContentView.swift:150:43 'headerColor' was deprecated in macOS 11.0: Use NSVisualEffectMaterialHeaderView\n\n/Users/knightdev/Craig-O-Cleaner/Craig-O-Clean/SystemCPUMonitorView.swift\n/Users/knightdev/Craig-O-Cleaner/Craig-O-Clean/SystemCPUMonitorView.swift:62:32 Immutable value 'cpuInfo' was never used; consider replacing with '_' or removing it\n";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
