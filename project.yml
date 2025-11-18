@@ -1,0 +1,56 @@
+name: Craig-O-Clean
+
+options:
+  bundleIdPrefix: com.neuralquantum
+  deploymentTarget:
+    macOS: "13.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+settings:
+  SWIFT_VERSION: 5.9
+  MACOSX_DEPLOYMENT_TARGET: 13.0
+  MARKETING_VERSION: 1.0
+  CURRENT_PROJECT_VERSION: 1
+
+targets:
+  Craig-O-Clean:
+    type: application
+    platform: macOS
+
+    sources:
+      - path: Craig-O-Clean
+        excludes:
+          - "*.backup"
+          - "Preview Content"
+
+    settings:
+      PRODUCT_NAME: Craig-O-Clean
+      PRODUCT_BUNDLE_IDENTIFIER: com.neuralquantum.Craig-O-Clean
+      INFOPLIST_FILE: Craig-O-Clean/Info.plist
+      CODE_SIGN_ENTITLEMENTS: Craig-O-Clean/Craig-O-Clean.entitlements
+      ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      COMBINE_HIDPI_IMAGES: YES
+      ENABLE_PREVIEWS: YES
+      DEVELOPMENT_ASSET_PATHS: "\"Craig-O-Clean/Preview Content\""
+      SWIFT_EMIT_LOC_STRINGS: YES
+      GENERATE_INFOPLIST_FILE: NO
+      CODE_SIGN_STYLE: Automatic
+      ENABLE_HARDENED_RUNTIME: YES
+      ENABLE_USER_SCRIPT_SANDBOXING: NO
+
+    scheme:
+      gatherCoverageData: false
+
+    dependencies: []
+
+schemes:
+  Craig-O-Clean:
+    build:
+      targets:
+        Craig-O-Clean: all
+    run:
+      config: Debug
+      askForAppToLaunch: false
+    archive:
+      config: Release

@@ -1,525 +1,513 @@
 import SwiftUI
+import AppKit
+
+enum SortOption: String, CaseIterable {
+    case name = "Name"
+    case cpu = "CPU Usage"
+    case memory = "Memory"
+    case pid = "Process ID"
+}
 
 struct ContentView: View {
     @StateObject private var processManager = ProcessManager()
-    @StateObject private var systemMemoryManager = SystemMemoryManager()
     @State private var selectedProcess: ProcessInfo?
     @State private var searchText = ""
     @State private var showingAlert = false
     @State private var alertMessage = ""
-    @State private var alertTitle = ""
-    @State private var selectedTab = 0
-    
+    @State private var showOnlyUserProcesses = true
+    @State private var showProcessDetails = false
+    @State private var processToTerminate: ProcessInfo?
+    @State private var showTerminateConfirmation = false
+    @State private var terminationAction: (() async -> Void)?
+    @State private var sortOption: SortOption = .cpu
+    @State private var sortAscending = false
+    @State private var groupByType = false
+
     var filteredProcesses: [ProcessInfo] {
-        if searchText.isEmpty {
-            return processManager.processes
-        } else {
-            return processManager.processes.filter {
-                $0.name.localizedCaseInsensitiveContains(searchText)
-            }
+        let baseProcesses = showOnlyUserProcesses ?
+            processManager.processes.filter { $0.isUserProcess } :
+            processManager.processes
+
+        let searched = searchText.isEmpty ? baseProcesses : baseProcesses.filter {
+            $0.name.localizedCaseInsensitiveContains(searchText) ||
+            $0.bundleIdentifier?.localizedCaseInsensitiveContains(searchText) == true
         }
+
+        return sortedProcesses(searched)
     }
-    
+
+    func sortedProcesses(_ processes: [ProcessInfo]) -> [ProcessInfo] {
+        let sorted = processes.sorted { lhs, rhs in
+            let comparison: Bool
+            switch sortOption {
+            case .name:
+                comparison = lhs.name.lowercased() < rhs.name.lowercased()
+            case .cpu:
+                comparison = lhs.cpuUsage > rhs.cpuUsage
+            case .memory:
+                comparison = lhs.memoryUsage > rhs.memoryUsage
+            case .pid:
+                comparison = lhs.id < rhs.id
+            }
+            return sortAscending ? !comparison : comparison
+        }
+        return sorted
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            // Top navigation buttons
-            HStack(spacing: 8) {
-                Button {
-                    withAnimation(nil) {
-                        selectedTab = 0
-                    }
-                } label: {
-                    Label("Processes", systemImage: "memorychip")
-                        .font(.callout)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(selectedTab == 0 ? Color.accentColor.opacity(0.15) : Color.clear)
-                        .foregroundColor(selectedTab == 0 ? .accentColor : .primary)
-                        .cornerRadius(6)
-                }
-                .buttonStyle(.plain)
-
-                Button {
-                    withAnimation(nil) {
-                        selectedTab = 1
-                    }
-                } label: {
-                    Label("Settings", systemImage: "gearshape")
-                        .font(.callout)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(selectedTab == 1 ? Color.accentColor.opacity(0.15) : Color.clear)
-                        .foregroundColor(selectedTab == 1 ? .accentColor : .primary)
-                        .cornerRadius(6)
-                }
-                .buttonStyle(.plain)
+            // Top toolbar
+            HStack {
+                TextField("Search processes...", text: $searchText)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .frame(maxWidth: 300)
 
                 Spacer()
+
+                // Sort controls
+                Menu {
+                    ForEach(SortOption.allCases, id: \.self) { option in
+                        Button {
+                            if sortOption == option {
+                                sortAscending.toggle()
+                            } else {
+                                sortOption = option
+                                sortAscending = false
+                            }
+                        } label: {
+                            HStack {
+                                Text(option.rawValue)
+                                if sortOption == option {
+                                    Image(systemName: sortAscending ? "arrow.up" : "arrow.down")
+                                }
+                            }
+                        }
+                    }
+                } label: {
+                    Label("Sort: \(sortOption.rawValue)", systemImage: "arrow.up.arrow.down")
+                }
+                .menuStyle(.borderlessButton)
+
+                Toggle("Group by Type", isOn: $groupByType)
+
+                Toggle("User Processes Only", isOn: $showOnlyUserProcesses)
+
+                Button("Export...") {
+                    exportProcessList()
+                }
+                .buttonStyle(.bordered)
+
+                Button("Refresh") {
+                    processManager.updateProcessList()
+                }
+                .buttonStyle(.borderedProminent)
+
+                if processManager.isLoading {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                }
             }
-            .animation(nil, value: selectedTab)
-            .padding(.horizontal)
-            .padding(.top, 100)
-            .padding(.bottom, 14)
-            .background(Color(NSColor.windowBackgroundColor))
+            .padding()
+            .background(Color(NSColor.controlBackgroundColor))
 
             Divider()
 
-            // Content area
-            ZStack(alignment: .top) {
-                // Main view layer
-                TabContainer {
-                    mainView
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                }
-                .id("main")
-                .transition(.identity)
-                .opacity(selectedTab == 0 ? 1 : 0)
+            // System CPU Monitor
+            SystemCPUMonitorView(processManager: processManager)
 
-                // Settings view layer
-                TabContainer {
-                    SettingsView()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                }
-                .id("settings")
-                .transition(.identity)
-                .opacity(selectedTab == 1 ? 1 : 0)
-            }
-            .animation(nil, value: selectedTab)
-        }
-        .animation(nil, value: selectedTab)
-        .frame(width: 440, height: 600)
-        .onAppear {
-            systemMemoryManager.refreshMemoryInfo()
-        }
-    }
-    
-    private var mainView: some View {
-        ScrollView {
-            LazyVStack(spacing: 10, pinnedViews: []) {
+            Divider()
+
+            // Process list
+            VStack(spacing: 0) {
                 // Header
-                headerView
-                    .padding()
+                HStack {
+                    Text("Process Name")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    Text("PID")
+                        .font(.headline)
+                        .frame(width: 60, alignment: .center)
+
+                    Text("CPU %")
+                        .font(.headline)
+                        .frame(width: 80, alignment: .trailing)
+
+                    Text("Memory")
+                        .font(.headline)
+                        .frame(width: 100, alignment: .trailing)
+
+                    Text("Bundle ID")
+                        .font(.headline)
+                        .frame(width: 180, alignment: .leading)
+
+                    Text("Actions")
+                        .font(.headline)
+                        .frame(width: 140, alignment: .center)
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+                .background(Color(NSColor.controlBackgroundColor))
 
                 Divider()
 
-                // System Memory Info
-                systemMemoryView
-
-                Divider()
-
-                // Search bar
-                searchBar
-
-                // Process list
-                LazyVStack(spacing: 1) {
-                    ForEach(filteredProcesses) { process in
-                        ProcessRow(
-                            process: process,
-                            isSelected: selectedProcess?.id == process.id,
-                            onSelect: { selectedProcess = process },
-                            onForceQuit: {
-                                forceQuitProcess(process)
+                // Process rows
+                ScrollView {
+                    LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+                        if groupByType {
+                            ForEach([true, false], id: \.self) { isUserProcess in
+                                let groupedProcesses = filteredProcesses.filter { $0.isUserProcess == isUserProcess }
+                                if !groupedProcesses.isEmpty {
+                                    Section(header: GroupHeaderView(
+                                        title: isUserProcess ? "User Applications" : "System Processes",
+                                        count: groupedProcesses.count
+                                    )) {
+                                        ForEach(groupedProcesses) { process in
+                                            ProcessRowView(
+                                                process: process,
+                                                isSelected: selectedProcess?.id == process.id,
+                                                onSelect: {
+                                                    selectedProcess = process
+                                                    showProcessDetails = true
+                                                },
+                                                onTerminate: { confirmTerminate(process, force: false) },
+                                                onForceQuit: { confirmTerminate(process, force: true) }
+                                            )
+                                            .background(selectedProcess?.id == process.id ?
+                                                       Color.accentColor.opacity(0.2) : Color.clear)
+                                        }
+                                    }
+                                }
                             }
-                        )
+                        } else {
+                            ForEach(filteredProcesses) { process in
+                                ProcessRowView(
+                                    process: process,
+                                    isSelected: selectedProcess?.id == process.id,
+                                    onSelect: {
+                                        selectedProcess = process
+                                        showProcessDetails = true
+                                    },
+                                    onTerminate: { confirmTerminate(process, force: false) },
+                                    onForceQuit: { confirmTerminate(process, force: true) }
+                                )
+                                .background(selectedProcess?.id == process.id ?
+                                           Color.accentColor.opacity(0.2) : Color.clear)
+                            }
+                        }
                     }
                 }
+            }
+
+            // Bottom status bar
+            HStack {
+                Text("\(filteredProcesses.count) processes")
+                    .foregroundColor(.secondary)
 
                 Divider()
+                    .frame(height: 20)
 
-                // Footer with Purge button
-                footerView
+                HStack(spacing: 4) {
+                    Image(systemName: "cpu")
+                        .foregroundColor(.blue)
+                    Text("System CPU: \(String(format: "%.1f%%", processManager.totalCPUUsage))")
+                        .foregroundColor(.secondary)
+                }
+
+                Divider()
+                    .frame(height: 20)
+
+                HStack(spacing: 4) {
+                    Image(systemName: "memorychip")
+                        .foregroundColor(.orange)
+                    Text("Total Memory: \(formatBytes(processManager.totalMemoryUsage))")
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                if let selected = selectedProcess {
+                    Text("Selected: \(selected.name) (PID: \(selected.id))")
+                        .foregroundColor(.secondary)
+                    Button("Details") {
+                        showProcessDetails = true
+                    }
+                    .buttonStyle(.link)
+                }
             }
-            .padding(.horizontal, 0)
-            .frame(maxWidth: .infinity, alignment: .top)
+            .padding()
+            .background(Color(NSColor.controlBackgroundColor))
         }
-        .alert(alertTitle, isPresented: $showingAlert) {
-            Button("OK", role: .cancel) { }
+        .alert("Process Action", isPresented: $showingAlert) {
+            Button("OK") { }
         } message: {
             Text(alertMessage)
         }
-    }
-    
-    private var headerView: some View {
-        VStack(spacing: 8) {
-            HStack {
-                HStack(spacing: 8) {
-                    // App logo (replace "AppLogo" with your asset name if different)
-#if os(macOS)
-                    if let appIcon = NSApplication.shared.applicationIconImage {
-                        Image(nsImage: appIcon)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 100, height: 100)
-                            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-                            .accessibilityHidden(true)
-                    } else if let nsImage = NSImage(named: "AppIcon") {
-                        Image(nsImage: nsImage)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 100, height: 100)
-                            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-                            .accessibilityHidden(true)
-                    } else {
-                        Image(systemName: "app.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 100, height: 100)
-                            .foregroundColor(.accentColor)
-                            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-                            .accessibilityHidden(true)
-                    }
-#else
-                    if UIImage(named: "AppIcon") != nil {
-                        Image("AppIcon")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 100, height: 100)
-                            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                    .stroke(Color.primary.opacity(0.06), lineWidth: 1)
-                            )
-                            .accessibilityHidden(true)
-                    } else {
-                        Image(systemName: "app.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 100, height: 100)
-                            .foregroundColor(.accentColor)
-                            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                    .stroke(Color.primary.opacity(0.06), lineWidth: 1)
-                            )
-                            .accessibilityHidden(true)
-                    }
-#endif
-
-
-                    Text("Craig-O-Clean")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.accentColor)
-                }
-                
-                Spacer()
-                
-                Button(action: {
-                    processManager.refreshProcesses()
-                    systemMemoryManager.refreshMemoryInfo()
-                }) {
-                    Image(systemName: "arrow.clockwise")
-                        .font(.title3)
-                }
-                .buttonStyle(.plain)
-                .disabled(processManager.isRefreshing)
-                .opacity(processManager.isRefreshing ? 0.5 : 1.0)
+        .alert("Confirm Termination", isPresented: $showTerminateConfirmation, presenting: processToTerminate) { process in
+            Button("Cancel", role: .cancel) {
+                processToTerminate = nil
+                terminationAction = nil
             }
-            
-            if let lastUpdate = processManager.lastUpdateTime {
-                Text("Last updated: \(lastUpdate, style: .time)")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
+            Button(isCriticalProcess(process) ? "Force Terminate" : "Terminate", role: .destructive) {
+                if let action = terminationAction {
+                    Task {
+                        await action()
+                    }
+                }
+                processToTerminate = nil
+                terminationAction = nil
             }
-        }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-    }
-    
-    private var systemMemoryView: some View {
-        VStack(spacing: 12) {
-            // Total system memory bar
-            VStack(alignment: .leading, spacing: 6) {
-                HStack {
-                    Text("System Memory")
-                        .font(.headline)
-                    Spacer()
-                    Text(String(format: "%.1f%%", systemMemoryManager.memoryPercentage))
-                        .font(.headline)
-                        .foregroundColor(memoryColor(for: systemMemoryManager.memoryPercentage))
-                }
-                
-                GeometryReader { geometry in
-                    ZStack(alignment: .leading) {
-                        // Background
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.gray.opacity(0.2))
-                        
-                        // Used memory bar
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(memoryColor(for: systemMemoryManager.memoryPercentage))
-                            .frame(width: geometry.size.width * CGFloat(systemMemoryManager.memoryPercentage / 100))
-                    }
-                }
-                .frame(height: 8)
-                
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Used: \(String(format: "%.2f GB", systemMemoryManager.usedMemory))")
-                            .font(.caption)
-                            .foregroundColor(.primary)
-                    }
-                    
-                    Spacer()
-                    
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text("Available: \(String(format: "%.2f GB", systemMemoryManager.availableMemory))")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                
-                HStack {
-                    Text("Total: \(String(format: "%.2f GB", systemMemoryManager.totalMemory))")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                    
-                    Spacer()
-                    
-                    Text("Pressure: \(systemMemoryManager.memoryPressure)")
-                        .font(.caption2)
-                        .foregroundColor(pressureColor(for: systemMemoryManager.memoryPressure))
-                }
-            }
-            
-            // Process memory usage
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Top Processes")
+        } message: { process in
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Are you sure you want to terminate '\(process.name)'?")
+                if isCriticalProcess(process) {
+                    Text("Warning: This appears to be a critical system process. Terminating it may cause system instability.")
                         .font(.caption)
-                        .foregroundColor(.secondary)
-                    Text(String(format: "%.2f GB", processManager.totalMemoryUsage))
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
-                }
-                
-                Spacer()
-                
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("Count")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Text("\(processManager.processes.count)")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
+                        .foregroundColor(.red)
                 }
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor).opacity(0.5))
+        .sheet(isPresented: $showProcessDetails) {
+            if let process = selectedProcess {
+                ProcessDetailsView(processDetails: processManager.getProcessDetails(for: process))
+            }
+        }
+        .onAppear {
+            processManager.updateProcessList()
+        }
     }
-    
-    private func memoryColor(for percentage: Double) -> Color {
-        if percentage < 50 {
-            return .green
-        } else if percentage < 75 {
-            return .orange
+
+    private func formatBytes(_ bytes: Int64) -> String {
+        let gb = Double(bytes) / 1024.0 / 1024.0 / 1024.0
+        if gb >= 1.0 {
+            return String(format: "%.1f GB", gb)
         } else {
-            return .red
+            let mb = Double(bytes) / 1024.0 / 1024.0
+            return String(format: "%.1f MB", mb)
         }
     }
-    
-    private func pressureColor(for pressure: String) -> Color {
-        switch pressure {
-        case "Normal":
+
+    private func isCriticalProcess(_ process: ProcessInfo) -> Bool {
+        let criticalProcesses = [
+            "kernel_task", "launchd", "WindowServer", "loginwindow",
+            "SystemUIServer", "Dock", "Finder"
+        ]
+        return criticalProcesses.contains { process.name.contains($0) }
+    }
+
+    private func confirmTerminate(_ process: ProcessInfo, force: Bool) {
+        processToTerminate = process
+        if force {
+            terminationAction = { await forceQuitProcess(process) }
+        } else {
+            terminationAction = { await terminateProcess(process) }
+        }
+        showTerminateConfirmation = true
+    }
+
+    private func exportProcessList() {
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.commaSeparatedText]
+        panel.nameFieldStringValue = "processes_\(Date().formatted(date: .numeric, time: .omitted)).csv"
+
+        panel.begin { response in
+            guard response == .OK, let url = panel.url else { return }
+
+            var csvContent = "Process Name,PID,CPU %,Memory (MB),Bundle ID,User Process,Threads\n"
+
+            for process in filteredProcesses {
+                let memoryMB = Double(process.memoryUsage) / 1024.0 / 1024.0
+                let row = "\"\(process.name)\",\(process.id),\(String(format: "%.1f", process.cpuUsage)),\(String(format: "%.1f", memoryMB)),\"\(process.bundleIdentifier ?? "")\",\(process.isUserProcess),\(process.threads)\n"
+                csvContent += row
+            }
+
+            try? csvContent.write(to: url, atomically: true, encoding: .utf8)
+
+            alertMessage = "Process list exported successfully to \(url.lastPathComponent)"
+            showingAlert = true
+        }
+    }
+
+    private func terminateProcess(_ process: ProcessInfo) async {
+        let success = await processManager.terminateProcess(process)
+        await MainActor.run {
+            alertMessage = success ?
+                "Process '\(process.name)' terminated successfully." :
+                "Failed to terminate process '\(process.name)'."
+            showingAlert = true
+
+            if success {
+                selectedProcess = nil
+                processManager.updateProcessList()
+            }
+        }
+    }
+
+    private func forceQuitProcess(_ process: ProcessInfo) async {
+        let success = await processManager.forceQuitProcess(process)
+        await MainActor.run {
+            alertMessage = success ?
+                "Process '\(process.name)' force quit successfully." :
+                "Failed to force quit process '\(process.name)'."
+            showingAlert = true
+
+            if success {
+                selectedProcess = nil
+                processManager.updateProcessList()
+            }
+        }
+    }
+}
+
+struct ProcessRowView: View {
+    let process: ProcessInfo
+    let isSelected: Bool
+    let onSelect: () -> Void
+    let onTerminate: () -> Void
+    let onForceQuit: () -> Void
+
+    @State private var isHovered = false
+
+    var cpuUsageColor: Color {
+        switch process.cpuUsage {
+        case 0..<20:
             return .green
-        case "Moderate":
+        case 20..<50:
+            return .yellow
+        case 50..<80:
             return .orange
         default:
             return .red
         }
     }
-    
-    private var searchBar: some View {
+
+    var body: some View {
         HStack {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(.secondary)
-            
-            TextField("Search processes...", text: $searchText)
-                .textFieldStyle(.plain)
-            
-            if !searchText.isEmpty {
-                Button(action: { searchText = "" }) {
-                    Image(systemName: "xmark.circle.fill")
+            // Process icon and name
+            HStack {
+                if let bundleIdentifier = process.bundleIdentifier,
+                   let app = NSWorkspace.shared.runningApplications.first(where: { $0.bundleIdentifier == bundleIdentifier }),
+                   let icon = app.icon {
+                    Image(nsImage: icon)
+                        .resizable()
+                        .frame(width: 20, height: 20)
+                } else {
+                    Image(systemName: "gear")
+                        .frame(width: 20, height: 20)
                         .foregroundColor(.secondary)
                 }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding(8)
-        .background(Color(NSColor.textBackgroundColor))
-    }
-    
-    private var footerView: some View {
-        VStack(spacing: 8) {
-            Button(action: {
-                purgeMemory()
-            }) {
-                HStack {
-                    Image(systemName: "trash.fill")
-                    Text("Free Memory")
-                        .fontWeight(.semibold)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            
-            Text("Flushes inactive memory and clears caches to free up RAM")
-                .font(.caption2)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-    }
-    
-    private func forceQuitProcess(_ process: ProcessInfo) {
-        let alert = NSAlert()
-        alert.messageText = "Force Quit Process?"
-        alert.informativeText = "Are you sure you want to force quit \"\(process.name)\" (PID: \(process.pid))?\n\nMemory usage: \(process.formattedMemory)\n\nThis action cannot be undone and may cause data loss."
-        alert.alertStyle = .critical
-        alert.addButton(withTitle: "Force Quit")
-        alert.addButton(withTitle: "Cancel")
-        
-        let response = alert.runModal()
-        
-        if response == .alertFirstButtonReturn {
-            processManager.forceQuitProcess(pid: process.pid)
-            
-            alertTitle = "Success"
-            alertMessage = "Process \(process.name) has been terminated."
-            showingAlert = true
-        }
-    }
-    
-    private func purgeMemory() {
-        processManager.purgeMemory { success, message in
-            alertTitle = success ? "Success" : "Error"
-            alertMessage = message
-            showingAlert = true
-        }
-    }
-}
 
-private struct TabContainer<Content: View>: View {
-    @ViewBuilder let content: Content
-    var body: some View {
-        ZStack(alignment: .top) {
-            Color.clear
-            content
-                .padding(.top, 16)
-                .padding(.bottom, 16)
-                .padding(.horizontal, 0)
-        }
-        .ignoresSafeArea(.container, edges: .top)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .clipped()
-    }
-}
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 4) {
+                        Text(process.name)
+                            .font(.system(.body, design: .monospaced))
+                            .lineLimit(1)
 
-struct ProcessRow: View {
-    let process: ProcessInfo
-    let isSelected: Bool
-    let onSelect: () -> Void
-    let onForceQuit: () -> Void
-    
-    private var isMemoryIntensive: Bool {
-        process.memoryUsage >= 500 // 500 MB or more
-    }
-    
-    var body: some View {
-        HStack {
-            // Warning indicator for memory-intensive processes
-            if isMemoryIntensive {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.caption)
-                    .foregroundColor(.orange)
-            }
-            
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 4) {
-                    Text(process.name)
-                        .font(.system(.body, design: .monospaced))
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                    
-                    if isMemoryIntensive {
-                        Text("HIGH")
-                            .font(.system(size: 8, weight: .bold))
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 2)
-                            .background(Color.orange.opacity(0.2))
-                            .foregroundColor(.orange)
-                            .cornerRadius(3)
+                        if process.cpuUsage > 80 {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.red)
+                                .font(.caption)
+                        }
                     }
-                }
-                
-                Text("PID: \(process.pid)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            
-            Spacer()
-            
-            VStack(alignment: .trailing, spacing: 4) {
-                Text(process.formattedMemory)
-                    .font(.headline)
-                    .foregroundColor(isMemoryIntensive ? .orange : .primary)
-                    .fontWeight(isMemoryIntensive ? .bold : .regular)
-                
-                Button(action: onForceQuit) {
-                    HStack(spacing: 2) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.caption2)
-                        Text("Force Quit")
+
+                    if !process.isUserProcess {
+                        Text("System Process")
                             .font(.caption)
+                            .foregroundColor(.secondary)
                     }
-                    .foregroundColor(.red)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 3)
-                    .background(Color.red.opacity(0.1))
-                    .cornerRadius(4)
                 }
-                .buttonStyle(.plain)
+
+                Spacer()
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            // PID
+            Text("\(process.id)")
+                .font(.system(.body, design: .monospaced))
+                .frame(width: 60, alignment: .center)
+
+            // CPU usage with color indicator
+            HStack(spacing: 4) {
+                Circle()
+                    .fill(cpuUsageColor)
+                    .frame(width: 8, height: 8)
+                Text(String(format: "%.1f", process.cpuUsage))
+                    .font(.system(.body, design: .monospaced))
+                    .foregroundColor(cpuUsageColor)
+            }
+            .frame(width: 80, alignment: .trailing)
+
+            // Memory usage
+            Text(String(format: "%.0f MB", Double(process.memoryUsage) / 1024.0 / 1024.0))
+                .font(.system(.body, design: .monospaced))
+                .frame(width: 100, alignment: .trailing)
+
+            // Bundle ID
+            Text(process.bundleIdentifier ?? "—")
+                .font(.system(.caption, design: .monospaced))
+                .foregroundColor(.secondary)
+                .lineLimit(1)
+                .frame(width: 180, alignment: .leading)
+
+            // Action buttons
+            HStack(spacing: 4) {
+                Button("Quit") {
+                    onTerminate()
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+
+                Button("Force Quit") {
+                    onForceQuit()
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .foregroundColor(.red)
+            }
+            .frame(width: 140)
+            .opacity(isHovered ? 1.0 : 0.6)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(backgroundForRow)
+        .padding(.horizontal)
+        .padding(.vertical, 6)
         .contentShape(Rectangle())
         .onTapGesture {
             onSelect()
         }
-        .hoverEffect()
-    }
-    
-    private var backgroundForRow: Color {
-        if isSelected {
-            return Color.blue.opacity(0.1)
-        } else if isMemoryIntensive {
-            return Color.orange.opacity(0.05)
-        } else {
-            return Color.clear
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                isHovered = hovering
+            }
         }
-    }
-}
-
-extension View {
-    func hoverEffect() -> some View {
-        self.overlay(
-            RoundedRectangle(cornerRadius: 4)
-                .stroke(Color.clear, lineWidth: 0)
+        .background(
+            Rectangle()
+                .fill(isHovered ? Color.gray.opacity(0.1) : Color.clear)
         )
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
+struct GroupHeaderView: View {
+    let title: String
+    let count: Int
+
+    var body: some View {
+        HStack {
+            Text(title)
+                .font(.headline)
+                .foregroundColor(.primary)
+
+            Spacer()
+
+            Text("\(count) process\(count == 1 ? "" : "es")")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+        .background(Color(NSColor.controlBackgroundColor).opacity(0.95))
     }
 }
 
+#Preview {
+    ContentView()
+        .frame(width: 900, height: 700)
+}
