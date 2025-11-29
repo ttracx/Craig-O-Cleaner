@@ -1,84 +1,139 @@
+// MARK: - Craig_O_CleanApp.swift
+// ClearMind Control Center - Main Application Entry Point
+// A macOS system utility for Apple Silicon Macs
+
 import SwiftUI
+import AppKit
 
 @main
-struct Craig_O_CleanApp: App {
+struct ClearMindApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
-        // Settings scene (required but hidden)
+        // Settings scene (required but hidden for menu bar apps)
         Settings {
             EmptyView()
         }
     }
 }
 
+// MARK: - App Delegate
+
 class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem?
     var popover: NSPopover?
     var fullWindow: NSWindow?
     var windowDelegate: WindowDelegate?
+    
+    // Services
+    private var systemMetrics: SystemMetricsService?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Initialize system metrics for menu bar updates
+        systemMetrics = SystemMetricsService()
+        
         // Create status bar item
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         if let button = statusItem?.button {
-            button.image = NSImage(systemSymbolName: "cpu", accessibilityDescription: "Craig-O-Clean")
+            // Use brain icon for ClearMind branding
+            button.image = NSImage(systemSymbolName: "brain.head.profile", accessibilityDescription: "ClearMind Control Center")
             button.action = #selector(statusBarButtonClicked(_:))
             button.target = self
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+            
+            // Add memory pressure indicator
+            updateStatusBarIcon()
         }
 
         // Create context menu
         createContextMenu()
 
-        // Create popover
+        // Create popover with new MenuBarContentView
         popover = NSPopover()
-        popover?.contentSize = NSSize(width: 360, height: 480)
+        popover?.contentSize = NSSize(width: 360, height: 520)
         popover?.behavior = .transient
         popover?.contentViewController = NSHostingController(
-            rootView: MenuBarView(onExpandClick: { [weak self] in
+            rootView: MenuBarContentView(onExpandClick: { [weak self] in
                 self?.openFullWindow()
             })
         )
 
         // Hide dock icon (menu bar app only)
         NSApp.setActivationPolicy(.accessory)
+        
+        // Start monitoring for status bar updates
+        Task { @MainActor in
+            systemMetrics?.startMonitoring()
+        }
+        
+        // Schedule periodic status bar icon updates
+        Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
+            self?.updateStatusBarIcon()
+        }
+    }
+    
+    private func updateStatusBarIcon() {
+        // Could update icon color/badge based on system health
+        // For now, keep the brain icon
     }
 
     func createContextMenu() {
         let menu = NSMenu()
 
         // About menu item
-        menu.addItem(NSMenuItem(
-            title: "About Craig-O-Clean",
+        let aboutItem = NSMenuItem(
+            title: "About ClearMind Control Center",
             action: #selector(showAbout),
             keyEquivalent: ""
-        ))
+        )
+        aboutItem.target = self
+        menu.addItem(aboutItem)
+
+        menu.addItem(NSMenuItem.separator())
+        
+        // Quick Actions submenu
+        let quickActionsMenu = NSMenu()
+        
+        let smartCleanupItem = NSMenuItem(title: "Smart Cleanup", action: #selector(performSmartCleanup), keyEquivalent: "")
+        smartCleanupItem.target = self
+        quickActionsMenu.addItem(smartCleanupItem)
+        
+        let closeBackgroundItem = NSMenuItem(title: "Close Background Apps", action: #selector(closeBackgroundApps), keyEquivalent: "")
+        closeBackgroundItem.target = self
+        quickActionsMenu.addItem(closeBackgroundItem)
+        
+        let quickActionsItem = NSMenuItem(title: "Quick Actions", action: nil, keyEquivalent: "")
+        quickActionsItem.submenu = quickActionsMenu
+        menu.addItem(quickActionsItem)
 
         menu.addItem(NSMenuItem.separator())
 
         // Open Full Window menu item
-        menu.addItem(NSMenuItem(
-            title: "Open Full Window",
+        let openWindowItem = NSMenuItem(
+            title: "Open Control Center",
             action: #selector(openFullWindow),
-            keyEquivalent: ""
-        ))
+            keyEquivalent: "o"
+        )
+        openWindowItem.target = self
+        menu.addItem(openWindowItem)
 
         menu.addItem(NSMenuItem.separator())
 
         // Quit menu item
-        menu.addItem(NSMenuItem(
-            title: "Quit Craig-O-Clean",
+        let quitItem = NSMenuItem(
+            title: "Quit ClearMind",
             action: #selector(quitApp),
             keyEquivalent: "q"
-        ))
+        )
+        quitItem.target = self
+        menu.addItem(quitItem)
 
         statusItem?.menu = menu
     }
 
     @objc func statusBarButtonClicked(_ sender: NSStatusBarButton) {
-        let event = NSApp.currentEvent!
+        guard let event = NSApp.currentEvent else { return }
 
         if event.type == .rightMouseUp {
             // Right-click: show context menu
@@ -98,15 +153,49 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc func showAbout() {
         NSApp.orderFrontStandardAboutPanel(options: [
-            .applicationName: "Craig-O-Clean",
+            .applicationName: "ClearMind Control Center",
             .applicationVersion: "1.0",
-            .credits: NSAttributedString(string: "A powerful macOS process monitor\nBuilt with SwiftUI")
+            .credits: NSAttributedString(string: "A powerful macOS system utility\nfor Apple Silicon\n\nMonitor • Optimize • Control")
         ])
         NSApp.activate(ignoringOtherApps: true)
     }
 
     @objc func quitApp() {
         NSApp.terminate(nil)
+    }
+    
+    @objc func performSmartCleanup() {
+        Task { @MainActor in
+            let optimizer = MemoryOptimizerService()
+            await optimizer.analyzeMemoryUsage()
+            let result = await optimizer.smartCleanup()
+            
+            showNotification(
+                title: "Smart Cleanup Complete",
+                body: "Freed \(result.formattedMemoryFreed) by closing \(result.appsTerminated) apps"
+            )
+        }
+    }
+    
+    @objc func closeBackgroundApps() {
+        Task { @MainActor in
+            let optimizer = MemoryOptimizerService()
+            await optimizer.analyzeMemoryUsage()
+            let result = await optimizer.quickCleanupBackground()
+            
+            showNotification(
+                title: "Background Apps Closed",
+                body: "Freed \(result.formattedMemoryFreed) by closing \(result.appsTerminated) background apps"
+            )
+        }
+    }
+    
+    private func showNotification(title: String, body: String) {
+        let notification = NSUserNotification()
+        notification.title = title
+        notification.informativeText = body
+        notification.soundName = NSUserNotificationDefaultSoundName
+        NSUserNotificationCenter.default.deliver(notification)
     }
 
     @objc func togglePopover() {
@@ -116,6 +205,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     popover.performClose(nil)
                 } else {
                     popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+                    // Make sure popover window is on top
+                    popover.contentViewController?.view.window?.makeKey()
                 }
             }
         }
@@ -132,19 +223,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        // Create new window
-        let contentView = ContentView()
+        // Create new window with MainAppView
+        let contentView = MainAppView()
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 900, height: 700),
+            contentRect: NSRect(x: 0, y: 0, width: 1100, height: 750),
             styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false
         )
 
-        window.title = "Craig-O-Clean - Process Monitor"
+        window.title = "ClearMind Control Center"
         window.contentView = NSHostingView(rootView: contentView)
         window.center()
+        window.minSize = NSSize(width: 900, height: 600)
         window.makeKeyAndOrderFront(nil)
+        
+        // Set window to use toolbar style
+        window.titlebarAppearsTransparent = false
+        window.toolbarStyle = .unified
 
         // Show app in dock when window is open
         NSApp.setActivationPolicy(.regular)
@@ -163,6 +259,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         fullWindow = window
     }
 }
+
+// MARK: - Window Delegate
 
 class WindowDelegate: NSObject, NSWindowDelegate {
     var onClose: () -> Void

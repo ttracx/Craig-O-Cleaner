@@ -2,6 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Bundle Configuration -->
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -11,32 +12,63 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>$(PRODUCT_NAME)</string>
+	<string>ClearMind Control Center</string>
+	<key>CFBundleDisplayName</key>
+	<string>ClearMind Control Center</string>
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	
+	<!-- Application Category -->
 	<key>LSApplicationCategoryType</key>
-	<string>public.app-category.productivity</string>
+	<string>public.app-category.utilities</string>
+	
+	<!-- Minimum System Version -->
 	<key>LSMinimumSystemVersion</key>
-	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+	<string>14.0</string>
+	
+	<!-- Menu Bar App (Agent) - Hides from Dock by default -->
 	<key>LSUIElement</key>
 	<true/>
-	<key>NSDesktopFolderUsageDescription</key>
-	<string>Craig-O-Clean needs access to the Desktop, Downloads, and Documents folders in order to provide seamless AI assistance. Access to the Desktop allows it to interact with files users keep readily available for quick reference. Access to the Downloads folder ensures it can process files the user has recently acquired from the web, such as images, PDFs, or datasets for AI analysis. Access to the Documents folder allows QuantumMind to retrieve and organize user-created work, enabling it to analyze, summarize, and assist in visual conversations or other AI-driven tasks that rely on the user’s stored files.</string>
-	<key>NSDocumentsFolderUsageDescription</key>
-	<string>Craig-O-Clean needs access to the Desktop, Downloads, and Documents folders in order to provide seamless AI assistance. Access to the Desktop allows it to interact with files users keep readily available for quick reference. Access to the Downloads folder ensures it can process files the user has recently acquired from the web, such as images, PDFs, or datasets for AI analysis. Access to the Documents folder allows QuantumMind to retrieve and organize user-created work, enabling it to analyze, summarize, and assist in visual conversations or other AI-driven tasks that rely on the user’s stored files.</string>
-	<key>NSDownloadsFolderUsageDescription</key>
-	<string>Craig-O-Clean needs access to the Desktop, Downloads, and Documents folders in order to provide seamless AI assistance. Access to the Desktop allows it to interact with files users keep readily available for quick reference. Access to the Downloads folder ensures it can process files the user has recently acquired from the web, such as images, PDFs, or datasets for AI analysis. Access to the Documents folder allows QuantumMind to retrieve and organize user-created work, enabling it to analyze, summarize, and assist in visual conversations or other AI-driven tasks that rely on the user’s stored files.</string>
-	<key>NSHumanReadableCopyright</key>
-	<string></string>
-	<key>NSLocalNetworkUsageDescription</key>
-	<string>Craig-O-Clean requires network access to enhance its AI-driven functionality and provide seamless user support. Network access enables the AI to connect to cloud services, retrieve real-time data, and perform updates that improve its performance. By accessing the internet, QuantumMind can download necessary resources, synchronize user preferences across devices, and provide accurate recommendations based on current online information. Additionally, network connectivity allows for efficient troubleshooting, security checks, and the delivery of intelligent insights for optimizing system and application usage while maintaining privacy and data protection.</string>
+	
+	<!-- Principal Class -->
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	
+	<!-- Human Readable Copyright -->
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2024 ClearMind. All rights reserved.</string>
+	
+	<!-- Privacy Usage Descriptions -->
+	
+	<!-- AppleScript/Automation Permission -->
+	<key>NSAppleEventsUsageDescription</key>
+	<string>ClearMind Control Center needs Automation permission to manage browser tabs in Safari, Chrome, Edge, and other browsers. This allows you to view and close tabs across all your browsers from one place.</string>
+	
+	<!-- Accessibility Permission -->
+	<key>NSAccessibilityUsageDescription</key>
+	<string>ClearMind Control Center uses Accessibility access to provide advanced system monitoring and window management features.</string>
+	
+	<!-- System Administration Permission (for purge command) -->
 	<key>NSSystemAdministrationUsageDescription</key>
-	<string>Craig-O-Clean requires access to key system folders, including Applications, Library, and System, to optimize AI functionality. Access to the Applications folder allows it to identify installed software and help users launch or manage programs efficiently. The Library folder provides essential configuration and preference data, enabling QuantumMind to tailor its assistance based on system and app settings. Access to the System folder ensures proper awareness of core macOS components, facilitating diagnostics, compatibility checks, and AI-driven recommendations for maintaining system stability and performance.</string>
+	<string>ClearMind Control Center may request administrator privileges to run the memory purge command. This is an optional advanced feature that frees inactive memory.</string>
+	
+	<!-- Supported Architectures (Apple Silicon optimized) -->
+	<key>LSArchitecturePriority</key>
+	<array>
+		<string>arm64</string>
+		<string>x86_64</string>
+	</array>
+	
+	<!-- High Resolution Capable -->
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	
+	<!-- Supports Secure Coding -->
+	<key>NSSupportsSecureCoding</key>
+	<true/>
 </dict>
 </plist>
