@@ -1,151 +1,168 @@
-.PHONY: help sync sync-ruby sync-xcodegen sync-python install-deps clean-backups build run
+# ClearMind Control Center Makefile
+# Build, test, and package commands
+
+.PHONY: all build release test clean archive dmg help setup sync
 
 # Default target
+all: build
+
+# Configuration
+SCHEME = Craig-O-Clean
+PROJECT = Craig-O-Clean.xcodeproj
+BUILD_DIR = build
+APP_NAME = ClearMind Control Center
+
+# Help target
 help:
-	@echo "╔════════════════════════════════════════════════════════╗"
-	@echo "║           Craig-O-Clean - Makefile Help               ║"
-	@echo "╚════════════════════════════════════════════════════════╝"
+	@echo "ClearMind Control Center - Build Commands"
 	@echo ""
-	@echo "Available targets:"
+	@echo "Usage: make [target]"
 	@echo ""
-	@echo "  📦 Project Sync:"
-	@echo "    make sync              - Sync Xcode project (Ruby - recommended)"
-	@echo "    make sync-ruby         - Sync using Ruby script"
-	@echo "    make sync-xcodegen     - Sync using xcodegen"
-	@echo "    make sync-python       - Sync using Python script"
-	@echo ""
-	@echo "  🔧 Installation:"
-	@echo "    make install-deps      - Install all dependencies"
-	@echo "    make install-ruby      - Install Ruby dependencies"
-	@echo "    make install-xcodegen  - Install xcodegen"
-	@echo "    make install-python    - Install Python dependencies"
-	@echo ""
-	@echo "  🧹 Maintenance:"
-	@echo "    make clean-backups     - Remove old project backups"
-	@echo "    make clean-build       - Clean Xcode build artifacts"
-	@echo "    make clean-all         - Clean everything"
-	@echo ""
-	@echo "  🚀 Build & Run:"
-	@echo "    make build             - Build the project"
-	@echo "    make run               - Build and run the app"
-	@echo "    make open              - Open project in Xcode"
-	@echo ""
-	@echo "  🧪 Testing:"
-	@echo "    make test              - Run tests"
-	@echo ""
-	@echo "  📋 Git:"
-	@echo "    make commit            - Sync project and commit changes"
+	@echo "Targets:"
+	@echo "  build     - Build debug configuration"
+	@echo "  release   - Build release configuration"
+	@echo "  test      - Run all tests"
+	@echo "  test-unit - Run unit tests only"
+	@echo "  test-ui   - Run UI tests only"
+	@echo "  clean     - Clean build artifacts"
+	@echo "  archive   - Create release archive"
+	@echo "  dmg       - Create DMG installer"
+	@echo "  setup     - Install development dependencies"
+	@echo "  sync      - Sync source files with Xcode project"
+	@echo "  lint      - Run SwiftLint (if installed)"
+	@echo "  format    - Format code with swift-format (if installed)"
 	@echo ""
 
-# Sync targets (using xcodegen to avoid duplicates)
-sync: sync-xcodegen
+# Build debug configuration
+build:
+	@echo "Building debug configuration..."
+	xcodebuild build \
+		-project $(PROJECT) \
+		-scheme $(SCHEME) \
+		-configuration Debug \
+		-derivedDataPath $(BUILD_DIR)/DerivedData \
+		| xcpretty || xcodebuild build -project $(PROJECT) -scheme $(SCHEME) -configuration Debug
 
-sync-ruby:
-	@echo "🔄 Syncing with Ruby script..."
-	@chmod +x sync-xcode-project.rb
-	@./sync-xcode-project.rb
+# Build release configuration
+release:
+	@echo "Building release configuration..."
+	xcodebuild build \
+		-project $(PROJECT) \
+		-scheme $(SCHEME) \
+		-configuration Release \
+		-derivedDataPath $(BUILD_DIR)/DerivedData \
+		| xcpretty || xcodebuild build -project $(PROJECT) -scheme $(SCHEME) -configuration Release
 
-sync-xcodegen:
-	@echo "🔄 Syncing with xcodegen..."
-	@chmod +x sync-xcode-project.sh
-	@./sync-xcode-project.sh
+# Run all tests
+test: test-unit test-ui
 
-sync-python:
-	@echo "🔄 Syncing with Python script..."
-	@chmod +x sync-xcode-project.py
-	@python3 sync-xcode-project.py
+# Run unit tests
+test-unit:
+	@echo "Running unit tests..."
+	xcodebuild test \
+		-project $(PROJECT) \
+		-scheme $(SCHEME) \
+		-destination 'platform=macOS' \
+		-only-testing:ClearMindTests \
+		| xcpretty || xcodebuild test -project $(PROJECT) -scheme $(SCHEME) -destination 'platform=macOS'
 
-# Installation targets
-install-deps: install-ruby install-xcodegen install-python
-	@echo "✅ All dependencies installed!"
+# Run UI tests
+test-ui:
+	@echo "Running UI tests..."
+	xcodebuild test \
+		-project $(PROJECT) \
+		-scheme $(SCHEME) \
+		-destination 'platform=macOS' \
+		-only-testing:ClearMindUITests \
+		| xcpretty || xcodebuild test -project $(PROJECT) -scheme $(SCHEME) -destination 'platform=macOS'
 
-install-ruby:
-	@echo "📦 Installing xcodeproj gem..."
-	@gem install xcodeproj || sudo gem install xcodeproj
-	@echo "✅ Ruby dependencies installed"
+# Clean build artifacts
+clean:
+	@echo "Cleaning build artifacts..."
+	xcodebuild clean -project $(PROJECT) -scheme $(SCHEME)
+	rm -rf $(BUILD_DIR)
+	rm -rf ~/Library/Developer/Xcode/DerivedData/$(SCHEME)-*
 
-install-xcodegen:
-	@echo "📦 Installing xcodegen..."
-	@if command -v brew >/dev/null 2>&1; then \
-		brew install xcodegen; \
+# Create archive for distribution
+archive: clean
+	@echo "Creating archive..."
+	mkdir -p $(BUILD_DIR)
+	xcodebuild archive \
+		-project $(PROJECT) \
+		-scheme $(SCHEME) \
+		-archivePath $(BUILD_DIR)/$(SCHEME).xcarchive \
+		-configuration Release
+
+# Create DMG installer
+dmg: archive
+	@echo "Creating DMG installer..."
+	@if [ -d "$(BUILD_DIR)/$(SCHEME).xcarchive/Products/Applications/$(APP_NAME).app" ]; then \
+		hdiutil create -volname "$(APP_NAME)" \
+			-srcfolder "$(BUILD_DIR)/$(SCHEME).xcarchive/Products/Applications/$(APP_NAME).app" \
+			-ov -format UDZO \
+			$(BUILD_DIR)/ClearMind.dmg; \
+		echo "DMG created at $(BUILD_DIR)/ClearMind.dmg"; \
 	else \
-		echo "❌ Homebrew not found. Install from https://brew.sh"; \
+		echo "Error: App bundle not found in archive"; \
 		exit 1; \
 	fi
-	@echo "✅ xcodegen installed"
 
-install-python:
-	@echo "📦 Installing pbxproj..."
-	@pip3 install pbxproj
-	@echo "✅ Python dependencies installed"
+# Install development dependencies
+setup:
+	@echo "Installing development dependencies..."
+	@if command -v brew >/dev/null 2>&1; then \
+		echo "Installing xcpretty..."; \
+		gem install xcpretty 2>/dev/null || sudo gem install xcpretty; \
+		echo "Installing swiftlint..."; \
+		brew install swiftlint 2>/dev/null || true; \
+		echo "Installing swift-format..."; \
+		brew install swift-format 2>/dev/null || true; \
+		echo "Installing xcodegen..."; \
+		brew install xcodegen 2>/dev/null || true; \
+	else \
+		echo "Homebrew not found. Please install Homebrew first."; \
+		echo "Visit: https://brew.sh"; \
+	fi
+	@echo "Setup complete!"
 
-# Cleanup targets
-clean-backups:
-	@echo "🧹 Cleaning up old backups..."
-	@find . -maxdepth 1 -name "*.xcodeproj.backup-*" -type d -print0 | \
-		xargs -0 ls -dt 2>/dev/null | \
-		tail -n +6 | \
-		xargs rm -rf 2>/dev/null || true
-	@echo "✅ Old backups cleaned"
+# Sync source files with Xcode project
+sync:
+	@echo "Syncing source files with Xcode project..."
+	@if command -v xcodegen >/dev/null 2>&1; then \
+		xcodegen generate; \
+		echo "Project regenerated successfully!"; \
+	else \
+		echo "XcodeGen not found. Install with: brew install xcodegen"; \
+		echo "Or manually add new files in Xcode."; \
+	fi
 
-clean-build:
-	@echo "🧹 Cleaning build artifacts..."
-	@rm -rf ~/Library/Developer/Xcode/DerivedData/Craig-O-Clean-* 2>/dev/null || true
-	@rm -rf build/ 2>/dev/null || true
-	@echo "✅ Build artifacts cleaned"
+# Run SwiftLint
+lint:
+	@echo "Running SwiftLint..."
+	@if command -v swiftlint >/dev/null 2>&1; then \
+		swiftlint lint --path Craig-O-Clean; \
+	else \
+		echo "SwiftLint not found. Install with: brew install swiftlint"; \
+	fi
 
-clean-all: clean-backups clean-build
-	@echo "✅ All cleaned!"
+# Format code
+format:
+	@echo "Formatting code..."
+	@if command -v swift-format >/dev/null 2>&1; then \
+		find Craig-O-Clean -name "*.swift" -exec swift-format -i {} \;; \
+		echo "Code formatted!"; \
+	else \
+		echo "swift-format not found. Install with: brew install swift-format"; \
+	fi
 
-# Build targets
-build:
-	@echo "🔨 Building Craig-O-Clean..."
-	@xcodebuild -project Craig-O-Clean.xcodeproj \
-		-scheme Craig-O-Clean \
-		-configuration Debug \
-		build
-
-run: build
-	@echo "🚀 Running Craig-O-Clean..."
-	@open build/Debug/Craig-O-Clean.app
-
+# Open project in Xcode
 open:
-	@echo "📂 Opening in Xcode..."
-	@open Craig-O-Clean.xcodeproj
+	@open $(PROJECT)
 
-# Testing
-test:
-	@echo "🧪 Running tests..."
-	@xcodebuild test -project Craig-O-Clean.xcodeproj \
-		-scheme Craig-O-Clean \
-		-destination 'platform=macOS'
-
-# Git workflow
-commit: sync
-	@echo "📝 Committing changes..."
-	@git add .
-	@git status
-	@echo ""
-	@echo "Ready to commit. Run:"
-	@echo "  git commit -m 'Your message'"
-	@echo "  git push"
-
-# Development workflow
-dev: sync open
-
-# Quick sync and test
-check: sync test
-
-# Show current status
-status:
-	@echo "📊 Project Status"
-	@echo "════════════════════════════════════════════════════════"
-	@echo ""
-	@echo "Swift files in source:"
-	@find Craig-O-Clean -name "*.swift" -type f ! -path "*/Preview Content/*" | wc -l | xargs echo "  "
-	@echo ""
-	@echo "Recent backups:"
-	@find . -maxdepth 1 -name "*.xcodeproj.backup-*" -type d 2>/dev/null | wc -l | xargs echo "  "
-	@echo ""
-	@git status --short
-	@echo ""
+# Show project statistics
+stats:
+	@echo "Project Statistics:"
+	@echo "==================="
+	@echo "Swift files: $$(find Craig-O-Clean -name '*.swift' | wc -l | tr -d ' ')"
+	@echo "Lines of code: $$(find Craig-O-Clean -name '*.swift' -exec cat {} \; | wc -l | tr -d ' ')"
+	@echo "Test files: $$(find Craig-O-Clean/Tests -name '*.swift' 2>/dev/null | wc -l | tr -d ' ')"
