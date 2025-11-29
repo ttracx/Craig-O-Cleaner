@@ -143,6 +143,7 @@ final class PermissionsService: ObservableObject {
     
     private let logger = Logger(subsystem: "com.craigoclean.app", category: "Permissions")
     private var checkTimer: Timer?
+    private var appActivationObserver: NSObjectProtocol?
     private let hasShownOnboarding = "hasShownPermissionsOnboarding"
     
     // MARK: - Computed Properties
@@ -179,6 +180,7 @@ final class PermissionsService: ObservableObject {
     init() {
         logger.info("PermissionsService initialized")
         setupAutomationTargets()
+        setupAppActivationObserver()
 
         // Check if we should show onboarding
         let hasShown = UserDefaults.standard.bool(forKey: hasShownOnboarding)
@@ -192,10 +194,32 @@ final class PermissionsService: ObservableObject {
                 await autoRequestPermissions()
             }
         }
+        
+        // Start periodic checks for permission changes
+        startPeriodicCheck(interval: 5.0)
     }
     
     deinit {
         checkTimer?.invalidate()
+        if let observer = appActivationObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+    
+    // MARK: - App Activation Observer
+    
+    private func setupAppActivationObserver() {
+        // Re-check permissions when app becomes active (user returns from System Settings)
+        appActivationObserver = NotificationCenter.default.addObserver(
+            forName: NSApplication.didBecomeActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.logger.info("App became active, refreshing permissions")
+                await self?.checkAllPermissions()
+            }
+        }
     }
     
     // MARK: - Setup

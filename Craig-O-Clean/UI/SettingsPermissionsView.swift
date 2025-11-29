@@ -63,6 +63,12 @@ struct SettingsPermissionsView: View {
         .sheet(isPresented: $showingPrivacyPolicy) {
             PrivacyPolicySheet()
         }
+        .onAppear {
+            // Refresh permissions when view appears
+            Task {
+                await permissions.checkAllPermissions()
+            }
+        }
     }
     
     // MARK: - General Settings Section

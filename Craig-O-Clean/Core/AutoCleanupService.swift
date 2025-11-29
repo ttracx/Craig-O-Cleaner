@@ -116,10 +116,9 @@ final class AutoCleanupService: ObservableObject {
         }
     }
 
-    nonisolated deinit {
-        Task { @MainActor in
-            stopMonitoring()
-        }
+    deinit {
+        // Timer.invalidate() is thread-safe and can be called from any thread
+        monitoringTimer?.invalidate()
     }
 
     // MARK: - Public Methods
