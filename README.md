@@ -1,274 +1,256 @@
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/485d839f-c025-4db7-94d3-823379e02d77" alt="Craig-O-Clean Logo" width="200"/>
-  
-  # Craig-O-Clean App
-  
-  A native macOS SwiftUI application for monitoring and managing system memory usage for our Chief Product Officer, Craig Ross at NeuralQuantum.ai | VibeCaaS.com | Tunaas.ai | Neuro Equality, LLC. Craig-O-Clean provides a menu bar utility that displays running processes sorted by memory usage and allows users to force quit applications or purge system memory.
-  
-  ![macOS](https://img.shields.io/badge/macOS-13.0+-blue.svg)
-  ![Swift](https://img.shields.io/badge/Swift-5.0-orange.svg)
-  ![Xcode](https://img.shields.io/badge/Xcode-15.0+-blue.svg)
-</div>
+# ClearMind Control Center
 
-## Features
+<p align="center">
+  <img src="Craig-O-Clean/Craig-O-Cleaner-logo.png" width="128" alt="ClearMind Control Center Logo">
+</p>
 
-- **Menu Bar Integration**: Lightweight menu bar app that stays out of your way
-- **Real-time Process Monitoring**: Displays processes sorted by memory usage
-- **Memory Usage Statistics**: Shows total memory usage and process count
-- **Process Management**: Force quit any process with a single click
-- **Memory Purge**: Execute `sync && sudo purge` command to flush inactive memory
-- **Search Functionality**: Quickly find specific processes
-- **Auto-refresh**: Process list updates automatically every 5 seconds
-- **Native SwiftUI Interface**: Modern macOS design with smooth animations
+<p align="center">
+  <strong>A powerful macOS utility for monitoring system resources, managing processes, and optimizing memory.</strong>
+</p>
 
-## Demo
+<p align="center">
+  <em>Built with SwiftUI for Apple Silicon • macOS 14+ (Sonoma)</em>
+</p>
 
-<div align="center">
-  <img src="demo.gif" alt="Craig-O-Clean Demo" width="600"/>
-  <p><em>Craig-O-Clean in action - Monitor memory usage and manage processes effortlessly</em></p>
-</div>
+---
 
-## Requirements
+## ✨ Features
 
-- macOS 13.0 (Ventura) or later
-- Xcode 15.0 or later (for building from source)
-- Apple Silicon or Intel-based Mac
+### 📊 System Dashboard
+- **Real-time monitoring** of CPU, RAM, disk, and network usage
+- **Memory pressure indicator** (Normal/Moderate/High/Critical)
+- **Per-core CPU visualization** with interactive charts
+- **Historical data tracking** with customizable time ranges
+- **System health summary** at a glance
 
-## Installation & Building
+### 📋 Process Manager
+- View all running applications and system processes
+- **Sort by name, CPU usage, memory, or PID**
+- Filter user apps vs. system processes
+- **Safe process termination** with confirmation dialogs
+- **Force quit** capability for unresponsive apps
+- Process details with CPU history charts
+- Export process list to CSV
 
-### Option 1: Build from Xcode (Recommended)
+### 🧹 Memory Cleanup
+- **Guided cleanup workflow** in three easy steps
+- Intelligent suggestions based on memory usage patterns
+- See estimated memory to be freed before cleanup
+- Safe termination of memory-heavy apps
+- Optional **memory purge** command (with admin privileges)
+- Background app detection and cleanup
 
-1. **Clone the repository**:
+### 🌐 Browser Tab Manager
+- **Manage tabs across multiple browsers:**
+  - Safari
+  - Google Chrome
+  - Microsoft Edge
+  - Brave Browser
+- View all open tabs with URLs
+- Close individual tabs or entire windows
+- **Close tabs by domain** (e.g., all YouTube tabs)
+- Remove duplicate tabs automatically
+- Quick cleanup of heavy browser tabs
+
+### 📱 Menu Bar App
+- **Always-accessible** from the menu bar
+- Live memory percentage display
+- Quick system metrics overview
+- **One-click optimization** actions
+- Expandable to full dashboard
+
+---
+
+## 🖼️ Screenshots
+
+### Dashboard
+![Dashboard](demo.gif)
+
+The dashboard provides a comprehensive overview of your system's health with real-time metrics.
+
+### Process Manager
+View and manage all running processes with detailed information and actions.
+
+### Memory Cleanup
+A guided workflow to safely free up memory by closing unnecessary applications.
+
+### Browser Tabs
+Manage browser tabs across Safari, Chrome, Edge, and Brave from one place.
+
+---
+
+## 📋 Requirements
+
+- **macOS 14.0 (Sonoma)** or later
+- **Apple Silicon** (M1, M2, M3 series) or Intel Mac
+- Xcode 15.0+ for building from source
+
+---
+
+## 🚀 Installation
+
+### Option 1: Build from Source
+
+1. **Clone the repository:**
    ```bash
-   git clone https://github.com/ttracx/Craig-O-Cleaner.git
-   cd Craig-O-Cleaner
+   git clone https://github.com/yourusername/clearmind-control-center.git
+   cd clearmind-control-center
    ```
 
-2. **Open the project in Xcode**:
+2. **Open in Xcode:**
    ```bash
    open Craig-O-Clean.xcodeproj
    ```
 
-3. **Configure signing** (if needed):
-   - Select the `Craig-O-Clean` project in the Project Navigator
-   - Select the `Craig-O-Clean` target
-   - Go to the "Signing & Capabilities" tab
-   - Choose your development team or use "Sign to Run Locally"
+3. **Build and run:**
+   - Select your target device (My Mac)
+   - Press `Cmd + R` to build and run
 
-4. **Build and run**:
-   - Press `⌘R` or click the "Run" button in Xcode
-   - The app will build and launch automatically
-   - Look for the memory chip icon (📟) in your menu bar
+### Option 2: Download Release
 
-### Option 2: Build from Command Line
-
-1. **Clone and navigate to the repository**:
-   ```bash
-   git clone https://github.com/ttracx/Craig-O-Cleaner.git
-   cd Craig-O-Cleaner
-   ```
-
-2. **Build the app**:
-   ```bash
-   xcodebuild -project Craig-O-Clean.xcodeproj \
-              -scheme Craig-O-Clean \
-              -configuration Release \
-              -derivedDataPath ./build
-   ```
-
-3. **Locate the built app**:
-   The compiled app will be located at:
-   ```
-   ./build/Build/Products/Release/Craig-O-Clean.app
-   ```
-
-4. **Run the app**:
-   ```bash
-   open ./build/Build/Products/Release/Craig-O-Clean.app
-   ```
-
-5. **Optional: Copy to Applications folder**:
-   ```bash
-   cp -r ./build/Build/Products/Release/Craig-O-Clean.app /Applications/
-   ```
-
-## Usage
-
-### Launching the App
-
-- After building, the app appears as a menu bar icon (memory chip symbol)
-- Click the menu bar icon to open the process list
-- The app runs in the background and doesn't appear in the Dock
-
-### Managing Processes
-
-1. **View Processes**: Click the menu bar icon to see all processes sorted by memory usage
-2. **Search**: Use the search bar to filter processes by name
-3. **Refresh**: Click the refresh icon (↻) to manually update the process list
-4. **Force Quit**: Click "Force Quit" next to any process to terminate it immediately
-5. **Purge Memory**: Click the "Purge Memory" button at the bottom to run `sync && sudo purge`
-
-### Memory Purge
-
-The "Purge Memory" button executes the system command `sync && sudo purge`:
-- `sync`: Flushes file system buffers
-- `purge`: Frees up inactive memory
-
-**Note**: The purge command requires administrator privileges. macOS will prompt you to enter your password when you click this button.
-
-## Project Structure
-
-```
-Craig-O-Cleaner/
-├── Craig-O-Clean.xcodeproj/       # Xcode project file
-│   └── project.pbxproj
-├── Craig-O-Clean/                 # Source code
-│   ├── Craig_O_CleanApp.swift    # Main app entry point and menu bar setup
-│   ├── ContentView.swift         # Main UI interface
-│   ├── ProcessManager.swift      # Process monitoring and management logic
-│   ├── ProcessInfo.swift         # Process data model
-│   ├── Assets.xcassets/          # App icons and assets
-│   ├── Preview Content/          # SwiftUI preview assets
-│   ├── Craig-O-Clean.entitlements # App permissions
-│   └── Info.plist               # App configuration
-├── README.md                     # This file
-└── .gitignore                   # Git ignore rules
-```
-
-## Technical Details
-
-### Architecture
-
-- **SwiftUI**: Modern declarative UI framework
-- **AppDelegate Pattern**: Custom app delegate for menu bar integration
-- **ObservableObject**: Reactive state management for process list
-- **Process API**: Uses macOS Process class to execute shell commands
-- **Auto-refresh Timer**: Scheduled timer for automatic updates
-
-### Permissions
-
-The app requires the following permissions:
-- **No Sandbox**: Disabled to allow process monitoring and management
-- **File Access**: Required for executing system commands
-
-These are configured in `Craig-O-Clean.entitlements`.
-
-### Memory Monitoring
-
-The app uses the `ps` command to gather process information:
-```bash
-ps -axm -o pid,rss,comm
-```
-
-This provides:
-- `pid`: Process ID
-- `rss`: Resident Set Size (memory in KB)
-- `comm`: Command name
-
-### Security Notes
-
-- The app runs **without** sandbox restrictions to function properly
-- Administrator privileges are only requested when using the "Purge Memory" feature
-- Force quit functionality works on user-owned processes without admin privileges
-- The app uses AppleScript to request admin privileges securely when needed
-
-## Troubleshooting
-
-### App doesn't appear in menu bar
-- Make sure the app is actually running (check Activity Monitor)
-- Restart the app
-- Check System Settings → Desktop & Dock → Menu Bar to ensure menu bar icons are visible
-
-### "Permission Denied" when force quitting
-- You can only force quit processes owned by your user
-- System processes require administrator privileges
-- Some protected processes cannot be terminated
-
-### Purge command fails
-- Ensure you enter your administrator password when prompted
-- The account must have admin privileges
-- Some system configurations may restrict the purge command
-
-### Build errors in Xcode
-- Ensure you're using Xcode 15.0 or later
-- Clean the build folder: Product → Clean Build Folder (⇧⌘K)
-- Delete derived data: Window → Organizer → Delete Derived Data
-- Restart Xcode
-
-### Code signing issues
-- Go to Signing & Capabilities in Xcode
-- Select "Automatically manage signing"
-- Choose your Apple Developer account or "Sign to Run Locally"
-
-## Development
-
-### Prerequisites for Development
-
-- Xcode 15.0 or later
-- macOS 13.0 SDK or later
-- Swift 5.9 or later
-
-### Building for Development
-
-```bash
-# Build in Debug mode
-xcodebuild -project Craig-O-Clean.xcodeproj \
-           -scheme Craig-O-Clean \
-           -configuration Debug
-
-# Run tests (if available)
-xcodebuild test -project Craig-O-Clean.xcodeproj \
-                -scheme Craig-O-Clean
-```
-
-### Customization
-
-You can customize the app by modifying:
-- **Refresh interval**: Change the timer interval in `ProcessManager.swift`
-- **Process filter**: Adjust the memory threshold filter (currently 10 MB)
-- **UI appearance**: Modify colors and layout in `ContentView.swift`
-- **Menu bar icon**: Change the SF Symbol in `Craig_O_CleanApp.swift`
-
-## Known Limitations
-
-- Auto-refresh interval is fixed at 5 seconds (can be modified in code)
-- Only displays top 50 memory-consuming processes
-- Processes using less than 10 MB are filtered out
-- Some system processes may not be terminable without admin rights
-
-## Future Enhancements
-
-Potential features for future versions:
-- CPU usage monitoring
-- Customizable refresh intervals
-- Export process list to CSV
-- Process history and trends
-- Memory usage alerts/notifications
-- Dark mode optimizations
-- Preference window for settings
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is provided as-is for educational and personal use.
-
-## Credits
-
-Created as a macOS utility for monitoring and managing system memory usage.
-
-## Support
-
-For issues, questions, or suggestions:
-- Open an issue on GitHub
-- Check existing issues for solutions
+Download the latest `.dmg` from the [Releases](https://github.com/yourusername/clearmind-control-center/releases) page.
 
 ---
 
-**Note**: This application is designed for macOS and leverages native system commands. Use the force quit and memory purge features responsibly as they can affect system stability if misused.
+## 🔐 Permissions
+
+ClearMind Control Center requires certain permissions to function properly:
+
+### Required Permissions
+
+| Permission | Purpose | How to Enable |
+|------------|---------|---------------|
+| **Automation** | Control browsers for tab management | System Settings → Privacy & Security → Automation |
+
+### Optional Permissions
+
+| Permission | Purpose | How to Enable |
+|------------|---------|---------------|
+| **Accessibility** | Enhanced system monitoring | System Settings → Privacy & Security → Accessibility |
+| **Administrator** | Memory purge command | Prompted when using purge feature |
+
+### How to Grant Permissions
+
+1. **Open System Settings**
+2. **Navigate to Privacy & Security**
+3. **Select the permission type** (e.g., Automation)
+4. **Find ClearMind Control Center** in the list
+5. **Enable the toggle** for each browser you want to manage
+
+> **Note:** You may need to restart the app after granting permissions.
 
 ---
 
-© 2025 Craig-O-Cleaner powered by VibeCaaS.com a division of NeuralQuantum.ai LLC. All rights reserved.
+## 🏗️ Architecture
+
+ClearMind Control Center follows a modular architecture:
+
+```
+ClearMind Control Center
+├── Services/
+│   ├── SystemMetricsService    # CPU, RAM, disk, network monitoring
+│   ├── ProcessManager          # Process listing and management
+│   ├── MemoryOptimizerService  # Memory cleanup workflows
+│   ├── BrowserAutomationService # Browser tab management
+│   └── PermissionsService      # Permission checking and guidance
+├── Views/
+│   ├── MainAppView             # Sidebar navigation container
+│   ├── DashboardView           # System metrics dashboard
+│   ├── ContentView             # Process manager view
+│   ├── MemoryCleanupView       # Guided cleanup interface
+│   ├── BrowserTabsView         # Tab management interface
+│   └── PermissionsView         # Settings and permissions
+└── Tests/
+    ├── SystemMetricsServiceTests
+    ├── BrowserAutomationServiceTests
+    └── MemoryOptimizerServiceTests
+```
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed documentation.
+
+---
+
+## 🧪 Testing
+
+### Run Unit Tests
+
+```bash
+# From Xcode
+Cmd + U
+
+# From command line
+xcodebuild test -project Craig-O-Clean.xcodeproj -scheme Craig-O-Clean -destination 'platform=macOS'
+```
+
+### Test Coverage
+
+- **SystemMetricsService**: Memory, CPU, disk, and network metrics
+- **BrowserAutomationService**: Browser detection, tab parsing
+- **MemoryOptimizerService**: Cleanup workflows, selection management
+
+---
+
+## 🔒 Security & Privacy
+
+- **No data collection**: All monitoring happens locally
+- **No network requests**: The app doesn't send any data
+- **No analytics**: Your usage is completely private
+- **Open source**: Review the code yourself
+
+For detailed security information, see [SECURITY_NOTES.md](SECURITY_NOTES.md).
+
+---
+
+## 🛠️ Development
+
+### Building
+
+```bash
+# Build for debugging
+xcodebuild -project Craig-O-Clean.xcodeproj -scheme Craig-O-Clean -configuration Debug build
+
+# Build for release
+xcodebuild -project Craig-O-Clean.xcodeproj -scheme Craig-O-Clean -configuration Release build
+```
+
+### Code Style
+
+- Swift 5.9+
+- SwiftUI for all views
+- Combine for reactive updates
+- MainActor for UI-related services
+
+### Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests
+5. Submit a pull request
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- Apple for SwiftUI and the macOS platform
+- The open-source community for inspiration
+- All contributors and testers
+
+---
+
+## 📬 Contact
+
+- **Issues**: [GitHub Issues](https://github.com/yourusername/clearmind-control-center/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/yourusername/clearmind-control-center/discussions)
+
+---
+
+<p align="center">
+  Made with ❤️ for macOS
+</p>

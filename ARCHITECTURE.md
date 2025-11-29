@@ -1,400 +1,454 @@
-# Craig-O-Clean Architecture
+# ClearMind Control Center - Architecture
 
-This document describes the technical architecture and design of the Craig-O-Clean application.
+This document describes the technical architecture and design of ClearMind Control Center.
 
 ## Overview
 
-Craig-O-Clean is a native macOS menu bar application built using SwiftUI and AppKit. It provides real-time process monitoring and memory management capabilities.
+ClearMind Control Center is a native macOS application built with SwiftUI, designed for Apple Silicon and Intel Macs running macOS 14 (Sonoma) or later. It provides comprehensive system monitoring, process management, memory optimization, and browser tab management through an intuitive, modern interface.
 
-## Architecture Diagram
+## High-Level Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        macOS System                          │
-│  ┌─────────┐  ┌──────────┐  ┌─────────┐  ┌──────────────┐ │
-│  │   ps    │  │   kill   │  │  sync   │  │osascript     │ │
-│  │ command │  │ command  │  │ command │  │(AppleScript) │ │
-│  └────┬────┘  └────┬─────┘  └────┬────┘  └──────┬───────┘ │
-└───────┼────────────┼─────────────┼───────────────┼─────────┘
-        │            │             │               │
-        │            │             │               │
-┌───────┼────────────┼─────────────┼───────────────┼─────────┐
-│       │            │             │               │         │
-│  ┌────▼─────────────────────────────────────────▼──────┐  │
-│  │           ProcessManager (ObservableObject)         │  │
-│  │  ┌──────────────────────────────────────────────┐  │  │
-│  │  │ • fetchProcesses()                           │  │  │
-│  │  │ • parseProcessOutput()                       │  │  │
-│  │  │ • refreshProcesses()                         │  │  │
-│  │  │ • forceQuitProcess(pid)                      │  │  │
-│  │  │ • purgeMemory(completion)                    │  │  │
-│  │  │ • calculateTotalMemory()                     │  │  │
-│  │  └──────────────────────────────────────────────┘  │  │
-│  │  Published Properties:                              │  │
-│  │  • @Published var processes: [ProcessInfo]         │  │
-│  │  • @Published var isRefreshing: Bool                │  │
-│  │  • @Published var lastUpdateTime: Date?            │  │
-│  │  • @Published var totalMemoryUsage: Double         │  │
-│  └─────────────────────┬───────────────────────────────┘  │
-│                        │                                   │
-│  ┌────────────────────▼────────────────────────────────┐  │
-│  │              ProcessInfo (Model)                    │  │
-│  │  ┌──────────────────────────────────────────────┐  │  │
-│  │  │ • id: UUID                                   │  │  │
-│  │  │ • pid: Int                                   │  │  │
-│  │  │ • name: String                               │  │  │
-│  │  │ • memoryUsage: Double                        │  │  │
-│  │  │ • formattedMemory: String (computed)         │  │  │
-│  │  └──────────────────────────────────────────────┘  │  │
-│  └─────────────────────┬───────────────────────────────┘  │
-│                        │                                   │
-│  ┌────────────────────▼────────────────────────────────┐  │
-│  │           ContentView (SwiftUI View)                │  │
-│  │  ┌──────────────────────────────────────────────┐  │  │
-│  │  │ Components:                                  │  │  │
-│  │  │ • headerView                                 │  │  │
-│  │  │ • searchBar                                  │  │  │
-│  │  │ • ScrollView with LazyVStack                 │  │  │
-│  │  │ • footerView                                 │  │  │
-│  │  │                                              │  │  │
-│  │  │ @StateObject var processManager              │  │  │
-│  │  │ @State var selectedProcess                   │  │  │
-│  │  │ @State var searchText                        │  │  │
-│  │  │ @State var showingAlert                      │  │  │
-│  │  └──────────────────────────────────────────────┘  │  │
-│  └─────────────────────┬───────────────────────────────┘  │
-│                        │                                   │
-│  ┌────────────────────▼────────────────────────────────┐  │
-│  │            ProcessRow (SwiftUI View)                │  │
-│  │  • Displays individual process information          │  │
-│  │  • Force Quit button                                │  │
-│  │  • Selection state                                  │  │
-│  └─────────────────────────────────────────────────────┘  │
-│                                                            │
-│  ┌─────────────────────────────────────────────────────┐  │
-│  │      AppDelegate (NSApplicationDelegate)            │  │
-│  │  ┌──────────────────────────────────────────────┐  │  │
-│  │  │ • NSStatusItem (menu bar icon)               │  │  │
-│  │  │ • NSPopover (popup window)                   │  │  │
-│  │  │ • togglePopover() - show/hide popup          │  │  │
-│  │  └──────────────────────────────────────────────┘  │  │
-│  └─────────────────────────────────────────────────────┘  │
-│                                                            │
-│  ┌─────────────────────────────────────────────────────┐  │
-│  │         Craig_O_CleanApp (@main)                    │  │
-│  │  • App entry point                                  │  │
-│  │  • @NSApplicationDelegateAdaptor                    │  │
-│  └─────────────────────────────────────────────────────┘  │
-│                  Craig-O-Clean Application                 │
-└────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                           ClearMind Control Center                            │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐              │
+│  │   Menu Bar UI   │  │   Main Window   │  │    Popover      │              │
+│  │  (NSStatusItem) │  │  (NSWindow)     │  │  (NSPopover)    │              │
+│  └────────┬────────┘  └────────┬────────┘  └────────┬────────┘              │
+│           │                    │                    │                        │
+│           └────────────────────┼────────────────────┘                        │
+│                                │                                             │
+│  ┌─────────────────────────────┴─────────────────────────────────┐          │
+│  │                     SwiftUI View Layer                         │          │
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐         │          │
+│  │  │Dashboard │ │Processes │ │ Memory   │ │ Browser  │         │          │
+│  │  │  View    │ │  View    │ │ Cleanup  │ │  Tabs    │         │          │
+│  │  └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘         │          │
+│  └───────┼────────────┼────────────┼────────────┼────────────────┘          │
+│          │            │            │            │                            │
+│  ┌───────┴────────────┴────────────┴────────────┴────────────────┐          │
+│  │                      Service Layer                             │          │
+│  │  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐      │          │
+│  │  │  System       │  │  Memory       │  │  Browser      │      │          │
+│  │  │  Metrics      │  │  Optimizer    │  │  Automation   │      │          │
+│  │  │  Service      │  │  Service      │  │  Service      │      │          │
+│  │  └───────────────┘  └───────────────┘  └───────────────┘      │          │
+│  │  ┌───────────────┐  ┌───────────────┐                         │          │
+│  │  │  Process      │  │  Permissions  │                         │          │
+│  │  │  Manager      │  │  Service      │                         │          │
+│  │  └───────────────┘  └───────────────┘                         │          │
+│  └────────────────────────────────────────────────────────────────┘          │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                              macOS System APIs                                │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │ host_info   │  │ NSWorkspace │  │ AppleScript │  │ proc_*      │         │
+│  │ vm_stat     │  │ NSRunningApp│  │ NSAppleScript│  │ APIs        │         │
+│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘         │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## Component Details
+## Directory Structure
 
-### 1. Craig_O_CleanApp (Main Entry Point)
+```
+Craig-O-Clean/
+├── Craig_O_CleanApp.swift        # App entry point & AppDelegate
+├── Services/
+│   ├── SystemMetricsService.swift    # CPU, RAM, disk, network monitoring
+│   ├── MemoryOptimizerService.swift  # Memory cleanup workflows
+│   ├── BrowserAutomationService.swift # Browser tab management
+│   └── PermissionsService.swift      # Permission management
+├── Views/
+│   ├── MainAppView.swift             # Sidebar navigation container
+│   ├── DashboardView.swift           # System metrics dashboard
+│   ├── BrowserTabsView.swift         # Tab management interface
+│   ├── MemoryCleanupView.swift       # Guided cleanup UI
+│   ├── PermissionsView.swift         # Settings & permissions
+│   └── EnhancedMenuBarView.swift     # Menu bar popover
+├── ProcessManager.swift              # Process monitoring (existing)
+├── ContentView.swift                 # Process list view (existing)
+├── SystemMemoryManager.swift         # Memory stats (existing)
+├── Tests/
+│   ├── SystemMetricsServiceTests.swift
+│   ├── BrowserAutomationServiceTests.swift
+│   └── MemoryOptimizerServiceTests.swift
+├── Assets.xcassets/
+├── Info.plist
+└── Craig-O-Clean.entitlements
+```
 
-**File**: `Craig_O_CleanApp.swift`
+## Service Layer
 
-**Purpose**: Application entry point and lifecycle management
+### SystemMetricsService
+
+**Purpose**: Provides real-time system metrics monitoring.
 
 **Key Features**:
-- SwiftUI `@main` entry point
-- Uses `@NSApplicationDelegateAdaptor` to integrate with AppKit
-- Creates empty Settings scene (app doesn't appear in Dock)
+- CPU usage (overall, per-core, user/system breakdown)
+- Memory metrics (used, free, active, wired, compressed, swap)
+- Disk usage (total, used, free, volume name)
+- Network activity (bytes sent/received, rates)
+- Historical data for charting
 
+**Implementation**:
 ```swift
-@main
-struct Craig_O_CleanApp: App {
-    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+@MainActor
+class SystemMetricsService: ObservableObject {
+    @Published var memoryMetrics: MemoryMetrics?
+    @Published var cpuMetrics: CPUMetrics?
+    @Published var diskMetrics: DiskMetrics?
+    @Published var networkMetrics: NetworkMetrics?
+    @Published var healthSummary: SystemHealthSummary?
+    @Published var cpuHistory: [CPUHistoryPoint] = []
+    @Published var memoryHistory: [MemoryHistoryPoint] = []
     
-    var body: some Scene {
-        Settings {
-            EmptyView()
-        }
-    }
+    func updateAllMetrics()
+    func startAutoUpdate(interval: TimeInterval)
+    func stopAutoUpdate()
 }
 ```
 
-### 2. AppDelegate (Menu Bar Integration)
+**System APIs Used**:
+- `host_statistics64` for memory statistics
+- `host_processor_info` for CPU metrics
+- `FileManager` resource values for disk info
+- `getifaddrs` for network statistics
 
-**File**: `Craig_O_CleanApp.swift`
+### MemoryOptimizerService
 
-**Purpose**: Manages menu bar icon and popover
+**Purpose**: Provides guided memory cleanup workflows.
 
-**Key Components**:
-- `NSStatusItem`: The menu bar icon
-- `NSPopover`: The popup window containing ContentView
-- `NSHostingController`: Bridges SwiftUI to AppKit
+**Key Features**:
+- Analyze running applications for cleanup suggestions
+- Multi-step cleanup workflow (Analyze → Review → Confirm → Execute)
+- Safe app termination with user consent
+- Memory purge command (admin required)
 
-**Responsibilities**:
-- Create and configure status bar item
-- Handle popover show/hide logic
-- Set up menu bar icon and action
-
-### 3. ProcessManager (Business Logic)
-
-**File**: `ProcessManager.swift`
-
-**Purpose**: Core business logic for process monitoring and management
-
-**Pattern**: Observable Object (MVVM pattern)
-
-**Published Properties**:
+**Implementation**:
 ```swift
-@Published var processes: [ProcessInfo] = []
-@Published var isRefreshing = false
-@Published var lastUpdateTime: Date?
-@Published var totalMemoryUsage: Double = 0
-```
-
-**Methods**:
-
-| Method | Purpose | Implementation |
-|--------|---------|----------------|
-| `refreshProcesses()` | Fetch and update process list | Async dispatch, calls fetchProcesses() |
-| `fetchProcesses()` | Execute `ps` command | Process API with pipe for output |
-| `parseProcessOutput()` | Parse ps output into ProcessInfo | String parsing, filtering, sorting |
-| `forceQuitProcess()` | Terminate a process | Execute `kill -9` command |
-| `purgeMemory()` | Free inactive memory | Execute `sync` then `osascript` for `purge` |
-| `startAutoRefresh()` | Begin auto-refresh timer | 5-second Timer |
-| `calculateTotalMemory()` | Sum memory usage | Reduce operation on processes |
-
-**Auto-Refresh**:
-- Timer-based: 5 seconds interval
-- Background thread for fetching
-- Main thread for UI updates
-
-### 4. ProcessInfo (Data Model)
-
-**File**: `ProcessInfo.swift`
-
-**Purpose**: Data model for process information
-
-**Properties**:
-```swift
-struct ProcessInfo: Identifiable, Hashable {
-    let id = UUID()           // Unique identifier
-    let pid: Int              // Process ID
-    let name: String          // Process name
-    let memoryUsage: Double   // Memory in MB
+@MainActor
+class MemoryOptimizerService: ObservableObject {
+    @Published var cleanupCandidates: [CleanupCandidate] = []
+    @Published var suggestions: [CleanupSuggestion] = []
+    @Published var selectedForCleanup: Set<String> = []
+    @Published var currentStep: CleanupStep = .analyze
     
-    var formattedMemory: String {
-        // Computed property: formats as MB or GB
-    }
+    func analyzeForCleanup() async
+    func executeCleanup() async -> CleanupResult
+    func quickCleanup() async -> CleanupResult
+    func runPurge() async throws
 }
 ```
 
-**Protocols**:
-- `Identifiable`: For SwiftUI ForEach loops
-- `Hashable`: For Set operations and comparison
+### BrowserAutomationService
 
-### 5. ContentView (Main UI)
+**Purpose**: Manages browser tabs across multiple browsers using AppleScript.
 
-**File**: `ContentView.swift`
+**Supported Browsers**:
+- Safari
+- Google Chrome
+- Microsoft Edge
+- Brave Browser
 
-**Purpose**: Primary user interface
+**Key Features**:
+- Detect installed and running browsers
+- Fetch all open tabs with window/tab indices
+- Close individual tabs, windows, or by domain
+- Permission status checking
 
-**Architecture**: SwiftUI declarative UI with MVVM pattern
-
-**Structure**:
+**Implementation**:
+```swift
+@MainActor
+class BrowserAutomationService: ObservableObject {
+    @Published var installedBrowsers: [BrowserType] = []
+    @Published var runningBrowsers: [BrowserType] = []
+    @Published var browserWindows: [BrowserWindow] = []
+    @Published var allTabs: [BrowserTab] = []
+    @Published var permissionStatus: [BrowserType: Bool] = [:]
+    
+    func fetchAllTabs() async
+    func closeTab(_ tab: BrowserTab) async -> BrowserOperationResult
+    func closeTabsByDomain(_ domain: String) async -> BrowserOperationResult
+}
 ```
-ContentView
-├── headerView
-│   ├── Title and icon
-│   ├── Refresh button
-│   └── Statistics (memory, count)
-├── searchBar
-│   ├── Search field
-│   └── Clear button
-├── ScrollView
-│   └── LazyVStack
-│       └── ProcessRow (foreach)
-└── footerView
-    ├── Purge button
-    └── Warning text
+
+**AppleScript Integration**:
+```applescript
+-- Safari tab fetching
+tell application "Safari"
+    repeat with w in windows
+        repeat with t in tabs of w
+            get name of t
+            get URL of t
+        end repeat
+    end repeat
+end tell
+
+-- Chrome/Edge tab fetching
+tell application "Google Chrome"
+    repeat with w in windows
+        repeat with t in tabs of w
+            get title of t
+            get URL of t
+        end repeat
+    end repeat
+end tell
 ```
 
-**State Management**:
-- `@StateObject`: Owns ProcessManager instance
-- `@State`: Local UI state (search, selection, alerts)
+### PermissionsService
 
-**Computed Properties**:
-- `filteredProcesses`: Filters processes based on search text
+**Purpose**: Manages app permissions and provides user guidance.
 
-### 6. ProcessRow (List Item)
+**Key Features**:
+- Check automation permissions for browsers
+- Check accessibility permission
+- Provide step-by-step enable instructions
+- Open System Settings directly
 
-**File**: `ContentView.swift`
+**Implementation**:
+```swift
+@MainActor
+class PermissionsService: ObservableObject {
+    @Published var permissions: [PermissionInfo] = []
+    @Published var automationPermissions: [AutomationPermissionDetail] = []
+    
+    func checkAllPermissions() async
+    func openSettings(for permission: PermissionType)
+    func requestAccessibilityPermission()
+}
+```
 
-**Purpose**: Individual process list item
+## View Layer
 
-**Features**:
-- Process name (monospaced font)
-- Process ID
-- Memory usage (formatted)
-- Force Quit button
-- Selection highlight
-- Tap gesture handling
+### MainAppView
+
+The primary application container with sidebar navigation.
+
+**Components**:
+- Sidebar with navigation items
+- Detail view container
+- Quick stats footer
+
+**Navigation Tabs**:
+1. Dashboard
+2. Processes
+3. Memory Cleanup
+4. Browser Tabs
+5. Settings
+
+### DashboardView
+
+Real-time system metrics visualization.
+
+**Components**:
+- System health summary card
+- CPU, Memory, Disk, Network metric cards
+- CPU history chart
+- Memory history chart
+
+### MemoryCleanupView
+
+Guided multi-step cleanup workflow.
+
+**Steps**:
+1. **Analyze**: Scan running applications
+2. **Review**: Select apps to close
+3. **Confirm**: Final confirmation
+4. **Execute**: Close selected apps
+5. **Complete**: Show results
+
+### BrowserTabsView
+
+Browser tab management interface.
+
+**Components**:
+- Browser sidebar (list of browsers)
+- Tab list with search/filter
+- Domain grouping
+- Bulk actions menu
 
 ## Data Flow
 
-### Process List Update Flow
+### Metrics Update Flow
 
 ```
-Timer (5s)
-    ↓
-ProcessManager.refreshProcesses()
-    ↓
-DispatchQueue.global (background)
-    ↓
-fetchProcesses() → Execute 'ps -axm -o pid,rss,comm'
-    ↓
-parseProcessOutput() → Parse string, create ProcessInfo array
-    ↓
-Filter (> 10 MB) → Sort (by memory) → Take top 50
-    ↓
-DispatchQueue.main (UI thread)
-    ↓
-@Published processes = newProcesses
-    ↓
-SwiftUI observes change
-    ↓
-ContentView re-renders
-    ↓
-User sees updated list
+Timer (2s interval)
+       │
+       ▼
+SystemMetricsService.updateAllMetrics()
+       │
+       ├──► fetchMemoryMetrics() ──► vm_statistics64
+       ├──► fetchCPUMetrics() ──► host_processor_info
+       ├──► fetchDiskMetrics() ──► FileManager
+       └──► fetchNetworkMetrics() ──► getifaddrs
+       │
+       ▼
+@Published properties updated
+       │
+       ▼
+SwiftUI observes changes
+       │
+       ▼
+Views re-render
 ```
 
-### Force Quit Flow
+### Memory Cleanup Flow
 
 ```
-User taps "Force Quit" button
-    ↓
-ProcessRow.onForceQuit() called
-    ↓
-ContentView.forceQuitProcess(process) called
-    ↓
-Shows alert
-    ↓
-ProcessManager.forceQuitProcess(pid: Int)
-    ↓
-Execute 'kill -9 <pid>'
-    ↓
-Wait 0.5 seconds
-    ↓
-Trigger refreshProcesses()
-    ↓
-UI updates automatically
+User clicks "Analyze"
+       │
+       ▼
+analyzeForCleanup()
+       │
+       ├──► Get NSWorkspace.runningApplications
+       ├──► Get memory usage per process
+       └──► Generate suggestions
+       │
+       ▼
+User reviews & selects apps
+       │
+       ▼
+User confirms
+       │
+       ▼
+executeCleanup()
+       │
+       ├──► NSRunningApplication.terminate()
+       └──► or forceTerminate()
+       │
+       ▼
+Display results
 ```
 
-### Memory Purge Flow
+### Browser Tab Flow
 
 ```
-User taps "Purge Memory" button
-    ↓
-ContentView.purgeMemory() called
-    ↓
-ProcessManager.purgeMemory(completion:)
-    ↓
-Execute 'sync' command
-    ↓
-Execute 'osascript -e "do shell script \"purge\" with administrator privileges"'
-    ↓
-macOS prompts for password
-    ↓
-User enters password
-    ↓
-Command executes
-    ↓
-Completion handler called with result
-    ↓
-Show success/error alert
-    ↓
-Refresh process list
-    ↓
-UI updates
+fetchAllTabs()
+       │
+       ├──► Safari: Execute AppleScript
+       ├──► Chrome: Execute AppleScript
+       └──► Edge: Execute AppleScript
+       │
+       ▼
+Parse results into BrowserTab models
+       │
+       ▼
+User selects tab to close
+       │
+       ▼
+closeTab() ──► Execute AppleScript
+       │
+       ▼
+Update local state
 ```
 
 ## Threading Model
 
-### Main Thread
+### Main Thread (MainActor)
 - All UI updates
 - SwiftUI view rendering
+- Published property changes
 - Timer scheduling
-- Alert presentation
 
-### Background Thread (QoS: .userInitiated)
-- Process list fetching
-- Command execution
-- String parsing
-- Data processing
+### Background Thread
+- System API calls (vm_stat, host_info)
+- AppleScript execution
+- File system operations
 
 ### Synchronization
-- `DispatchQueue.main.async` for UI updates
-- `@Published` properties trigger main thread updates
-- Process API handles its own threading
+- Services are marked `@MainActor`
+- Background work uses `Task` with `@MainActor` callback
+- `DispatchQueue.global(qos: .userInitiated)` for heavy work
 
 ## Memory Management
 
-### Process Manager
-- Weak references in closures to prevent retain cycles
-- Timer invalidation in `deinit`
-- Cleanup of resources
+### Automatic Reference Counting
+- `[weak self]` in closures to prevent retain cycles
+- `@StateObject` for view-owned services
+- `@ObservedObject` for passed-in services
 
-### SwiftUI
-- Automatic view lifecycle management
-- `@StateObject` ownership semantics
-- `@ObservedObject` reference semantics
-
-## Security Considerations
-
-### Sandboxing
-- **Disabled**: Required for `ps`, `kill`, `purge` commands
-- Configured in `Craig-O-Clean.entitlements`
-
-### Privilege Escalation
-- Only for `purge` command
-- Uses AppleScript for secure password prompt
-- User explicitly authorizes each time
-
-### Process Access
-- Can only quit user-owned processes without admin
-- System processes require elevated privileges
-- Protected processes cannot be terminated
-
-## File Organization
-
+### Timer Management
+```swift
+deinit {
+    updateTimer?.invalidate()
+    updateTimer = nil
+}
 ```
-Craig-O-Clean/
-├── Craig_O_CleanApp.swift      # Entry point + AppDelegate
-├── ContentView.swift            # Main UI + ProcessRow
-├── ProcessManager.swift         # Business logic
-├── ProcessInfo.swift            # Data model
-├── Assets.xcassets/            # Icons and assets
-├── Info.plist                  # App configuration
-└── Craig-O-Clean.entitlements  # Permissions
+
+### History Pruning
+```swift
+if cpuHistory.count > maxHistoryPoints {
+    cpuHistory.removeFirst(cpuHistory.count - maxHistoryPoints)
+}
 ```
+
+## Error Handling
+
+### AppleScript Errors
+```swift
+enum BrowserOperationResult {
+    case success
+    case permissionDenied
+    case browserNotRunning
+    case scriptError(String)
+    case timeout
+    case unsupported
+}
+```
+
+### Graceful Degradation
+- Missing permissions show guidance UI
+- Unavailable metrics display "--" or placeholders
+- Browser closed mid-operation handled gracefully
+
+## Testing Strategy
+
+### Unit Tests
+- Service logic with mocked dependencies
+- Model calculations and parsing
+- State transitions
+
+### Integration Tests
+- AppleScript execution (when permissions granted)
+- System API calls
+- Process enumeration
+
+### UI Tests
+- Navigation between tabs
+- User interaction flows
+- Error state displays
 
 ## Build Configuration
 
 ### Targets
-- **Craig-O-Clean**: Main application target
+- **ClearMind Control Center**: Main app target
+- **ClearMind Control Center Tests**: Unit tests
 
 ### Configurations
-- **Debug**: Development builds with symbols
+- **Debug**: Development builds
 - **Release**: Optimized production builds
 
 ### Key Settings
-- Minimum Deployment: macOS 13.0
-- Swift Version: 5.0
-- LSUIElement: true (menu bar app)
-- Sandbox: false (requires system access)
+```
+MACOSX_DEPLOYMENT_TARGET = 14.0
+SWIFT_VERSION = 5.9
+ENABLE_HARDENED_RUNTIME = YES
+ENABLE_APP_SANDBOX = NO
+```
 
 ## Dependencies
 
 ### System Frameworks
-- SwiftUI (UI framework)
-- AppKit (NSStatusItem, NSPopover, NSApplicationDelegate)
-- Foundation (Process, Timer, String, etc.)
-- Combine (ObservableObject, @Published)
+- SwiftUI
+- AppKit
+- Combine
+- Charts (iOS 16+)
+- ServiceManagement
 
 ### External Dependencies
 - None (100% native)
@@ -402,92 +456,30 @@ Craig-O-Clean/
 ## Performance Characteristics
 
 ### Memory Usage
-- Typical: 20-40 MB
-- Lightweight due to SwiftUI
-- Process list cached in memory
+- Base: ~30-50 MB
+- With history tracking: +10-20 MB
+- Menu bar only: ~20 MB
 
 ### CPU Usage
-- Idle: Near 0%
-- During refresh: Brief spike (< 1 second)
-- Timer overhead: Negligible
+- Idle: <1%
+- During refresh: 2-5% spike
+- During cleanup: 5-10% spike
 
 ### Refresh Performance
-- `ps` command: ~50-100ms
-- Parsing: ~10-50ms
-- UI update: ~10ms
-- Total: ~100-200ms per refresh
+- Metrics update: ~50-100ms
+- Browser tab fetch: ~200-500ms (depends on tab count)
+- Full analysis: ~500ms-1s
 
-## Testing Strategy
-
-### Manual Testing
-- Launch and menu bar appearance
-- Process list accuracy
-- Search functionality
-- Force quit operations
-- Memory purge
-- Error handling
-
-### Potential Unit Tests (Future)
-- ProcessInfo model validation
-- Process output parsing
-- Memory calculation accuracy
-- Search filtering logic
-
-### Integration Tests (Future)
-- Command execution
-- Process monitoring
-- Memory operations
-
-## Future Architecture Improvements
+## Future Considerations
 
 ### Potential Enhancements
-1. **Dependency Injection**: Make ProcessManager injectable
-2. **Repository Pattern**: Abstract command execution
-3. **Unit Testing**: Add testable architecture
-4. **Protocol-Oriented**: Define protocols for better testing
-5. **Modular Design**: Separate concerns into modules
-6. **Configuration**: User preferences system
-7. **Logging**: Structured logging framework
+1. **Notifications**: Alert for high memory/CPU
+2. **Widgets**: macOS desktop widgets
+3. **Shortcuts**: Siri Shortcuts integration
+4. **iCloud Sync**: Settings sync across devices
+5. **Profiles**: Different monitoring profiles
 
-### Scalability Considerations
-- Currently optimized for single window/instance
-- Could support multiple windows with shared ProcessManager
-- Could add background modes for continuous monitoring
-
-## Technical Decisions
-
-### Why SwiftUI?
-- Modern, declarative UI
-- Less code than AppKit
-- Automatic state management
-- Great performance
-
-### Why NSStatusItem?
-- Standard macOS menu bar API
-- Reliable and well-supported
-- Easy integration with SwiftUI via NSHostingController
-
-### Why No Sandbox?
-- Required for `ps`, `kill`, `purge` commands
-- No alternative APIs available
-- Security handled via macOS permissions
-
-### Why 5-Second Refresh?
-- Balance between responsiveness and resource usage
-- Frequent enough for monitoring
-- Infrequent enough to avoid overhead
-
-### Why Top 50 Processes?
-- Sufficient for identifying memory hogs
-- Keeps UI performant
-- Reduces parsing overhead
-
-## Conclusion
-
-Craig-O-Clean uses a clean, layered architecture that separates concerns:
-- **Presentation Layer**: SwiftUI views
-- **Business Logic**: ProcessManager
-- **Data Layer**: ProcessInfo model
-- **Integration Layer**: AppDelegate
-
-This design makes the app maintainable, testable, and easy to extend.
+### Scalability
+- Current design supports single-window use
+- Could add multiple windows with shared services
+- Background monitoring mode possible with notifications

@@ -18,6 +18,16 @@
 		C4715D919A5DBEF825CE493A /* ProcessDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68B2DE05F77C4B544BE495A3 /* ProcessDetailsView.swift */; };
 		C72688306B4BEE5732CCBB8A /* ProcessManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2145AF91FEE09DA3360DEF7 /* ProcessManager.swift */; };
 		F5F21EDE8F69891F6A77AD61 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44536121E1A03039EB5C837E /* Assets.xcassets */; };
+		4ED2E492A4AD4146BA4EBDCF /* BrowserAutomationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D666C40AAF440CE82667BB9 /* BrowserAutomationService.swift */; };
+		9EA6459994FC4893ABB8E8B8 /* MemoryOptimizerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 818D5A8433904B4F98A0D7E7 /* MemoryOptimizerService.swift */; };
+		7D45C1EB073749DEA2D2331B /* PermissionsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18077C6A5CB640D59205D41E /* PermissionsService.swift */; };
+		710B9F132BA94B6DA3D358B5 /* SystemMetricsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4DF2B33ED6438AB7E0A222 /* SystemMetricsService.swift */; };
+		5572B7CAC99D4FD8AE049285 /* BrowserTabsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A8847426BBD4B48A39FA0BC /* BrowserTabsView.swift */; };
+		E76596BC286C491886A3AADD /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF7041D84E2F415EAF400E04 /* DashboardView.swift */; };
+		ED0CDD597CA141DABDA1C82E /* EnhancedMenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E87F96843838445DB3FEB99D /* EnhancedMenuBarView.swift */; };
+		A02D2AF2CB1F4ABBAE207240 /* MainAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD008F9D1DFE4D07ACCDB492 /* MainAppView.swift */; };
+		FF26C5C60C1A4E3C884A91D5 /* MemoryCleanupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7193DD93D904DB79967343E /* MemoryCleanupView.swift */; };
+		B74B56FB99EE47029A07B687 /* PermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB2EC48B42234B0F8910F96E /* PermissionsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +45,16 @@
 		C353CAB9F69732F92380EEC5 /* LaunchAtLoginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLoginManager.swift; sourceTree = "<group>"; };
 		F6E10BBC32BAE5E056982A8B /* Craig-O-Clean.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Craig-O-Clean.entitlements"; sourceTree = "<group>"; };
 		FB5748E37851D981C3F01925 /* Craig-O-Clean.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Craig-O-Clean.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4D666C40AAF440CE82667BB9 /* BrowserAutomationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/BrowserAutomationService.swift"; sourceTree = "<group>"; };
+		818D5A8433904B4F98A0D7E7 /* MemoryOptimizerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/MemoryOptimizerService.swift"; sourceTree = "<group>"; };
+		18077C6A5CB640D59205D41E /* PermissionsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/PermissionsService.swift"; sourceTree = "<group>"; };
+		0B4DF2B33ED6438AB7E0A222 /* SystemMetricsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/SystemMetricsService.swift"; sourceTree = "<group>"; };
+		0A8847426BBD4B48A39FA0BC /* BrowserTabsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/BrowserTabsView.swift"; sourceTree = "<group>"; };
+		DF7041D84E2F415EAF400E04 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/DashboardView.swift"; sourceTree = "<group>"; };
+		E87F96843838445DB3FEB99D /* EnhancedMenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/EnhancedMenuBarView.swift"; sourceTree = "<group>"; };
+		FD008F9D1DFE4D07ACCDB492 /* MainAppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/MainAppView.swift"; sourceTree = "<group>"; };
+		A7193DD93D904DB79967343E /* MemoryCleanupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/MemoryCleanupView.swift"; sourceTree = "<group>"; };
+		EB2EC48B42234B0F8910F96E /* PermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/PermissionsView.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -49,6 +69,8 @@
 		AAA8B2312C2FDE28DD3FAF8F /* Craig-O-Clean */ = {
 			isa = PBXGroup;
 			children = (
+				A769CDC5CFF447AD91A89988 /* Services */,
+				95A36D35A8974387958648E1 /* Views */,
 				44536121E1A03039EB5C837E /* Assets.xcassets */,
 				496C4A64B26A83B21DBF72D2 /* ContentView.swift */,
 				A963F27F151E1C97ACCFAE4B /* Craig_O_CleanApp.swift */,
@@ -72,6 +94,31 @@
 				FB5748E37851D981C3F01925 /* Craig-O-Clean.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+
+		A769CDC5CFF447AD91A89988 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				4D666C40AAF440CE82667BB9 /* BrowserAutomationService.swift */,
+				818D5A8433904B4F98A0D7E7 /* MemoryOptimizerService.swift */,
+				18077C6A5CB640D59205D41E /* PermissionsService.swift */,
+				0B4DF2B33ED6438AB7E0A222 /* SystemMetricsService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		95A36D35A8974387958648E1 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				0A8847426BBD4B48A39FA0BC /* BrowserTabsView.swift */,
+				DF7041D84E2F415EAF400E04 /* DashboardView.swift */,
+				E87F96843838445DB3FEB99D /* EnhancedMenuBarView.swift */,
+				FD008F9D1DFE4D07ACCDB492 /* MainAppView.swift */,
+				A7193DD93D904DB79967343E /* MemoryCleanupView.swift */,
+				EB2EC48B42234B0F8910F96E /* PermissionsView.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -153,7 +200,17 @@
 				6F58AD285DFDAEE78860DD75 /* SettingsView.swift in Sources */,
 				2FE223FFC5AB086E1F390837 /* SystemCPUMonitorView.swift in Sources */,
 				9A3F893F8F82316375784ED0 /* SystemMemoryManager.swift in Sources */,
-			);
+			
+				4ED2E492A4AD4146BA4EBDCF /* BrowserAutomationService.swift in Sources */,
+				9EA6459994FC4893ABB8E8B8 /* MemoryOptimizerService.swift in Sources */,
+				7D45C1EB073749DEA2D2331B /* PermissionsService.swift in Sources */,
+				710B9F132BA94B6DA3D358B5 /* SystemMetricsService.swift in Sources */,
+				5572B7CAC99D4FD8AE049285 /* BrowserTabsView.swift in Sources */,
+				E76596BC286C491886A3AADD /* DashboardView.swift in Sources */,
+				ED0CDD597CA141DABDA1C82E /* EnhancedMenuBarView.swift in Sources */,
+				A02D2AF2CB1F4ABBAE207240 /* MainAppView.swift in Sources */,
+				FF26C5C60C1A4E3C884A91D5 /* MemoryCleanupView.swift in Sources */,
+				B74B56FB99EE47029A07B687 /* PermissionsView.swift in Sources */,);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
@@ -171,7 +228,7 @@
 				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Craig-O-Clean/Preview Content\"";
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = NO;
@@ -188,7 +245,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "Craig-O-Clean/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Craig-O-Clean\n/Users/knightdev/Craig-O-Cleaner/Craig-O-Clean/ContentView.swift\n/Users/knightdev/Craig-O-Cleaner/Craig-O-Clean/ContentView.swift:150:43 'headerColor' was deprecated in macOS 11.0: Use NSVisualEffectMaterialHeaderView\n\n/Users/knightdev/Craig-O-Cleaner/Craig-O-Clean/SystemCPUMonitorView.swift\n/Users/knightdev/Craig-O-Cleaner/Craig-O-Clean/SystemCPUMonitorView.swift:62:32 Immutable value 'cpuInfo' was never used; consider replacing with '_' or removing it\n";
+				INFOPLIST_KEY_CFBundleDisplayName = "ClearMind Control Center";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -196,7 +253,7 @@
 				);
 				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.vibecaas.Craig-O-Clean";
-				PRODUCT_NAME = "Craig-O-Clean";
+				PRODUCT_NAME = "ClearMind Control Center";
 				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
 				RUNTIME_EXCEPTION_ALLOW_JIT = NO;
 				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = NO;
@@ -257,7 +314,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -325,7 +382,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -351,7 +408,7 @@
 				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Craig-O-Clean/Preview Content\"";
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = NO;
@@ -368,7 +425,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "Craig-O-Clean/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Craig-O-Clean\n/Users/knightdev/Craig-O-Cleaner/Craig-O-Clean/ContentView.swift\n/Users/knightdev/Craig-O-Cleaner/Craig-O-Clean/ContentView.swift:150:43 'headerColor' was deprecated in macOS 11.0: Use NSVisualEffectMaterialHeaderView\n\n/Users/knightdev/Craig-O-Cleaner/Craig-O-Clean/SystemCPUMonitorView.swift\n/Users/knightdev/Craig-O-Cleaner/Craig-O-Clean/SystemCPUMonitorView.swift:62:32 Immutable value 'cpuInfo' was never used; consider replacing with '_' or removing it\n";
+				INFOPLIST_KEY_CFBundleDisplayName = "ClearMind Control Center";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -376,7 +433,7 @@
 				);
 				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.vibecaas.Craig-O-Clean";
-				PRODUCT_NAME = "Craig-O-Clean";
+				PRODUCT_NAME = "ClearMind Control Center";
 				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
 				RUNTIME_EXCEPTION_ALLOW_JIT = NO;
 				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = NO;
