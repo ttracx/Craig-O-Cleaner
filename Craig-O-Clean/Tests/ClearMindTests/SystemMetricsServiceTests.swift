@@ -1,8 +1,8 @@
 // MARK: - SystemMetricsServiceTests.swift
-// ClearMind Control Center - Unit Tests for SystemMetricsService
+// CraigOClean Control Center - Unit Tests for SystemMetricsService
 
 import XCTest
-@testable import ClearMind
+@testable import CraigOClean
 
 @MainActor
 final class SystemMetricsServiceTests: XCTestCase {

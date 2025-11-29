@@ -1,8 +1,8 @@
 // MARK: - PermissionsServiceTests.swift
-// ClearMind Control Center - Unit Tests for PermissionsService
+// CraigOClean Control Center - Unit Tests for PermissionsService
 
 import XCTest
-@testable import ClearMind
+@testable import CraigOClean
 
 @MainActor
 final class PermissionsServiceTests: XCTestCase {

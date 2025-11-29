@@ -1,5 +1,5 @@
 // MARK: - MemoryOptimizerService.swift
-// ClearMind Control Center - Memory Optimization Service
+// CraigOClean Control Center - Memory Optimization Service
 // Provides safe memory cleanup workflows and optimization suggestions
 
 import Foundation
@@ -123,7 +123,7 @@ final class MemoryOptimizerService: ObservableObject {
     
     // MARK: - Private Properties
     
-    private let logger = Logger(subsystem: "com.clearmind.controlcenter", category: "MemoryOptimizer")
+    private let logger = Logger(subsystem: "com.CraigOClean.controlcenter", category: "MemoryOptimizer")
     private var processManager: ProcessManager?
     
     // MARK: - Protected Processes
@@ -318,20 +318,19 @@ final class MemoryOptimizerService: ObservableObject {
     }
     
     /// Run the purge command (requires admin privileges)
-    func runPurgeCommand() async -> (success: Bool, message: String) {
+    nonisolated func runPurgeCommand() async -> (success: Bool, message: String) {
         logger.info("Running purge command...")
-        
+
         let script = """
         do shell script "purge" with administrator privileges
         """
-        
-        var error: NSDictionary?
-        let appleScript = NSAppleScript(source: script)
-        
+
         return await withCheckedContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
+                let appleScript = NSAppleScript(source: script)
+                var error: NSDictionary?
                 appleScript?.executeAndReturnError(&error)
-                
+
                 if let error = error {
                     let message = error[NSAppleScript.errorMessage] as? String ?? "Failed to run purge command"
                     continuation.resume(returning: (false, message))

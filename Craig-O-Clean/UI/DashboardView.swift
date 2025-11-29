@@ -1,5 +1,5 @@
 // MARK: - DashboardView.swift
-// ClearMind Control Center - System Dashboard
+// CraigOClean Control Center - System Dashboard
 // Displays comprehensive system health metrics in a card-based layout
 
 import SwiftUI
@@ -357,7 +357,7 @@ struct DashboardView: View {
                     InfoRow(label: "Uptime", value: SystemMetricsService.formatUptime(snapshot.uptime))
                 }
                 
-                InfoRow(label: "macOS", value: ProcessInfo.processInfo.operatingSystemVersionString)
+                InfoRow(label: "macOS", value: Foundation.ProcessInfo.processInfo.operatingSystemVersionString)
                 
                 InfoRow(label: "Processor", value: "Apple Silicon")
                 

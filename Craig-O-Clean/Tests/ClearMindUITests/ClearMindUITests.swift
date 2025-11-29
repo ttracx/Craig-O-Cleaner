@@ -1,10 +1,10 @@
-// MARK: - ClearMindUITests.swift
-// ClearMind Control Center - UI Tests
+// MARK: - CraigOCleanUITests.swift
+// CraigOClean Control Center - UI Tests
 // Tests for the main application UI flows
 
 import XCTest
 
-final class ClearMindUITests: XCTestCase {
+final class CraigOCleanUITests: XCTestCase {
     
     var app: XCUIApplication!
     

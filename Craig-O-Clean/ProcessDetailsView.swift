@@ -184,18 +184,18 @@ struct ProcessOverviewView: View {
                 // Basic Information Section
                 GroupBox("Basic Information") {
                     VStack(alignment: .leading, spacing: 8) {
-                        InfoRow(label: "Process Name", value: process.name)
-                        InfoRow(label: "Process ID", value: "\(process.id)")
-                        InfoRow(label: "Parent PID", value: process.parentPID != nil ? "\(process.parentPID!)" : "Unknown")
-                        InfoRow(label: "User ID", value: "\(process.uid)")
-                        InfoRow(label: "Process Type", value: process.isUserProcess ? "User Application" : "System Process")
+                        ProcessInfoRow(label: "Process Name", value: process.name)
+                        ProcessInfoRow(label: "Process ID", value: "\(process.id)")
+                        ProcessInfoRow(label: "Parent PID", value: process.parentPID != nil ? "\(process.parentPID!)" : "Unknown")
+                        ProcessInfoRow(label: "User ID", value: "\(process.uid)")
+                        ProcessInfoRow(label: "Process Type", value: process.isUserProcess ? "User Application" : "System Process")
                         
                         if let bundleId = process.bundleIdentifier {
-                            InfoRow(label: "Bundle ID", value: bundleId)
+                            ProcessInfoRow(label: "Bundle ID", value: bundleId)
                         }
                         
                         if let creationTime = process.creationTime {
-                            InfoRow(label: "Started", value: DateFormatter.localizedString(from: creationTime, dateStyle: .medium, timeStyle: .medium))
+                            ProcessInfoRow(label: "Started", value: DateFormatter.localizedString(from: creationTime, dateStyle: .medium, timeStyle: .medium))
                         }
                     }
                 }
@@ -204,10 +204,10 @@ struct ProcessOverviewView: View {
                 if let executablePath = process.executablePath {
                     GroupBox("Executable") {
                         VStack(alignment: .leading, spacing: 8) {
-                            InfoRow(label: "Path", value: executablePath)
+                            ProcessInfoRow(label: "Path", value: executablePath)
                             
                             if let workingDir = process.workingDirectory {
-                                InfoRow(label: "Working Directory", value: workingDir)
+                                ProcessInfoRow(label: "Working Directory", value: workingDir)
                             }
                         }
                     }
@@ -236,10 +236,10 @@ struct ProcessOverviewView: View {
                 // Resource Usage Section
                 GroupBox("Resource Usage") {
                     VStack(alignment: .leading, spacing: 8) {
-                        InfoRow(label: "CPU Usage", value: process.formattedCPUUsage)
-                        InfoRow(label: "Memory Usage", value: process.formattedMemoryUsage)
-                        InfoRow(label: "Thread Count", value: "\(process.threads)")
-                        InfoRow(label: "Port Count", value: "\(process.ports)")
+                        ProcessInfoRow(label: "CPU Usage", value: process.formattedCPUUsage)
+                        ProcessInfoRow(label: "Memory Usage", value: process.formattedMemoryUsage)
+                        ProcessInfoRow(label: "Thread Count", value: "\(process.threads)")
+                        ProcessInfoRow(label: "Port Count", value: "\(process.ports)")
                     }
                 }
             }
@@ -321,28 +321,28 @@ struct ProcessPerformanceView: View {
             // Current Performance Metrics
             GroupBox("Current Performance") {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 16) {
-                    MetricCard(
+                    ProcessMetricCard(
                         title: "CPU Usage",
                         value: processDetails.process.formattedCPUUsage,
                         color: cpuUsageColor(processDetails.process.cpuUsage),
                         icon: "cpu"
                     )
-                    
-                    MetricCard(
+
+                    ProcessMetricCard(
                         title: "Memory",
                         value: processDetails.process.formattedMemoryUsage,
                         color: .blue,
                         icon: "memorychip"
                     )
-                    
-                    MetricCard(
+
+                    ProcessMetricCard(
                         title: "Threads",
                         value: "\(processDetails.process.threads)",
                         color: .green,
                         icon: "arrow.branch"
                     )
-                    
-                    MetricCard(
+
+                    ProcessMetricCard(
                         title: "Age",
                         value: processDetails.process.formattedAge,
                         color: .orange,
@@ -438,32 +438,32 @@ struct ProcessFilesView: View {
 }
 
 // MARK: - Helper Views
-struct InfoRow: View {
+struct ProcessInfoRow: View {
     let label: String
     let value: String
-    
+
     var body: some View {
         HStack {
             Text(label + ":")
                 .fontWeight(.medium)
                 .frame(minWidth: 120, alignment: .leading)
-            
+
             Text(value)
                 .textSelection(.enabled)
                 .foregroundColor(.secondary)
-            
+
             Spacer()
         }
         .font(.caption)
     }
 }
 
-struct MetricCard: View {
+struct ProcessMetricCard: View {
     let title: String
     let value: String
     let color: Color
     let icon: String
-    
+
     var body: some View {
         VStack(spacing: 8) {
             HStack {
@@ -474,7 +474,7 @@ struct MetricCard: View {
                     .foregroundColor(.secondary)
                 Spacer()
             }
-            
+
             Text(value)
                 .font(.title3)
                 .fontWeight(.semibold)

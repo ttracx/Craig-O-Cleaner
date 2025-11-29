@@ -1,8 +1,8 @@
 // MARK: - MemoryOptimizerServiceTests.swift
-// ClearMind Control Center - Unit Tests for MemoryOptimizerService
+// CraigOClean Control Center - Unit Tests for MemoryOptimizerService
 
 import XCTest
-@testable import ClearMind
+@testable import CraigOClean
 
 @MainActor
 final class MemoryOptimizerServiceTests: XCTestCase {

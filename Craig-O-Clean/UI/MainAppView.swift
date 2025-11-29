@@ -1,5 +1,5 @@
 // MARK: - MainAppView.swift
-// ClearMind Control Center - Main Application View
+// Craig-O-Clean - Main Application View
 // Provides sidebar navigation to all major screens
 
 import SwiftUI
@@ -10,26 +10,29 @@ enum NavigationItem: String, CaseIterable, Identifiable {
     case dashboard = "Dashboard"
     case processes = "Processes"
     case memoryCleanup = "Memory Cleanup"
+    case autoCleanup = "Auto-Cleanup"
     case browserTabs = "Browser Tabs"
     case settings = "Settings"
-    
+
     var id: String { rawValue }
-    
+
     var icon: String {
         switch self {
         case .dashboard: return "gauge.with.dots.needle.bottom.50percent"
         case .processes: return "list.bullet.rectangle"
         case .memoryCleanup: return "memorychip"
+        case .autoCleanup: return "wand.and.stars"
         case .browserTabs: return "safari"
         case .settings: return "gearshape"
         }
     }
-    
+
     var description: String {
         switch self {
         case .dashboard: return "System overview"
         case .processes: return "Running apps & processes"
         case .memoryCleanup: return "Free up memory"
+        case .autoCleanup: return "Automatic resource management"
         case .browserTabs: return "Manage browser tabs"
         case .settings: return "App settings & permissions"
         }
@@ -44,12 +47,30 @@ struct MainAppView: View {
     @StateObject private var memoryOptimizer = MemoryOptimizerService()
     @StateObject private var browserAutomation = BrowserAutomationService()
     @StateObject private var permissions = PermissionsService()
-    
+    @StateObject private var autoCleanup: AutoCleanupService
+
     @State private var selectedItem: NavigationItem = .dashboard
     @State private var showOnboarding = false
-    
+
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
-    
+
+    init() {
+        let systemMetrics = SystemMetricsService()
+        let processManager = ProcessManager()
+        let memoryOptimizer = MemoryOptimizerService()
+
+        _systemMetrics = StateObject(wrappedValue: systemMetrics)
+        _processManager = StateObject(wrappedValue: processManager)
+        _memoryOptimizer = StateObject(wrappedValue: memoryOptimizer)
+        _browserAutomation = StateObject(wrappedValue: BrowserAutomationService())
+        _permissions = StateObject(wrappedValue: PermissionsService())
+        _autoCleanup = StateObject(wrappedValue: AutoCleanupService(
+            systemMetrics: systemMetrics,
+            memoryOptimizer: memoryOptimizer,
+            processManager: processManager
+        ))
+    }
+
     var body: some View {
         NavigationSplitView {
             // Sidebar
@@ -77,11 +98,11 @@ struct MainAppView: View {
                 // App header in sidebar
                 VStack(spacing: 8) {
                     HStack {
-                        Image(systemName: "brain.head.profile")
+                        Image(systemName: "sparkles")
                             .font(.title2)
-                            .foregroundColor(.accentColor)
-                        
-                        Text("ClearMind")
+                            .foregroundColor(.vibePurple)
+
+                        Text("Craig-O-Clean")
                             .font(.title2)
                             .fontWeight(.bold)
                     }
@@ -112,7 +133,7 @@ struct MainAppView: View {
                 // Version info
                 VStack(spacing: 4) {
                     Divider()
-                    Text("ClearMind Control Center")
+                    Text("Craig-O-Clean")
                         .font(.caption2)
                         .foregroundColor(.secondary)
                     Text("Version 1.0")
@@ -143,10 +164,11 @@ struct MainAppView: View {
         .environmentObject(memoryOptimizer)
         .environmentObject(browserAutomation)
         .environmentObject(permissions)
+        .environmentObject(autoCleanup)
     }
-    
+
     // MARK: - Detail View Builder
-    
+
     @ViewBuilder
     private func detailView(for item: NavigationItem) -> some View {
         switch item {
@@ -156,6 +178,8 @@ struct MainAppView: View {
             ProcessManagerView()
         case .memoryCleanup:
             MemoryCleanupView()
+        case .autoCleanup:
+            AutoCleanupSettingsView(autoCleanup: autoCleanup)
         case .browserTabs:
             BrowserTabsView()
         case .settings:
@@ -170,6 +194,7 @@ struct MainAppView: View {
         case .dashboard: return .blue
         case .processes: return .green
         case .memoryCleanup: return .orange
+        case .autoCleanup: return .vibePurple
         case .browserTabs: return .purple
         case .settings: return .gray
         }
@@ -225,12 +250,12 @@ struct OnboardingView: View {
     @State private var currentPage = 0
     
     private let pages: [(title: String, description: String, icon: String, color: Color)] = [
-        ("Welcome to ClearMind", "Your intelligent system monitor and memory optimizer for macOS", "brain.head.profile", .blue),
+        ("Welcome to CraigOClean", "Your intelligent system monitor and memory optimizer for macOS", "brain.head.profile", .blue),
         ("Monitor System Health", "Keep track of CPU, memory, disk, and network usage in real-time", "gauge.with.dots.needle.bottom.50percent", .green),
         ("Manage Processes", "View and control running applications with ease", "list.bullet.rectangle", .orange),
         ("Optimize Memory", "Free up RAM safely with guided cleanup workflows", "memorychip", .purple),
         ("Browser Tab Management", "Control tabs across Safari, Chrome, Edge, and more", "safari", .cyan),
-        ("Permissions Required", "ClearMind needs Automation permission to control browsers. You can configure this in Settings.", "lock.shield", .red)
+        ("Permissions Required", "CraigOClean needs Automation permission to control browsers. You can configure this in Settings.", "lock.shield", .red)
     ]
     
     var body: some View {

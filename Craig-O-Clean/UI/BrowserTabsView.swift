@@ -1,5 +1,5 @@
 // MARK: - BrowserTabsView.swift
-// ClearMind Control Center - Browser Tab Management View
+// CraigOClean Control Center - Browser Tab Management View
 // Lists and manages tabs across Safari, Chrome, Edge, and other browsers
 
 import SwiftUI
@@ -135,7 +135,7 @@ struct BrowserTabsView: View {
                 .font(.title2)
                 .fontWeight(.bold)
             
-            Text("To manage browser tabs, ClearMind needs permission to control your browsers.")
+            Text("To manage browser tabs, CraigOClean needs permission to control your browsers.")
                 .font(.body)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -154,7 +154,7 @@ struct BrowserTabsView: View {
                 HStack(alignment: .top, spacing: 8) {
                     Text("2.")
                         .fontWeight(.bold)
-                    Text("Find ClearMind Control Center and enable access for your browsers")
+                    Text("Find CraigOClean Control Center and enable access for your browsers")
                 }
                 
                 HStack(alignment: .top, spacing: 8) {
@@ -295,51 +295,12 @@ struct BrowserTabsView: View {
     }
     
     // MARK: - Browser Sidebar
-    
+
     private var browserSidebar: some View {
         VStack(spacing: 0) {
-            // All browsers option
-            BrowserSidebarItem(
-                name: "All Browsers",
-                icon: "globe",
-                count: browserAutomation.totalTabCount,
-                isSelected: selectedBrowser == nil,
-                color: .accentColor
-            ) {
-                selectedBrowser = nil
-            }
-            
-            Divider()
-                .padding(.vertical, 8)
-            
-            // Individual browsers
-            ForEach(browserAutomation.runningBrowsers) { browser in
-                let count = browserAutomation.browserTabs[browser]?.reduce(0) { $0 + $1.tabs.count } ?? 0
-                
-                BrowserSidebarItem(
-                    name: browser.rawValue,
-                    icon: browser.icon,
-                    count: count,
-                    isSelected: selectedBrowser == browser,
-                    color: browserColor(browser)
-                ) {
-                    selectedBrowser = browser
-                }
-                
-                // Permission status
-                if permissions.permissionStatus[PermissionsService.AutomationTarget.safari.bundleIdentifier] == false {
-                    HStack {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .font(.caption2)
-                            .foregroundColor(.yellow)
-                        Text("No permission")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.horizontal, 16)
-                }
-            }
-            
+            allBrowsersItem
+            Divider().padding(.vertical, 8)
+            individualBrowsersList
             Spacer()
             
             Divider()
@@ -529,6 +490,35 @@ struct BrowserTabsView: View {
             }
         }
     }
+
+    private var allBrowsersItem: some View {
+        BrowserSidebarItem(
+            name: "All Browsers",
+            icon: "globe",
+            count: browserAutomation.totalTabCount,
+            isSelected: selectedBrowser == nil,
+            color: .accentColor
+        ) {
+            selectedBrowser = nil
+        }
+    }
+
+    private var individualBrowsersList: some View {
+        ForEach(browserAutomation.runningBrowsers) { browser in
+            let windows = browserAutomation.browserTabs[browser] ?? []
+            let count = windows.reduce(0) { $0 + $1.tabs.count }
+
+            BrowserSidebarItem(
+                name: browser.rawValue,
+                icon: browser.icon,
+                count: count,
+                isSelected: selectedBrowser == browser,
+                color: browserColor(browser)
+            ) {
+                selectedBrowser = browser
+            }
+        }
+    }
 }
 
 // MARK: - Supporting Views
@@ -687,7 +677,7 @@ struct PermissionsHelpSheet: View {
                         Text("Why is this needed?")
                             .font(.headline)
                         
-                        Text("ClearMind uses AppleScript to communicate with browsers. macOS requires your explicit permission for apps to control other apps, ensuring your privacy and security.")
+                        Text("CraigOClean uses AppleScript to communicate with browsers. macOS requires your explicit permission for apps to control other apps, ensuring your privacy and security.")
                             .foregroundColor(.secondary)
                     }
                     
@@ -703,7 +693,7 @@ struct PermissionsHelpSheet: View {
                         
                         InstructionStep(number: 3, title: "Find Automation", detail: "Scroll down and click Automation")
                         
-                        InstructionStep(number: 4, title: "Enable ClearMind", detail: "Find ClearMind Control Center in the list and enable access for each browser you want to manage (Safari, Chrome, Edge, etc.)")
+                        InstructionStep(number: 4, title: "Enable CraigOClean", detail: "Find CraigOClean Control Center in the list and enable access for each browser you want to manage (Safari, Chrome, Edge, etc.)")
                         
                         InstructionStep(number: 5, title: "Restart if needed", detail: "If the permission doesn't take effect immediately, try closing and reopening your browser")
                     }
@@ -714,7 +704,7 @@ struct PermissionsHelpSheet: View {
                         Text("Troubleshooting")
                             .font(.headline)
                         
-                        Text("• If ClearMind isn't listed, try using the Browser Tabs feature first - this will trigger the permission prompt")
+                        Text("• If CraigOClean isn't listed, try using the Browser Tabs feature first - this will trigger the permission prompt")
                         
                         Text("• Make sure the browser is running when you try to grant permission")
                         

@@ -1,12 +1,13 @@
 // MARK: - Craig_O_CleanApp.swift
-// ClearMind Control Center - Main Application Entry Point
+// Craig-O-Clean - Main Application Entry Point
 // A macOS system utility for Apple Silicon Macs
 
 import SwiftUI
 import AppKit
+import UserNotifications
 
 @main
-struct ClearMindApp: App {
+struct Craig_O_CleanApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
@@ -31,13 +32,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Initialize system metrics for menu bar updates
         systemMetrics = SystemMetricsService()
-        
+
+        // Request notification permissions
+        requestNotificationPermissions()
+
         // Create status bar item
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         if let button = statusItem?.button {
-            // Use brain icon for ClearMind branding
-            button.image = NSImage(systemSymbolName: "brain.head.profile", accessibilityDescription: "ClearMind Control Center")
+            // Try to use app icon, fallback to system symbol
+            if let appIcon = NSApp.applicationIconImage {
+                let resizedIcon = NSImage(size: NSSize(width: 18, height: 18))
+                resizedIcon.lockFocus()
+                appIcon.draw(in: NSRect(x: 0, y: 0, width: 18, height: 18))
+                resizedIcon.unlockFocus()
+                button.image = resizedIcon
+                button.image?.isTemplate = true
+            } else {
+                button.image = NSImage(systemSymbolName: "sparkles", accessibilityDescription: "Craig-O-Clean")
+            }
             button.action = #selector(statusBarButtonClicked(_:))
             button.target = self
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
@@ -83,7 +96,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // About menu item
         let aboutItem = NSMenuItem(
-            title: "About ClearMind Control Center",
+            title: "About Craig-O-Clean",
             action: #selector(showAbout),
             keyEquivalent: ""
         )
@@ -122,7 +135,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Quit menu item
         let quitItem = NSMenuItem(
-            title: "Quit ClearMind",
+            title: "Quit Craig-O-Clean",
             action: #selector(quitApp),
             keyEquivalent: "q"
         )
@@ -153,9 +166,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc func showAbout() {
         NSApp.orderFrontStandardAboutPanel(options: [
-            .applicationName: "ClearMind Control Center",
+            .applicationName: "Craig-O-Clean",
             .applicationVersion: "1.0",
-            .credits: NSAttributedString(string: "A powerful macOS system utility\nfor Apple Silicon\n\nMonitor • Optimize • Control")
+            .credits: NSAttributedString(string: "macOS Memory Manager for Craig Ross\n\n© 2025 CraigOClean.com powered by VibeCaaS.com\na division of NeuralQuantum.ai LLC\n\nMonitor • Optimize • Control")
         ])
         NSApp.activate(ignoringOtherApps: true)
     }
@@ -190,12 +203,34 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
+    private func requestNotificationPermissions() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
+            if let error = error {
+                print("Failed to request notification permissions: \(error.localizedDescription)")
+            } else if granted {
+                print("Notification permissions granted")
+            }
+        }
+    }
+
     private func showNotification(title: String, body: String) {
-        let notification = NSUserNotification()
-        notification.title = title
-        notification.informativeText = body
-        notification.soundName = NSUserNotificationDefaultSoundName
-        NSUserNotificationCenter.default.deliver(notification)
+        // Use UserNotifications framework (requires macOS 11+, project targets macOS 14+)
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+
+        let request = UNNotificationRequest(
+            identifier: UUID().uuidString,
+            content: content,
+            trigger: nil
+        )
+
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Failed to show notification: \(error.localizedDescription)")
+            }
+        }
     }
 
     @objc func togglePopover() {
@@ -232,7 +267,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             defer: false
         )
 
-        window.title = "ClearMind Control Center"
+        window.title = "Craig-O-Clean"
         window.contentView = NSHostingView(rootView: contentView)
         window.center()
         window.minSize = NSSize(width: 900, height: 600)

@@ -1,5 +1,5 @@
 // MARK: - ProcessManagerView.swift
-// ClearMind Control Center - Process Manager View
+// CraigOClean Control Center - Process Manager View
 // Lists and manages running applications and processes
 
 import SwiftUI

@@ -1,8 +1,8 @@
 // MARK: - BrowserAutomationServiceTests.swift
-// ClearMind Control Center - Unit Tests for BrowserAutomationService
+// CraigOClean Control Center - Unit Tests for BrowserAutomationService
 
 import XCTest
-@testable import ClearMind
+@testable import CraigOClean
 
 @MainActor
 final class BrowserAutomationServiceTests: XCTestCase {

@@ -131,6 +131,53 @@ Cross-browser tab management:
 2. Drag ClearMind to Applications
 3. Launch and grant requested permissions
 
+## Development
+
+### Quick Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/your-repo/clearmind-control-center.git
+cd clearmind-control-center
+
+# Install dependencies and setup auto-sync
+make setup
+make setup-auto-sync
+```
+
+### Automatic Xcode Project Syncing
+
+This project uses **XcodeGen** to automatically keep the Xcode project in sync with source files. You never have to manually add files to Xcode!
+
+**Three ways to sync:**
+
+1. **Git Hooks (Automatic)** - Enabled after running `make setup-auto-sync`
+   - Auto-syncs after `git pull`, `git merge`, and `git checkout`
+   - Detects Swift file changes and syncs automatically
+
+2. **Manual Sync** - When you add files outside git:
+   ```bash
+   make sync
+   ```
+
+3. **File Watcher** - Real-time syncing during active development:
+   ```bash
+   make watch-sync
+   ```
+
+See [XCODE_SYNC.md](XCODE_SYNC.md) for complete documentation on automatic syncing.
+
+### Available Make Commands
+
+```bash
+make help              # Show all available commands
+make build             # Build debug configuration
+make test              # Run all tests
+make sync              # Sync Xcode project with source files
+make setup-auto-sync   # Configure automatic syncing
+make watch-sync        # Start file watcher for real-time syncing
+```
+
 ## Permissions Required
 
 ClearMind requires certain permissions for full functionality:

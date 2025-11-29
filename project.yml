@@ -1,6 +1,6 @@
-name: ClearMind
+name: Craig-O-Clean
 options:
-  bundleIdPrefix: com.clearmind
+  bundleIdPrefix: com.craigoclean
   deploymentTarget:
     macOS: "14.0"
   xcodeVersion: "15.0"
@@ -18,7 +18,7 @@ settings:
     DEAD_CODE_STRIPPING: YES
 
 targets:
-  ClearMind:
+  Craig-O-Clean:
     type: application
     platform: macOS
     sources:
@@ -28,8 +28,8 @@ targets:
           - "Preview Content/**"
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.clearmind.controlcenter
-        PRODUCT_NAME: "ClearMind Control Center"
+        PRODUCT_BUNDLE_IDENTIFIER: com.craigoclean.app
+        PRODUCT_NAME: "Craig-O-Clean"
         INFOPLIST_FILE: Craig-O-Clean/Info.plist
         CODE_SIGN_ENTITLEMENTS: Craig-O-Clean/Craig-O-Clean.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
@@ -45,45 +45,45 @@ targets:
     preBuildScripts: []
     postBuildScripts: []
 
-  ClearMindTests:
+  Craig-O-CleanTests:
     type: bundle.unit-test
     platform: macOS
     sources:
       - path: Craig-O-Clean/Tests/ClearMindTests
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.clearmind.controlcenter.tests
+        PRODUCT_BUNDLE_IDENTIFIER: com.craigoclean.app.tests
         BUNDLE_LOADER: "$(TEST_HOST)"
-        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/ClearMind Control Center.app/Contents/MacOS/ClearMind Control Center"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Craig-O-Clean.app/Contents/MacOS/Craig-O-Clean"
     dependencies:
-      - target: ClearMind
+      - target: Craig-O-Clean
 
-  ClearMindUITests:
+  Craig-O-CleanUITests:
     type: bundle.ui-testing
     platform: macOS
     sources:
       - path: Craig-O-Clean/Tests/ClearMindUITests
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.clearmind.controlcenter.uitests
-        TEST_TARGET_NAME: ClearMind
+        PRODUCT_BUNDLE_IDENTIFIER: com.craigoclean.app.uitests
+        TEST_TARGET_NAME: Craig-O-Clean
     dependencies:
-      - target: ClearMind
+      - target: Craig-O-Clean
 
 schemes:
-  ClearMind:
+  Craig-O-Clean:
     build:
       targets:
-        ClearMind: all
-        ClearMindTests: [test]
-        ClearMindUITests: [test]
+        Craig-O-Clean: all
+        Craig-O-CleanTests: [test]
+        Craig-O-CleanUITests: [test]
     run:
       config: Debug
     test:
       config: Debug
       targets:
-        - ClearMindTests
-        - ClearMindUITests
+        - Craig-O-CleanTests
+        - Craig-O-CleanUITests
     profile:
       config: Release
     analyze:

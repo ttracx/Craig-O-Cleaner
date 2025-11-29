@@ -1,5 +1,5 @@
 // MARK: - MenuBarContentView.swift
-// ClearMind Control Center - Menu Bar Mini-Dashboard
+// CraigOClean Control Center - Menu Bar Mini-Dashboard
 // Provides quick access to key metrics and actions from the menu bar
 
 import SwiftUI
@@ -57,7 +57,7 @@ struct MenuBarContentView: View {
                 .foregroundColor(.accentColor)
             
             VStack(alignment: .leading, spacing: 2) {
-                Text("ClearMind")
+                Text("CraigOClean")
                     .font(.headline)
                     .fontWeight(.bold)
                 

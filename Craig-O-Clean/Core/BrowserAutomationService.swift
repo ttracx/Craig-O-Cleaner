@@ -1,5 +1,5 @@
 // MARK: - BrowserAutomationService.swift
-// ClearMind Control Center - Browser Tab Management Service
+// CraigOClean Control Center - Browser Tab Management Service
 // Manages browser tabs across Safari, Chrome, Edge, Brave, Arc using AppleScript
 // Requires Automation permission for each browser
 
@@ -10,7 +10,7 @@ import os.log
 
 // MARK: - Browser Types
 
-enum SupportedBrowser: String, CaseIterable, Identifiable {
+enum SupportedBrowser: String, CaseIterable, Identifiable, Hashable {
     case safari = "Safari"
     case chrome = "Google Chrome"
     case edge = "Microsoft Edge"
@@ -152,7 +152,7 @@ final class BrowserAutomationService: ObservableObject {
     
     // MARK: - Private Properties
     
-    private let logger = Logger(subsystem: "com.clearmind.controlcenter", category: "BrowserAutomation")
+    private let logger = Logger(subsystem: "com.CraigOClean.controlcenter", category: "BrowserAutomation")
     private var refreshTimer: Timer?
     
     // MARK: - Computed Properties

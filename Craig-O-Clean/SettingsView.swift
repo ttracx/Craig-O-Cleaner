@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @StateObject private var launchAtLoginManager = LaunchAtLoginManager()
+    @ObservedObject private var launchAtLoginManager = LaunchAtLoginManager.shared
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -199,16 +199,33 @@ struct SettingsView: View {
             Divider()
                 .padding(.vertical, 4)
             
-            // Copyright notice
-            VStack(spacing: 4) {
-                Text("© 2025 Craig-O-Cleaner")
-                    .font(.caption2)
-                    .foregroundColor(.accentColor)
-                
-                Text("Powered by VibeCaaS.com, a division of NeuralQuantum.ai")
+            // Copyright notice - VibeCaaS branding
+            VStack(spacing: 6) {
+                Text("© 2025 ")
                     .font(.caption2)
                     .foregroundColor(.secondary)
-                
+                + Text("CraigOClean.com")
+                    .font(.caption2)
+                    .foregroundColor(.vibePurple)
+                    .fontWeight(.medium)
+                + Text(" powered by ")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                + Text("VibeCaaS.com")
+                    .font(.caption2)
+                    .foregroundColor(.vibeTeal)
+                    .fontWeight(.medium)
+                + Text(" a division of ")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                + Text("NeuralQuantum.ai")
+                    .font(.caption2)
+                    .foregroundColor(.vibeAmber)
+                    .fontWeight(.medium)
+                + Text(" LLC.")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+
                 Text("All rights reserved.")
                     .font(.caption2)
                     .foregroundColor(.secondary)

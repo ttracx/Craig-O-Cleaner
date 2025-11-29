@@ -2,12 +2,14 @@ import Foundation
 import ServiceManagement
 
 class LaunchAtLoginManager: ObservableObject {
+    static let shared = LaunchAtLoginManager()
+
     @Published var isEnabled: Bool = false
-    
-    init() {
+
+    private init() {
         checkLaunchAtLoginStatus()
     }
-    
+
     func checkLaunchAtLoginStatus() {
         // Check if the app is set to launch at login
         if #available(macOS 13.0, *) {
@@ -17,23 +19,26 @@ class LaunchAtLoginManager: ObservableObject {
             isEnabled = false
         }
     }
-    
-    func toggleLaunchAtLogin() {
+
+    func setLaunchAtLogin(_ enabled: Bool) {
         if #available(macOS 13.0, *) {
             do {
-                if isEnabled {
-                    // isEnabled is true (ON) - register the app to launch at login
+                if enabled {
+                    // Register the app to launch at login
                     try SMAppService.mainApp.register()
                 } else {
-                    // isEnabled is false (OFF) - unregister from launch at login
+                    // Unregister from launch at login
                     try SMAppService.mainApp.unregister()
                 }
+                isEnabled = enabled
             } catch {
-                print("Failed to toggle launch at login: \(error.localizedDescription)")
-                // Revert the state if toggle failed
-                isEnabled = !isEnabled
+                print("Failed to set launch at login: \(error.localizedDescription)")
             }
         }
+    }
+
+    func toggleLaunchAtLogin() {
+        setLaunchAtLogin(!isEnabled)
     }
 }
 

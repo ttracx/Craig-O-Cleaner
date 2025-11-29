@@ -1,5 +1,5 @@
 // MARK: - MemoryCleanupView.swift
-// ClearMind Control Center - Memory Cleanup View
+// CraigOClean Control Center - Memory Cleanup View
 // Provides guided memory cleanup workflows and optimization suggestions
 
 import SwiftUI
@@ -72,8 +72,9 @@ struct MemoryCleanupView: View {
             Button("Cancel", role: .cancel) { }
             Button("Purge Memory", role: .destructive) {
                 Task {
-                    let (success, message) = await memoryOptimizer.runPurgeCommand()
-                    // Handle result
+                    let (_, message) = await memoryOptimizer.runPurgeCommand()
+                    // Show result message if needed
+                    print("Purge result: \(message)")
                 }
             }
         } message: {

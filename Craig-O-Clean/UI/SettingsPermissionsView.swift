@@ -1,5 +1,5 @@
 // MARK: - SettingsPermissionsView.swift
-// ClearMind Control Center - Settings and Permissions View
+// Craig-O-Clean - Settings and Permissions View
 // App configuration, permission management, and diagnostics
 
 import SwiftUI
@@ -78,7 +78,7 @@ struct SettingsPermissionsView: View {
                 
                 SettingsToggle(
                     title: "Launch at Login",
-                    description: "Start ClearMind automatically when you log in",
+                    description: "Start Craig-O-Clean automatically when you log in",
                     isOn: $launchAtLogin
                 )
                 .onChange(of: launchAtLogin) { _, newValue in
@@ -140,48 +140,110 @@ struct SettingsPermissionsView: View {
     }
     
     // MARK: - Permissions Section
-    
+
     private var permissionsSection: some View {
         SettingsSection(title: "Permissions", icon: "lock.shield") {
             VStack(spacing: 16) {
-                // Status summary
-                HStack {
-                    Image(systemName: permissions.hasRequiredPermissions ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
-                        .foregroundColor(permissions.hasRequiredPermissions ? .green : .yellow)
-                    
-                    Text(permissions.getStatusSummary())
-                        .font(.subheadline)
-                    
-                    Spacer()
-                    
-                    if permissions.isChecking {
-                        ProgressView()
-                            .scaleEffect(0.7)
+                // Critical permissions status overview
+                if !permissions.hasAllCriticalPermissions {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.vibeAmber)
+
+                            Text("Critical Permissions Required")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+
+                            Spacer()
+
+                            if permissions.isChecking {
+                                ProgressView()
+                                    .scaleEffect(0.7)
+                            }
+                        }
+
+                        Text("Craig-O-Clean requires the following permissions to fully manage your apps, processes, and system:")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+
+                        // Missing permissions badges
+                        HStack(spacing: 8) {
+                            ForEach(permissions.missingCriticalPermissions) { permission in
+                                HStack(spacing: 4) {
+                                    Image(systemName: permission.icon)
+                                    Text(permission.rawValue)
+                                }
+                                .font(.caption)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 4)
+                                .background(Color.vibeAmber.opacity(0.2))
+                                .foregroundColor(.vibeAmber)
+                                .cornerRadius(12)
+                            }
+                        }
                     }
+                    .padding()
+                    .background(Color.vibeAmber.opacity(0.1))
+                    .cornerRadius(8)
+                } else {
+                    // All permissions granted
+                    HStack {
+                        Image(systemName: "checkmark.shield.fill")
+                            .foregroundColor(.vibeTeal)
+
+                        Text("All Critical Permissions Granted")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+
+                        Spacer()
+
+                        if permissions.isChecking {
+                            ProgressView()
+                                .scaleEffect(0.7)
+                        }
+                    }
+                    .padding()
+                    .background(Color.vibeTeal.opacity(0.1))
+                    .cornerRadius(8)
                 }
-                .padding()
-                .background(permissions.hasRequiredPermissions ? Color.green.opacity(0.1) : Color.yellow.opacity(0.1))
-                .cornerRadius(8)
-                
+
                 Divider()
-                
+
                 // Accessibility
                 PermissionRow(
                     title: "Accessibility",
-                    description: "Required for advanced system interactions",
+                    description: "Access advanced system features and window management",
                     status: permissions.accessibilityStatus,
                     onRequest: {
                         permissions.requestAccessibilityPermission()
                     }
                 )
-                
+
                 Divider()
-                
+
+                // Full Disk Access
+                PermissionRow(
+                    title: "Full Disk Access",
+                    description: "Read detailed process and system information",
+                    status: permissions.fullDiskAccessStatus,
+                    onRequest: {
+                        permissions.requestFullDiskAccessPermission()
+                    }
+                )
+
+                Divider()
+
                 // Automation targets
                 Text("Browser Automation")
                     .font(.headline)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                
+
+                Text("Control browser tabs like Safari and Chrome")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
                 ForEach(permissions.automationTargets) { target in
                     AutomationPermissionRow(
                         target: target,
@@ -190,12 +252,29 @@ struct SettingsPermissionsView: View {
                         }
                     )
                 }
-                
-                // Open settings button
-                Button("Open System Settings") {
-                    permissions.openPrivacySettings()
+
+                // Action buttons
+                HStack(spacing: 12) {
+                    if !permissions.hasAllCriticalPermissions {
+                        Button {
+                            Task {
+                                await permissions.autoRequestPermissions()
+                            }
+                        } label: {
+                            HStack {
+                                Image(systemName: "lock.open.fill")
+                                Text("Request All Permissions")
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.vibePurple)
+                    }
+
+                    Button("Open System Settings") {
+                        permissions.openPrivacySettings()
+                    }
+                    .buttonStyle(.bordered)
                 }
-                .buttonStyle(.bordered)
                 .frame(maxWidth: .infinity, alignment: .trailing)
             }
         }
@@ -214,7 +293,7 @@ struct SettingsPermissionsView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Your Data Stays on Your Mac")
                             .font(.headline)
-                        Text("ClearMind does not collect, transmit, or store any personal data or usage analytics.")
+                        Text("Craig-O-Clean does not collect, transmit, or store any personal data or usage analytics.")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -294,7 +373,7 @@ struct SettingsPermissionsView: View {
                     .foregroundColor(.accentColor)
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("ClearMind Control Center")
+                    Text("Craig-O-Clean")
                         .font(.title2)
                         .fontWeight(.bold)
                     
@@ -376,7 +455,7 @@ struct PermissionRow: View {
     let description: String
     let status: PermissionStatus
     let onRequest: () -> Void
-    
+
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
@@ -386,17 +465,25 @@ struct PermissionRow: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-            
+
             Spacer()
-            
+
             HStack(spacing: 8) {
-                Image(systemName: status.icon)
-                    .foregroundColor(statusColor)
-                
-                Text(status.rawValue)
-                    .font(.caption)
-                    .foregroundColor(statusColor)
-                
+                // Status badge
+                HStack(spacing: 6) {
+                    Image(systemName: status.icon)
+                        .font(.caption)
+
+                    Text(status.rawValue)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(statusColor.opacity(0.15))
+                .foregroundColor(statusColor)
+                .cornerRadius(12)
+
                 if status != .granted {
                     Button("Grant") {
                         onRequest()
@@ -407,13 +494,13 @@ struct PermissionRow: View {
             }
         }
     }
-    
+
     private var statusColor: Color {
         switch status {
-        case .granted: return .green
-        case .denied: return .red
-        case .notDetermined: return .yellow
-        case .restricted: return .orange
+        case .granted: return .vibeTeal
+        case .denied: return Color(red: 239/255, green: 68/255, blue: 68/255)  // Red
+        case .notDetermined: return .vibeAmber
+        case .restricted: return Color(red: 251/255, green: 146/255, blue: 60/255)  // Orange
         }
     }
 }
@@ -421,22 +508,30 @@ struct PermissionRow: View {
 struct AutomationPermissionRow: View {
     let target: AutomationTarget
     let onRequest: () -> Void
-    
+
     var body: some View {
         HStack {
             Text(target.name)
                 .font(.subheadline)
-            
+
             Spacer()
-            
+
             HStack(spacing: 8) {
-                Image(systemName: target.status.icon)
-                    .foregroundColor(statusColor)
-                
-                Text(target.status.rawValue)
-                    .font(.caption)
-                    .foregroundColor(statusColor)
-                
+                // Status badge
+                HStack(spacing: 6) {
+                    Image(systemName: target.status.icon)
+                        .font(.caption2)
+
+                    Text(target.status.rawValue)
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(statusColor.opacity(0.15))
+                .foregroundColor(statusColor)
+                .cornerRadius(10)
+
                 if target.status != .granted {
                     Button("Request") {
                         onRequest()
@@ -448,13 +543,13 @@ struct AutomationPermissionRow: View {
         }
         .padding(.vertical, 4)
     }
-    
+
     private var statusColor: Color {
         switch target.status {
-        case .granted: return .green
-        case .denied: return .red
-        case .notDetermined: return .yellow
-        case .restricted: return .orange
+        case .granted: return .vibeTeal
+        case .denied: return Color(red: 239/255, green: 68/255, blue: 68/255)  // Red
+        case .notDetermined: return .vibeAmber
+        case .restricted: return Color(red: 251/255, green: 146/255, blue: 60/255)  // Orange
         }
     }
 }
@@ -490,10 +585,10 @@ struct DiagnosticsSheet: View {
                     // System Info
                     GroupBox("System Information") {
                         VStack(alignment: .leading, spacing: 8) {
-                            DiagnosticRow(label: "macOS Version", value: ProcessInfo.processInfo.operatingSystemVersionString)
+                            DiagnosticRow(label: "macOS Version", value: Foundation.ProcessInfo.processInfo.operatingSystemVersionString)
                             DiagnosticRow(label: "Processor", value: "Apple Silicon")
-                            DiagnosticRow(label: "Physical Memory", value: ByteCountFormatter.string(fromByteCount: Int64(ProcessInfo.processInfo.physicalMemory), countStyle: .file))
-                            DiagnosticRow(label: "Active Processors", value: "\(ProcessInfo.processInfo.activeProcessorCount)")
+                            DiagnosticRow(label: "Physical Memory", value: ByteCountFormatter.string(fromByteCount: Int64(Foundation.ProcessInfo.processInfo.physicalMemory), countStyle: .file))
+                            DiagnosticRow(label: "Active Processors", value: "\(Foundation.ProcessInfo.processInfo.activeProcessorCount)")
                         }
                         .padding(.vertical, 8)
                     }
@@ -502,7 +597,7 @@ struct DiagnosticsSheet: View {
                     GroupBox("App Information") {
                         VStack(alignment: .leading, spacing: 8) {
                             DiagnosticRow(label: "App Version", value: "1.0 (1)")
-                            DiagnosticRow(label: "Bundle ID", value: "com.clearmind.controlcenter")
+                            DiagnosticRow(label: "Bundle ID", value: "com.CraigOClean.controlcenter")
                             DiagnosticRow(label: "Uptime", value: formatUptime())
                         }
                         .padding(.vertical, 8)
@@ -536,7 +631,7 @@ struct DiagnosticsSheet: View {
     }
     
     private func formatUptime() -> String {
-        let uptime = ProcessInfo.processInfo.systemUptime
+        let uptime = Foundation.ProcessInfo.processInfo.systemUptime
         let hours = Int(uptime) / 3600
         let minutes = (Int(uptime) % 3600) / 60
         return "\(hours)h \(minutes)m"
@@ -545,25 +640,25 @@ struct DiagnosticsSheet: View {
     private func exportDiagnostics() {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.plainText]
-        panel.nameFieldStringValue = "clearmind_diagnostics.txt"
+        panel.nameFieldStringValue = "CraigOClean_diagnostics.txt"
         
         panel.begin { response in
             guard response == .OK, let url = panel.url else { return }
             
             let diagnostics = """
-            ClearMind Control Center Diagnostics
+            Craig-O-Clean Diagnostics
             Generated: \(Date())
             
             System Information
             ==================
-            macOS: \(ProcessInfo.processInfo.operatingSystemVersionString)
-            Physical Memory: \(ByteCountFormatter.string(fromByteCount: Int64(ProcessInfo.processInfo.physicalMemory), countStyle: .file))
-            Processors: \(ProcessInfo.processInfo.activeProcessorCount)
+            macOS: \(Foundation.ProcessInfo.processInfo.operatingSystemVersionString)
+            Physical Memory: \(ByteCountFormatter.string(fromByteCount: Int64(Foundation.ProcessInfo.processInfo.physicalMemory), countStyle: .file))
+            Processors: \(Foundation.ProcessInfo.processInfo.activeProcessorCount)
             
             App Information
             ================
             Version: 1.0 (1)
-            Bundle ID: com.clearmind.controlcenter
+            Bundle ID: com.CraigOClean.controlcenter
             """
             
             try? diagnostics.write(to: url, atomically: true, encoding: .utf8)
@@ -598,7 +693,7 @@ struct AboutSheet: View {
                     .font(.system(size: 80))
                     .foregroundColor(.accentColor)
                 
-                Text("ClearMind Control Center")
+                Text("Craig-O-Clean")
                     .font(.largeTitle)
                     .fontWeight(.bold)
                 
@@ -619,7 +714,7 @@ struct AboutSheet: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
                 
-                Text("© 2024 ClearMind")
+                Text("© 2025 CraigOClean.com powered by VibeCaaS.com")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -659,7 +754,7 @@ struct PrivacyPolicySheet: View {
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    Text("ClearMind Control Center Privacy Policy")
+                    Text("Craig-O-Clean Privacy Policy")
                         .font(.title3)
                         .fontWeight(.bold)
                     
@@ -671,7 +766,7 @@ struct PrivacyPolicySheet: View {
                         Text("Data Collection")
                             .font(.headline)
                         
-                        Text("ClearMind Control Center does NOT collect, store, or transmit any personal data or usage information. All data processing happens locally on your Mac.")
+                        Text("Craig-O-Clean does NOT collect, store, or transmit any personal data or usage information. All data processing happens locally on your Mac.")
                     }
                     
                     VStack(alignment: .leading, spacing: 12) {
@@ -692,7 +787,7 @@ struct PrivacyPolicySheet: View {
                         Text("Network")
                             .font(.headline)
                         
-                        Text("ClearMind does not make any network connections. There are no analytics, crash reporting, or update checks that transmit data.")
+                        Text("Craig-O-Clean does not make any network connections. There are no analytics, crash reporting, or update checks that transmit data.")
                     }
                     
                     VStack(alignment: .leading, spacing: 12) {

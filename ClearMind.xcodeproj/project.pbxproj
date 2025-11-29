@@ -1,0 +1,644 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0075A178AE56E1605EC7945A /* BrowserAutomationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF5A0111D40F34EA83BF7821 /* BrowserAutomationService.swift */; };
+		091DFB6677F49CD3E779A8D8 /* MemoryCleanupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1589F063CAF6AC777EB7DD09 /* MemoryCleanupView.swift */; };
+		0EF58B31D71A1C7989C61220 /* MemoryOptimizerServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE29BE9744F4E88F69C511E4 /* MemoryOptimizerServiceTests.swift */; };
+		179C54BB7CD0CC3C45ED96CA /* SystemCPUMonitorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A556AE5A1B23D0FD5A71315F /* SystemCPUMonitorView.swift */; };
+		1D237D8A00899AB51366D15F /* LaunchAtLoginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD59276EDFEC2670E02DD75 /* LaunchAtLoginManager.swift */; };
+		2923DD1C24A54DD1C2CC4E8E /* SettingsPermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8979EBE88CAD7A1CFD976D1 /* SettingsPermissionsView.swift */; };
+		3BB77D8FFB05C33A973E4E6D /* Craig-O-Cleaner-logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 6F29CA0504ECC9C708D3F2EC /* Craig-O-Cleaner-logo.png */; };
+		43D5040253072B37A115AB41 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AAAD80847F548982F5DCAC1 /* DashboardView.swift */; };
+		4609F64E700CD0F553E01E5B /* ProcessDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9632C48F53F4A7561D87B2A8 /* ProcessDetailsView.swift */; };
+		49864DBA053911318BD8B05E /* MenuBarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF77E599B12D2A8123A5CE13 /* MenuBarContentView.swift */; };
+		5CF658DB59292B6B18C04CA2 /* SystemMetricsServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62110226A54D9FE6DD158044 /* SystemMetricsServiceTests.swift */; };
+		62691AA043C871752E15AD8B /* VibeCaaSColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 996BF828FFDE7FD82DBF316E /* VibeCaaSColors.swift */; };
+		657CA690A953662F321263B5 /* PermissionsServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F85D2665A0456A4E3FF69FD8 /* PermissionsServiceTests.swift */; };
+		6CCFD83B8487277959763ECE /* PermissionsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03633AA8F1031B41972FB7F0 /* PermissionsService.swift */; };
+		7BBF8F0745AB1A25013CDCDC /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525989251D01DF719202C6AD /* SettingsView.swift */; };
+		81F4A576540245F5710D448A /* SystemMemoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C799A927192BA14CEB60F323 /* SystemMemoryManager.swift */; };
+		86C8EA8706A8FE359DD66A34 /* SystemMetricsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3D0D569672DFD672B969A2 /* SystemMetricsService.swift */; };
+		8A18144465D7DF4A6DB1A7CD /* ClearMindUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91640A95F4718E8E8035DBF8 /* ClearMindUITests.swift */; };
+		92E59F63D6015533FBE853DF /* Craig_O_CleanApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF78901041D60EBF5A7E32AE /* Craig_O_CleanApp.swift */; };
+		98875ACD06476BC206D20103 /* MemoryOptimizerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E536C69E76507C6FA8624A12 /* MemoryOptimizerService.swift */; };
+		A11AF514AE53E1C17ACDDA31 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06FF244442ECA5102F31F227 /* MenuBarView.swift */; };
+		A55E959619CD510FC75EA362 /* MainAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 913306868C67DDDABB500ECE /* MainAppView.swift */; };
+		A5C0030EA29C4528E242CFD7 /* BrowserAutomationServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0AA3212F5FCE0B6D2F87F13 /* BrowserAutomationServiceTests.swift */; };
+		B6276CC9869A5ABC1F12AC36 /* BrowserTabsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D9EA0372E1EF362A19FBEC1 /* BrowserTabsView.swift */; };
+		BD4E97244A34043251DBD7ED /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 471220E286F0224289D6C76A /* Assets.xcassets */; };
+		CF58E267BF2591A325DB5F0E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7052225E42FE829FDA5B9 /* ContentView.swift */; };
+		EA22CB1E2E6D43393B5B41F2 /* ProcessManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB1A923708A939AD6D90F764 /* ProcessManager.swift */; };
+		F127122F9305DC23E223ECBA /* ProcessManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1173FF4AFE3FA21DADCF594 /* ProcessManagerView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		0A5CAC9778AE583C4C789F4C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3EEABA560B9840FD0BCB041D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DF1189409A4792369E641419;
+			remoteInfo = ClearMind;
+		};
+		D12BDC1E32F4809EF7102D15 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3EEABA560B9840FD0BCB041D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DF1189409A4792369E641419;
+			remoteInfo = ClearMind;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		03633AA8F1031B41972FB7F0 /* PermissionsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsService.swift; sourceTree = "<group>"; };
+		06FF244442ECA5102F31F227 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
+		122E8FC3D8CFBC1EEBB3401A /* ClearMind.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClearMind.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1589F063CAF6AC777EB7DD09 /* MemoryCleanupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryCleanupView.swift; sourceTree = "<group>"; };
+		1E3D0D569672DFD672B969A2 /* SystemMetricsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMetricsService.swift; sourceTree = "<group>"; };
+		3AD59276EDFEC2670E02DD75 /* LaunchAtLoginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLoginManager.swift; sourceTree = "<group>"; };
+		471220E286F0224289D6C76A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		498C77F244A9602844966255 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		525989251D01DF719202C6AD /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		62110226A54D9FE6DD158044 /* SystemMetricsServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMetricsServiceTests.swift; sourceTree = "<group>"; };
+		6F29CA0504ECC9C708D3F2EC /* Craig-O-Cleaner-logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Craig-O-Cleaner-logo.png"; sourceTree = "<group>"; };
+		84FD7959CBAC0230B7CE6A02 /* ClearMindTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClearMindTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8AAAD80847F548982F5DCAC1 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		8D9EA0372E1EF362A19FBEC1 /* BrowserTabsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabsView.swift; sourceTree = "<group>"; };
+		913306868C67DDDABB500ECE /* MainAppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainAppView.swift; sourceTree = "<group>"; };
+		91640A95F4718E8E8035DBF8 /* ClearMindUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClearMindUITests.swift; sourceTree = "<group>"; };
+		9632C48F53F4A7561D87B2A8 /* ProcessDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessDetailsView.swift; sourceTree = "<group>"; };
+		996BF828FFDE7FD82DBF316E /* VibeCaaSColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VibeCaaSColors.swift; sourceTree = "<group>"; };
+		9BB7052225E42FE829FDA5B9 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A556AE5A1B23D0FD5A71315F /* SystemCPUMonitorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemCPUMonitorView.swift; sourceTree = "<group>"; };
+		AE29BE9744F4E88F69C511E4 /* MemoryOptimizerServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryOptimizerServiceTests.swift; sourceTree = "<group>"; };
+		AF5A0111D40F34EA83BF7821 /* BrowserAutomationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserAutomationService.swift; sourceTree = "<group>"; };
+		AF78901041D60EBF5A7E32AE /* Craig_O_CleanApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Craig_O_CleanApp.swift; sourceTree = "<group>"; };
+		C799A927192BA14CEB60F323 /* SystemMemoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMemoryManager.swift; sourceTree = "<group>"; };
+		D0AA3212F5FCE0B6D2F87F13 /* BrowserAutomationServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserAutomationServiceTests.swift; sourceTree = "<group>"; };
+		D8979EBE88CAD7A1CFD976D1 /* SettingsPermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPermissionsView.swift; sourceTree = "<group>"; };
+		E536C69E76507C6FA8624A12 /* MemoryOptimizerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryOptimizerService.swift; sourceTree = "<group>"; };
+		EB1A923708A939AD6D90F764 /* ProcessManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessManager.swift; sourceTree = "<group>"; };
+		F1173FF4AFE3FA21DADCF594 /* ProcessManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessManagerView.swift; sourceTree = "<group>"; };
+		F85D2665A0456A4E3FF69FD8 /* PermissionsServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsServiceTests.swift; sourceTree = "<group>"; };
+		FE5F45C6865770AA15F3DD34 /* ClearMindUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClearMindUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FEEA277C475700C13E80A286 /* Craig-O-Clean.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Craig-O-Clean.entitlements"; sourceTree = "<group>"; };
+		FF77E599B12D2A8123A5CE13 /* MenuBarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0A58AE56B81B283658D75F0D /* Craig-O-Clean */ = {
+			isa = PBXGroup;
+			children = (
+				471220E286F0224289D6C76A /* Assets.xcassets */,
+				9BB7052225E42FE829FDA5B9 /* ContentView.swift */,
+				AF78901041D60EBF5A7E32AE /* Craig_O_CleanApp.swift */,
+				FEEA277C475700C13E80A286 /* Craig-O-Clean.entitlements */,
+				6F29CA0504ECC9C708D3F2EC /* Craig-O-Cleaner-logo.png */,
+				498C77F244A9602844966255 /* Info.plist */,
+				3AD59276EDFEC2670E02DD75 /* LaunchAtLoginManager.swift */,
+				06FF244442ECA5102F31F227 /* MenuBarView.swift */,
+				9632C48F53F4A7561D87B2A8 /* ProcessDetailsView.swift */,
+				EB1A923708A939AD6D90F764 /* ProcessManager.swift */,
+				525989251D01DF719202C6AD /* SettingsView.swift */,
+				A556AE5A1B23D0FD5A71315F /* SystemCPUMonitorView.swift */,
+				C799A927192BA14CEB60F323 /* SystemMemoryManager.swift */,
+				996BF828FFDE7FD82DBF316E /* VibeCaaSColors.swift */,
+				1306F493A602B7DFA7FD36A7 /* Core */,
+				B8B4ECC32898408EE6933E62 /* Tests */,
+				2520530103F7D98E795D7314 /* UI */,
+			);
+			path = "Craig-O-Clean";
+			sourceTree = "<group>";
+		};
+		1306F493A602B7DFA7FD36A7 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				AF5A0111D40F34EA83BF7821 /* BrowserAutomationService.swift */,
+				E536C69E76507C6FA8624A12 /* MemoryOptimizerService.swift */,
+				03633AA8F1031B41972FB7F0 /* PermissionsService.swift */,
+				1E3D0D569672DFD672B969A2 /* SystemMetricsService.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		2520530103F7D98E795D7314 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				8D9EA0372E1EF362A19FBEC1 /* BrowserTabsView.swift */,
+				8AAAD80847F548982F5DCAC1 /* DashboardView.swift */,
+				913306868C67DDDABB500ECE /* MainAppView.swift */,
+				1589F063CAF6AC777EB7DD09 /* MemoryCleanupView.swift */,
+				FF77E599B12D2A8123A5CE13 /* MenuBarContentView.swift */,
+				F1173FF4AFE3FA21DADCF594 /* ProcessManagerView.swift */,
+				D8979EBE88CAD7A1CFD976D1 /* SettingsPermissionsView.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		67E051563FA8D6413C2CEEA6 /* ClearMindUITests */ = {
+			isa = PBXGroup;
+			children = (
+				91640A95F4718E8E8035DBF8 /* ClearMindUITests.swift */,
+			);
+			path = ClearMindUITests;
+			sourceTree = "<group>";
+		};
+		6B1C7CA5B40A128039909E0D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				122E8FC3D8CFBC1EEBB3401A /* ClearMind.app */,
+				84FD7959CBAC0230B7CE6A02 /* ClearMindTests.xctest */,
+				FE5F45C6865770AA15F3DD34 /* ClearMindUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		AFDA005F341782DE05EC88DC = {
+			isa = PBXGroup;
+			children = (
+				0A58AE56B81B283658D75F0D /* Craig-O-Clean */,
+				6B1C7CA5B40A128039909E0D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B8B4ECC32898408EE6933E62 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				D88521E47AD6014B8C60ADA5 /* ClearMindTests */,
+				67E051563FA8D6413C2CEEA6 /* ClearMindUITests */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		D88521E47AD6014B8C60ADA5 /* ClearMindTests */ = {
+			isa = PBXGroup;
+			children = (
+				D0AA3212F5FCE0B6D2F87F13 /* BrowserAutomationServiceTests.swift */,
+				AE29BE9744F4E88F69C511E4 /* MemoryOptimizerServiceTests.swift */,
+				F85D2665A0456A4E3FF69FD8 /* PermissionsServiceTests.swift */,
+				62110226A54D9FE6DD158044 /* SystemMetricsServiceTests.swift */,
+			);
+			path = ClearMindTests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1C4184A560F9D40538E60F25 /* ClearMindTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2DFD60C7494A7809E7241CAD /* Build configuration list for PBXNativeTarget "ClearMindTests" */;
+			buildPhases = (
+				50A8D04B9C9B19F57A6237B8 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4239082E2FA474B2C8C13D1D /* PBXTargetDependency */,
+			);
+			name = ClearMindTests;
+			packageProductDependencies = (
+			);
+			productName = ClearMindTests;
+			productReference = 84FD7959CBAC0230B7CE6A02 /* ClearMindTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		39A345EC465CF55814648CD0 /* ClearMindUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 363B438BE6AF71C76AF6A71F /* Build configuration list for PBXNativeTarget "ClearMindUITests" */;
+			buildPhases = (
+				A3A9D22B42A86C249B405C40 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D3B5B312C2CBF9C97DA643DC /* PBXTargetDependency */,
+			);
+			name = ClearMindUITests;
+			packageProductDependencies = (
+			);
+			productName = ClearMindUITests;
+			productReference = FE5F45C6865770AA15F3DD34 /* ClearMindUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		DF1189409A4792369E641419 /* ClearMind */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1691C5873132C1CD0151FDD9 /* Build configuration list for PBXNativeTarget "ClearMind" */;
+			buildPhases = (
+				408D576D35B67CA01E240838 /* Sources */,
+				C925D27FDA8ADAA2E56014F6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ClearMind;
+			packageProductDependencies = (
+			);
+			productName = ClearMind;
+			productReference = 122E8FC3D8CFBC1EEBB3401A /* ClearMind.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3EEABA560B9840FD0BCB041D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					1C4184A560F9D40538E60F25 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+					39A345EC465CF55814648CD0 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+						TestTargetID = DF1189409A4792369E641419;
+					};
+					DF1189409A4792369E641419 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = E1FCB8FF4A8713D858B1CBA5 /* Build configuration list for PBXProject "ClearMind" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = AFDA005F341782DE05EC88DC;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DF1189409A4792369E641419 /* ClearMind */,
+				1C4184A560F9D40538E60F25 /* ClearMindTests */,
+				39A345EC465CF55814648CD0 /* ClearMindUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C925D27FDA8ADAA2E56014F6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BD4E97244A34043251DBD7ED /* Assets.xcassets in Resources */,
+				3BB77D8FFB05C33A973E4E6D /* Craig-O-Cleaner-logo.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		408D576D35B67CA01E240838 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0075A178AE56E1605EC7945A /* BrowserAutomationService.swift in Sources */,
+				B6276CC9869A5ABC1F12AC36 /* BrowserTabsView.swift in Sources */,
+				CF58E267BF2591A325DB5F0E /* ContentView.swift in Sources */,
+				92E59F63D6015533FBE853DF /* Craig_O_CleanApp.swift in Sources */,
+				43D5040253072B37A115AB41 /* DashboardView.swift in Sources */,
+				1D237D8A00899AB51366D15F /* LaunchAtLoginManager.swift in Sources */,
+				A55E959619CD510FC75EA362 /* MainAppView.swift in Sources */,
+				091DFB6677F49CD3E779A8D8 /* MemoryCleanupView.swift in Sources */,
+				98875ACD06476BC206D20103 /* MemoryOptimizerService.swift in Sources */,
+				49864DBA053911318BD8B05E /* MenuBarContentView.swift in Sources */,
+				A11AF514AE53E1C17ACDDA31 /* MenuBarView.swift in Sources */,
+				6CCFD83B8487277959763ECE /* PermissionsService.swift in Sources */,
+				4609F64E700CD0F553E01E5B /* ProcessDetailsView.swift in Sources */,
+				EA22CB1E2E6D43393B5B41F2 /* ProcessManager.swift in Sources */,
+				F127122F9305DC23E223ECBA /* ProcessManagerView.swift in Sources */,
+				2923DD1C24A54DD1C2CC4E8E /* SettingsPermissionsView.swift in Sources */,
+				7BBF8F0745AB1A25013CDCDC /* SettingsView.swift in Sources */,
+				179C54BB7CD0CC3C45ED96CA /* SystemCPUMonitorView.swift in Sources */,
+				81F4A576540245F5710D448A /* SystemMemoryManager.swift in Sources */,
+				86C8EA8706A8FE359DD66A34 /* SystemMetricsService.swift in Sources */,
+				62691AA043C871752E15AD8B /* VibeCaaSColors.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		50A8D04B9C9B19F57A6237B8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A5C0030EA29C4528E242CFD7 /* BrowserAutomationServiceTests.swift in Sources */,
+				0EF58B31D71A1C7989C61220 /* MemoryOptimizerServiceTests.swift in Sources */,
+				657CA690A953662F321263B5 /* PermissionsServiceTests.swift in Sources */,
+				5CF658DB59292B6B18C04CA2 /* SystemMetricsServiceTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A3A9D22B42A86C249B405C40 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8A18144465D7DF4A6DB1A7CD /* ClearMindUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		4239082E2FA474B2C8C13D1D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DF1189409A4792369E641419 /* ClearMind */;
+			targetProxy = D12BDC1E32F4809EF7102D15 /* PBXContainerItemProxy */;
+		};
+		D3B5B312C2CBF9C97DA643DC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DF1189409A4792369E641419 /* ClearMind */;
+			targetProxy = 0A5CAC9778AE583C4C789F4C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0454DEC6845A6B28B6C60A12 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.clearmind.controlcenter.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ClearMind Control Center.app/Contents/MacOS/ClearMind Control Center";
+			};
+			name = Release;
+		};
+		0553C7B8D63D4079B00C7F58 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.clearmind.controlcenter.uitests;
+				SDKROOT = macosx;
+				TEST_TARGET_NAME = ClearMind;
+			};
+			name = Release;
+		};
+		1DBCDFAD62F7F0391AA4A9DC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "Craig-O-Clean/Craig-O-Clean.entitlements";
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = "Craig-O-Clean/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.clearmind.controlcenter;
+				PRODUCT_NAME = "ClearMind Control Center";
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Debug;
+		};
+		3D42C0318F14C05E1C9855AD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.clearmind.controlcenter.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ClearMind Control Center.app/Contents/MacOS/ClearMind Control Center";
+			};
+			name = Debug;
+		};
+		81F8D16E48AA7A6713D73679 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		9703412135CF9C3BB5CCED90 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		E255423B91E8CF7069E16B60 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.clearmind.controlcenter.uitests;
+				SDKROOT = macosx;
+				TEST_TARGET_NAME = ClearMind;
+			};
+			name = Debug;
+		};
+		F4F19C0B7C467A1FEAD4898C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "Craig-O-Clean/Craig-O-Clean.entitlements";
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = "Craig-O-Clean/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.clearmind.controlcenter;
+				PRODUCT_NAME = "ClearMind Control Center";
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1691C5873132C1CD0151FDD9 /* Build configuration list for PBXNativeTarget "ClearMind" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DBCDFAD62F7F0391AA4A9DC /* Debug */,
+				F4F19C0B7C467A1FEAD4898C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		2DFD60C7494A7809E7241CAD /* Build configuration list for PBXNativeTarget "ClearMindTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3D42C0318F14C05E1C9855AD /* Debug */,
+				0454DEC6845A6B28B6C60A12 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		363B438BE6AF71C76AF6A71F /* Build configuration list for PBXNativeTarget "ClearMindUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E255423B91E8CF7069E16B60 /* Debug */,
+				0553C7B8D63D4079B00C7F58 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E1FCB8FF4A8713D858B1CBA5 /* Build configuration list for PBXProject "ClearMind" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9703412135CF9C3BB5CCED90 /* Debug */,
+				81F8D16E48AA7A6713D73679 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 3EEABA560B9840FD0BCB041D /* Project object */;
+}

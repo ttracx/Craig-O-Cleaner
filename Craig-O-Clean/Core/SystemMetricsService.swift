@@ -1,5 +1,5 @@
 // MARK: - SystemMetricsService.swift
-// ClearMind Control Center - System Metrics Service
+// CraigOClean Control Center - System Metrics Service
 // Provides comprehensive system monitoring for CPU, RAM, swap, memory pressure, disk, and network.
 // Optimized for Apple Silicon (M-series) Macs running macOS 14+ (Sonoma)
 
@@ -142,7 +142,7 @@ final class SystemMetricsService: ObservableObject {
     private var previousNetworkBytes: (in: UInt64, out: UInt64)?
     private var previousNetworkTime: Date?
     private var previousCPUTicks: host_cpu_load_info?
-    private let logger = Logger(subsystem: "com.clearmind.controlcenter", category: "SystemMetrics")
+    private let logger = Logger(subsystem: "com.CraigOClean.controlcenter", category: "SystemMetrics")
     
     // MARK: - Initialization
     
@@ -313,7 +313,7 @@ final class SystemMetricsService: ObservableObject {
     private func fetchMemoryMetrics() async throws -> MemoryMetrics {
         return await withCheckedContinuation { continuation in
             // Get total physical memory
-            let totalRAM = UInt64(ProcessInfo.processInfo.physicalMemory)
+            let totalRAM = UInt64(Foundation.ProcessInfo.processInfo.physicalMemory)
             
             // Get VM statistics
             var vmStats = vm_statistics64()
@@ -403,10 +403,10 @@ final class SystemMetricsService: ObservableObject {
                 let usedSpace = totalSpace - freeSpace
                 
                 // Get file system type
-                var statfs = Darwin.statfs()
-                Darwin.statfs("/", &statfs)
-                
-                let fileSystem = withUnsafePointer(to: &statfs.f_fstypename) { ptr in
+                var statfsBuffer = Darwin.statfs()
+                _ = statfs("/", &statfsBuffer)
+
+                let fileSystem = withUnsafePointer(to: &statfsBuffer.f_fstypename) { ptr in
                     return String(cString: UnsafeRawPointer(ptr).assumingMemoryBound(to: CChar.self))
                 }
                 

@@ -15,10 +15,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "0415B46CA7B47AC35FB319C5"
-               BuildableName = "Craig-O-Clean.app"
-               BlueprintName = "Craig-O-Clean"
-               ReferencedContainer = "container:Craig-O-Clean.xcodeproj">
+               BlueprintIdentifier = "DF1189409A4792369E641419"
+               BuildableName = "ClearMind.app"
+               BlueprintName = "ClearMind"
+               ReferencedContainer = "container:ClearMind.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -29,10 +29,10 @@
             buildForAnalyzing = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "7467991BBA646C3A88C57F87"
-               BuildableName = "Craig-O-CleanTests.xctest"
-               BlueprintName = "Craig-O-CleanTests"
-               ReferencedContainer = "container:Craig-O-Clean.xcodeproj">
+               BlueprintIdentifier = "1C4184A560F9D40538E60F25"
+               BuildableName = "ClearMindTests.xctest"
+               BlueprintName = "ClearMindTests"
+               ReferencedContainer = "container:ClearMind.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -43,10 +43,10 @@
             buildForAnalyzing = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "926F2C4AEE3C34614C862130"
-               BuildableName = "Craig-O-CleanUITests.xctest"
-               BlueprintName = "Craig-O-CleanUITests"
-               ReferencedContainer = "container:Craig-O-Clean.xcodeproj">
+               BlueprintIdentifier = "39A345EC465CF55814648CD0"
+               BuildableName = "ClearMindUITests.xctest"
+               BlueprintName = "ClearMindUITests"
+               ReferencedContainer = "container:ClearMind.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -60,10 +60,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "0415B46CA7B47AC35FB319C5"
-            BuildableName = "Craig-O-Clean.app"
-            BlueprintName = "Craig-O-Clean"
-            ReferencedContainer = "container:Craig-O-Clean.xcodeproj">
+            BlueprintIdentifier = "DF1189409A4792369E641419"
+            BuildableName = "ClearMind.app"
+            BlueprintName = "ClearMind"
+            ReferencedContainer = "container:ClearMind.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <Testables>
@@ -72,10 +72,10 @@
             parallelizable = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "7467991BBA646C3A88C57F87"
-               BuildableName = "Craig-O-CleanTests.xctest"
-               BlueprintName = "Craig-O-CleanTests"
-               ReferencedContainer = "container:Craig-O-Clean.xcodeproj">
+               BlueprintIdentifier = "1C4184A560F9D40538E60F25"
+               BuildableName = "ClearMindTests.xctest"
+               BlueprintName = "ClearMindTests"
+               ReferencedContainer = "container:ClearMind.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -83,10 +83,10 @@
             parallelizable = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "926F2C4AEE3C34614C862130"
-               BuildableName = "Craig-O-CleanUITests.xctest"
-               BlueprintName = "Craig-O-CleanUITests"
-               ReferencedContainer = "container:Craig-O-Clean.xcodeproj">
+               BlueprintIdentifier = "39A345EC465CF55814648CD0"
+               BuildableName = "ClearMindUITests.xctest"
+               BlueprintName = "ClearMindUITests"
+               ReferencedContainer = "container:ClearMind.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -107,10 +107,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "0415B46CA7B47AC35FB319C5"
-            BuildableName = "Craig-O-Clean.app"
-            BlueprintName = "Craig-O-Clean"
-            ReferencedContainer = "container:Craig-O-Clean.xcodeproj">
+            BlueprintIdentifier = "DF1189409A4792369E641419"
+            BuildableName = "ClearMind.app"
+            BlueprintName = "ClearMind"
+            ReferencedContainer = "container:ClearMind.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
@@ -126,10 +126,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "0415B46CA7B47AC35FB319C5"
-            BuildableName = "Craig-O-Clean.app"
-            BlueprintName = "Craig-O-Clean"
-            ReferencedContainer = "container:Craig-O-Clean.xcodeproj">
+            BlueprintIdentifier = "DF1189409A4792369E641419"
+            BuildableName = "ClearMind.app"
+            BlueprintName = "ClearMind"
+            ReferencedContainer = "container:ClearMind.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>

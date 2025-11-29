@@ -1,6 +1,6 @@
 // MARK: - PermissionsService.swift
-// ClearMind Control Center - Permissions Management Service
-// Handles checking and requesting macOS permissions for Automation, Accessibility, etc.
+// Craig-O-Clean - Permissions Management Service
+// Handles checking and requesting macOS permissions for Automation, Accessibility, Full Disk Access, etc.
 
 import Foundation
 import Combine
@@ -133,14 +133,17 @@ final class PermissionsService: ObservableObject {
     // MARK: - Published Properties
     
     @Published private(set) var accessibilityStatus: PermissionStatus = .notDetermined
+    @Published private(set) var fullDiskAccessStatus: PermissionStatus = .notDetermined
     @Published private(set) var automationTargets: [AutomationTarget] = []
     @Published private(set) var isChecking = false
     @Published private(set) var lastCheckTime: Date?
+    @Published var shouldShowPermissionsOnboarding: Bool = false
     
     // MARK: - Private Properties
     
-    private let logger = Logger(subsystem: "com.clearmind.controlcenter", category: "Permissions")
+    private let logger = Logger(subsystem: "com.craigoclean.app", category: "Permissions")
     private var checkTimer: Timer?
+    private let hasShownOnboarding = "hasShownPermissionsOnboarding"
     
     // MARK: - Computed Properties
     
@@ -148,9 +151,27 @@ final class PermissionsService: ObservableObject {
         // At least one automation target should be granted for full functionality
         automationTargets.contains { $0.status == .granted }
     }
-    
+
     var allAutomationGranted: Bool {
         automationTargets.allSatisfy { $0.status == .granted }
+    }
+
+    var hasAllCriticalPermissions: Bool {
+        accessibilityStatus == .granted && fullDiskAccessStatus == .granted && hasRequiredPermissions
+    }
+
+    var missingCriticalPermissions: [PermissionType] {
+        var missing: [PermissionType] = []
+        if accessibilityStatus != .granted {
+            missing.append(.accessibility)
+        }
+        if fullDiskAccessStatus != .granted {
+            missing.append(.fullDiskAccess)
+        }
+        if !hasRequiredPermissions {
+            missing.append(.automation)
+        }
+        return missing
     }
     
     // MARK: - Initialization
@@ -158,8 +179,18 @@ final class PermissionsService: ObservableObject {
     init() {
         logger.info("PermissionsService initialized")
         setupAutomationTargets()
+
+        // Check if we should show onboarding
+        let hasShown = UserDefaults.standard.bool(forKey: hasShownOnboarding)
+        shouldShowPermissionsOnboarding = !hasShown
+
         Task {
             await checkAllPermissions()
+
+            // Auto-request permissions if this is first launch
+            if shouldShowPermissionsOnboarding {
+                await autoRequestPermissions()
+            }
         }
     }
     
@@ -206,19 +237,53 @@ final class PermissionsService: ObservableObject {
     /// Check all permissions
     func checkAllPermissions() async {
         isChecking = true
-        
+
         // Check accessibility
         accessibilityStatus = checkAccessibilityPermission()
-        
+
+        // Check full disk access
+        fullDiskAccessStatus = checkFullDiskAccessPermission()
+
         // Check automation for each target
         for i in automationTargets.indices {
             automationTargets[i].status = await checkAutomationPermission(for: automationTargets[i])
         }
-        
+
         lastCheckTime = Date()
         isChecking = false
-        
-        logger.info("Permission check completed - Accessibility: \(self.accessibilityStatus.rawValue)")
+
+        logger.info("Permission check completed - Accessibility: \(self.accessibilityStatus.rawValue), Full Disk Access: \(self.fullDiskAccessStatus.rawValue)")
+    }
+
+    /// Auto-request all missing critical permissions
+    func autoRequestPermissions() async {
+        logger.info("Auto-requesting missing permissions...")
+
+        // Request accessibility first
+        if accessibilityStatus != .granted {
+            logger.info("Requesting accessibility permission")
+            requestAccessibilityPermission()
+            try? await Task.sleep(for: .seconds(1))
+        }
+
+        // Full Disk Access must be manually enabled - we can only guide users
+        if fullDiskAccessStatus != .granted {
+            logger.info("Full Disk Access not granted - user must enable manually")
+        }
+
+        // Request automation for installed browsers
+        for target in automationTargets where target.status != .granted {
+            logger.info("Requesting automation permission for \(target.name)")
+            requestAutomationPermission(for: target)
+            try? await Task.sleep(for: .seconds(0.5))
+        }
+    }
+
+    /// Mark onboarding as complete
+    func completeOnboarding() {
+        shouldShowPermissionsOnboarding = false
+        UserDefaults.standard.set(true, forKey: hasShownOnboarding)
+        logger.info("Permissions onboarding completed")
     }
     
     /// Check accessibility permission
@@ -232,9 +297,45 @@ final class PermissionsService: ObservableObject {
     func requestAccessibilityPermission() {
         let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
         AXIsProcessTrustedWithOptions(options as CFDictionary)
-        
+
         // Also open System Settings to the right place
         openSystemSettings(for: .accessibility)
+    }
+
+    /// Check Full Disk Access permission
+    func checkFullDiskAccessPermission() -> PermissionStatus {
+        // Try to access a protected location that requires Full Disk Access
+        // For example, try to read Safari's history database
+        let protectedPaths = [
+            URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Safari/History.db"),
+            URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Application Support/com.apple.sharedfilelist"),
+        ]
+
+        for path in protectedPaths {
+            // Check if we can access file attributes (requires Full Disk Access)
+            if let attributes = try? FileManager.default.attributesOfItem(atPath: path.path) {
+                // Successfully accessed protected file
+                if attributes[.type] != nil {
+                    return .granted
+                }
+            }
+        }
+
+        // Also check if we can enumerate protected directories
+        let protectedDir = URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Mail")
+        if let contents = try? FileManager.default.contentsOfDirectory(at: protectedDir, includingPropertiesForKeys: nil) {
+            if !contents.isEmpty {
+                return .granted
+            }
+        }
+
+        return .denied
+    }
+
+    /// Request Full Disk Access permission (opens System Settings)
+    func requestFullDiskAccessPermission() {
+        // Can't programmatically request Full Disk Access, must guide user to System Settings
+        openSystemSettings(for: .fullDiskAccess)
     }
     
     /// Check automation permission for a specific target
@@ -379,7 +480,7 @@ extension PermissionsService {
             return [
                 "Open System Settings",
                 "Go to Privacy & Security → Automation",
-                "Find ClearMind Control Center in the list",
+                "Find Craig-O-Clean in the list",
                 "Enable access for each browser you want to manage",
                 "If the app isn't listed, try using a browser feature first"
             ]
@@ -388,7 +489,7 @@ extension PermissionsService {
                 "Open System Settings",
                 "Go to Privacy & Security → Accessibility",
                 "Click the lock icon to make changes",
-                "Enable ClearMind Control Center",
+                "Enable Craig-O-Clean",
                 "You may need to restart the app"
             ]
         case .fullDiskAccess:
@@ -396,7 +497,7 @@ extension PermissionsService {
                 "Open System Settings",
                 "Go to Privacy & Security → Full Disk Access",
                 "Click the lock icon to make changes",
-                "Click '+' and add ClearMind Control Center",
+                "Click '+' and add Craig-O-Clean",
                 "Restart the app for changes to take effect"
             ]
         }

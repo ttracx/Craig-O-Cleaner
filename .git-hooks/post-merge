@@ -1,0 +1,35 @@
+#!/bin/bash
+# Git Hook: Auto-sync Xcode project after merge/pull
+# This hook runs after git pull or git merge
+
+set -e
+
+PROJECT_NAME="Craig-O-Clean"
+SWIFT_FILES_CHANGED=false
+
+# Check if any Swift files were added or removed
+if git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD | grep -q "\.swift$"; then
+    SWIFT_FILES_CHANGED=true
+fi
+
+# Check if project.yml was modified
+if git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD | grep -q "^project\.yml$"; then
+    SWIFT_FILES_CHANGED=true
+fi
+
+# If Swift files changed, sync the project
+if [ "$SWIFT_FILES_CHANGED" = true ]; then
+    echo ""
+    echo "🔄 Swift files detected in merge/pull, syncing Xcode project..."
+    echo ""
+
+    if command -v xcodegen &> /dev/null; then
+        xcodegen generate
+        echo "✅ Xcode project synced successfully!"
+    else
+        echo "⚠️  XcodeGen not found. Run 'make setup' to install."
+        echo "   Or manually sync with: make sync"
+    fi
+
+    echo ""
+fi

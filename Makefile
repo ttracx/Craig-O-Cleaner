@@ -1,7 +1,7 @@
 # ClearMind Control Center Makefile
 # Build, test, and package commands
 
-.PHONY: all build release test clean archive dmg help setup sync
+.PHONY: all build release test clean archive dmg help setup sync setup-auto-sync watch-sync
 
 # Default target
 all: build
@@ -18,19 +18,30 @@ help:
 	@echo ""
 	@echo "Usage: make [target]"
 	@echo ""
-	@echo "Targets:"
-	@echo "  build     - Build debug configuration"
-	@echo "  release   - Build release configuration"
-	@echo "  test      - Run all tests"
-	@echo "  test-unit - Run unit tests only"
-	@echo "  test-ui   - Run UI tests only"
-	@echo "  clean     - Clean build artifacts"
-	@echo "  archive   - Create release archive"
-	@echo "  dmg       - Create DMG installer"
-	@echo "  setup     - Install development dependencies"
-	@echo "  sync      - Sync source files with Xcode project"
-	@echo "  lint      - Run SwiftLint (if installed)"
-	@echo "  format    - Format code with swift-format (if installed)"
+	@echo "Build & Test:"
+	@echo "  build        - Build debug configuration"
+	@echo "  release      - Build release configuration"
+	@echo "  test         - Run all tests"
+	@echo "  test-unit    - Run unit tests only"
+	@echo "  test-ui      - Run UI tests only"
+	@echo "  clean        - Clean build artifacts"
+	@echo ""
+	@echo "Distribution:"
+	@echo "  archive      - Create release archive"
+	@echo "  dmg          - Create DMG installer"
+	@echo ""
+	@echo "Development:"
+	@echo "  setup        - Install development dependencies"
+	@echo "  sync         - Sync source files with Xcode project (manual)"
+	@echo "  setup-auto-sync - Configure automatic Xcode syncing (git hooks)"
+	@echo "  watch-sync   - Start file watcher for real-time syncing"
+	@echo "  lint         - Run SwiftLint (if installed)"
+	@echo "  format       - Format code with swift-format (if installed)"
+	@echo "  open         - Open project in Xcode"
+	@echo "  stats        - Show project statistics"
+	@echo ""
+	@echo "Auto-Sync Info:"
+	@echo "  See XCODE_SYNC.md for complete auto-sync documentation"
 	@echo ""
 
 # Build debug configuration
@@ -166,3 +177,18 @@ stats:
 	@echo "Swift files: $$(find Craig-O-Clean -name '*.swift' | wc -l | tr -d ' ')"
 	@echo "Lines of code: $$(find Craig-O-Clean -name '*.swift' -exec cat {} \; | wc -l | tr -d ' ')"
 	@echo "Test files: $$(find Craig-O-Clean/Tests -name '*.swift' 2>/dev/null | wc -l | tr -d ' ')"
+
+# Setup automatic Xcode syncing
+setup-auto-sync:
+	@echo "Setting up automatic Xcode project syncing..."
+	@./setup-auto-sync.sh
+
+# Start file watcher for real-time syncing
+watch-sync:
+	@echo "Starting file watcher for real-time Xcode syncing..."
+	@if command -v fswatch >/dev/null 2>&1; then \
+		./watch-and-sync.sh; \
+	else \
+		echo "fswatch not found. Install with: brew install fswatch"; \
+		echo "Then run: make watch-sync"; \
+	fi
