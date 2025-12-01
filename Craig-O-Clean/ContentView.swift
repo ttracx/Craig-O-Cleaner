@@ -317,7 +317,7 @@ struct ContentView: View {
 
             for process in filteredProcesses {
                 let memoryMB = Double(process.memoryUsage) / 1024.0 / 1024.0
-                let row = "\"\(process.name)\",\(process.id),\(String(format: "%.1f", process.cpuUsage)),\(String(format: "%.1f", memoryMB)),\"\(process.bundleIdentifier ?? "")\",\(process.isUserProcess),\(process.threads)\n"
+                let row = "\"\(process.name)\",\(process.pid),\(String(format: "%.1f", process.cpuUsage)),\(String(format: "%.1f", memoryMB)),\"\(process.bundleIdentifier ?? "")\",\(process.isUserProcess),\(process.threads)\n"
                 csvContent += row
             }
 
@@ -422,7 +422,7 @@ struct ProcessRowView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
 
             // PID
-            Text("\(process.id)")
+            Text("\(process.pid)")
                 .font(.system(.body, design: .monospaced))
                 .frame(width: 60, alignment: .center)
 

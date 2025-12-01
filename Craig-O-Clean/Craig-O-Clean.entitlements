@@ -2,16 +2,28 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- App Sandbox - DISABLED for process management functionality -->
+	<!-- Note: This app requires direct access to kill processes via shell commands -->
+	<!-- For Mac App Store distribution, you would need a privileged helper tool instead -->
+	<key>com.apple.security.app-sandbox</key>
+	<false/>
+
 	<!-- Automation permission to control other apps (browsers) via AppleScript -->
 	<key>com.apple.security.automation.apple-events</key>
 	<true/>
-	
-	<!-- App Sandbox - disabled for system access -->
-	<key>com.apple.security.app-sandbox</key>
-	<false/>
-	
+
 	<!-- Allow reading user-selected files (for export) -->
 	<key>com.apple.security.files.user-selected.read-write</key>
 	<true/>
+
+	<!-- Network access (if needed for future features) -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+
+	<!-- Hardened Runtime exceptions for process management -->
+	<key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+	<false/>
+	<key>com.apple.security.cs.disable-library-validation</key>
+	<false/>
 </dict>
 </plist>

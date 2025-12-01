@@ -764,7 +764,7 @@ struct PrivacyPolicySheet: View {
                         .font(.title3)
                         .fontWeight(.bold)
                     
-                    Text("Last updated: November 2024")
+                    Text("Last updated: November 2025")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     

@@ -116,7 +116,7 @@ struct ProcessDetailsHeaderView: View {
                     .font(.title2)
                     .fontWeight(.bold)
                 
-                Text("PID: \(process.id)")
+                Text("PID: \(process.pid)")
                     .font(.caption)
                     .foregroundColor(.secondary)
                 
@@ -185,7 +185,7 @@ struct ProcessOverviewView: View {
                 GroupBox("Basic Information") {
                     VStack(alignment: .leading, spacing: 8) {
                         ProcessInfoRow(label: "Process Name", value: process.name)
-                        ProcessInfoRow(label: "Process ID", value: "\(process.id)")
+                        ProcessInfoRow(label: "Process ID", value: "\(process.pid)")
                         ProcessInfoRow(label: "Parent PID", value: process.parentPID != nil ? "\(process.parentPID!)" : "Unknown")
                         ProcessInfoRow(label: "User ID", value: "\(process.uid)")
                         ProcessInfoRow(label: "Process Type", value: process.isUserProcess ? "User Application" : "System Process")

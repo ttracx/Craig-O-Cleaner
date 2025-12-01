@@ -33,10 +33,12 @@ struct ProcessManagerView: View {
     @State private var selectedProcess: ProcessInfo?
     @State private var showingTerminateAlert = false
     @State private var showingForceQuitAlert = false
+    @State private var showingAdminForceQuitAlert = false
     @State private var showingProcessDetails = false
     @State private var processToTerminate: ProcessInfo?
     @State private var alertMessage = ""
     @State private var showingAlert = false
+    @State private var showingKillHeavyAppsAlert = false
     
     var filteredAndSortedProcesses: [ProcessInfo] {
         var processes = processManager.processes
@@ -98,6 +100,38 @@ struct ProcessManagerView: View {
         .navigationTitle("Processes")
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
+                Menu {
+                    Button {
+                        Task {
+                            let success = await processManager.restartFinder()
+                            alertMessage = success ? "Finder restarted successfully." : "Failed to restart Finder."
+                            showingAlert = true
+                        }
+                    } label: {
+                        Label("Restart Finder", systemImage: "folder")
+                    }
+                    
+                    Button {
+                        Task {
+                            let success = await processManager.restartDock()
+                            alertMessage = success ? "Dock restarted successfully." : "Failed to restart Dock."
+                            showingAlert = true
+                        }
+                    } label: {
+                        Label("Restart Dock", systemImage: "dock.rectangle")
+                    }
+                    
+                    Divider()
+                    
+                    Button {
+                        showingKillHeavyAppsAlert = true
+                    } label: {
+                        Label("Kill Heavy Apps", systemImage: "xmark.circle.fill")
+                    }
+                } label: {
+                    Label("Quick Actions", systemImage: "bolt.fill")
+                }
+                
                 Button {
                     processManager.updateProcessList()
                 } label: {
@@ -140,6 +174,26 @@ struct ProcessManagerView: View {
             Button("OK") { }
         } message: {
             Text(alertMessage)
+        }
+        .alert("Force Quit with Admin Privileges", isPresented: $showingAdminForceQuitAlert, presenting: processToTerminate) { process in
+            Button("Cancel", role: .cancel) { }
+            Button("Force Quit (Admin)", role: .destructive) {
+                Task {
+                    await forceQuitWithAdmin(process)
+                }
+            }
+        } message: { process in
+            Text("Regular force quit failed for '\(process.name)'.\n\nWould you like to try with administrator privileges? This will prompt for your password.")
+        }
+        .alert("Kill Heavy Apps", isPresented: $showingKillHeavyAppsAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Kill Apps", role: .destructive) {
+                Task {
+                    await killHeavyApps()
+                }
+            }
+        } message: {
+            Text("This will force quit common heavy applications (Chrome, Safari, Slack, Discord, Teams, Zoom, Xcode, Simulator, Docker, Spotify, etc.) to free up memory.\n\n⚠️ Unsaved work will be lost.")
         }
         .sheet(isPresented: $showingProcessDetails) {
             if let process = selectedProcess {
@@ -265,6 +319,10 @@ struct ProcessManagerView: View {
                             onForceQuit: {
                                 processToTerminate = process
                                 showingForceQuitAlert = true
+                            },
+                            onForceQuitAdmin: {
+                                processToTerminate = process
+                                showingAdminForceQuitAlert = true
                             }
                         )
                         
@@ -337,13 +395,41 @@ struct ProcessManagerView: View {
     private func forceQuitProcess(_ process: ProcessInfo) async {
         let success = await processManager.forceQuitProcess(process)
         await MainActor.run {
+            if success {
+                alertMessage = "'\(process.name)' force quit successfully."
+                showingAlert = true
+                selectedProcess = nil
+            } else {
+                // Offer admin mode if regular force quit failed
+                processToTerminate = process
+                showingAdminForceQuitAlert = true
+            }
+        }
+    }
+    
+    private func forceQuitWithAdmin(_ process: ProcessInfo) async {
+        let success = await processManager.forceQuitWithAdminPrivileges(process)
+        await MainActor.run {
             alertMessage = success ?
-                "'\(process.name)' force quit successfully." :
-                "Failed to force quit '\(process.name)'."
+                "'\(process.name)' force quit successfully with admin privileges." :
+                "Failed to force quit '\(process.name)' even with admin privileges. The process may be protected by the system."
             showingAlert = true
             if success {
                 selectedProcess = nil
+                processManager.updateProcessList()
             }
+        }
+    }
+    
+    private func killHeavyApps() async {
+        let killedApps = await processManager.killHeavyApps()
+        await MainActor.run {
+            if killedApps.isEmpty {
+                alertMessage = "No heavy apps were running to kill."
+            } else {
+                alertMessage = "Successfully killed \(killedApps.count) app(s):\n• " + killedApps.joined(separator: "\n• ")
+            }
+            showingAlert = true
         }
     }
     
@@ -395,6 +481,7 @@ struct ProcessRowItem: View {
     let onDoubleClick: () -> Void
     let onTerminate: () -> Void
     let onForceQuit: () -> Void
+    var onForceQuitAdmin: (() -> Void)? = nil
     
     @State private var isHovered = false
     
@@ -518,10 +605,17 @@ struct ProcessRowItem: View {
         .contextMenu {
             Button("Terminate") { onTerminate() }
             Button("Force Quit") { onForceQuit() }
+            if let adminAction = onForceQuitAdmin {
+                Button("Force Quit (Admin)...") { adminAction() }
+            }
             Divider()
             Button("Copy PID") {
                 NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString("\(process.id)", forType: .string)
+                NSPasteboard.general.setString("\(process.pid)", forType: .string)
+            }
+            Button("Copy Process Name") {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(process.name, forType: .string)
             }
             if let path = process.executablePath {
                 Button("Reveal in Finder") {

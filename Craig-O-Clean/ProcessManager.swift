@@ -6,7 +6,8 @@ private let PROC_PIDPATHINFO_MAXSIZE: Int = 1024 * 4
 
 // MARK: - Enhanced Process Information Model
 struct ProcessInfo: Identifiable, Hashable {
-    let id: Int32
+    let id: UUID = UUID() // Unique ID for SwiftUI ForEach
+    let pid: Int32         // Process ID
     let name: String
     let bundleIdentifier: String?
     let isUserProcess: Bool
@@ -20,12 +21,12 @@ struct ProcessInfo: Identifiable, Hashable {
     let arguments: [String]
     let workingDirectory: String?
     let uid: uid_t
-    
-    init(pid: Int32, name: String, bundleIdentifier: String? = nil, isUserProcess: Bool = true, 
-         cpuUsage: Double = 0.0, memoryUsage: Int64 = 0, creationTime: Date? = nil, 
-         parentPID: Int32? = nil, executablePath: String? = nil, threads: Int32 = 0, 
+
+    init(pid: Int32, name: String, bundleIdentifier: String? = nil, isUserProcess: Bool = true,
+         cpuUsage: Double = 0.0, memoryUsage: Int64 = 0, creationTime: Date? = nil,
+         parentPID: Int32? = nil, executablePath: String? = nil, threads: Int32 = 0,
          ports: Int32 = 0, arguments: [String] = [], workingDirectory: String? = nil, uid: uid_t = 0) {
-        self.id = pid
+        self.pid = pid
         self.name = name
         self.bundleIdentifier = bundleIdentifier
         self.isUserProcess = isUserProcess
@@ -177,21 +178,21 @@ class ProcessManager: ObservableObject {
         
         for process in processes {
             let cpuData = CPUUsageData(timestamp: now, usage: process.cpuUsage)
-            
-            if cpuHistory[process.id] == nil {
-                cpuHistory[process.id] = []
+
+            if cpuHistory[process.pid] == nil {
+                cpuHistory[process.pid] = []
             }
-            
-            cpuHistory[process.id]?.append(cpuData)
-            
+
+            cpuHistory[process.pid]?.append(cpuData)
+
             // Keep only the last maxHistoryPoints data points
-            if let count = cpuHistory[process.id]?.count, count > maxHistoryPoints {
-                cpuHistory[process.id]?.removeFirst(count - maxHistoryPoints)
+            if let count = cpuHistory[process.pid]?.count, count > maxHistoryPoints {
+                cpuHistory[process.pid]?.removeFirst(count - maxHistoryPoints)
             }
         }
         
         // Clean up history for processes that no longer exist
-        let currentPIDs = Set(processes.map { $0.id })
+        let currentPIDs = Set(processes.map { $0.pid })
         cpuHistory = cpuHistory.filter { currentPIDs.contains($0.key) }
     }
     
@@ -266,7 +267,7 @@ class ProcessManager: ObservableObject {
             let processName = URL(fileURLWithPath: processPath).lastPathComponent
             
             // Skip if we already have this process from NSWorkspace
-            let alreadyExists = processes.contains { $0.id == pid }
+            let alreadyExists = processes.contains { $0.pid == pid }
             guard !alreadyExists else { continue }
             
             let details = getDetailedProcessInfo(for: pid)
@@ -494,19 +495,28 @@ class ProcessManager: ObservableObject {
     }
     
     func terminateProcess(_ process: ProcessInfo) async -> Bool {
-        // First try graceful termination
-        if let app = NSWorkspace.shared.runningApplications.first(where: { $0.processIdentifier == process.id }) {
-            return app.terminate()
+        // First try graceful termination via NSRunningApplication
+        if let app = NSWorkspace.shared.runningApplications.first(where: { $0.processIdentifier == process.pid }) {
+            let result = app.terminate()
+            if result {
+                await cleanupProcessHistory(for: process.pid)
+                return true
+            }
+        }
+        
+        // Try graceful quit via AppleScript for user apps
+        if process.isUserProcess {
+            let appleScriptResult = await runAppleScriptQuit(processName: process.name)
+            if appleScriptResult {
+                await cleanupProcessHistory(for: process.pid)
+                return true
+            }
         }
         
         // Fall back to SIGTERM for system processes
-        let result = kill(process.id, SIGTERM)
+        let result = kill(process.pid, SIGTERM)
         if result == 0 {
-            // Clean up history for terminated process
-            await MainActor.run {
-                cpuHistory.removeValue(forKey: process.id)
-                previousCPUTicks.removeValue(forKey: process.id)
-            }
+            await cleanupProcessHistory(for: process.pid)
             return true
         }
         
@@ -514,25 +524,246 @@ class ProcessManager: ObservableObject {
     }
     
     func forceQuitProcess(_ process: ProcessInfo) async -> Bool {
-        // Force quit with SIGKILL
-        let result = kill(process.id, SIGKILL)
-        if result == 0 {
-            // Clean up history for terminated process
-            await MainActor.run {
-                cpuHistory.removeValue(forKey: process.id)
-                previousCPUTicks.removeValue(forKey: process.id)
+        // Method 1: Try NSRunningApplication.forceTerminate() first (works for user apps)
+        if let app = NSWorkspace.shared.runningApplications.first(where: { $0.processIdentifier == process.pid }) {
+            if app.forceTerminate() {
+                await cleanupProcessHistory(for: process.pid)
+                return true
             }
+        }
+        
+        // Method 2: Try killall -9 "App Name" via shell command
+        if await runShellForceKill(byName: process.name) {
+            await cleanupProcessHistory(for: process.pid)
             return true
         }
+        
+        // Method 3: Try pkill -9 by bundle identifier (if available)
+        if let bundleId = process.bundleIdentifier {
+            if await runShellForceKill(byBundleId: bundleId) {
+                await cleanupProcessHistory(for: process.pid)
+                return true
+            }
+        }
+        
+        // Method 4: Try kill -9 PID via shell command
+        if await runShellForceKill(byPID: process.pid) {
+            await cleanupProcessHistory(for: process.pid)
+            return true
+        }
+        
+        // Method 5: Last resort - direct SIGKILL (may fail for sandboxed apps)
+        let result = kill(process.pid, SIGKILL)
+        if result == 0 {
+            await cleanupProcessHistory(for: process.pid)
+            return true
+        }
+        
         return false
+    }
+    
+    // MARK: - Shell Command Force Kill Methods
+    
+    /// Force kill process by application name using: killall -9 "App Name"
+    private func runShellForceKill(byName name: String) async -> Bool {
+        return await withCheckedContinuation { continuation in
+            let task = Process()
+            task.executableURL = URL(fileURLWithPath: "/usr/bin/killall")
+            task.arguments = ["-9", name]
+            
+            // Suppress output
+            task.standardOutput = FileHandle.nullDevice
+            task.standardError = FileHandle.nullDevice
+            
+            do {
+                try task.run()
+                task.waitUntilExit()
+                continuation.resume(returning: task.terminationStatus == 0)
+            } catch {
+                print("[ProcessManager] killall failed for '\(name)': \(error.localizedDescription)")
+                continuation.resume(returning: false)
+            }
+        }
+    }
+    
+    /// Force kill process by bundle identifier using: pkill -9 -f "bundle.identifier"
+    private func runShellForceKill(byBundleId bundleId: String) async -> Bool {
+        return await withCheckedContinuation { continuation in
+            let task = Process()
+            task.executableURL = URL(fileURLWithPath: "/usr/bin/pkill")
+            task.arguments = ["-9", "-f", bundleId]
+            
+            task.standardOutput = FileHandle.nullDevice
+            task.standardError = FileHandle.nullDevice
+            
+            do {
+                try task.run()
+                task.waitUntilExit()
+                continuation.resume(returning: task.terminationStatus == 0)
+            } catch {
+                print("[ProcessManager] pkill failed for bundle '\(bundleId)': \(error.localizedDescription)")
+                continuation.resume(returning: false)
+            }
+        }
+    }
+    
+    /// Force kill process by PID using: kill -9 PID
+    private func runShellForceKill(byPID pid: Int32) async -> Bool {
+        return await withCheckedContinuation { continuation in
+            let task = Process()
+            task.executableURL = URL(fileURLWithPath: "/bin/kill")
+            task.arguments = ["-9", String(pid)]
+            
+            task.standardOutput = FileHandle.nullDevice
+            task.standardError = FileHandle.nullDevice
+            
+            do {
+                try task.run()
+                task.waitUntilExit()
+                continuation.resume(returning: task.terminationStatus == 0)
+            } catch {
+                print("[ProcessManager] kill -9 failed for PID \(pid): \(error.localizedDescription)")
+                continuation.resume(returning: false)
+            }
+        }
+    }
+    
+    /// Graceful quit via AppleScript
+    private func runAppleScriptQuit(processName: String) async -> Bool {
+        return await withCheckedContinuation { continuation in
+            let script = """
+            tell application "\(processName)"
+                quit
+            end tell
+            """
+            
+            var error: NSDictionary?
+            if let scriptObject = NSAppleScript(source: script) {
+                scriptObject.executeAndReturnError(&error)
+                if error == nil {
+                    continuation.resume(returning: true)
+                } else {
+                    continuation.resume(returning: false)
+                }
+            } else {
+                continuation.resume(returning: false)
+            }
+        }
+    }
+    
+    /// Clean up CPU and tick history for a terminated process
+    private func cleanupProcessHistory(for pid: Int32) async {
+        await MainActor.run {
+            cpuHistory.removeValue(forKey: pid)
+            previousCPUTicks.removeValue(forKey: pid)
+        }
+    }
+    
+    // MARK: - Batch Kill Methods
+    
+    /// Kill all helper processes for an app (e.g., "Google Chrome Helper")
+    func killAllHelperProcesses(for appName: String) async -> Int {
+        let helperNames = [
+            "\(appName) Helper",
+            "\(appName) Helper (Renderer)",
+            "\(appName) Helper (GPU)",
+            "\(appName) Helper (Plugin)"
+        ]
+        
+        var killedCount = 0
+        for helperName in helperNames {
+            if await runShellForceKill(byName: helperName) {
+                killedCount += 1
+            }
+        }
+        
+        return killedCount
+    }
+    
+    /// Kill a list of known heavy apps to free up memory
+    /// Returns array of successfully killed app names
+    func killHeavyApps(appNames: [String]? = nil) async -> [String] {
+        let defaultHeavyApps = [
+            "Google Chrome",
+            "Google Chrome Helper",
+            "Safari",
+            "Firefox",
+            "Microsoft Edge",
+            "Slack",
+            "Discord",
+            "Microsoft Teams",
+            "Zoom",
+            "Xcode",
+            "Simulator",
+            "Docker Desktop",
+            "Android Studio",
+            "Spotify"
+        ]
+        
+        let appsToKill = appNames ?? defaultHeavyApps
+        var killedApps: [String] = []
+        
+        for appName in appsToKill {
+            // Check if process is actually running before trying to kill
+            let isRunning = processes.contains { $0.name == appName }
+            if isRunning {
+                if await runShellForceKill(byName: appName) {
+                    killedApps.append(appName)
+                }
+            }
+        }
+        
+        // Also kill Chrome helpers specifically
+        if appsToKill.contains("Google Chrome") {
+            _ = await killAllHelperProcesses(for: "Google Chrome")
+        }
+        
+        // Refresh process list after killing
+        updateProcessList()
+        
+        return killedApps
+    }
+    
+    /// Restart Finder (common fix for UI issues)
+    func restartFinder() async -> Bool {
+        return await runShellForceKill(byName: "Finder")
+        // Finder will automatically restart after being killed
+    }
+    
+    /// Restart Dock (common fix for UI issues)
+    func restartDock() async -> Bool {
+        return await runShellForceKill(byName: "Dock")
+        // Dock will automatically restart after being killed
+    }
+    
+    /// Force kill process using AppleScript with administrator privileges (prompts for password)
+    func forceQuitWithAdminPrivileges(_ process: ProcessInfo) async -> Bool {
+        return await withCheckedContinuation { continuation in
+            let script = """
+            do shell script "kill -9 \(process.pid)" with administrator privileges
+            """
+            
+            var error: NSDictionary?
+            if let scriptObject = NSAppleScript(source: script) {
+                scriptObject.executeAndReturnError(&error)
+                if error == nil {
+                    continuation.resume(returning: true)
+                } else {
+                    print("[ProcessManager] Admin kill failed: \(error ?? [:])")
+                    continuation.resume(returning: false)
+                }
+            } else {
+                continuation.resume(returning: false)
+            }
+        }
     }
     
     func getProcessDetails(for process: ProcessInfo) -> ProcessDetails {
         return ProcessDetails(
             process: process,
-            cpuHistory: getCPUHistory(for: process.id),
+            cpuHistory: getCPUHistory(for: process.pid),
             networkConnections: [], // Would require additional implementation
-            openFiles: getOpenFiles(for: process.id),
+            openFiles: getOpenFiles(for: process.pid),
             environmentVariables: [:] // Would require additional implementation
         )
     }

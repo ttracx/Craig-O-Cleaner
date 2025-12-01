@@ -98,9 +98,17 @@ struct MainAppView: View {
                 // App header in sidebar
                 VStack(spacing: 8) {
                     HStack {
-                        Image(systemName: "sparkles")
-                            .font(.title2)
-                            .foregroundColor(.vibePurple)
+                        if let appIcon = NSApp.applicationIconImage {
+                            Image(nsImage: appIcon)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 28, height: 28)
+                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                        } else {
+                            Image(systemName: "sparkles")
+                                .font(.title2)
+                                .foregroundColor(.vibePurple)
+                        }
 
                         Text("Craig-O-Clean")
                             .font(.title2)
