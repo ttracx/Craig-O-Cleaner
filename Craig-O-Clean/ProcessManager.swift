@@ -42,6 +42,16 @@ struct ProcessInfo: Identifiable, Hashable {
         self.uid = uid
     }
     
+    // MARK: - Hashable & Equatable (based on PID only for stable identity)
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(pid)
+    }
+    
+    static func == (lhs: ProcessInfo, rhs: ProcessInfo) -> Bool {
+        lhs.pid == rhs.pid
+    }
+    
     var formattedMemoryUsage: String {
         let mb = Double(memoryUsage) / 1024.0 / 1024.0
         if mb >= 1024 {
