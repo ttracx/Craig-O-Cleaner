@@ -2,9 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- App Sandbox - Required for Mac App Store distribution -->
+	<!-- App Sandbox - DISABLED for process management functionality -->
+	<!-- Note: This app requires direct access to kill processes via shell commands -->
+	<!-- For Mac App Store distribution, you would need a privileged helper tool instead -->
 	<key>com.apple.security.app-sandbox</key>
-	<true/>
+	<false/>
 
 	<!-- Automation permission to control other apps (browsers) via AppleScript -->
 	<key>com.apple.security.automation.apple-events</key>
