@@ -47,7 +47,7 @@ struct ContentView: View {
             case .memory:
                 comparison = lhs.memoryUsage > rhs.memoryUsage
             case .pid:
-                comparison = lhs.id < rhs.id
+                comparison = lhs.pid < rhs.pid
             }
             return sortAscending ? !comparison : comparison
         }
@@ -227,7 +227,7 @@ struct ContentView: View {
                 Spacer()
 
                 if let selected = selectedProcess {
-                    Text("Selected: \(selected.name) (PID: \(selected.id))")
+                    Text("Selected: \(selected.name) (PID: \(selected.pid))")
                         .foregroundColor(.secondary)
                     Button("Details") {
                         showProcessDetails = true

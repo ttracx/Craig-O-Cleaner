@@ -6,7 +6,7 @@ private let PROC_PIDPATHINFO_MAXSIZE: Int = 1024 * 4
 
 // MARK: - Enhanced Process Information Model
 struct ProcessInfo: Identifiable, Hashable {
-    let id: UUID = UUID() // Unique ID for SwiftUI ForEach
+    var id: Int32 { pid }  // Use PID as stable identity for SwiftUI
     let pid: Int32         // Process ID
     let name: String
     let bundleIdentifier: String?

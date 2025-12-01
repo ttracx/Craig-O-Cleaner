@@ -91,3 +91,8 @@ iOSInjectionProject/
 
 ## macOS specific
 .DS_Store
+
+## Signing and credentials
+ExportOptions.plist
+*.mobileprovision
+*.provisionprofile

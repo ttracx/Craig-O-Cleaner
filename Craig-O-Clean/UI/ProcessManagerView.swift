@@ -74,7 +74,7 @@ struct ProcessManagerView: View {
             case .memory:
                 comparison = lhs.memoryUsage > rhs.memoryUsage
             case .pid:
-                comparison = lhs.id < rhs.id
+                comparison = lhs.pid < rhs.pid
             }
             return sortAscending ? !comparison : comparison
         }
@@ -460,7 +460,7 @@ struct ProcessManagerView: View {
             
             for process in filteredAndSortedProcesses {
                 let memoryMB = Double(process.memoryUsage) / 1024.0 / 1024.0
-                let row = "\"\(process.name)\",\(process.id),\(String(format: "%.1f", process.cpuUsage)),\(String(format: "%.1f", memoryMB)),\"\(process.bundleIdentifier ?? "")\",\(process.isUserProcess),\(process.threads)\n"
+                let row = "\"\(process.name)\",\(process.pid),\(String(format: "%.1f", process.cpuUsage)),\(String(format: "%.1f", memoryMB)),\"\(process.bundleIdentifier ?? "")\",\(process.isUserProcess),\(process.threads)\n"
                 csvContent += row
             }
             
@@ -532,7 +532,7 @@ struct ProcessRowItem: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             
             // PID
-            Text("\(process.id)")
+            Text("\(process.pid)")
                 .font(.system(.body, design: .monospaced))
                 .frame(width: 60)
             
@@ -655,7 +655,7 @@ struct ProcessDetailsSheet: View {
                         .font(.title2)
                         .fontWeight(.bold)
                     
-                    Text("PID: \(process.id)")
+                    Text("PID: \(process.pid)")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -689,7 +689,7 @@ struct ProcessDetailsSheet: View {
                     // Process Info
                     GroupBox("Process Information") {
                         VStack(spacing: 12) {
-                            DetailRow(label: "Process ID", value: "\(process.id)")
+                            DetailRow(label: "Process ID", value: "\(process.pid)")
                             if let parentPID = process.parentPID {
                                 DetailRow(label: "Parent PID", value: "\(parentPID)")
                             }
