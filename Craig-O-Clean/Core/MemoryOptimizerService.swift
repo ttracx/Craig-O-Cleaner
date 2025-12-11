@@ -141,6 +141,11 @@ final class MemoryOptimizerService: ObservableObject {
         logger.info("MemoryOptimizerService initialized")
     }
     
+    /// Set the process manager for CPU usage tracking
+    func setProcessManager(_ pm: ProcessManager) {
+        self.processManager = pm
+    }
+    
     // MARK: - Public Methods
     
     /// Analyze running apps and suggest cleanup candidates
@@ -150,6 +155,17 @@ final class MemoryOptimizerService: ObservableObject {
         potentialMemorySavings = 0
         
         logger.info("Analyzing memory usage...")
+        
+        // Build a map of PID to CPU usage from ProcessManager if available
+        var cpuUsageMap: [Int32: Double] = [:]
+        if let pm = processManager {
+            pm.updateProcessList()
+            // Give a moment for the process list to update
+            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+            for process in pm.processes {
+                cpuUsageMap[process.pid] = process.cpuUsage
+            }
+        }
         
         let runningApps = NSWorkspace.shared.runningApplications
         var candidates: [CleanupCandidate] = []
@@ -169,12 +185,15 @@ final class MemoryOptimizerService: ObservableObject {
             // Determine category
             let category = determineCategory(for: app, memoryUsage: memoryInfo)
             
+            // Get CPU usage from ProcessManager if available
+            let cpuUsage = cpuUsageMap[app.processIdentifier] ?? 0.0
+            
             let candidate = CleanupCandidate(
                 id: "\(app.processIdentifier)",
                 name: app.localizedName ?? "Unknown App",
                 bundleIdentifier: bundleId,
                 memoryUsage: memoryInfo,
-                cpuUsage: 0, // Would need ProcessManager for this
+                cpuUsage: cpuUsage,
                 lastActiveTime: nil,
                 processId: app.processIdentifier,
                 isBackgroundApp: app.activationPolicy != .regular,

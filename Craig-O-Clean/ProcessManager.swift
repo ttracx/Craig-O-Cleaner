@@ -772,15 +772,292 @@ class ProcessManager: ObservableObject {
         return ProcessDetails(
             process: process,
             cpuHistory: getCPUHistory(for: process.pid),
-            networkConnections: [], // Would require additional implementation
+            networkConnections: getNetworkConnections(for: process.pid),
             openFiles: getOpenFiles(for: process.pid),
-            environmentVariables: [:] // Would require additional implementation
+            environmentVariables: getEnvironmentVariables(for: process.pid)
         )
     }
     
+    /// Get open files for a process using lsof
     private func getOpenFiles(for pid: Int32) -> [String] {
-        // This is a simplified implementation
-        // In practice, you'd use lsof or similar system calls
-        return []
+        var openFiles: [String] = []
+        
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/usr/sbin/lsof")
+        task.arguments = ["-p", "\(pid)", "-F", "n"]
+        
+        let pipe = Pipe()
+        task.standardOutput = pipe
+        task.standardError = FileHandle.nullDevice
+        
+        do {
+            try task.run()
+            task.waitUntilExit()
+            
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            if let output = String(data: data, encoding: .utf8) {
+                let lines = output.components(separatedBy: "\n")
+                for line in lines {
+                    if line.hasPrefix("n") && !line.hasPrefix("n->") {
+                        let path = String(line.dropFirst()) // Remove 'n' prefix
+                        if path.hasPrefix("/") && !path.contains("(") {
+                            openFiles.append(path)
+                        }
+                    }
+                }
+            }
+        } catch {
+            // lsof may fail for system processes, return empty array
+        }
+        
+        return Array(openFiles.prefix(100)) // Limit to first 100 files
+    }
+    
+    /// Get network connections for a process using lsof
+    private func getNetworkConnections(for pid: Int32) -> [NetworkConnection] {
+        var connections: [NetworkConnection] = []
+        
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/usr/sbin/lsof")
+        task.arguments = ["-p", "\(pid)", "-i", "-n", "-P"]
+        
+        let pipe = Pipe()
+        task.standardOutput = pipe
+        task.standardError = FileHandle.nullDevice
+        
+        do {
+            try task.run()
+            task.waitUntilExit()
+            
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            if let output = String(data: data, encoding: .utf8) {
+                let lines = output.components(separatedBy: "\n")
+                for line in lines.dropFirst() { // Skip header
+                    let trimmed = line.trimmingCharacters(in: .whitespaces)
+                    if !trimmed.isEmpty {
+                        // Parse the connection info
+                        // Format: COMMAND PID USER FD TYPE DEVICE SIZE/OFF NODE NAME
+                        let components = trimmed.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
+                        if components.count >= 9 {
+                            let protocolType = components.count > 7 ? components[7] : "TCP"
+                            let connectionStr = components.last ?? ""
+                            
+                            // Parse connection string like "192.168.1.1:443->10.0.0.1:12345 (ESTABLISHED)"
+                            if let connection = parseNetworkConnection(connectionStr, protocolType: protocolType) {
+                                connections.append(connection)
+                            }
+                        }
+                    }
+                }
+            }
+        } catch {
+            // lsof may fail for system processes, return empty array
+        }
+        
+        return connections
+    }
+    
+    /// Parse a network connection string from lsof output
+    private func parseNetworkConnection(_ connectionStr: String, protocolType: String) -> NetworkConnection? {
+        // Common formats:
+        // "localhost:8080->remotehost:443 (ESTABLISHED)"
+        // "*:8080 (LISTEN)"
+        // "[::1]:8080->[::1]:54321 (ESTABLISHED)"
+        
+        var localAddr = "*"
+        var localPort = 0
+        var remoteAddr = "*"
+        var remotePort = 0
+        var state = "UNKNOWN"
+        
+        // Extract state if present
+        if let stateMatch = connectionStr.range(of: "\\(([^)]+)\\)", options: .regularExpression) {
+            state = String(connectionStr[stateMatch]).replacingOccurrences(of: "(", with: "").replacingOccurrences(of: ")", with: "")
+        }
+        
+        // Remove state from connection string for parsing
+        let cleanStr = connectionStr.replacingOccurrences(of: "\\s*\\([^)]+\\)", with: "", options: .regularExpression)
+        
+        // Check for arrow (connection with remote)
+        if cleanStr.contains("->") {
+            let parts = cleanStr.components(separatedBy: "->")
+            if parts.count >= 2 {
+                // Parse local address:port
+                if let (addr, port) = parseAddressPort(parts[0]) {
+                    localAddr = addr
+                    localPort = port
+                }
+                // Parse remote address:port
+                if let (addr, port) = parseAddressPort(parts[1]) {
+                    remoteAddr = addr
+                    remotePort = port
+                }
+            }
+        } else {
+            // Just local listening
+            if let (addr, port) = parseAddressPort(cleanStr) {
+                localAddr = addr
+                localPort = port
+            }
+        }
+        
+        return NetworkConnection(
+            localAddress: localAddr,
+            localPort: localPort,
+            remoteAddress: remoteAddr,
+            remotePort: remotePort,
+            state: state,
+            protocolType: protocolType
+        )
+    }
+    
+    /// Parse address:port string
+    private func parseAddressPort(_ str: String) -> (String, Int)? {
+        let trimmed = str.trimmingCharacters(in: .whitespaces)
+        
+        // Handle IPv6 addresses like [::1]:8080
+        if trimmed.hasPrefix("[") {
+            if let closeBracket = trimmed.lastIndex(of: "]") {
+                let addr = String(trimmed[trimmed.index(after: trimmed.startIndex)..<closeBracket])
+                let afterBracket = trimmed.index(after: closeBracket)
+                if afterBracket < trimmed.endIndex && trimmed[afterBracket] == ":" {
+                    let portStr = String(trimmed[trimmed.index(after: afterBracket)...])
+                    if let port = Int(portStr) {
+                        return (addr, port)
+                    }
+                }
+            }
+        } else {
+            // Handle IPv4 addresses like 192.168.1.1:8080 or hostname:8080
+            if let lastColon = trimmed.lastIndex(of: ":") {
+                let addr = String(trimmed[..<lastColon])
+                let portStr = String(trimmed[trimmed.index(after: lastColon)...])
+                if let port = Int(portStr) {
+                    return (addr, port)
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    /// Get environment variables for a process
+    private func getEnvironmentVariables(for pid: Int32) -> [String: String] {
+        var envVars: [String: String] = [:]
+        
+        // Use ps command to get environment variables
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/bin/ps")
+        task.arguments = ["-p", "\(pid)", "-E", "-ww", "-o", "command="]
+        
+        let pipe = Pipe()
+        task.standardOutput = pipe
+        task.standardError = FileHandle.nullDevice
+        
+        do {
+            try task.run()
+            task.waitUntilExit()
+            
+            // Alternatively, try to read from /proc if available
+            // Since macOS doesn't have /proc, we'll parse what we can
+            // from KERN_PROCARGS2 for more detailed environment access
+            
+            var mib = [CTL_KERN, KERN_PROCARGS2, pid]
+            var size: size_t = 0
+            
+            guard sysctl(&mib, 3, nil, &size, nil, 0) == 0, size > 0 else {
+                return envVars
+            }
+            
+            let buffer = UnsafeMutablePointer<CChar>.allocate(capacity: size)
+            defer { buffer.deallocate() }
+            
+            guard sysctl(&mib, 3, buffer, &size, nil, 0) == 0 else {
+                return envVars
+            }
+            
+            // Skip argc
+            var offset = MemoryLayout<Int32>.size
+            
+            // Skip executable path
+            while offset < size && buffer[offset] != 0 {
+                offset += 1
+            }
+            offset += 1
+            
+            // Skip trailing nulls
+            while offset < size && buffer[offset] == 0 {
+                offset += 1
+            }
+            
+            // Skip argv
+            while offset < size {
+                if buffer[offset] == 0 {
+                    offset += 1
+                    if offset < size && buffer[offset] == 0 {
+                        // Found double null - end of argv
+                        offset += 1
+                        break
+                    }
+                } else {
+                    offset += 1
+                }
+            }
+            
+            // Skip to environment variables (after argv)
+            while offset < size && buffer[offset] == 0 {
+                offset += 1
+            }
+            
+            // Parse environment variables
+            while offset < size {
+                let envStart = buffer.advanced(by: offset)
+                let envString = String(cString: envStart)
+                
+                if envString.isEmpty {
+                    break
+                }
+                
+                // Parse KEY=VALUE format
+                if let equalsIndex = envString.firstIndex(of: "=") {
+                    let key = String(envString[..<equalsIndex])
+                    let value = String(envString[envString.index(after: equalsIndex)...])
+                    envVars[key] = value
+                }
+                
+                offset += envString.utf8.count + 1
+            }
+        } catch {
+            // Failed to get environment variables
+        }
+        
+        return envVars
+    }
+    
+    /// Get port count for a process using lsof
+    func getPortCount(for pid: Int32) -> Int32 {
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/usr/sbin/lsof")
+        task.arguments = ["-p", "\(pid)", "-i", "-n"]
+        
+        let pipe = Pipe()
+        task.standardOutput = pipe
+        task.standardError = FileHandle.nullDevice
+        
+        do {
+            try task.run()
+            task.waitUntilExit()
+            
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            if let output = String(data: data, encoding: .utf8) {
+                let lines = output.components(separatedBy: "\n")
+                    .filter { !$0.isEmpty && !$0.hasPrefix("COMMAND") }
+                return Int32(lines.count)
+            }
+        } catch {
+            // lsof may fail for system processes
+        }
+        
+        return 0
     }
 }

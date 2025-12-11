@@ -319,13 +319,13 @@ struct BrowserTabsView: View {
                 .controlSize(.small)
                 .frame(maxWidth: .infinity)
                 
-                Button("Close Old Tabs") {
-                    // Could implement based on tab access time if available
+                Button("Consolidate Tabs") {
+                    consolidateDomainTabs()
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
                 .frame(maxWidth: .infinity)
-                .disabled(true)
+                .help("Close excess tabs from domains with more than 3 tabs (keeps 3 per domain)")
             }
             .padding()
         }
@@ -486,6 +486,42 @@ struct BrowserTabsView: View {
                     try? await browserAutomation.closeTab(tab)
                 }
                 alertMessage = "Closed \(duplicates.count) duplicate tabs"
+                showingAlert = true
+            }
+        }
+    }
+    
+    /// Consolidate tabs by closing excess tabs from domains with more than 3 tabs
+    private func consolidateDomainTabs() {
+        let maxTabsPerDomain = 3
+        
+        // Group tabs by domain
+        var tabsByDomain: [String: [BrowserTab]] = [:]
+        for tab in browserAutomation.allTabs {
+            let domain = tab.domain
+            tabsByDomain[domain, default: []].append(tab)
+        }
+        
+        // Find tabs to close (excess tabs per domain)
+        var tabsToClose: [BrowserTab] = []
+        for (_, tabs) in tabsByDomain {
+            if tabs.count > maxTabsPerDomain {
+                // Keep the first N tabs (assumed to be more recent/important)
+                // Close the rest
+                let excessTabs = Array(tabs.dropFirst(maxTabsPerDomain))
+                tabsToClose.append(contentsOf: excessTabs)
+            }
+        }
+        
+        if tabsToClose.isEmpty {
+            alertMessage = "No domains have more than \(maxTabsPerDomain) tabs"
+            showingAlert = true
+        } else {
+            Task {
+                for tab in tabsToClose {
+                    try? await browserAutomation.closeTab(tab)
+                }
+                alertMessage = "Closed \(tabsToClose.count) excess tabs from high-tab domains"
                 showingAlert = true
             }
         }

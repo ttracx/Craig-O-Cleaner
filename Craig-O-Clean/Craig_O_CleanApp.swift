@@ -82,13 +82,75 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         // Schedule periodic status bar icon updates
         Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
-            self?.updateStatusBarIcon()
+            Task { @MainActor in
+                self?.updateStatusBarIcon()
+            }
         }
     }
     
+    @MainActor
     private func updateStatusBarIcon() {
-        // Could update icon color/badge based on system health
-        // For now, keep the brain icon
+        guard let button = statusItem?.button else { return }
+        
+        // Determine system health based on memory metrics
+        var healthSymbol = "sparkles" // Default - healthy
+        var healthColor: NSColor = .systemGreen
+        
+        if let memoryMetrics = systemMetrics?.memoryMetrics {
+            switch memoryMetrics.pressureLevel {
+            case .normal:
+                healthSymbol = "sparkles"
+                healthColor = .systemGreen
+            case .warning:
+                healthSymbol = "exclamationmark.triangle"
+                healthColor = .systemYellow
+            case .critical:
+                healthSymbol = "exclamationmark.octagon"
+                healthColor = .systemRed
+            }
+        }
+        
+        // Also check CPU usage if available
+        if let cpuMetrics = systemMetrics?.cpuMetrics {
+            if cpuMetrics.totalUsage > 90 {
+                healthSymbol = "exclamationmark.octagon"
+                healthColor = .systemRed
+            } else if cpuMetrics.totalUsage > 75 && healthSymbol == "sparkles" {
+                healthSymbol = "exclamationmark.triangle"
+                healthColor = .systemYellow
+            }
+        }
+        
+        // Create the icon with health indicator
+        if let baseImage = NSImage(systemSymbolName: healthSymbol, accessibilityDescription: "System Health") {
+            let config = NSImage.SymbolConfiguration(pointSize: 16, weight: .medium)
+            let symbolImage = baseImage.withSymbolConfiguration(config)
+            
+            // For template images, the color comes from the system
+            // To show color, we need to create a non-template image
+            if healthColor != .systemGreen {
+                // Create a colored version for warning/critical states
+                let coloredImage = NSImage(size: NSSize(width: 18, height: 18), flipped: false) { rect in
+                    healthColor.set()
+                    symbolImage?.draw(in: rect, from: .zero, operation: .sourceOver, fraction: 1.0)
+                    return true
+                }
+                button.image = coloredImage
+                button.image?.isTemplate = false
+            } else {
+                // Use template mode for normal state (follows system appearance)
+                button.image = symbolImage
+                button.image?.isTemplate = true
+            }
+        }
+        
+        // Update tooltip with current status
+        if let memory = systemMetrics?.memoryMetrics {
+            button.toolTip = String(format: "Memory: %.0f%% used (%.1f GB / %.1f GB)", 
+                                    memory.usedPercentage,
+                                    memory.usedRAM,
+                                    memory.totalRAM)
+        }
     }
 
     func createContextMenu() {
