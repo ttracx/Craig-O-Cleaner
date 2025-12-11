@@ -10,6 +10,7 @@ enum SortOption: String, CaseIterable {
 
 struct ContentView: View {
     @StateObject private var processManager = ProcessManager()
+    @StateObject private var systemMemoryManager = SystemMemoryManager()
     @State private var selectedProcess: ProcessInfo?
     @State private var searchText = ""
     @State private var showingAlert = false
@@ -22,13 +23,20 @@ struct ContentView: View {
     @State private var sortOption: SortOption = .cpu
     @State private var sortAscending = false
     @State private var groupByType = false
+    @State private var showHeavyProcessesOnly = false
 
     var filteredProcesses: [ProcessInfo] {
-        let baseProcesses = showOnlyUserProcesses ?
-            processManager.processes.filter { $0.isUserProcess } :
-            processManager.processes
+        var processes = processManager.processes
+        
+        if showOnlyUserProcesses {
+            processes = processes.filter { $0.isUserProcess }
+        }
+        
+        if showHeavyProcessesOnly {
+            processes = processes.filter { $0.memoryUsage > 500 * 1024 * 1024 }
+        }
 
-        let searched = searchText.isEmpty ? baseProcesses : baseProcesses.filter {
+        let searched = searchText.isEmpty ? processes : processes.filter {
             $0.name.localizedCaseInsensitiveContains(searchText) ||
             $0.bundleIdentifier?.localizedCaseInsensitiveContains(searchText) == true
         }
@@ -91,6 +99,8 @@ struct ContentView: View {
                 Toggle("Group by Type", isOn: $groupByType)
 
                 Toggle("User Processes Only", isOn: $showOnlyUserProcesses)
+                
+                Toggle("Heavy Only", isOn: $showHeavyProcessesOnly)
 
                 Button("Export...") {
                     exportProcessList()
@@ -114,6 +124,11 @@ struct ContentView: View {
 
             // System CPU Monitor
             SystemCPUMonitorView(processManager: processManager)
+
+            Divider()
+
+            // System Memory Monitor
+            SystemMemoryMonitorView(memoryManager: systemMemoryManager)
 
             Divider()
 

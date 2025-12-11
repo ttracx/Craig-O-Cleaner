@@ -1,5 +1,12 @@
 import Foundation
 import Combine
+import UserNotifications
+
+struct MemoryHistoryPoint: Identifiable {
+    let id = UUID()
+    let timestamp: Date
+    let percentage: Double
+}
 
 class SystemMemoryManager: ObservableObject {
     @Published var totalMemory: Double = 0 // in GB
@@ -7,6 +14,31 @@ class SystemMemoryManager: ObservableObject {
     @Published var availableMemory: Double = 0 // in GB
     @Published var memoryPressure: String = "Normal"
     @Published var memoryPercentage: Double = 0 // percentage used
+    @Published var memoryHistory: [MemoryHistoryPoint] = []
+    
+    private let maxHistoryPoints = 60
+    private var lastNotificationTime: Date?
+    private var updateTimer: Timer?
+    
+    init() {
+        startMonitoring()
+    }
+    
+    deinit {
+        stopMonitoring()
+    }
+    
+    func startMonitoring() {
+        refreshMemoryInfo()
+        updateTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            self?.refreshMemoryInfo()
+        }
+    }
+    
+    func stopMonitoring() {
+        updateTimer?.invalidate()
+        updateTimer = nil
+    }
     
     func refreshMemoryInfo() {
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
@@ -95,12 +127,24 @@ class SystemMemoryManager: ObservableObject {
             pressure = "High"
         }
         
+        let historyPoint = MemoryHistoryPoint(timestamp: Date(), percentage: percentage)
+        
         DispatchQueue.main.async { [weak self] in
-            self?.totalMemory = totalPhysicalMemory
-            self?.usedMemory = usedMem
-            self?.availableMemory = availableMem
-            self?.memoryPercentage = percentage
-            self?.memoryPressure = pressure
+            guard let self = self else { return }
+            self.totalMemory = totalPhysicalMemory
+            self.usedMemory = usedMem
+            self.availableMemory = availableMem
+            self.memoryPercentage = percentage
+            self.memoryPressure = pressure
+            
+            self.memoryHistory.append(historyPoint)
+            if self.memoryHistory.count > self.maxHistoryPoints {
+                self.memoryHistory.removeFirst()
+            }
+            
+            if pressure == "High" {
+                self.checkAndNotifyLowMemory()
+            }
         }
     }
     
@@ -113,5 +157,25 @@ class SystemMemoryManager: ObservableObject {
         }
         return 0
     }
+    
+    private func checkAndNotifyLowMemory() {
+        let now = Date()
+        if let last = lastNotificationTime, now.timeIntervalSince(last) < 300 { // 5 minutes cooldown
+            return
+        }
+        
+        lastNotificationTime = now
+        
+        let content = UNMutableNotificationContent()
+        content.title = "High Memory Usage"
+        content.body = "System memory usage is high. Consider closing some applications."
+        content.sound = .default
+        
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error showing notification: \(error.localizedDescription)")
+            }
+        }
+    }
 }
-

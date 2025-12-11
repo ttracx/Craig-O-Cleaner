@@ -75,6 +75,27 @@ This document summarizes the enhancements made to the Craig-O-Clean macOS memory
   - Memory purge operations
   - Process termination (when needed)
 
+### 8. **Memory Usage History Graph** ✅
+- **SystemMemoryMonitorView**:
+  - Visual graph showing memory usage trends over time
+  - Color-coded area and line chart
+  - Updates in real-time
+  - Collapsible view to save space
+
+### 9. **Low Memory Notifications** ✅
+- **Automated Alerts**:
+  - Monitors memory pressure constantly
+  - Sends a system notification when memory pressure becomes "High"
+  - Includes a cooldown period to prevent notification spam (5 minutes)
+
+### 10. **Advanced Process Filtering** ✅
+- **Heavy Processes Filter**:
+  - Added "Heavy Only (>500MB)" toggle
+  - Quickly isolates memory-hogging applications
+- **Type Filtering**:
+  - Existing "User Processes Only" toggle
+  - Existing "Group by Type" toggle
+
 ## New Files Created
 
 1. **SettingsView.swift**
@@ -86,11 +107,15 @@ This document summarizes the enhancements made to the Craig-O-Clean macOS memory
    - Real-time system memory monitoring
    - Parses `vm_stat` output for accurate memory statistics
    - Calculates memory pressure based on usage
+   - Tracks memory history for graphing
 
 3. **LaunchAtLoginManager.swift**
    - Handles launch at login functionality
    - Uses modern SMAppService API
    - Automatic status checking
+
+4. **SystemMemoryMonitorView.swift**
+   - SwiftUI view for displaying memory usage history chart
 
 ## Modified Files
 
@@ -100,6 +125,7 @@ This document summarizes the enhancements made to the Craig-O-Clean macOS memory
    - Improved ProcessRow with visual indicators
    - Enhanced confirmation dialogs
    - Memory bar with color-coding
+   - Added SystemMemoryMonitorView and new filters
 
 2. **Craig_O_CleanApp.swift**
    - No changes needed (existing implementation continues to work)
@@ -153,10 +179,9 @@ This document summarizes the enhancements made to the Craig-O-Clean macOS memory
 
 ### Monitoring Memory
 1. The main "Processes" tab shows:
-   - System memory bar with percentage
-   - Used vs Available memory
-   - Memory pressure indicator
-   - List of top 50 processes sorted by memory usage
+   - System CPU Monitor (expandable)
+   - System Memory Monitor (expandable graph)
+   - List of processes with sort and filter options
 
 ### Force Quitting Processes
 1. Memory-intensive processes are highlighted in orange
@@ -183,27 +208,25 @@ This document summarizes the enhancements made to the Craig-O-Clean macOS memory
 - [x] Force quit confirmation dialog appears
 - [x] Process termination works correctly
 - [x] Memory purge requires admin privileges
+- [x] Memory history graph updates
+- [x] Low memory notifications trigger correctly
+- [x] Heavy process filter works
 
 ## Future Enhancements (Optional)
 
-1. Add memory usage history graph
-2. Include CPU usage statistics
-3. Add process filtering options
-4. Export process list to CSV
-5. Custom memory threshold settings
-6. Notification when memory is critically low
-7. Automatic memory optimization
-8. Dark mode optimizations
+1. Custom memory threshold settings
+2. Automatic memory optimization (beyond notifications)
+3. Dark mode optimizations (ongoing)
 
 ## Notes
 
 - The app requires macOS 13.0 or later for launch at login functionality
 - Admin privileges are required for memory purge and some process terminations
 - The app runs as a menu bar utility (LSUIElement = YES)
-- All memory statistics are refreshed every 5 seconds automatically
+- All memory statistics are refreshed every 1 second (memory) or 2 seconds (processes) automatically
 
 ---
 
-**Version**: 1.0 (Enhanced)
-**Last Updated**: November 12, 2025
+**Version**: 1.1 (Enhanced)
+**Last Updated**: December 11, 2025
 **Build Status**: ✅ Successful
