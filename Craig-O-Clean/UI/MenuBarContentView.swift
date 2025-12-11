@@ -10,6 +10,10 @@ struct MenuBarContentView: View {
     @StateObject private var processManager = ProcessManager()
     @StateObject private var memoryOptimizer = MemoryOptimizerService()
     @StateObject private var browserAutomation = BrowserAutomationService()
+
+    @EnvironmentObject var auth: AuthManager
+    @EnvironmentObject var userStore: LocalUserStore
+    @EnvironmentObject var subscriptions: SubscriptionManager
     
     let onExpandClick: () -> Void
     
@@ -77,10 +81,47 @@ struct MenuBarContentView: View {
                             .foregroundColor(.secondary)
                     }
                 }
+
+                HStack(spacing: 6) {
+                    if subscriptions.isPro {
+                        Text("PRO")
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.vibePurple.opacity(0.2))
+                            .foregroundColor(.vibePurple)
+                            .cornerRadius(6)
+                    }
+
+                    if auth.isSignedIn {
+                        Text(userStore.profile?.displayName ?? "Signed in")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    } else {
+                        Text("Not signed in")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                }
             }
             
             Spacer()
             
+            if !subscriptions.isPro {
+                Button {
+                    onExpandClick()
+                } label: {
+                    Text("Upgrade")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+                .tint(.vibePurple)
+            }
+
             Button {
                 isRefreshing = true
                 Task {

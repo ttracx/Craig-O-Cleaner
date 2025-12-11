@@ -3,10 +3,15 @@
 // App configuration, permission management, and diagnostics
 
 import SwiftUI
+import AuthenticationServices
 
 struct SettingsPermissionsView: View {
     @EnvironmentObject var systemMetrics: SystemMetricsService
     @EnvironmentObject var permissions: PermissionsService
+    @EnvironmentObject var auth: AuthManager
+    @EnvironmentObject var userStore: LocalUserStore
+    @EnvironmentObject var subscriptions: SubscriptionManager
+    @EnvironmentObject var stripe: StripeCheckoutService
     
     @AppStorage("refreshInterval") private var refreshInterval: Double = 2.0
     @AppStorage("showInDock") private var showInDock = false
@@ -17,10 +22,17 @@ struct SettingsPermissionsView: View {
     @State private var showingDiagnostics = false
     @State private var showingAbout = false
     @State private var showingPrivacyPolicy = false
+    @State private var accountErrorMessage: String?
     
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
+                // Account / Sign-in
+                accountSection
+
+                // Subscription / Upgrades
+                subscriptionSection
+
                 // General Settings
                 generalSettingsSection
                 
@@ -68,7 +80,214 @@ struct SettingsPermissionsView: View {
             Task {
                 await permissions.checkAllPermissions()
             }
+
+            // Ensure local profile exists if keychain session exists
+            syncLocalProfileFromAuthIfNeeded()
         }
+    }
+
+    // MARK: - Account Section
+
+    private var accountSection: some View {
+        SettingsSection(title: "Account", icon: "person.crop.circle") {
+            VStack(alignment: .leading, spacing: 12) {
+                if auth.isSignedIn, let userId = auth.userId {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(userStore.profile?.displayName ?? "Signed in")
+                            .font(.headline)
+                        Text(userStore.profile?.email ?? "Apple ID linked")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text("User ID: \(userId)")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .textSelection(.enabled)
+                    }
+
+                    HStack {
+                        Button("Sign Out") {
+                            auth.signOut()
+                            userStore.setProfile(nil)
+                        }
+                        .buttonStyle(.bordered)
+
+                        Spacer()
+                    }
+                } else {
+                    Text("Sign in to keep your settings tied to your identity on this Mac and to simplify upgrades/restores.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                    SignInWithAppleButton(.signIn) { request in
+                        request.requestedScopes = [.fullName, .email]
+                    } onCompletion: { result in
+                        switch result {
+                        case .success(let authorization):
+                            if let credential = authorization.credential as? ASAuthorizationAppleIDCredential {
+                                handleAppleCredential(credential)
+                            } else {
+                                accountErrorMessage = "Sign-in failed."
+                            }
+                        case .failure:
+                            accountErrorMessage = "Sign-in cancelled or failed."
+                        }
+                    }
+                    .frame(height: 44)
+                    .signInWithAppleButtonStyle(.black)
+
+                    if let accountErrorMessage {
+                        Text(accountErrorMessage)
+                            .font(.caption2)
+                            .foregroundColor(.red)
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Subscription Section
+
+    private var subscriptionSection: some View {
+        SettingsSection(title: "Subscription", icon: "crown") {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(subscriptions.isPro ? "Pro Active" : "Free Plan")
+                            .font(.headline)
+                        Text(subscriptions.isPro ? "Thanks for supporting Craig-O-Clean." : "Upgrade to unlock Pro features.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    Spacer()
+
+                    if subscriptions.isLoading {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                    }
+                }
+
+                if let msg = subscriptions.lastErrorMessage {
+                    Text(msg)
+                        .font(.caption2)
+                        .foregroundColor(.red)
+                }
+
+                // App Store subscriptions (StoreKit 2)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Upgrade via App Store")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+
+                    if subscriptions.products.isEmpty {
+                        Button("Load Plans") {
+                            Task { await subscriptions.loadProducts() }
+                        }
+                        .buttonStyle(.bordered)
+                    } else {
+                        ForEach(subscriptions.products, id: \.id) { product in
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(product.displayName)
+                                        .fontWeight(.medium)
+                                    Text(product.description)
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                }
+
+                                Spacer()
+
+                                Text(product.displayPrice)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+
+                                Button("Buy") {
+                                    Task { await subscriptions.purchase(product) }
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .controlSize(.small)
+                            }
+                            .padding(.vertical, 4)
+                        }
+                    }
+
+                    HStack {
+                        Button("Restore Purchases") {
+                            Task { await subscriptions.restorePurchases() }
+                        }
+                        .buttonStyle(.bordered)
+
+                        Button("Manage Subscriptions") {
+                            if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                                NSWorkspace.shared.open(url)
+                            }
+                        }
+                        .buttonStyle(.bordered)
+
+                        Spacer()
+                    }
+                }
+
+                Divider()
+
+                // Stripe (external) – requires your backend
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Business / Team (Stripe)")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+
+                    Text("Use Stripe for off-App-Store sales (e.g., invoices or team licensing). A backend is required.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                    Button("Open Stripe Checkout") {
+                        Task {
+                            do {
+                                try await stripe.openCheckout(planId: "pro_team", userId: auth.userId)
+                            } catch {
+                                // Keep this minimal in UI; user can configure backend URL in Info.plist.
+                                subscriptions.lastErrorMessage = "Stripe checkout not configured."
+                            }
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                }
+            }
+        }
+    }
+
+    private func handleAppleCredential(_ credential: ASAuthorizationAppleIDCredential) {
+        auth.handleAppleSignIn(credential: credential)
+
+        let formatter = PersonNameComponentsFormatter()
+        let fullName = credential.fullName.flatMap { formatter.string(from: $0) }
+
+        let now = Date()
+        let existing = userStore.profile
+
+        let profile = UserProfile(
+            userId: credential.user,
+            displayName: fullName ?? existing?.displayName,
+            email: credential.email ?? existing?.email,
+            createdAt: existing?.createdAt ?? now,
+            lastSignInAt: now
+        )
+        userStore.setProfile(profile)
+        accountErrorMessage = nil
+    }
+
+    private func syncLocalProfileFromAuthIfNeeded() {
+        guard auth.isSignedIn, let userId = auth.userId else { return }
+        guard userStore.profile?.userId != userId else { return }
+
+        let now = Date()
+        userStore.setProfile(UserProfile(
+            userId: userId,
+            displayName: nil,
+            email: nil,
+            createdAt: now,
+            lastSignInAt: now
+        ))
     }
     
     // MARK: - General Settings Section
@@ -299,7 +518,7 @@ struct SettingsPermissionsView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Your Data Stays on Your Mac")
                             .font(.headline)
-                        Text("Craig-O-Clean does not collect, transmit, or store any personal data or usage analytics.")
+                        Text("Craig-O-Clean stores your settings locally. If you use Sign in with Apple, App Store subscriptions, or Stripe checkout, those providers will handle network requests required for authentication or payments.")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -308,9 +527,9 @@ struct SettingsPermissionsView: View {
                 Divider()
                 
                 VStack(alignment: .leading, spacing: 8) {
-                    Label("No analytics or tracking", systemImage: "xmark.circle")
-                    Label("No cloud storage", systemImage: "xmark.circle")
-                    Label("No network connections required", systemImage: "xmark.circle")
+                    Label("No analytics or tracking", systemImage: "checkmark.circle")
+                    Label("No cloud storage for your app data", systemImage: "checkmark.circle")
+                    Label("Network only for sign-in / purchases (optional)", systemImage: "checkmark.circle")
                     Label("All processing happens locally", systemImage: "checkmark.circle")
                 }
                 .font(.caption)
@@ -793,7 +1012,7 @@ struct PrivacyPolicySheet: View {
                         Text("Network")
                             .font(.headline)
                         
-                        Text("Craig-O-Clean does not make any network connections. There are no analytics, crash reporting, or update checks that transmit data.")
+                        Text("Craig-O-Clean does not run analytics, crash reporting, or tracking. If you choose to sign in or purchase a subscription, network requests are made only for authentication and payments through Apple (and optionally Stripe via your configured backend).")
                     }
                     
                     VStack(alignment: .leading, spacing: 12) {

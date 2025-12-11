@@ -70,6 +70,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             rootView: MenuBarContentView(onExpandClick: { [weak self] in
                 self?.openFullWindow()
             })
+            .environmentObject(AuthManager.shared)
+            .environmentObject(LocalUserStore.shared)
+            .environmentObject(SubscriptionManager.shared)
+            .environmentObject(StripeCheckoutService.shared)
         )
 
         // Hide dock icon (menu bar app only)
@@ -322,6 +326,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Create new window with MainAppView
         let contentView = MainAppView()
+            .environmentObject(AuthManager.shared)
+            .environmentObject(LocalUserStore.shared)
+            .environmentObject(SubscriptionManager.shared)
+            .environmentObject(StripeCheckoutService.shared)
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 1100, height: 750),
             styleMask: [.titled, .closable, .miniaturizable, .resizable],

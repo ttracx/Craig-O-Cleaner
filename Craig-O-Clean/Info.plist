@@ -74,5 +74,16 @@
 	<!-- Supports Secure Coding -->
 	<key>NSSupportsSecureCoding</key>
 	<true/>
+
+	<!-- In-App Purchase Product IDs (StoreKit 2) -->
+	<key>IAPProductIDs</key>
+	<array>
+		<string>com.craigoclean.pro.monthly</string>
+		<string>com.craigoclean.pro.yearly</string>
+	</array>
+
+	<!-- Stripe backend base URL (Stripe secret keys MUST stay on your server) -->
+	<key>StripeBackendBaseURL</key>
+	<string></string>
 </dict>
 </plist>
