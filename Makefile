@@ -74,7 +74,7 @@ test-unit:
 		-project $(PROJECT) \
 		-scheme $(SCHEME) \
 		-destination 'platform=macOS' \
-		-only-testing:ClearMindTests \
+		-only-testing:Craig-O-CleanTests \
 		| xcpretty || xcodebuild test -project $(PROJECT) -scheme $(SCHEME) -destination 'platform=macOS'
 
 # Run UI tests
@@ -84,7 +84,7 @@ test-ui:
 		-project $(PROJECT) \
 		-scheme $(SCHEME) \
 		-destination 'platform=macOS' \
-		-only-testing:ClearMindUITests \
+		-only-testing:Craig-O-CleanUITests \
 		| xcpretty || xcodebuild test -project $(PROJECT) -scheme $(SCHEME) -destination 'platform=macOS'
 
 # Clean build artifacts
