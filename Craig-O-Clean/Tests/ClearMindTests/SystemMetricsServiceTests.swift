@@ -2,7 +2,7 @@
 // CraigOClean Control Center - Unit Tests for SystemMetricsService
 
 import XCTest
-@testable import CraigOClean
+@testable import Craig_O_Clean
 
 @MainActor
 final class SystemMetricsServiceTests: XCTestCase {

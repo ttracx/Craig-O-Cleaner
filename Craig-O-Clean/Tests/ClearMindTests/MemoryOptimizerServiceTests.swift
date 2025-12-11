@@ -2,7 +2,7 @@
 // CraigOClean Control Center - Unit Tests for MemoryOptimizerService
 
 import XCTest
-@testable import CraigOClean
+@testable import Craig_O_Clean
 
 @MainActor
 final class MemoryOptimizerServiceTests: XCTestCase {
