@@ -2,7 +2,7 @@
 // CraigOClean Control Center - Unit Tests for PermissionsService
 
 import XCTest
-@testable import CraigOClean
+@testable import Craig_O_Clean
 
 @MainActor
 final class PermissionsServiceTests: XCTestCase {
