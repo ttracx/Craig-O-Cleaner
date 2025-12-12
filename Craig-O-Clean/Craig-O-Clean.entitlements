@@ -18,10 +18,14 @@
 	<key>com.apple.security.network.client</key>
 	<true/>
 
-	<!-- Sign in with Apple -->
+	<!-- Sign in with Apple - Uncomment when you have a provisioning profile with this capability -->
+	<!-- To enable: Go to Apple Developer Portal > Certificates, Identifiers & Profiles > 
+	     Your App ID > Enable "Sign in with Apple", then create a new provisioning profile -->
+	<!--
 	<key>com.apple.developer.applesignin</key>
 	<array>
 		<string>Default</string>
 	</array>
+	-->
 </dict>
 </plist>

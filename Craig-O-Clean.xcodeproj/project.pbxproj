@@ -280,13 +280,13 @@
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					0415B46CA7B47AC35FB319C5 = {
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
 					};
 					7467991BBA646C3A88C57F87 = {
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
 					};
 					926F2C4AEE3C34614C862130 = {
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
 						TestTargetID = 0415B46CA7B47AC35FB319C5;
 					};
 				};
@@ -418,8 +418,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "Craig-O-Clean/Craig-O-Clean.entitlements";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K36LFHM32T;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "Craig-O-Clean/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
