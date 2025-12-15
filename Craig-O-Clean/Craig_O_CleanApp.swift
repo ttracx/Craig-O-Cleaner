@@ -21,7 +21,7 @@ struct Craig_O_CleanApp: App {
 // MARK: - App Delegate
 
 @MainActor
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var statusItem: NSStatusItem?
     var popover: NSPopover?
     var fullWindow: NSWindow?
@@ -29,10 +29,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     // Services
     private var systemMetrics: SystemMetricsService?
+    private var processManager: ProcessManager?
+    
+    // Menu items that need dynamic updates
+    private var runningAppsMenuItem: NSMenuItem?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Initialize system metrics for menu bar updates
         systemMetrics = SystemMetricsService()
+        processManager = ProcessManager()
 
         // Request notification permissions
         requestNotificationPermissions()
@@ -160,6 +165,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func createContextMenu() {
         let menu = NSMenu()
+        menu.delegate = self
 
         // About menu item
         let aboutItem = NSMenuItem(
@@ -170,6 +176,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         aboutItem.target = self
         menu.addItem(aboutItem)
 
+        menu.addItem(NSMenuItem.separator())
+        
+        // Running Apps submenu (for force quit)
+        let runningAppsMenu = NSMenu()
+        let runningAppsItem = NSMenuItem(title: "Force Quit App", action: nil, keyEquivalent: "")
+        runningAppsItem.submenu = runningAppsMenu
+        runningAppsMenuItem = runningAppsItem
+        menu.addItem(runningAppsItem)
+        
         menu.addItem(NSMenuItem.separator())
         
         // Quick Actions submenu
@@ -210,6 +225,137 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(quitItem)
 
         statusItem?.menu = menu
+    }
+    
+    // MARK: - NSMenuDelegate
+    
+    nonisolated func menuNeedsUpdate(_ menu: NSMenu) {
+        Task { @MainActor in
+            updateRunningAppsMenu()
+        }
+    }
+    
+    private func updateRunningAppsMenu() {
+        guard let submenu = runningAppsMenuItem?.submenu else { return }
+        submenu.removeAllItems()
+        
+        // Get running applications sorted by memory usage
+        let runningApps = NSWorkspace.shared.runningApplications
+            .filter { $0.activationPolicy == .regular && $0.localizedName != nil }
+            .sorted { ($0.localizedName ?? "") < ($1.localizedName ?? "") }
+        
+        if runningApps.isEmpty {
+            let noAppsItem = NSMenuItem(title: "No apps running", action: nil, keyEquivalent: "")
+            noAppsItem.isEnabled = false
+            submenu.addItem(noAppsItem)
+            return
+        }
+        
+        // Add header
+        let headerItem = NSMenuItem(title: "Select app to force quit:", action: nil, keyEquivalent: "")
+        headerItem.isEnabled = false
+        submenu.addItem(headerItem)
+        submenu.addItem(NSMenuItem.separator())
+        
+        // Add each running app
+        for app in runningApps {
+            guard let appName = app.localizedName else { continue }
+            
+            let menuItem = NSMenuItem(title: appName, action: #selector(forceQuitSelectedApp(_:)), keyEquivalent: "")
+            menuItem.target = self
+            menuItem.representedObject = app.processIdentifier
+            
+            // Add app icon
+            if let icon = app.icon {
+                let resizedIcon = NSImage(size: NSSize(width: 16, height: 16))
+                resizedIcon.lockFocus()
+                icon.draw(in: NSRect(x: 0, y: 0, width: 16, height: 16))
+                resizedIcon.unlockFocus()
+                menuItem.image = resizedIcon
+            }
+            
+            // Add memory usage info if available
+            if let process = processManager?.processes.first(where: { $0.pid == app.processIdentifier }) {
+                menuItem.title = "\(appName) — \(process.formattedMemoryUsage)"
+            }
+            
+            submenu.addItem(menuItem)
+        }
+        
+        // Add separator and "Force Quit All Non-Essential" option
+        submenu.addItem(NSMenuItem.separator())
+        
+        let forceQuitAllItem = NSMenuItem(
+            title: "Force Quit All Background Apps",
+            action: #selector(forceQuitAllBackground),
+            keyEquivalent: ""
+        )
+        forceQuitAllItem.target = self
+        submenu.addItem(forceQuitAllItem)
+    }
+    
+    @objc func forceQuitSelectedApp(_ sender: NSMenuItem) {
+        guard let pid = sender.representedObject as? Int32 else { return }
+        
+        // Find the app
+        if let app = NSWorkspace.shared.runningApplications.first(where: { $0.processIdentifier == pid }) {
+            let appName = app.localizedName ?? "Unknown"
+            
+            // Show confirmation alert
+            let alert = NSAlert()
+            alert.messageText = "Force Quit \"\(appName)\"?"
+            alert.informativeText = "Any unsaved changes will be lost."
+            alert.alertStyle = .warning
+            alert.addButton(withTitle: "Force Quit")
+            alert.addButton(withTitle: "Cancel")
+            
+            NSApp.activate(ignoringOtherApps: true)
+            
+            if alert.runModal() == .alertFirstButtonReturn {
+                Task { @MainActor in
+                    // Try force terminate
+                    if app.forceTerminate() {
+                        showNotification(title: "App Terminated", body: "\"\(appName)\" has been force quit.")
+                    } else {
+                        // Try using ProcessManager's more aggressive methods
+                        if let process = processManager?.processes.first(where: { $0.pid == pid }) {
+                            let success = await processManager?.forceQuitProcess(process) ?? false
+                            if success {
+                                showNotification(title: "App Terminated", body: "\"\(appName)\" has been force quit.")
+                            } else {
+                                showNotification(title: "Force Quit Failed", body: "Unable to quit \"\(appName)\". It may require administrator privileges.")
+                            }
+                        }
+                    }
+                    processManager?.updateProcessList()
+                }
+            }
+        }
+    }
+    
+    @objc func forceQuitAllBackground() {
+        let alert = NSAlert()
+        alert.messageText = "Force Quit All Background Apps?"
+        alert.informativeText = "This will close all apps running in the background. Any unsaved work will be lost."
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "Force Quit All")
+        alert.addButton(withTitle: "Cancel")
+        
+        NSApp.activate(ignoringOtherApps: true)
+        
+        if alert.runModal() == .alertFirstButtonReturn {
+            Task { @MainActor in
+                let optimizer = MemoryOptimizerService()
+                await optimizer.analyzeMemoryUsage()
+                let result = await optimizer.quickCleanupBackground()
+                
+                showNotification(
+                    title: "Background Apps Closed",
+                    body: "Closed \(result.appsTerminated) apps, freed \(result.formattedMemoryFreed)"
+                )
+                processManager?.updateProcessList()
+            }
+        }
     }
 
     @objc func statusBarButtonClicked(_ sender: NSStatusBarButton) {

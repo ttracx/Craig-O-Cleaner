@@ -1,0 +1,1 @@
+/Users/knightdev/.cursor/agents/security-auditor.md

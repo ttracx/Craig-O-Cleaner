@@ -1,0 +1,1 @@
+/Users/knightdev/.cursor/agents/test-generator.md
