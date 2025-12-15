@@ -18,6 +18,123 @@ struct Craig_O_CleanApp: App {
     }
 }
 
+// MARK: - Easter Egg Messages 🥚
+
+struct EasterEggMessage {
+    let title: String
+    let body: String
+    let sound: Bool
+    
+    init(_ title: String, _ body: String, sound: Bool = true) {
+        self.title = title
+        self.body = body
+        self.sound = sound
+    }
+}
+
+enum EasterEggManager {
+    // Regular funny messages (shown randomly)
+    static let funnyMessages: [EasterEggMessage] = [
+        EasterEggMessage("🧹 Craig's Cleaning Tip #42", "Have you tried turning your RAM off and on again? ...Wait, that's not how this works."),
+        EasterEggMessage("📊 Fun Fact", "Your computer has more RAM than the entire Apollo 11 mission. And yet Chrome still wants more. 🚀"),
+        EasterEggMessage("🎭 Plot Twist", "I'm also using some of your RAM right now. We're in this together! 😅"),
+        EasterEggMessage("🐰 Found Them!", "I found some dust bunnies hiding in your memory. Don't worry, I'll be gentle."),
+        EasterEggMessage("📞 Incoming Call", "Your RAM called. It says it needs some 'me time.' I got you covered."),
+        EasterEggMessage("🧠 Memory Lane", "Remember when 640KB was enough for anyone? Pepperidge Farm remembers."),
+        EasterEggMessage("🎮 Achievement Unlocked", "You opened Craig-O-Clean! +10 Cleanliness, +5 Organization, -1 Procrastination"),
+        EasterEggMessage("🔮 Fortune Cookie", "Your RAM forecast: Cloudy with a chance of cleanup. Lucky numbers: 8, 16, 32, 64"),
+        EasterEggMessage("🎪 Welcome Back!", "Your memory missed you! Just kidding, it doesn't remember anything. That's... that's the problem."),
+        EasterEggMessage("🦸 Hero Mode", "With great RAM comes great responsibility. — Uncle Memory"),
+        EasterEggMessage("🍪 Cookie Notice", "This app uses cookies. Just kidding! But your browser has like 47,000 of them."),
+        EasterEggMessage("🎬 Previously on Craig-O-Clean", "Your apps were hogging memory. Drama ensued. Let's fix this."),
+        EasterEggMessage("🌟 Daily Affirmation", "You are valid. Your processes are valid. Let's just... validate some of them out of memory."),
+        EasterEggMessage("🎸 Rock On!", "Your computer is about to get SO clean, it'll need sunglasses. 😎"),
+        EasterEggMessage("📝 Reminder", "Roses are red, violets are blue, Chrome has 50 tabs, and they're all using CPU."),
+        EasterEggMessage("🎯 Mission Briefing", "Your mission, should you choose to accept it: Close some apps. This message will self-destruct in 5... 4... just kidding."),
+        EasterEggMessage("🐱 Cat Fact", "If your Mac were a cat, it would knock unnecessary processes off the table. Be like cat."),
+        EasterEggMessage("🎭 Shakespeare Says", "To quit, or not to quit? That is the question. (The answer is quit. Quit the heavy apps.)"),
+        EasterEggMessage("🌈 Motivational", "Every byte you free is a byte closer to peak performance! ...That sounded better in my head."),
+        EasterEggMessage("🎪 Fun Mode: ON", "Warning: Excessive cleanliness may cause feelings of satisfaction and smugness."),
+    ]
+    
+    // Special time-based messages
+    static let morningMessages: [EasterEggMessage] = [
+        EasterEggMessage("☀️ Good Morning!", "Rise and shine! Your RAM woke up before you did. Overachiever."),
+        EasterEggMessage("🌅 Early Bird", "You're up early! Your computer appreciates your dedication to cleanliness."),
+        EasterEggMessage("☕ Morning Brew", "Coffee loading... Memory optimizing... You're going to have a great day!"),
+    ]
+    
+    static let lateNightMessages: [EasterEggMessage] = [
+        EasterEggMessage("🌙 Night Owl Alert", "Still coding at this hour? Your RAM is tired too, but we got this!"),
+        EasterEggMessage("🦉 Midnight Clean", "Shh... your computer's memory is trying to sleep. Let's tuck it in."),
+        EasterEggMessage("😴 Sleepy Time", "Your Mac called. It said 'just five more minutes'... of optimization."),
+        EasterEggMessage("🌟 Starlight Special", "Late night + clean RAM = productivity magic. ✨"),
+    ]
+    
+    static let weekendMessages: [EasterEggMessage] = [
+        EasterEggMessage("🎉 Weekend Vibes!", "Even your RAM deserves a break. Let's make it a clean break."),
+        EasterEggMessage("🛋️ Lazy Sunday", "Relax! Let me do the memory cleaning while you enjoy your weekend."),
+        EasterEggMessage("🎊 Party Mode", "It's the weekend! Time to party... by cleaning your memory. We're fun."),
+    ]
+    
+    // Super rare legendary messages (1% chance within the easter egg)
+    static let legendaryMessages: [EasterEggMessage] = [
+        EasterEggMessage("🦄 LEGENDARY DROP!", "You found the ultra-rare unicorn message! Quick, make a wish! 🌟 (Your RAM will be extra clean today)"),
+        EasterEggMessage("🎰 JACKPOT!", "You hit the easter egg jackpot! This happens to 1 in 100 users. You're basically famous now."),
+        EasterEggMessage("👾 Secret Level", "KONAMI CODE DETECTED! ↑↑↓↓←→←→BA... Just kidding. But you're still special."),
+        EasterEggMessage("🏆 Golden Ticket", "You found Craig's Golden Ticket! Your prize: Immaculately clean memory and bragging rights."),
+    ]
+    
+    // Craig-specific humor
+    static let craigMessages: [EasterEggMessage] = [
+        EasterEggMessage("👨‍💼 Craig Approved™", "This memory optimization has been personally blessed by Craig himself."),
+        EasterEggMessage("📜 Craig's Wisdom", "Craig once said: 'A clean Mac is a happy Mac.' He's so wise."),
+        EasterEggMessage("🎖️ Official Notice", "By the power vested in me by Craig, I now pronounce your memory... CLEAN!"),
+    ]
+    
+    static func getRandomMessage() -> EasterEggMessage {
+        let hour = Calendar.current.component(.hour, from: Date())
+        let weekday = Calendar.current.component(.weekday, from: Date())
+        let isWeekend = weekday == 1 || weekday == 7
+        
+        // 1% chance for legendary message
+        if Int.random(in: 1...100) == 42 {
+            return legendaryMessages.randomElement()!
+        }
+        
+        // 15% chance for Craig-specific message
+        if Int.random(in: 1...100) <= 15 {
+            return craigMessages.randomElement()!
+        }
+        
+        // Time-based messages (30% chance when applicable)
+        if Int.random(in: 1...100) <= 30 {
+            // Early morning (5 AM - 8 AM)
+            if hour >= 5 && hour < 8 {
+                return morningMessages.randomElement()!
+            }
+            
+            // Late night (11 PM - 4 AM)
+            if hour >= 23 || hour < 4 {
+                return lateNightMessages.randomElement()!
+            }
+            
+            // Weekend
+            if isWeekend {
+                return weekendMessages.randomElement()!
+            }
+        }
+        
+        // Default: random funny message
+        return funnyMessages.randomElement()!
+    }
+    
+    static var shouldShowEasterEgg: Bool {
+        // 25% chance to show easter egg on app launch
+        return Int.random(in: 1...100) <= 25
+    }
+}
+
 // MARK: - App Delegate
 
 @MainActor
@@ -33,6 +150,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     // Menu items that need dynamic updates
     private var runningAppsMenuItem: NSMenuItem?
+    
+    // Easter egg tracking
+    private var hasShownEasterEggToday = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Initialize system metrics for menu bar updates
@@ -94,6 +214,64 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 self?.updateStatusBarIcon()
+            }
+        }
+        
+        // 🥚 Easter Egg: Show a fun message on launch (with a slight delay for delight)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+            self?.triggerEasterEgg()
+        }
+    }
+    
+    // MARK: - Easter Egg 🥚
+    
+    private func triggerEasterEgg() {
+        // Check if we should show the easter egg (25% chance)
+        guard EasterEggManager.shouldShowEasterEgg else { return }
+        
+        // Don't spam - check if we showed one recently (use UserDefaults)
+        let lastShownKey = "lastEasterEggDate"
+        let lastShown = UserDefaults.standard.object(forKey: lastShownKey) as? Date
+        
+        // Only show once per app session or if it's been more than 4 hours
+        if let lastShown = lastShown {
+            let hoursSinceLastShown = Date().timeIntervalSince(lastShown) / 3600
+            if hoursSinceLastShown < 4 && hasShownEasterEggToday {
+                return
+            }
+        }
+        
+        // Get a fun message
+        let message = EasterEggManager.getRandomMessage()
+        
+        // Show the easter egg notification
+        showEasterEggNotification(message)
+        
+        // Mark as shown
+        hasShownEasterEggToday = true
+        UserDefaults.standard.set(Date(), forKey: lastShownKey)
+    }
+    
+    private func showEasterEggNotification(_ message: EasterEggMessage) {
+        let content = UNMutableNotificationContent()
+        content.title = message.title
+        content.body = message.body
+        content.sound = message.sound ? .default : nil
+        
+        // Add a category for interactive notifications
+        content.categoryIdentifier = "EASTER_EGG"
+        
+        let request = UNNotificationRequest(
+            identifier: "easter-egg-\(UUID().uuidString)",
+            content: content,
+            trigger: nil // Show immediately
+        )
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("🥚 Easter egg failed to hatch: \(error.localizedDescription)")
+            } else {
+                print("🥚 Easter egg delivered: \(message.title)")
             }
         }
     }
