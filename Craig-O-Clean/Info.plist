@@ -83,6 +83,11 @@
 	</array>
 
 	<!-- Stripe backend base URL (Stripe secret keys MUST stay on your server) -->
+	<!-- CONFIGURE THIS: Set to your backend URL that handles Stripe checkout -->
+	<!-- Example: https://api.yourdomain.com -->
+	<!-- Backend must implement: POST /stripe/create-checkout-session -->
+	<!-- Request: { "planId": "string", "userId": "string?" } -->
+	<!-- Response: { "url": "https://checkout.stripe.com/..." } -->
 	<key>StripeBackendBaseURL</key>
 	<string></string>
 </dict>
