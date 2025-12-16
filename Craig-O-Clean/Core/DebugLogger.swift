@@ -7,10 +7,10 @@ import os.log
 import SwiftUI
 import AppKit
 
-// MARK: - Log Level Enum
+// MARK: - Debug Log Level Enum
 
 /// Defines the severity level of log entries
-public enum LogLevel: Int, Codable, CaseIterable, Comparable {
+public enum DebugLogLevel: Int, Codable, CaseIterable, Comparable, Sendable {
     case verbose = 0
     case debug = 1
     case info = 2
@@ -18,7 +18,7 @@ public enum LogLevel: Int, Codable, CaseIterable, Comparable {
     case error = 4
     case critical = 5
 
-    public static func < (lhs: LogLevel, rhs: LogLevel) -> Bool {
+    public static func < (lhs: DebugLogLevel, rhs: DebugLogLevel) -> Bool {
         lhs.rawValue < rhs.rawValue
     }
 
@@ -55,10 +55,10 @@ public enum LogLevel: Int, Codable, CaseIterable, Comparable {
     }
 }
 
-// MARK: - Log Category Enum
+// MARK: - Debug Log Category Enum
 
 /// Categories for organizing log entries
-public enum LogCategory: String, Codable, CaseIterable {
+public enum DebugLogCategory: String, Codable, CaseIterable, Sendable {
     case app = "App"
     case ui = "UI"
     case navigation = "Navigation"
@@ -92,14 +92,14 @@ public enum LogCategory: String, Codable, CaseIterable {
     }
 }
 
-// MARK: - Log Entry Model
+// MARK: - Debug Log Entry Model
 
 /// A single log entry with all metadata
-public struct LogEntry: Codable, Identifiable, Sendable {
+public struct DebugLogEntry: Codable, Identifiable, Sendable {
     public let id: UUID
     public let timestamp: Date
-    public let level: LogLevel
-    public let category: LogCategory
+    public let level: DebugLogLevel
+    public let category: DebugLogCategory
     public let message: String
     public let file: String
     public let function: String
@@ -111,8 +111,8 @@ public struct LogEntry: Codable, Identifiable, Sendable {
     public init(
         id: UUID = UUID(),
         timestamp: Date = Date(),
-        level: LogLevel,
-        category: LogCategory,
+        level: DebugLogLevel,
+        category: DebugLogCategory,
         message: String,
         file: String,
         function: String,
@@ -160,7 +160,7 @@ public struct LogEntry: Codable, Identifiable, Sendable {
 // MARK: - Test Result Model
 
 /// Represents a single test result for the automated testing system
-public struct TestResult: Codable, Identifiable {
+public struct DebugTestResult: Codable, Identifiable, Sendable {
     public let id: UUID
     public let testName: String
     public let category: String
@@ -169,7 +169,7 @@ public struct TestResult: Codable, Identifiable {
     public let errorMessage: String?
     public let screenshot: Data?
     public let timestamp: Date
-    public let logs: [LogEntry]
+    public let logs: [DebugLogEntry]
 
     public init(
         id: UUID = UUID(),
@@ -180,7 +180,7 @@ public struct TestResult: Codable, Identifiable {
         errorMessage: String? = nil,
         screenshot: Data? = nil,
         timestamp: Date = Date(),
-        logs: [LogEntry] = []
+        logs: [DebugLogEntry] = []
     ) {
         self.id = id
         self.testName = testName
@@ -197,7 +197,7 @@ public struct TestResult: Codable, Identifiable {
 // MARK: - Test Report Model
 
 /// Complete test report containing all results
-public struct TestReport: Codable {
+public struct DebugTestReport: Codable, Sendable {
     public let id: UUID
     public let appVersion: String
     public let buildNumber: String
@@ -205,9 +205,9 @@ public struct TestReport: Codable {
     public let startTime: Date
     public let endTime: Date
     public let duration: TimeInterval
-    public let results: [TestResult]
-    public let systemMetrics: SystemTestMetrics
-    public let summary: TestSummary
+    public let results: [DebugTestResult]
+    public let systemMetrics: DebugSystemTestMetrics
+    public let summary: DebugTestSummary
 
     public init(
         id: UUID = UUID(),
@@ -216,8 +216,8 @@ public struct TestReport: Codable {
         macOSVersion: String,
         startTime: Date,
         endTime: Date,
-        results: [TestResult],
-        systemMetrics: SystemTestMetrics
+        results: [DebugTestResult],
+        systemMetrics: DebugSystemTestMetrics
     ) {
         self.id = id
         self.appVersion = appVersion
@@ -235,7 +235,7 @@ public struct TestReport: Codable {
         let failedTests = totalTests - passedTests
         let passRate = totalTests > 0 ? Double(passedTests) / Double(totalTests) * 100 : 0
 
-        self.summary = TestSummary(
+        self.summary = DebugTestSummary(
             totalTests: totalTests,
             passedTests: passedTests,
             failedTests: failedTests,
@@ -247,7 +247,7 @@ public struct TestReport: Codable {
 }
 
 /// Test summary statistics
-public struct TestSummary: Codable {
+public struct DebugTestSummary: Codable, Sendable {
     public let totalTests: Int
     public let passedTests: Int
     public let failedTests: Int
@@ -257,7 +257,7 @@ public struct TestSummary: Codable {
 }
 
 /// System metrics captured during testing
-public struct SystemTestMetrics: Codable {
+public struct DebugSystemTestMetrics: Codable, Sendable {
     public let peakMemoryUsage: Double
     public let averageCPUUsage: Double
     public let peakCPUUsage: Double
@@ -291,10 +291,10 @@ public final class DebugLogger: ObservableObject {
 
     // MARK: - Published Properties
 
-    @Published public private(set) var logs: [LogEntry] = []
+    @Published public private(set) var logs: [DebugLogEntry] = []
     @Published public private(set) var isRecording: Bool = true
-    @Published public var minimumLevel: LogLevel = .debug
-    @Published public var enabledCategories: Set<LogCategory> = Set(LogCategory.allCases)
+    @Published public var minimumLevel: DebugLogLevel = .debug
+    @Published public var enabledCategories: Set<DebugLogCategory> = Set(DebugLogCategory.allCases)
 
     // MARK: - Private Properties
 
@@ -303,7 +303,7 @@ public final class DebugLogger: ObservableObject {
     private let maxLogEntries = 10000
     private var logFileHandle: FileHandle?
     private var currentLogFilePath: URL?
-    private var testResults: [TestResult] = []
+    private var testResults: [DebugTestResult] = []
     private var testStartTime: Date?
     private var sessionID: UUID = UUID()
 
@@ -324,15 +324,15 @@ public final class DebugLogger: ObservableObject {
 
     private init() {
         startNewLogFile()
-        log(.info, category: .app, message: "DebugLogger initialized - Session: \(sessionID.uuidString)")
+        log(DebugLogLevel.info, category: DebugLogCategory.app, message: "DebugLogger initialized - Session: \(sessionID.uuidString)")
     }
 
     // MARK: - Public Logging Methods
 
     /// Log a message with full context
     public func log(
-        _ level: LogLevel,
-        category: LogCategory,
+        _ level: DebugLogLevel,
+        category: DebugLogCategory,
         message: String,
         additionalInfo: [String: String]? = nil,
         includeStackTrace: Bool = false,
@@ -344,7 +344,7 @@ public final class DebugLogger: ObservableObject {
 
         let stackTrace: String? = includeStackTrace ? Thread.callStackSymbols.joined(separator: "\n") : nil
 
-        let entry = LogEntry(
+        let entry = DebugLogEntry(
             level: level,
             category: category,
             message: message,
@@ -377,28 +377,28 @@ public final class DebugLogger: ObservableObject {
 
     // MARK: - Convenience Methods
 
-    public func verbose(_ message: String, category: LogCategory = .app, file: String = #file, function: String = #function, line: Int = #line) {
-        log(.verbose, category: category, message: message, file: file, function: function, line: line)
+    public func verbose(_ message: String, category: DebugLogCategory = .app, file: String = #file, function: String = #function, line: Int = #line) {
+        log(DebugLogLevel.verbose, category: category, message: message, file: file, function: function, line: line)
     }
 
-    public func debug(_ message: String, category: LogCategory = .app, file: String = #file, function: String = #function, line: Int = #line) {
-        log(.debug, category: category, message: message, file: file, function: function, line: line)
+    public func debug(_ message: String, category: DebugLogCategory = .app, file: String = #file, function: String = #function, line: Int = #line) {
+        log(DebugLogLevel.debug, category: category, message: message, file: file, function: function, line: line)
     }
 
-    public func info(_ message: String, category: LogCategory = .app, file: String = #file, function: String = #function, line: Int = #line) {
-        log(.info, category: category, message: message, file: file, function: function, line: line)
+    public func info(_ message: String, category: DebugLogCategory = .app, file: String = #file, function: String = #function, line: Int = #line) {
+        log(DebugLogLevel.info, category: category, message: message, file: file, function: function, line: line)
     }
 
-    public func warning(_ message: String, category: LogCategory = .app, file: String = #file, function: String = #function, line: Int = #line) {
-        log(.warning, category: category, message: message, file: file, function: function, line: line)
+    public func warning(_ message: String, category: DebugLogCategory = .app, file: String = #file, function: String = #function, line: Int = #line) {
+        log(DebugLogLevel.warning, category: category, message: message, file: file, function: function, line: line)
     }
 
-    public func error(_ message: String, category: LogCategory = .app, additionalInfo: [String: String]? = nil, file: String = #file, function: String = #function, line: Int = #line) {
-        log(.error, category: category, message: message, additionalInfo: additionalInfo, includeStackTrace: true, file: file, function: function, line: line)
+    public func error(_ message: String, category: DebugLogCategory = .app, additionalInfo: [String: String]? = nil, file: String = #file, function: String = #function, line: Int = #line) {
+        log(DebugLogLevel.error, category: category, message: message, additionalInfo: additionalInfo, includeStackTrace: true, file: file, function: function, line: line)
     }
 
-    public func critical(_ message: String, category: LogCategory = .app, additionalInfo: [String: String]? = nil, file: String = #file, function: String = #function, line: Int = #line) {
-        log(.critical, category: category, message: message, additionalInfo: additionalInfo, includeStackTrace: true, file: file, function: function, line: line)
+    public func critical(_ message: String, category: DebugLogCategory = .app, additionalInfo: [String: String]? = nil, file: String = #file, function: String = #function, line: Int = #line) {
+        log(DebugLogLevel.critical, category: category, message: message, additionalInfo: additionalInfo, includeStackTrace: true, file: file, function: function, line: line)
     }
 
     // MARK: - UI Action Logging
@@ -408,17 +408,17 @@ public final class DebugLogger: ObservableObject {
         if let element = element {
             message += " on \(element)"
         }
-        log(.debug, category: .ui, message: message, file: file, function: function, line: line)
+        log(DebugLogLevel.debug, category: DebugLogCategory.ui, message: message, file: file, function: function, line: line)
     }
 
     public func logNavigation(from source: String, to destination: String, file: String = #file, function: String = #function, line: Int = #line) {
-        log(.info, category: .navigation, message: "Navigation: \(source) -> \(destination)", file: file, function: function, line: line)
+        log(DebugLogLevel.info, category: DebugLogCategory.navigation, message: "Navigation: \(source) -> \(destination)", file: file, function: function, line: line)
     }
 
     public func logPerformance(_ operation: String, duration: TimeInterval, file: String = #file, function: String = #function, line: Int = #line) {
         let durationMs = duration * 1000
-        let level: LogLevel = durationMs > 1000 ? .warning : (durationMs > 500 ? .info : .debug)
-        log(level, category: .performance, message: "\(operation) completed in \(String(format: "%.2f", durationMs))ms", file: file, function: function, line: line)
+        let level: DebugLogLevel = durationMs > 1000 ? DebugLogLevel.warning : (durationMs > 500 ? DebugLogLevel.info : DebugLogLevel.debug)
+        log(level, category: DebugLogCategory.performance, message: "\(operation) completed in \(String(format: "%.2f", durationMs))ms", file: file, function: function, line: line)
     }
 
     // MARK: - Test Logging
@@ -427,16 +427,17 @@ public final class DebugLogger: ObservableObject {
         testStartTime = Date()
         testResults.removeAll()
         sessionID = UUID()
-        log(.info, category: .test, message: "Test session started - ID: \(sessionID.uuidString)")
+        log(DebugLogLevel.info, category: DebugLogCategory.test, message: "Test session started - ID: \(sessionID.uuidString)")
     }
 
-    public func recordTestResult(_ result: TestResult) {
+    public func recordTestResult(_ result: DebugTestResult) {
         testResults.append(result)
         let status = result.passed ? "PASSED" : "FAILED"
-        log(result.passed ? .info : .error, category: .test, message: "Test '\(result.testName)' \(status) in \(String(format: "%.2f", result.duration))s")
+        let level: DebugLogLevel = result.passed ? DebugLogLevel.info : DebugLogLevel.error
+        log(level, category: DebugLogCategory.test, message: "Test '\(result.testName)' \(status) in \(String(format: "%.2f", result.duration))s")
     }
 
-    public func endTestSession() -> TestReport? {
+    public func endTestSession() -> DebugTestReport? {
         guard let startTime = testStartTime else { return nil }
 
         let endTime = Date()
@@ -444,17 +445,17 @@ public final class DebugLogger: ObservableObject {
         let buildNumber = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "Unknown"
         let macOSVersion = ProcessInfo.processInfo.operatingSystemVersionString
 
-        let report = TestReport(
+        let report = DebugTestReport(
             appVersion: appVersion,
             buildNumber: buildNumber,
             macOSVersion: macOSVersion,
             startTime: startTime,
             endTime: endTime,
             results: testResults,
-            systemMetrics: SystemTestMetrics()
+            systemMetrics: DebugSystemTestMetrics()
         )
 
-        log(.info, category: .test, message: "Test session ended - \(report.summary.passedTests)/\(report.summary.totalTests) passed (\(String(format: "%.1f", report.summary.passRate))%)")
+        log(DebugLogLevel.info, category: DebugLogCategory.test, message: "Test session ended - \(report.summary.passedTests)/\(report.summary.totalTests) passed (\(String(format: "%.1f", report.summary.passRate))%)")
 
         // Save report
         saveTestReport(report)
@@ -491,14 +492,14 @@ public final class DebugLogger: ObservableObject {
         logFileHandle?.write(header.data(using: .utf8) ?? Data())
     }
 
-    private func writeToFile(_ entry: LogEntry) {
+    private func writeToFile(_ entry: DebugLogEntry) {
         logQueue.async { [weak self] in
             let line = entry.formattedMessage + "\n"
             self?.logFileHandle?.write(line.data(using: .utf8) ?? Data())
         }
     }
 
-    private func saveTestReport(_ report: TestReport) {
+    private func saveTestReport(_ report: DebugTestReport) {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
         let timestamp = dateFormatter.string(from: Date())
@@ -511,7 +512,7 @@ public final class DebugLogger: ObservableObject {
 
         if let data = try? encoder.encode(report) {
             try? data.write(to: reportPath)
-            log(.info, category: .test, message: "Test report saved to: \(reportPath.path)")
+            log(DebugLogLevel.info, category: DebugLogCategory.test, message: "Test report saved to: \(reportPath.path)")
         }
     }
 
@@ -529,20 +530,7 @@ public final class DebugLogger: ObservableObject {
         encoder.dateEncodingStrategy = .iso8601
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
 
-        let exportData: [String: Any] = [
-            "sessionID": sessionID.uuidString,
-            "exportTimestamp": ISO8601DateFormatter().string(from: Date()),
-            "totalEntries": logs.count
-        ]
-
-        struct ExportPayload: Codable {
-            let sessionID: String
-            let exportTimestamp: String
-            let totalEntries: Int
-            let logs: [LogEntry]
-        }
-
-        let payload = ExportPayload(
+        let payload = LogExportPayload(
             sessionID: sessionID.uuidString,
             exportTimestamp: ISO8601DateFormatter().string(from: Date()),
             totalEntries: logs.count,
@@ -551,7 +539,7 @@ public final class DebugLogger: ObservableObject {
 
         if let data = try? encoder.encode(payload) {
             try? data.write(to: exportPath)
-            log(.info, category: .app, message: "Logs exported to: \(exportPath.path)")
+            log(DebugLogLevel.info, category: DebugLogCategory.app, message: "Logs exported to: \(exportPath.path)")
             return exportPath
         }
 
@@ -562,18 +550,8 @@ public final class DebugLogger: ObservableObject {
     public func exportForAutomatedTesting() -> URL? {
         let exportPath = logDirectory.appendingPathComponent("automated_test_feed.json")
 
-        // Create a simplified format for automated testing
-        struct AutomatedTestLog: Codable {
-            let timestamp: String
-            let level: String
-            let category: String
-            let message: String
-            let location: String
-            let additionalInfo: [String: String]?
-        }
-
         let testLogs = logs.map { entry in
-            AutomatedTestLog(
+            AutomatedTestLogEntry(
                 timestamp: entry.formattedTimestamp,
                 level: entry.level.name,
                 category: entry.category.rawValue,
@@ -596,7 +574,7 @@ public final class DebugLogger: ObservableObject {
 
     // MARK: - Filtering
 
-    public func getFilteredLogs(level: LogLevel? = nil, category: LogCategory? = nil, searchText: String? = nil) -> [LogEntry] {
+    public func getFilteredLogs(level: DebugLogLevel? = nil, category: DebugLogCategory? = nil, searchText: String? = nil) -> [DebugLogEntry] {
         var filtered = logs
 
         if let level = level {
@@ -618,7 +596,7 @@ public final class DebugLogger: ObservableObject {
 
     public func clearLogs() {
         logs.removeAll()
-        log(.info, category: .app, message: "Logs cleared")
+        log(DebugLogLevel.info, category: DebugLogCategory.app, message: "Logs cleared")
     }
 
     public func getLogDirectory() -> URL {
@@ -630,12 +608,32 @@ public final class DebugLogger: ObservableObject {
     }
 
     public var errorCount: Int {
-        logs.filter { $0.level >= .error }.count
+        logs.filter { $0.level >= DebugLogLevel.error }.count
     }
 
     public var warningCount: Int {
-        logs.filter { $0.level == .warning }.count
+        logs.filter { $0.level == DebugLogLevel.warning }.count
     }
+}
+
+// MARK: - Export Payload Structs
+
+/// Payload structure for log exports
+private struct LogExportPayload: Codable {
+    let sessionID: String
+    let exportTimestamp: String
+    let totalEntries: Int
+    let logs: [DebugLogEntry]
+}
+
+/// Simplified log entry for automated testing
+private struct AutomatedTestLogEntry: Codable {
+    let timestamp: String
+    let level: String
+    let category: String
+    let message: String
+    let location: String
+    let additionalInfo: [String: String]?
 }
 
 // MARK: - Log Extension for SwiftUI Views
@@ -654,7 +652,7 @@ extension View {
     func logDisappearance(viewName: String) -> some View {
         self.onDisappear {
             Task { @MainActor in
-                DebugLogger.shared.debug("View disappeared: \(viewName)", category: .navigation)
+                DebugLogger.shared.debug("View disappeared: \(viewName)", category: DebugLogCategory.navigation)
             }
         }
     }
@@ -682,6 +680,6 @@ public struct PerformanceMeasure {
 
 /// Quick log function for use throughout the app
 @MainActor
-public func appLog(_ message: String, level: LogLevel = .info, category: LogCategory = .app, file: String = #file, function: String = #function, line: Int = #line) {
+public func appLog(_ message: String, level: DebugLogLevel = DebugLogLevel.info, category: DebugLogCategory = DebugLogCategory.app, file: String = #file, function: String = #function, line: Int = #line) {
     DebugLogger.shared.log(level, category: category, message: message, file: file, function: function, line: line)
 }
