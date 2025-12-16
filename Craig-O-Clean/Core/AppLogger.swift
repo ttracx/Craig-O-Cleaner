@@ -66,7 +66,7 @@ struct LogEntry: Codable, Identifiable, Hashable {
         metadata: [String: String] = [:],
         stackTrace: String? = nil,
         error: Error? = nil,
-        sessionId: String = AppLogger.shared.sessionId,
+        sessionId: String,
         threadId: String = Thread.current.description
     ) {
         self.id = id
@@ -132,7 +132,7 @@ struct PerformanceMetric: Codable, Identifiable {
         operation: String,
         duration: TimeInterval,
         metadata: [String: String] = [:],
-        sessionId: String = AppLogger.shared.sessionId
+        sessionId: String
     ) {
         self.id = id
         self.timestamp = timestamp
@@ -161,7 +161,7 @@ struct UIEvent: Codable, Identifiable {
         viewName: String,
         action: String,
         metadata: [String: String] = [:],
-        sessionId: String = AppLogger.shared.sessionId
+        sessionId: String
     ) {
         self.id = id
         self.timestamp = timestamp
@@ -240,7 +240,8 @@ final class AppLogger: ObservableObject {
                 "line": "\(line)"
             ]) { _, new in new },
             stackTrace: stackTrace,
-            error: error
+            error: error,
+            sessionId: sessionId
         )
         
         logQueue.async { [weak self] in
@@ -295,7 +296,8 @@ final class AppLogger: ObservableObject {
         let metric = PerformanceMetric(
             operation: operation,
             duration: duration,
-            metadata: metadata
+            metadata: metadata,
+            sessionId: sessionId
         )
         
         Task { @MainActor in
@@ -315,7 +317,8 @@ final class AppLogger: ObservableObject {
             eventType: eventType,
             viewName: viewName,
             action: action,
-            metadata: metadata
+            metadata: metadata,
+            sessionId: sessionId
         )
         
         Task { @MainActor in

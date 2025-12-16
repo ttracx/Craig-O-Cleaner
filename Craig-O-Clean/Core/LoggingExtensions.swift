@@ -113,9 +113,9 @@ extension AppLogger {
             let result = try await operationBlock()
             info("\(operation) completed successfully", category: category, metadata: metadata)
             return result
-        } catch {
-            error("\(operation) failed", category: category, metadata: metadata, error: error)
-            throw error
+        } catch let caughtError {
+            self.error("\(operation) failed", category: category, metadata: metadata, error: caughtError)
+            throw caughtError
         }
     }
 }
