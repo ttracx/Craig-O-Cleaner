@@ -384,7 +384,7 @@ final class AppLogger: ObservableObject {
         return result.0
     }
     
-    private static func generateTextReportStatic(logs: [LogEntry], performanceMetrics: [PerformanceMetric], uiEvents: [UIEvent], sessionId: String) -> String {
+    private nonisolated static func generateTextReportStatic(logs: [LogEntry], performanceMetrics: [PerformanceMetric], uiEvents: [UIEvent], sessionId: String) -> String {
         var report = """
         ========================================
         Craig-O-Clean Debug Report
@@ -435,7 +435,7 @@ final class AppLogger: ObservableObject {
         return report
     }
     
-    private static func generateCSVReportStatic(logs: [LogEntry], performanceMetrics: [PerformanceMetric], uiEvents: [UIEvent]) -> String {
+    private nonisolated static func generateCSVReportStatic(logs: [LogEntry], performanceMetrics: [PerformanceMetric], uiEvents: [UIEvent]) -> String {
         var csv = "Type,Timestamp,Category/Operation/View,Message/Action,Duration,Metadata,Error\n"
         
         // Logs

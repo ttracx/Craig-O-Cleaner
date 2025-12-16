@@ -443,7 +443,7 @@ public final class DebugLogger: ObservableObject {
         let endTime = Date()
         let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown"
         let buildNumber = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "Unknown"
-        let macOSVersion = ProcessInfo.processInfo.operatingSystemVersionString
+        let macOSVersion = Foundation.ProcessInfo.processInfo.operatingSystemVersionString
 
         let report = DebugTestReport(
             appVersion: appVersion,
@@ -485,17 +485,18 @@ public final class DebugLogger: ObservableObject {
         Started: \(Date())
         App Version: \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown")
         Build: \(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "Unknown")
-        macOS: \(ProcessInfo.processInfo.operatingSystemVersionString)
+        macOS: \(Foundation.ProcessInfo.processInfo.operatingSystemVersionString)
         ================================================================================
 
         """
-        logFileHandle?.write(header.data(using: .utf8) ?? Data())
+        logFileHandle?.write(header.data(using: String.Encoding.utf8) ?? Data())
     }
 
     private func writeToFile(_ entry: DebugLogEntry) {
-        logQueue.async { [weak self] in
+        let fileHandle = logFileHandle
+        logQueue.async {
             let line = entry.formattedMessage + "\n"
-            self?.logFileHandle?.write(line.data(using: .utf8) ?? Data())
+            fileHandle?.write(line.data(using: String.Encoding.utf8) ?? Data())
         }
     }
 

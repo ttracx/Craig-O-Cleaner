@@ -1,31 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict>
-	<!-- App Sandbox - ENABLED for Mac App Store distribution -->
-	<key>com.apple.security.app-sandbox</key>
-	<true/>
-
-	<!-- Automation permission to control other apps (browsers) via AppleScript -->
-	<key>com.apple.security.automation.apple-events</key>
-	<true/>
-
-	<!-- Allow reading user-selected files (for export) -->
-	<key>com.apple.security.files.user-selected.read-write</key>
-	<true/>
-
-	<!-- Network access (if needed for future features) -->
-	<key>com.apple.security.network.client</key>
-	<true/>
-
-	<!-- Sign in with Apple - Uncomment when you have a provisioning profile with this capability -->
-	<!-- To enable: Go to Apple Developer Portal > Certificates, Identifiers & Profiles > 
-	     Your App ID > Enable "Sign in with Apple", then create a new provisioning profile -->
-	<!--
-	<key>com.apple.developer.applesignin</key>
-	<array>
-		<string>Default</string>
-	</array>
-	-->
-</dict>
+<dict/>
 </plist>

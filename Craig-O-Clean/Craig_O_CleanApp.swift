@@ -590,34 +590,25 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             AppLogger.shared.info("Smart cleanup initiated", category: "App")
             let tracker = AppLogger.shared.startPerformanceTracking(operation: "SmartCleanup")
             
-            do {
-                let optimizer = MemoryOptimizerService()
-                await optimizer.analyzeMemoryUsage()
-                let result = await optimizer.smartCleanup()
-                
-                tracker.end()
-                
-                AppLogger.shared.info(
-                    "Smart cleanup completed",
-                    category: "App",
-                    metadata: [
-                        "appsTerminated": "\(result.appsTerminated)",
-                        "memoryFreed": result.formattedMemoryFreed
-                    ]
-                )
-                
-                showNotification(
-                    title: "Smart Cleanup Complete",
-                    body: "Freed \(result.formattedMemoryFreed) by closing \(result.appsTerminated) apps"
-                )
-            } catch {
-                AppLogger.shared.error(
-                    "Smart cleanup failed",
-                    category: "App",
-                    error: error
-                )
-                tracker.end()
-            }
+            let optimizer = MemoryOptimizerService()
+            await optimizer.analyzeMemoryUsage()
+            let result = await optimizer.smartCleanup()
+
+            tracker.end()
+
+            AppLogger.shared.info(
+                "Smart cleanup completed",
+                category: "App",
+                metadata: [
+                    "appsTerminated": "\(result.appsTerminated)",
+                    "memoryFreed": result.formattedMemoryFreed
+                ]
+            )
+
+            showNotification(
+                title: "Smart Cleanup Complete",
+                body: "Freed \(result.formattedMemoryFreed) by closing \(result.appsTerminated) apps"
+            )
         }
     }
     
