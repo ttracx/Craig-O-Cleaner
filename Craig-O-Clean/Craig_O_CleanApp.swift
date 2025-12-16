@@ -155,9 +155,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var hasShownEasterEggToday = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Initialize logging
+        AppLogger.shared.info("Application launching", category: "App", metadata: [
+            "version": "1.0",
+            "build": Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "unknown"
+        ])
+        
         // Initialize system metrics for menu bar updates
         systemMetrics = SystemMetricsService()
         processManager = ProcessManager()
+        
+        AppLogger.shared.info("Services initialized", category: "App")
 
         // Request notification permissions
         requestNotificationPermissions()
@@ -565,19 +573,51 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc func quitApp() {
-        NSApp.terminate(nil)
+        // Export logs before quitting
+        Task {
+            do {
+                let logURL = try await AppLogger.shared.exportLogs(format: .json)
+                AppLogger.shared.info("Logs exported before quit: \(logURL.path)", category: "App")
+            } catch {
+                AppLogger.shared.warning("Failed to export logs before quit: \(error.localizedDescription)", category: "App")
+            }
+            NSApp.terminate(nil)
+        }
     }
     
     @objc func performSmartCleanup() {
         Task { @MainActor in
-            let optimizer = MemoryOptimizerService()
-            await optimizer.analyzeMemoryUsage()
-            let result = await optimizer.smartCleanup()
+            AppLogger.shared.info("Smart cleanup initiated", category: "App")
+            let tracker = AppLogger.shared.startPerformanceTracking(operation: "SmartCleanup")
             
-            showNotification(
-                title: "Smart Cleanup Complete",
-                body: "Freed \(result.formattedMemoryFreed) by closing \(result.appsTerminated) apps"
-            )
+            do {
+                let optimizer = MemoryOptimizerService()
+                await optimizer.analyzeMemoryUsage()
+                let result = await optimizer.smartCleanup()
+                
+                tracker.end()
+                
+                AppLogger.shared.info(
+                    "Smart cleanup completed",
+                    category: "App",
+                    metadata: [
+                        "appsTerminated": "\(result.appsTerminated)",
+                        "memoryFreed": result.formattedMemoryFreed
+                    ]
+                )
+                
+                showNotification(
+                    title: "Smart Cleanup Complete",
+                    body: "Freed \(result.formattedMemoryFreed) by closing \(result.appsTerminated) apps"
+                )
+            } catch {
+                AppLogger.shared.error(
+                    "Smart cleanup failed",
+                    category: "App",
+                    error: error
+                )
+                tracker.end()
+            }
         }
     }
     

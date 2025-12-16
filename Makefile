@@ -1,7 +1,8 @@
 # ClearMind Control Center Makefile
 # Build, test, and package commands
 
-.PHONY: all build release test clean archive dmg help setup sync setup-auto-sync watch-sync
+.PHONY: all build release test clean archive dmg help setup sync setup-auto-sync watch-sync \
+       test-automated test-quick test-full test-report agent-fix
 
 # Default target
 all: build
@@ -25,6 +26,13 @@ help:
 	@echo "  test-unit    - Run unit tests only"
 	@echo "  test-ui      - Run UI tests only"
 	@echo "  clean        - Clean build artifacts"
+	@echo ""
+	@echo "Automated UX Testing:"
+	@echo "  test-automated - Run full automated E2E testing with reports"
+	@echo "  test-quick     - Run quick sanity tests"
+	@echo "  test-full      - Run full suite with clean build"
+	@echo "  test-report    - Generate report from existing results"
+	@echo "  agent-fix      - Show agent orchestration instructions"
 	@echo ""
 	@echo "Distribution:"
 	@echo "  archive      - Create release archive"
@@ -192,3 +200,60 @@ watch-sync:
 		echo "fswatch not found. Install with: brew install fswatch"; \
 		echo "Then run: make watch-sync"; \
 	fi
+
+# =============================================================================
+# Automated UX Testing
+# =============================================================================
+
+# Run full automated E2E testing suite with report generation
+test-automated:
+	@echo "Running automated E2E testing suite..."
+	@./scripts/automated-ux-testing.sh --full --verbose
+
+# Run quick sanity tests
+test-quick:
+	@echo "Running quick sanity tests..."
+	@./scripts/automated-ux-testing.sh --quick
+
+# Run full test suite with clean build
+test-full:
+	@echo "Running full test suite with clean build..."
+	@./scripts/automated-ux-testing.sh --full --clean --verbose
+
+# Generate test report from existing results
+test-report:
+	@echo "Generating test report..."
+	@python3 scripts/generate-test-report.py --input test-output --output test-output/reports
+
+# Show agent orchestration prompt for fixing test issues
+agent-fix:
+	@echo ""
+	@echo "=========================================="
+	@echo "Agent Orchestration Instructions"
+	@echo "=========================================="
+	@echo ""
+	@echo "To fix issues identified by automated testing:"
+	@echo ""
+	@echo "1. First, run the automated tests:"
+	@echo "   make test-automated"
+	@echo ""
+	@echo "2. Review the generated reports:"
+	@echo "   - test-output/reports/test-report-*.md"
+	@echo "   - test-output/agent-prompts/agent-orchestration-prompt-*.md"
+	@echo ""
+	@echo "3. Use the agent orchestrator in Cursor:"
+	@echo "   @.cursor/agents/agent-orchestrator.md"
+	@echo ""
+	@echo "4. Copy the contents of the agent prompt file"
+	@echo "   and paste it to start the fix workflow"
+	@echo ""
+	@echo "5. Or use the orchestration template:"
+	@echo "   @.cursor/prompts/automated-test-fix-orchestration.md"
+	@echo ""
+	@if [ -d "test-output/agent-prompts" ]; then \
+		latest=$$(ls -t test-output/agent-prompts/agent-orchestration-prompt-*.md 2>/dev/null | head -1); \
+		if [ -n "$$latest" ]; then \
+			echo "Latest agent prompt: $$latest"; \
+		fi; \
+	fi
+	@echo ""
