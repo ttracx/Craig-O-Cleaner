@@ -214,12 +214,8 @@ struct MenuBarContentView: View {
                     color: .purple
                 ) {
                     Task {
-                        do {
-                            await memoryOptimizer.analyzeMemoryUsage()
-                            _ = await memoryOptimizer.quickCleanupBackground()
-                        } catch {
-                            print("Close background error: \(error.localizedDescription)")
-                        }
+                        await memoryOptimizer.analyzeMemoryUsage()
+                        _ = await memoryOptimizer.quickCleanupBackground()
                     }
                 }
                 
