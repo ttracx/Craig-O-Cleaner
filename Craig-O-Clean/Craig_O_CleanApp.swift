@@ -96,37 +96,40 @@ enum EasterEggManager {
         let hour = Calendar.current.component(.hour, from: Date())
         let weekday = Calendar.current.component(.weekday, from: Date())
         let isWeekend = weekday == 1 || weekday == 7
-        
+
+        // Default fallback message in case arrays are empty
+        let fallbackMessage = EasterEggMessage("🧹 Craig-O-Clean", "Your memory is being optimized!")
+
         // 1% chance for legendary message
         if Int.random(in: 1...100) == 42 {
-            return legendaryMessages.randomElement()!
+            return legendaryMessages.randomElement() ?? fallbackMessage
         }
-        
+
         // 15% chance for Craig-specific message
         if Int.random(in: 1...100) <= 15 {
-            return craigMessages.randomElement()!
+            return craigMessages.randomElement() ?? fallbackMessage
         }
-        
+
         // Time-based messages (30% chance when applicable)
         if Int.random(in: 1...100) <= 30 {
             // Early morning (5 AM - 8 AM)
             if hour >= 5 && hour < 8 {
-                return morningMessages.randomElement()!
+                return morningMessages.randomElement() ?? fallbackMessage
             }
-            
+
             // Late night (11 PM - 4 AM)
             if hour >= 23 || hour < 4 {
-                return lateNightMessages.randomElement()!
+                return lateNightMessages.randomElement() ?? fallbackMessage
             }
-            
+
             // Weekend
             if isWeekend {
-                return weekendMessages.randomElement()!
+                return weekendMessages.randomElement() ?? fallbackMessage
             }
         }
-        
+
         // Default: random funny message
-        return funnyMessages.randomElement()!
+        return funnyMessages.randomElement() ?? fallbackMessage
     }
     
     static var shouldShowEasterEgg: Bool {
@@ -589,39 +592,56 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         Task { @MainActor in
             AppLogger.shared.info("Smart cleanup initiated", category: "App")
             let tracker = AppLogger.shared.startPerformanceTracking(operation: "SmartCleanup")
-            
-            let optimizer = MemoryOptimizerService()
-            await optimizer.analyzeMemoryUsage()
-            let result = await optimizer.smartCleanup()
 
-            tracker.end()
+            do {
+                let optimizer = MemoryOptimizerService()
+                await optimizer.analyzeMemoryUsage()
+                let result = await optimizer.smartCleanup()
 
-            AppLogger.shared.info(
-                "Smart cleanup completed",
-                category: "App",
-                metadata: [
-                    "appsTerminated": "\(result.appsTerminated)",
-                    "memoryFreed": result.formattedMemoryFreed
-                ]
-            )
+                tracker.end()
 
-            showNotification(
-                title: "Smart Cleanup Complete",
-                body: "Freed \(result.formattedMemoryFreed) by closing \(result.appsTerminated) apps"
-            )
+                AppLogger.shared.info(
+                    "Smart cleanup completed",
+                    category: "App",
+                    metadata: [
+                        "appsTerminated": "\(result.appsTerminated)",
+                        "memoryFreed": result.formattedMemoryFreed
+                    ]
+                )
+
+                showNotification(
+                    title: "Smart Cleanup Complete",
+                    body: "Freed \(result.formattedMemoryFreed) by closing \(result.appsTerminated) apps"
+                )
+            } catch {
+                tracker.end()
+                AppLogger.shared.error("Smart cleanup failed", category: "App", error: error)
+                showNotification(
+                    title: "Smart Cleanup Failed",
+                    body: "An error occurred during cleanup. Please try again."
+                )
+            }
         }
     }
     
     @objc func closeBackgroundApps() {
         Task { @MainActor in
-            let optimizer = MemoryOptimizerService()
-            await optimizer.analyzeMemoryUsage()
-            let result = await optimizer.quickCleanupBackground()
-            
-            showNotification(
-                title: "Background Apps Closed",
-                body: "Freed \(result.formattedMemoryFreed) by closing \(result.appsTerminated) background apps"
-            )
+            do {
+                let optimizer = MemoryOptimizerService()
+                await optimizer.analyzeMemoryUsage()
+                let result = await optimizer.quickCleanupBackground()
+
+                showNotification(
+                    title: "Background Apps Closed",
+                    body: "Freed \(result.formattedMemoryFreed) by closing \(result.appsTerminated) background apps"
+                )
+            } catch {
+                AppLogger.shared.error("Close background apps failed", category: "App", error: error)
+                showNotification(
+                    title: "Cleanup Failed",
+                    body: "An error occurred while closing background apps."
+                )
+            }
         }
     }
     
