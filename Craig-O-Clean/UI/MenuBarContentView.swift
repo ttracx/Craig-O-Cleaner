@@ -24,6 +24,12 @@ enum MenuBarTab: String, CaseIterable {
     }
 }
 
+// MARK: - AutoCleanup Holder (prevents @State with class type crash)
+
+final class AutoCleanupHolder: ObservableObject {
+    @Published var service: AutoCleanupService?
+}
+
 // MARK: - Main Menu Bar Content View
 
 struct MenuBarContentView: View {
@@ -31,6 +37,7 @@ struct MenuBarContentView: View {
     @StateObject private var processManager = ProcessManager()
     @StateObject private var memoryOptimizer = MemoryOptimizerService()
     @StateObject private var browserAutomation = BrowserAutomationService()
+    @StateObject private var autoCleanupHolder = AutoCleanupHolder()
 
     @EnvironmentObject var auth: AuthManager
     @EnvironmentObject var userStore: LocalUserStore
@@ -40,7 +47,6 @@ struct MenuBarContentView: View {
 
     @State private var selectedTab: MenuBarTab = .dashboard
     @State private var isRefreshing = false
-    @State private var autoCleanup: AutoCleanupService?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -55,14 +61,14 @@ struct MenuBarContentView: View {
             // Tab content
             tabContent
         }
-        .frame(width: 380)
+        .frame(width: 360)
         .onAppear {
             systemMetrics.startMonitoring()
             processManager.updateProcessList()
 
             // Initialize AutoCleanupService with dependencies
-            if autoCleanup == nil {
-                autoCleanup = AutoCleanupService(
+            if autoCleanupHolder.service == nil {
+                autoCleanupHolder.service = AutoCleanupService(
                     systemMetrics: systemMetrics,
                     memoryOptimizer: memoryOptimizer,
                     processManager: processManager
@@ -80,12 +86,18 @@ struct MenuBarContentView: View {
 
     private var headerSection: some View {
         HStack {
-            Image(systemName: "brain.head.profile")
-                .font(.title2)
-                .foregroundColor(.accentColor)
+            if let appIcon = NSImage(named: "AppIcon") {
+                Image(nsImage: appIcon)
+                    .resizable()
+                    .frame(width: 22, height: 22)
+            } else {
+                Image(systemName: "brain.head.profile")
+                    .font(.title2)
+                    .foregroundColor(.accentColor)
+            }
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("CraigOClean")
+                Text("Craig-O-Clean")
                     .font(.headline)
                     .fontWeight(.bold)
 
@@ -190,7 +202,7 @@ struct MenuBarContentView: View {
                 browserAutomation: browserAutomation
             )
         case .settings:
-            if let autoCleanup = autoCleanup {
+            if let autoCleanup = autoCleanupHolder.service {
                 MenuBarSettingsTab(
                     autoCleanup: autoCleanup,
                     onExpandClick: onExpandClick

@@ -25,9 +25,15 @@ struct MenuBarView: View {
         VStack(spacing: 0) {
             // Header
             HStack {
-                Image(systemName: "cpu")
-                    .font(.title2)
-                    .foregroundColor(.accentColor)
+                if let appIcon = NSImage(named: "AppIcon") {
+                    Image(nsImage: appIcon)
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                } else {
+                    Image(systemName: "cpu")
+                        .font(.title2)
+                        .foregroundColor(.accentColor)
+                }
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Craig-O-Clean")
