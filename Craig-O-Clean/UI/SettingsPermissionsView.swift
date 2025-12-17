@@ -589,30 +589,44 @@ struct SettingsPermissionsView: View {
     }
     
     // MARK: - About Section
-    
+
+    private var appIcon: NSImage {
+        NSApp.applicationIconImage ?? NSImage(named: "AppIcon") ?? NSImage()
+    }
+
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+    }
+
+    private var buildNumber: String {
+        Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+    }
+
     private var aboutSection: some View {
         SettingsSection(title: "About", icon: "info.circle") {
             HStack(spacing: 16) {
-                Image(systemName: "brain.head.profile")
-                    .font(.system(size: 48))
-                    .foregroundColor(.accentColor)
-                
+                Image(nsImage: appIcon)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 64, height: 64)
+                    .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Craig-O-Clean")
                         .font(.title2)
                         .fontWeight(.bold)
-                    
-                    Text("Version 1.0 (Build 1)")
+
+                    Text("Version \(appVersion) (Build \(buildNumber))")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
-                    
+
                     Text("A macOS system utility for Apple Silicon")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
-                
+
                 Spacer()
-                
+
                 Button("About") {
                     showingAbout = true
                 }
@@ -909,48 +923,62 @@ struct DiagnosticRow: View {
 
 struct AboutSheet: View {
     @Environment(\.dismiss) var dismiss
-    
+
+    private var appIcon: NSImage {
+        NSApp.applicationIconImage ?? NSImage(named: "AppIcon") ?? NSImage()
+    }
+
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+    }
+
+    private var buildNumber: String {
+        Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+    }
+
     var body: some View {
         VStack(spacing: 24) {
-            // Icon and title
+            // App Icon and title
             VStack(spacing: 12) {
-                Image(systemName: "brain.head.profile")
-                    .font(.system(size: 80))
-                    .foregroundColor(.accentColor)
-                
+                Image(nsImage: appIcon)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 128, height: 128)
+                    .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
+
                 Text("Craig-O-Clean")
                     .font(.largeTitle)
                     .fontWeight(.bold)
-                
-                Text("Version 1.0")
+
+                Text("Version \(appVersion) (\(buildNumber))")
                     .font(.title3)
                     .foregroundColor(.secondary)
             }
-            
+
             // Description
             Text("A powerful macOS utility for monitoring system resources, managing processes, optimizing memory, and controlling browser tabs. Built for Apple Silicon.")
                 .multilineTextAlignment(.center)
                 .foregroundColor(.secondary)
                 .padding(.horizontal, 40)
-            
+
             // Credits
             VStack(spacing: 8) {
                 Text("Built with Swift & SwiftUI")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                
+
                 Text("© 2025 CraigOClean.com powered by VibeCaaS.com")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-            
+
             Button("Done") {
                 dismiss()
             }
             .buttonStyle(.borderedProminent)
         }
         .padding(40)
-        .frame(width: 450, height: 400)
+        .frame(width: 450, height: 420)
     }
 }
 
@@ -1035,5 +1063,9 @@ struct PrivacyPolicySheet: View {
     SettingsPermissionsView()
         .environmentObject(SystemMetricsService())
         .environmentObject(PermissionsService())
+        .environmentObject(AuthManager.shared)
+        .environmentObject(LocalUserStore.shared)
+        .environmentObject(SubscriptionManager.shared)
+        .environmentObject(StripeCheckoutService.shared)
         .frame(width: 700, height: 800)
 }

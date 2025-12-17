@@ -118,7 +118,9 @@ final class MemoryOptimizerService: ObservableObject {
         "com.apple.finder",
         "com.apple.dock",
         "com.apple.systempreferences",
-        "com.apple.loginwindow"
+        "com.apple.loginwindow",
+        "com.CraigOClean.controlcenter",
+        "com.craigoclean.app"
     ]
     
     // MARK: - Private Properties
@@ -432,12 +434,17 @@ extension MemoryOptimizerService {
         // Get current running process IDs to validate candidates are still running
         let runningPIDs = Set(NSWorkspace.shared.runningApplications.map { $0.processIdentifier })
 
-        // Filter background apps to only those still running
-        let backgroundApps = getBackgroundApps().filter { runningPIDs.contains($0.processId) }
+        // Get frontmost app PID to exclude from cleanup (don't close what user is actively using)
+        let frontmostPID = NSWorkspace.shared.frontmostApplication?.processIdentifier
+
+        // Filter background apps to only those still running and not frontmost
+        let backgroundApps = getBackgroundApps().filter {
+            runningPIDs.contains($0.processId) && $0.processId != frontmostPID
+        }
         selectedCandidates = Set(backgroundApps)
         return await executeCleanup()
     }
-    
+
     /// Quick cleanup - terminate top memory consumers
     func quickCleanupHeavy(limit: Int = 3) async -> CleanupResult {
         deselectAll()
@@ -445,8 +452,13 @@ extension MemoryOptimizerService {
         // Get current running process IDs to validate candidates are still running
         let runningPIDs = Set(NSWorkspace.shared.runningApplications.map { $0.processIdentifier })
 
-        // Filter heavy apps to only those still running
-        let heavyApps = getTopMemoryConsumers(limit: limit).filter { runningPIDs.contains($0.processId) }
+        // Get frontmost app PID to exclude from cleanup (don't close what user is actively using)
+        let frontmostPID = NSWorkspace.shared.frontmostApplication?.processIdentifier
+
+        // Filter heavy apps to only those still running and not frontmost
+        let heavyApps = getTopMemoryConsumers(limit: limit).filter {
+            runningPIDs.contains($0.processId) && $0.processId != frontmostPID
+        }
         selectedCandidates = Set(heavyApps)
         return await executeCleanup()
     }
@@ -458,8 +470,13 @@ extension MemoryOptimizerService {
         // Get current running process IDs to validate candidates are still running
         let runningPIDs = Set(NSWorkspace.shared.runningApplications.map { $0.processIdentifier })
 
-        // Filter to only candidates that are still running
-        let validCandidates = cleanupCandidates.filter { runningPIDs.contains($0.processId) }
+        // Get frontmost app PID to exclude from cleanup (don't close what user is actively using)
+        let frontmostPID = NSWorkspace.shared.frontmostApplication?.processIdentifier
+
+        // Filter to only candidates that are still running and not the frontmost app
+        let validCandidates = cleanupCandidates.filter {
+            runningPIDs.contains($0.processId) && $0.processId != frontmostPID
+        }
 
         // If no valid candidates, return early with empty result
         guard !validCandidates.isEmpty else {
@@ -478,7 +495,7 @@ extension MemoryOptimizerService {
             $0.isBackgroundApp && $0.memoryUsage > 200 * 1024 * 1024
         }
 
-        // Select top 3 non-critical heavy apps
+        // Select top 3 non-critical heavy apps (excluding frontmost)
         let heavyApps = validCandidates
             .filter { !$0.isBackgroundApp }
             .prefix(3)

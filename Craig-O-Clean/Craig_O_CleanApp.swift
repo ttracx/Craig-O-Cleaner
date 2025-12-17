@@ -593,55 +593,38 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             AppLogger.shared.info("Smart cleanup initiated", category: "App")
             let tracker = AppLogger.shared.startPerformanceTracking(operation: "SmartCleanup")
 
-            do {
-                let optimizer = MemoryOptimizerService()
-                await optimizer.analyzeMemoryUsage()
-                let result = await optimizer.smartCleanup()
+            let optimizer = MemoryOptimizerService()
+            await optimizer.analyzeMemoryUsage()
+            let result = await optimizer.smartCleanup()
 
-                tracker.end()
+            tracker.end()
 
-                AppLogger.shared.info(
-                    "Smart cleanup completed",
-                    category: "App",
-                    metadata: [
-                        "appsTerminated": "\(result.appsTerminated)",
-                        "memoryFreed": result.formattedMemoryFreed
-                    ]
-                )
+            AppLogger.shared.info(
+                "Smart cleanup completed",
+                category: "App",
+                metadata: [
+                    "appsTerminated": "\(result.appsTerminated)",
+                    "memoryFreed": result.formattedMemoryFreed
+                ]
+            )
 
-                showNotification(
-                    title: "Smart Cleanup Complete",
-                    body: "Freed \(result.formattedMemoryFreed) by closing \(result.appsTerminated) apps"
-                )
-            } catch {
-                tracker.end()
-                AppLogger.shared.error("Smart cleanup failed", category: "App", error: error)
-                showNotification(
-                    title: "Smart Cleanup Failed",
-                    body: "An error occurred during cleanup. Please try again."
-                )
-            }
+            showNotification(
+                title: "Smart Cleanup Complete",
+                body: "Freed \(result.formattedMemoryFreed) by closing \(result.appsTerminated) apps"
+            )
         }
     }
     
     @objc func closeBackgroundApps() {
         Task { @MainActor in
-            do {
-                let optimizer = MemoryOptimizerService()
-                await optimizer.analyzeMemoryUsage()
-                let result = await optimizer.quickCleanupBackground()
+            let optimizer = MemoryOptimizerService()
+            await optimizer.analyzeMemoryUsage()
+            let result = await optimizer.quickCleanupBackground()
 
-                showNotification(
-                    title: "Background Apps Closed",
-                    body: "Freed \(result.formattedMemoryFreed) by closing \(result.appsTerminated) background apps"
-                )
-            } catch {
-                AppLogger.shared.error("Close background apps failed", category: "App", error: error)
-                showNotification(
-                    title: "Cleanup Failed",
-                    body: "An error occurred while closing background apps."
-                )
-            }
+            showNotification(
+                title: "Background Apps Closed",
+                body: "Freed \(result.formattedMemoryFreed) by closing \(result.appsTerminated) background apps"
+            )
         }
     }
     

@@ -4,6 +4,7 @@
 
 import SwiftUI
 import AppKit
+import UserNotifications
 
 struct MenuBarContentView: View {
     @StateObject private var systemMetrics = SystemMetricsService()
@@ -182,7 +183,7 @@ struct MenuBarContentView: View {
     }
     
     // MARK: - Quick Actions Section
-    
+
     private var quickActionsSection: some View {
         VStack(spacing: 8) {
             HStack {
@@ -191,42 +192,76 @@ struct MenuBarContentView: View {
                     .foregroundColor(.secondary)
                 Spacer()
             }
-            
-            HStack(spacing: 8) {
+
+            // First row of actions
+            HStack(spacing: 6) {
                 QuickActionPill(
                     icon: "sparkles",
                     title: "Smart Cleanup",
                     color: .blue
                 ) {
                     Task {
-                        do {
-                            await memoryOptimizer.analyzeMemoryUsage()
-                            _ = await memoryOptimizer.smartCleanup()
-                        } catch {
-                            print("Smart cleanup error: \(error.localizedDescription)")
-                        }
+                        await memoryOptimizer.analyzeMemoryUsage()
+                        let result = await memoryOptimizer.smartCleanup()
+                        showCleanupResult(result)
                     }
                 }
 
                 QuickActionPill(
                     icon: "moon.fill",
-                    title: "Close Background",
+                    title: "Background",
                     color: .purple
                 ) {
                     Task {
                         await memoryOptimizer.analyzeMemoryUsage()
-                        _ = await memoryOptimizer.quickCleanupBackground()
+                        let result = await memoryOptimizer.quickCleanupBackground()
+                        showCleanupResult(result)
                     }
                 }
-                
+
+                QuickActionPill(
+                    icon: "memorychip",
+                    title: "Memory",
+                    color: .green
+                ) {
+                    Task {
+                        await memoryOptimizer.analyzeMemoryUsage()
+                        let result = await memoryOptimizer.quickCleanupHeavy(limit: 3)
+                        showCleanupResult(result)
+                    }
+                }
+            }
+
+            // Second row of actions
+            HStack(spacing: 6) {
                 if browserAutomation.runningBrowsers.count > 0 {
                     QuickActionPill(
                         icon: "safari",
-                        title: "Heavy Tabs",
+                        title: "Browser Tabs",
                         color: .cyan
                     ) {
-                        // Show browser tabs in main window
                         onExpandClick()
+                    }
+                }
+
+                QuickActionPill(
+                    icon: "clock.arrow.circlepath",
+                    title: "Auto Clean",
+                    color: .orange
+                ) {
+                    Task {
+                        await performAutoCleanup()
+                    }
+                }
+
+                QuickActionPill(
+                    icon: "arrow.clockwise.circle",
+                    title: "Refresh",
+                    color: .gray
+                ) {
+                    Task {
+                        await systemMetrics.refreshAllMetrics()
+                        processManager.updateProcessList()
                     }
                 }
             }
@@ -234,39 +269,118 @@ struct MenuBarContentView: View {
         .padding(.horizontal)
         .padding(.vertical, 8)
     }
+
+    private func showCleanupResult(_ result: CleanupResult) {
+        if result.appsTerminated > 0 {
+            let content = UNMutableNotificationContent()
+            content.title = "Cleanup Complete"
+            content.body = "Freed \(result.formattedMemoryFreed) by closing \(result.appsTerminated) apps"
+            content.sound = .default
+
+            let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+            UNUserNotificationCenter.current().add(request) { _ in }
+        }
+    }
+
+    private func performAutoCleanup() async {
+        await memoryOptimizer.analyzeMemoryUsage()
+
+        // Close heavy background apps
+        let backgroundResult = await memoryOptimizer.quickCleanupBackground()
+
+        // If memory pressure is still high, do smart cleanup
+        if let memory = systemMetrics.memoryMetrics, memory.pressureLevel != .normal {
+            let smartResult = await memoryOptimizer.smartCleanup()
+            let totalApps = backgroundResult.appsTerminated + smartResult.appsTerminated
+            let totalMemory = backgroundResult.memoryFreed + smartResult.memoryFreed
+
+            let content = UNMutableNotificationContent()
+            content.title = "Auto Cleanup Complete"
+            content.body = "Freed \(ByteCountFormatter.string(fromByteCount: totalMemory, countStyle: .file)) by closing \(totalApps) apps"
+            content.sound = .default
+
+            let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+            UNUserNotificationCenter.current().add(request) { _ in }
+        } else {
+            showCleanupResult(backgroundResult)
+        }
+    }
     
     // MARK: - Top Processes Section
-    
+
     private var topProcessesSection: some View {
         VStack(spacing: 0) {
             HStack {
-                Text("Top Memory Users")
+                Text("Running Apps")
                     .font(.caption)
+                    .fontWeight(.medium)
+                Text("(Right-click to quit)")
+                    .font(.caption2)
                     .foregroundColor(.secondary)
                 Spacer()
             }
             .padding(.horizontal)
             .padding(.top, 8)
-            
+
             ScrollView {
-                LazyVStack(spacing: 0) {
+                LazyVStack(spacing: 2) {
                     let topProcesses = Array(processManager.processes
+                        .filter { $0.isUserProcess }
                         .sorted { $0.memoryUsage > $1.memoryUsage }
-                        .prefix(6))
-                    
+                        .prefix(8))
+
                     ForEach(topProcesses) { process in
-                        MiniProcessRow(process: process)
+                        MiniProcessRow(
+                            process: process,
+                            onQuit: {
+                                quitProcess(process)
+                            },
+                            onForceQuit: {
+                                forceQuitProcess(process)
+                            }
+                        )
                     }
-                    
+
                     if topProcesses.isEmpty {
-                        Text("Loading...")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .padding()
+                        VStack(spacing: 8) {
+                            Image(systemName: "app.dashed")
+                                .font(.title2)
+                                .foregroundColor(.secondary)
+                            Text("No apps running")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 20)
                     }
                 }
+                .padding(.horizontal, 4)
             }
-            .frame(height: 200)
+            .frame(height: 220)
+        }
+    }
+
+    private func quitProcess(_ process: ProcessInfo) {
+        Task {
+            let success = await processManager.terminateProcess(process)
+            if success {
+                processManager.updateProcessList()
+            }
+        }
+    }
+
+    private func forceQuitProcess(_ process: ProcessInfo) {
+        Task {
+            let success = await processManager.forceQuitProcess(process)
+            if success {
+                processManager.updateProcessList()
+                let content = UNMutableNotificationContent()
+                content.title = "App Force Quit"
+                content.body = "\(process.name) has been force quit"
+                content.sound = .default
+                let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+                UNUserNotificationCenter.current().add(request) { _ in }
+            }
         }
     }
     
@@ -403,7 +517,11 @@ struct QuickActionPill: View {
 
 struct MiniProcessRow: View {
     let process: ProcessInfo
-    
+    let onQuit: () -> Void
+    let onForceQuit: () -> Void
+
+    @State private var isHovered = false
+
     var body: some View {
         HStack(spacing: 8) {
             // Icon
@@ -412,28 +530,71 @@ struct MiniProcessRow: View {
                let icon = app.icon {
                 Image(nsImage: icon)
                     .resizable()
-                    .frame(width: 18, height: 18)
+                    .frame(width: 20, height: 20)
             } else {
                 Image(systemName: process.isUserProcess ? "app" : "gear")
-                    .frame(width: 18, height: 18)
+                    .frame(width: 20, height: 20)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-            
+
             // Name
-            Text(process.name)
-                .font(.caption)
-                .lineLimit(1)
-            
+            VStack(alignment: .leading, spacing: 1) {
+                Text(process.name)
+                    .font(.caption)
+                    .lineLimit(1)
+                Text("PID: \(process.pid)")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+
             Spacer()
-            
+
             // Memory
             Text(process.formattedMemoryUsage)
                 .font(.caption)
                 .foregroundColor(.secondary)
+
+            // Quick action buttons (show on hover)
+            if isHovered {
+                Button {
+                    onQuit()
+                } label: {
+                    Text("Quit")
+                        .font(.caption2)
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.mini)
+
+                Button {
+                    onForceQuit()
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.caption)
+                }
+                .buttonStyle(.plain)
+                .foregroundColor(.red)
+                .help("Force Quit")
+            }
         }
         .padding(.horizontal)
         .padding(.vertical, 6)
+        .background(isHovered ? Color(NSColor.selectedContentBackgroundColor).opacity(0.3) : Color.clear)
+        .cornerRadius(6)
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isHovered = hovering
+            }
+        }
+        .contextMenu {
+            Button("Quit") {
+                onQuit()
+            }
+            Button("Force Quit") {
+                onForceQuit()
+            }
+            .foregroundColor(.red)
+        }
     }
 }
 
