@@ -312,9 +312,23 @@ final class PermissionsService: ObservableObject {
     
     /// Check accessibility permission
     func checkAccessibilityPermission() -> PermissionStatus {
+        // First try the standard check without prompting
         let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: false]
         let trusted = AXIsProcessTrustedWithOptions(options as CFDictionary)
-        return trusted ? .granted : .denied
+
+        // Log detailed info for debugging
+        let bundleID = Bundle.main.bundleIdentifier ?? "unknown"
+        logger.info("Accessibility check - Bundle: \(bundleID), Trusted: \(trusted)")
+
+        if trusted {
+            return .granted
+        }
+
+        // Also try the simpler AXIsProcessTrusted() as a fallback
+        let simpleTrusted = AXIsProcessTrusted()
+        logger.info("Accessibility fallback check - AXIsProcessTrusted: \(simpleTrusted)")
+
+        return simpleTrusted ? .granted : .denied
     }
     
     /// Request accessibility permission (opens System Settings)

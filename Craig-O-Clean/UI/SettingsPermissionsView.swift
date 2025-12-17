@@ -442,7 +442,8 @@ struct SettingsPermissionsView: View {
                     status: permissions.accessibilityStatus,
                     onRequest: {
                         permissions.requestAccessibilityPermission()
-                    }
+                    },
+                    showRestartHint: true
                 )
 
                 Divider()
@@ -694,42 +695,60 @@ struct PermissionRow: View {
     let description: String
     let status: PermissionStatus
     let onRequest: () -> Void
+    var showRestartHint: Bool = false
 
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .fontWeight(.medium)
-                Text(description)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .fontWeight(.medium)
+                    Text(description)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                HStack(spacing: 8) {
+                    // Status badge
+                    HStack(spacing: 6) {
+                        Image(systemName: status.icon)
+                            .font(.caption)
+
+                        Text(status.rawValue)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(statusColor.opacity(0.15))
+                    .foregroundColor(statusColor)
+                    .cornerRadius(12)
+
+                    if status != .granted {
+                        Button("Grant") {
+                            onRequest()
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                    }
+                }
             }
 
-            Spacer()
-
-            HStack(spacing: 8) {
-                // Status badge
+            // Show hint for Accessibility if denied
+            if showRestartHint && status == .denied {
                 HStack(spacing: 6) {
-                    Image(systemName: status.icon)
+                    Image(systemName: "info.circle")
                         .font(.caption)
-
-                    Text(status.rawValue)
-                        .font(.caption)
-                        .fontWeight(.medium)
+                    Text("If already granted in System Settings, try quitting and reopening Craig-O-Clean")
+                        .font(.caption2)
                 }
-                .padding(.horizontal, 10)
+                .foregroundColor(.vibeAmber)
+                .padding(.horizontal, 8)
                 .padding(.vertical, 4)
-                .background(statusColor.opacity(0.15))
-                .foregroundColor(statusColor)
-                .cornerRadius(12)
-
-                if status != .granted {
-                    Button("Grant") {
-                        onRequest()
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
-                }
+                .background(Color.vibeAmber.opacity(0.1))
+                .cornerRadius(6)
             }
         }
     }
