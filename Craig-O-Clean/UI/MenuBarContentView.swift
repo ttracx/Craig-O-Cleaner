@@ -199,19 +199,27 @@ struct MenuBarContentView: View {
                     color: .blue
                 ) {
                     Task {
-                        await memoryOptimizer.analyzeMemoryUsage()
-                        _ = await memoryOptimizer.smartCleanup()
+                        do {
+                            await memoryOptimizer.analyzeMemoryUsage()
+                            _ = await memoryOptimizer.smartCleanup()
+                        } catch {
+                            print("Smart cleanup error: \(error.localizedDescription)")
+                        }
                     }
                 }
-                
+
                 QuickActionPill(
                     icon: "moon.fill",
                     title: "Close Background",
                     color: .purple
                 ) {
                     Task {
-                        await memoryOptimizer.analyzeMemoryUsage()
-                        _ = await memoryOptimizer.quickCleanupBackground()
+                        do {
+                            await memoryOptimizer.analyzeMemoryUsage()
+                            _ = await memoryOptimizer.quickCleanupBackground()
+                        } catch {
+                            print("Close background error: \(error.localizedDescription)")
+                        }
                     }
                 }
                 

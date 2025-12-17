@@ -305,18 +305,31 @@ final class MemoryOptimizerService: ObservableObject {
     
     /// Terminate a single app gracefully
     func terminateApp(_ candidate: CleanupCandidate) async -> Bool {
+        // Re-fetch the app from NSWorkspace to ensure we have a valid reference
         guard let app = NSWorkspace.shared.runningApplications.first(where: { $0.processIdentifier == candidate.processId }) else {
             logger.warning("App not found: \(candidate.name)")
             return false
         }
-        
+
+        // Check if app is still running before attempting termination
+        guard !app.isTerminated else {
+            logger.info("App already terminated: \(candidate.name)")
+            return true
+        }
+
         // Try graceful termination first
-        if app.terminate() {
+        let terminateResult = app.terminate()
+
+        if terminateResult {
             // Wait a bit for the app to close
             try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
-            return !app.isTerminated ? false : true
+
+            // Re-check if app exists and is terminated
+            // The app reference may become invalid, so check NSWorkspace again
+            let stillRunning = NSWorkspace.shared.runningApplications.contains(where: { $0.processIdentifier == candidate.processId })
+            return !stillRunning
         }
-        
+
         return false
     }
     
@@ -415,7 +428,12 @@ extension MemoryOptimizerService {
     /// Quick cleanup - terminate background apps
     func quickCleanupBackground() async -> CleanupResult {
         deselectAll()
-        let backgroundApps = getBackgroundApps()
+
+        // Get current running process IDs to validate candidates are still running
+        let runningPIDs = Set(NSWorkspace.shared.runningApplications.map { $0.processIdentifier })
+
+        // Filter background apps to only those still running
+        let backgroundApps = getBackgroundApps().filter { runningPIDs.contains($0.processId) }
         selectedCandidates = Set(backgroundApps)
         return await executeCleanup()
     }
@@ -423,7 +441,12 @@ extension MemoryOptimizerService {
     /// Quick cleanup - terminate top memory consumers
     func quickCleanupHeavy(limit: Int = 3) async -> CleanupResult {
         deselectAll()
-        let heavyApps = getTopMemoryConsumers(limit: limit)
+
+        // Get current running process IDs to validate candidates are still running
+        let runningPIDs = Set(NSWorkspace.shared.runningApplications.map { $0.processIdentifier })
+
+        // Filter heavy apps to only those still running
+        let heavyApps = getTopMemoryConsumers(limit: limit).filter { runningPIDs.contains($0.processId) }
         selectedCandidates = Set(heavyApps)
         return await executeCleanup()
     }
@@ -431,20 +454,38 @@ extension MemoryOptimizerService {
     /// Smart cleanup - automatically select best candidates
     func smartCleanup() async -> CleanupResult {
         deselectAll()
-        
+
+        // Get current running process IDs to validate candidates are still running
+        let runningPIDs = Set(NSWorkspace.shared.runningApplications.map { $0.processIdentifier })
+
+        // Filter to only candidates that are still running
+        let validCandidates = cleanupCandidates.filter { runningPIDs.contains($0.processId) }
+
+        // If no valid candidates, return early with empty result
+        guard !validCandidates.isEmpty else {
+            logger.info("No valid cleanup candidates found")
+            return CleanupResult(
+                appsTerminated: 0,
+                memoryFreed: 0,
+                success: true,
+                errors: [],
+                timestamp: Date()
+            )
+        }
+
         // Select background apps using more than 200MB
-        let heavyBackground = cleanupCandidates.filter {
+        let heavyBackground = validCandidates.filter {
             $0.isBackgroundApp && $0.memoryUsage > 200 * 1024 * 1024
         }
-        
+
         // Select top 3 non-critical heavy apps
-        let heavyApps = cleanupCandidates
+        let heavyApps = validCandidates
             .filter { !$0.isBackgroundApp }
             .prefix(3)
-        
+
         selectedCandidates = Set(heavyBackground)
         selectedCandidates.formUnion(heavyApps)
-        
+
         return await executeCleanup()
     }
 }
