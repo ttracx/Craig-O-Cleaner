@@ -356,6 +356,47 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let menu = NSMenu()
         menu.delegate = self
 
+        // Memory Status header (updated dynamically)
+        let memoryStatusItem = NSMenuItem(title: "Memory: Loading...", action: nil, keyEquivalent: "")
+        memoryStatusItem.isEnabled = false
+        memoryStatusItem.tag = 100 // Tag for updating
+        menu.addItem(memoryStatusItem)
+
+        menu.addItem(NSMenuItem.separator())
+
+        // Quick Cleanup Actions (direct, not in submenu)
+        let smartCleanupItem = NSMenuItem(title: "✨ Smart Cleanup", action: #selector(performSmartCleanup), keyEquivalent: "s")
+        smartCleanupItem.target = self
+        menu.addItem(smartCleanupItem)
+
+        let closeBackgroundItem = NSMenuItem(title: "🌙 Close Background Apps", action: #selector(closeBackgroundApps), keyEquivalent: "b")
+        closeBackgroundItem.target = self
+        menu.addItem(closeBackgroundItem)
+
+        let cleanHeavyItem = NSMenuItem(title: "🔥 Close Heavy Apps", action: #selector(closeHeavyApps), keyEquivalent: "h")
+        cleanHeavyItem.target = self
+        menu.addItem(cleanHeavyItem)
+
+        menu.addItem(NSMenuItem.separator())
+
+        // Running Apps submenu (for force quit)
+        let runningAppsMenu = NSMenu()
+        let runningAppsItem = NSMenuItem(title: "Force Quit App", action: nil, keyEquivalent: "")
+        runningAppsItem.submenu = runningAppsMenu
+        runningAppsMenuItem = runningAppsItem
+        menu.addItem(runningAppsItem)
+
+        menu.addItem(NSMenuItem.separator())
+
+        // Open Control Center
+        let openWindowItem = NSMenuItem(
+            title: "Open Control Center",
+            action: #selector(openFullWindow),
+            keyEquivalent: "o"
+        )
+        openWindowItem.target = self
+        menu.addItem(openWindowItem)
+
         // About menu item
         let aboutItem = NSMenuItem(
             title: "About Craig-O-Clean",
@@ -364,43 +405,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         )
         aboutItem.target = self
         menu.addItem(aboutItem)
-
-        menu.addItem(NSMenuItem.separator())
-        
-        // Running Apps submenu (for force quit)
-        let runningAppsMenu = NSMenu()
-        let runningAppsItem = NSMenuItem(title: "Force Quit App", action: nil, keyEquivalent: "")
-        runningAppsItem.submenu = runningAppsMenu
-        runningAppsMenuItem = runningAppsItem
-        menu.addItem(runningAppsItem)
-        
-        menu.addItem(NSMenuItem.separator())
-        
-        // Quick Actions submenu
-        let quickActionsMenu = NSMenu()
-        
-        let smartCleanupItem = NSMenuItem(title: "Smart Cleanup", action: #selector(performSmartCleanup), keyEquivalent: "")
-        smartCleanupItem.target = self
-        quickActionsMenu.addItem(smartCleanupItem)
-        
-        let closeBackgroundItem = NSMenuItem(title: "Close Background Apps", action: #selector(closeBackgroundApps), keyEquivalent: "")
-        closeBackgroundItem.target = self
-        quickActionsMenu.addItem(closeBackgroundItem)
-        
-        let quickActionsItem = NSMenuItem(title: "Quick Actions", action: nil, keyEquivalent: "")
-        quickActionsItem.submenu = quickActionsMenu
-        menu.addItem(quickActionsItem)
-
-        menu.addItem(NSMenuItem.separator())
-
-        // Open Full Window menu item
-        let openWindowItem = NSMenuItem(
-            title: "Open Control Center",
-            action: #selector(openFullWindow),
-            keyEquivalent: "o"
-        )
-        openWindowItem.target = self
-        menu.addItem(openWindowItem)
 
         menu.addItem(NSMenuItem.separator())
 
@@ -417,13 +421,32 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     // MARK: - NSMenuDelegate
-    
+
     nonisolated func menuNeedsUpdate(_ menu: NSMenu) {
         Task { @MainActor in
+            updateMemoryStatusItem(menu)
             updateRunningAppsMenu()
         }
     }
-    
+
+    private func updateMemoryStatusItem(_ menu: NSMenu) {
+        guard let memoryItem = menu.item(withTag: 100) else { return }
+
+        if let memory = systemMetrics?.memoryMetrics {
+            let usedGB = Double(memory.usedRAM) / 1024 / 1024 / 1024
+            let totalGB = Double(memory.totalRAM) / 1024 / 1024 / 1024
+            let pressureEmoji: String
+            switch memory.pressureLevel {
+            case .normal: pressureEmoji = "🟢"
+            case .warning: pressureEmoji = "🟡"
+            case .critical: pressureEmoji = "🔴"
+            }
+            memoryItem.title = "\(pressureEmoji) Memory: \(String(format: "%.1f", usedGB))/\(String(format: "%.0f", totalGB)) GB (\(Int(memory.usedPercentage))%)"
+        } else {
+            memoryItem.title = "Memory: Checking..."
+        }
+    }
+
     private func updateRunningAppsMenu() {
         guard let submenu = runningAppsMenuItem?.submenu else { return }
         submenu.removeAllItems()
@@ -627,7 +650,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             )
         }
     }
-    
+
+    @objc func closeHeavyApps() {
+        Task { @MainActor in
+            let optimizer = MemoryOptimizerService()
+            await optimizer.analyzeMemoryUsage()
+            let result = await optimizer.quickCleanupHeavy(limit: 3)
+
+            showNotification(
+                title: "Heavy Apps Closed",
+                body: "Freed \(result.formattedMemoryFreed) by closing \(result.appsTerminated) memory-heavy apps"
+            )
+        }
+    }
+
     private func requestNotificationPermissions() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
             if let error = error {
