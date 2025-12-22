@@ -1,6 +1,6 @@
 // MARK: - MenuBarContentView.swift
 // CraigOClean Control Center - Menu Bar Mini-Dashboard
-// Provides quick access to key metrics and actions from the menu bar
+// Modern, visually appealing design with glass morphism and animations
 
 import SwiftUI
 import AppKit
@@ -47,26 +47,27 @@ struct MenuBarContentView: View {
 
     @State private var selectedTab: MenuBarTab = .dashboard
     @State private var isRefreshing = false
+    @Namespace private var tabAnimation
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
+            // Gradient Header
             headerSection
 
-            // Tab bar
-            tabBar
+            // Modern Tab Bar
+            modernTabBar
 
-            Divider()
-
-            // Tab content
+            // Tab Content
             tabContent
         }
-        .frame(width: 360)
+        .frame(width: 380)
+        .background(
+            VisualEffectBlur(material: .popover, blendingMode: .behindWindow)
+        )
         .onAppear {
             systemMetrics.startMonitoring()
             processManager.updateProcessList()
 
-            // Initialize AutoCleanupService with dependencies
             if autoCleanupHolder.service == nil {
                 autoCleanupHolder.service = AutoCleanupService(
                     systemMetrics: systemMetrics,
@@ -85,98 +86,141 @@ struct MenuBarContentView: View {
     // MARK: - Header Section
 
     private var headerSection: some View {
-        HStack {
-            if let appIcon = NSImage(named: "AppIcon") {
-                Image(nsImage: appIcon)
-                    .resizable()
-                    .frame(width: 22, height: 22)
-            } else {
-                Image(systemName: "brain.head.profile")
-                    .font(.title2)
-                    .foregroundColor(.accentColor)
-            }
+        ZStack {
+            // Gradient background
+            LinearGradient(
+                colors: [
+                    Color.vibePurple.opacity(0.8),
+                    Color.vibeTeal.opacity(0.6)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Craig-O-Clean")
-                    .font(.headline)
-                    .fontWeight(.bold)
+            // Content
+            HStack(spacing: 12) {
+                // App Icon with glow
+                ZStack {
+                    Circle()
+                        .fill(Color.white.opacity(0.2))
+                        .frame(width: 44, height: 44)
+                        .blur(radius: 8)
 
-                // Quick status
-                if let memory = systemMetrics.memoryMetrics {
-                    HStack(spacing: 8) {
-                        StatusDot(color: pressureColor(memory.pressureLevel))
-                        Text(memory.pressureLevel.rawValue)
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-
-                        Text("•")
-                            .foregroundColor(.secondary)
-
-                        Text("\(Int(memory.usedPercentage))% used")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
+                    if let appIcon = NSImage(named: "AppIcon") {
+                        Image(nsImage: appIcon)
+                            .resizable()
+                            .frame(width: 36, height: 36)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    } else {
+                        Image(systemName: "brain.head.profile")
+                            .font(.system(size: 24, weight: .medium))
+                            .foregroundColor(.white)
                     }
                 }
-            }
 
-            Spacer()
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 8) {
+                        Text("Craig-O-Clean")
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
 
-            if subscriptions.isPro {
-                Text("PRO")
-                    .font(.caption2)
-                    .fontWeight(.bold)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.vibePurple.opacity(0.2))
-                    .foregroundColor(.vibePurple)
-                    .cornerRadius(6)
-            }
+                        if subscriptions.isPro {
+                            ProBadge()
+                        }
+                    }
 
-            Button {
-                isRefreshing = true
-                Task {
-                    await systemMetrics.refreshAllMetrics()
-                    await memoryOptimizer.analyzeMemoryUsage()
-                    processManager.updateProcessList()
-                    isRefreshing = false
+                    // Status indicator
+                    if let memory = systemMetrics.memoryMetrics {
+                        HStack(spacing: 6) {
+                            PulsingStatusDot(color: pressureColor(memory.pressureLevel))
+                            Text(memory.pressureLevel.rawValue)
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundColor(.white.opacity(0.9))
+                            Text("\(Int(memory.usedPercentage))% used")
+                                .font(.system(size: 11))
+                                .foregroundColor(.white.opacity(0.7))
+                        }
+                    }
                 }
-            } label: {
-                Image(systemName: "arrow.clockwise")
-                    .font(.caption)
+
+                Spacer()
+
+                // Refresh button
+                Button {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        isRefreshing = true
+                    }
+                    Task {
+                        await systemMetrics.refreshAllMetrics()
+                        await memoryOptimizer.analyzeMemoryUsage()
+                        processManager.updateProcessList()
+                        withAnimation { isRefreshing = false }
+                    }
+                } label: {
+                    ZStack {
+                        Circle()
+                            .fill(Color.white.opacity(0.2))
+                            .frame(width: 32, height: 32)
+
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.white)
+                            .rotationEffect(isRefreshing ? .degrees(360) : .degrees(0))
+                            .animation(isRefreshing ? .linear(duration: 0.8).repeatForever(autoreverses: false) : .default, value: isRefreshing)
+                    }
+                }
+                .buttonStyle(.plain)
+                .disabled(isRefreshing)
             }
-            .buttonStyle(.plain)
-            .disabled(isRefreshing)
-            .rotationEffect(isRefreshing ? .degrees(360) : .degrees(0))
-            .animation(isRefreshing ? .linear(duration: 1).repeatForever(autoreverses: false) : .default, value: isRefreshing)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
+        .frame(height: 70)
     }
 
-    // MARK: - Tab Bar
+    // MARK: - Modern Tab Bar
 
-    private var tabBar: some View {
+    private var modernTabBar: some View {
         HStack(spacing: 0) {
             ForEach(MenuBarTab.allCases, id: \.self) { tab in
                 Button {
-                    withAnimation(.easeInOut(duration: 0.2)) {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
                         selectedTab = tab
                     }
                 } label: {
-                    VStack(spacing: 4) {
-                        Image(systemName: tab.icon)
-                            .font(.system(size: 14))
+                    VStack(spacing: 6) {
+                        ZStack {
+                            if selectedTab == tab {
+                                Circle()
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [.vibePurple, .vibeTeal],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                                    .frame(width: 36, height: 36)
+                                    .matchedGeometryEffect(id: "tabIndicator", in: tabAnimation)
+                            }
+
+                            Image(systemName: tab.icon)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(selectedTab == tab ? .white : .secondary)
+                        }
+                        .frame(width: 36, height: 36)
+
                         Text(tab.rawValue)
-                            .font(.caption2)
+                            .font(.system(size: 10, weight: selectedTab == tab ? .semibold : .regular))
+                            .foregroundColor(selectedTab == tab ? .primary : .secondary)
                     }
-                    .foregroundColor(selectedTab == tab ? .accentColor : .secondary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
-                    .background(selectedTab == tab ? Color.accentColor.opacity(0.1) : Color.clear)
                 }
                 .buttonStyle(.plain)
             }
         }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
         .background(Color(NSColor.controlBackgroundColor).opacity(0.5))
     }
 
@@ -192,24 +236,29 @@ struct MenuBarContentView: View {
                 memoryOptimizer: memoryOptimizer,
                 onExpandClick: onExpandClick
             )
+            .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .move(edge: .leading).combined(with: .opacity)))
         case .memory:
             MenuBarMemoryTab(
                 systemMetrics: systemMetrics,
                 memoryOptimizer: memoryOptimizer
             )
+            .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .move(edge: .leading).combined(with: .opacity)))
         case .browser:
             MenuBarBrowserTab(
                 browserAutomation: browserAutomation
             )
+            .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .move(edge: .leading).combined(with: .opacity)))
         case .settings:
             if let autoCleanup = autoCleanupHolder.service {
                 MenuBarSettingsTab(
                     autoCleanup: autoCleanup,
                     onExpandClick: onExpandClick
                 )
+                .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .move(edge: .leading).combined(with: .opacity)))
             } else {
-                VStack {
+                VStack(spacing: 12) {
                     ProgressView()
+                        .scaleEffect(1.2)
                     Text("Loading...")
                         .font(.caption)
                         .foregroundColor(.secondary)
@@ -218,8 +267,6 @@ struct MenuBarContentView: View {
             }
         }
     }
-
-    // MARK: - Helper Methods
 
     private func pressureColor(_ level: MemoryPressureLevel) -> Color {
         switch level {
@@ -238,70 +285,84 @@ struct MenuBarDashboardTab: View {
     @ObservedObject var memoryOptimizer: MemoryOptimizerService
     let onExpandClick: () -> Void
 
-    var body: some View {
-        ScrollView {
-            VStack(spacing: 12) {
-                // System stats
-                systemStatsSection
+    @State private var animateGauges = false
 
-                // Quick actions
+    var body: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 16) {
+                // System Gauges
+                systemGaugesSection
+                    .padding(.top, 8)
+
+                // Quick Actions
                 quickActionsSection
 
-                // Top processes
-                topProcessesSection
+                // Running Apps
+                runningAppsSection
 
                 // Footer
                 footerSection
             }
-            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .padding(.bottom, 12)
         }
-        .frame(height: 420)
+        .frame(height: 400)
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.8).delay(0.2)) {
+                animateGauges = true
+            }
+        }
     }
 
-    private var systemStatsSection: some View {
-        HStack(spacing: 8) {
+    private var systemGaugesSection: some View {
+        HStack(spacing: 10) {
             if let cpu = systemMetrics.cpuMetrics {
-                MiniStatCard(
+                AnimatedGaugeCard(
                     icon: "cpu",
                     title: "CPU",
-                    value: "\(Int(cpu.totalUsage))%",
-                    color: cpuColor(cpu.totalUsage)
+                    value: cpu.totalUsage,
+                    color: cpuColor(cpu.totalUsage),
+                    animate: animateGauges
                 )
             }
 
             if let memory = systemMetrics.memoryMetrics {
-                MiniStatCard(
+                AnimatedGaugeCard(
                     icon: "memorychip",
                     title: "Memory",
-                    value: "\(Int(memory.usedPercentage))%",
-                    color: pressureColor(memory.pressureLevel)
+                    value: memory.usedPercentage,
+                    color: pressureColor(memory.pressureLevel),
+                    animate: animateGauges
                 )
             }
 
             if let disk = systemMetrics.diskMetrics {
-                MiniStatCard(
+                AnimatedGaugeCard(
                     icon: "internaldrive",
                     title: "Disk",
-                    value: "\(Int(disk.usedPercentage))%",
-                    color: diskColor(disk.usedPercentage)
+                    value: disk.usedPercentage,
+                    color: diskColor(disk.usedPercentage),
+                    animate: animateGauges
                 )
             }
         }
-        .padding(.horizontal)
     }
 
     private var quickActionsSection: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 10) {
             HStack {
-                Text("Quick Actions")
-                    .font(.caption)
+                Label("Quick Actions", systemImage: "bolt.fill")
+                    .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(.secondary)
                 Spacer()
             }
-            .padding(.horizontal)
 
-            HStack(spacing: 6) {
-                QuickActionPill(icon: "sparkles", title: "Smart", color: .blue) {
+            HStack(spacing: 8) {
+                ModernActionButton(
+                    icon: "sparkles",
+                    title: "Smart Clean",
+                    gradient: [.blue, .purple]
+                ) {
                     Task {
                         await memoryOptimizer.analyzeMemoryUsage()
                         let result = await memoryOptimizer.smartCleanup()
@@ -309,7 +370,11 @@ struct MenuBarDashboardTab: View {
                     }
                 }
 
-                QuickActionPill(icon: "moon.fill", title: "Background", color: .purple) {
+                ModernActionButton(
+                    icon: "moon.fill",
+                    title: "Background",
+                    gradient: [.purple, .pink]
+                ) {
                     Task {
                         await memoryOptimizer.analyzeMemoryUsage()
                         let result = await memoryOptimizer.quickCleanupBackground()
@@ -317,7 +382,11 @@ struct MenuBarDashboardTab: View {
                     }
                 }
 
-                QuickActionPill(icon: "memorychip", title: "Heavy", color: .orange) {
+                ModernActionButton(
+                    icon: "flame.fill",
+                    title: "Heavy Apps",
+                    gradient: [.orange, .red]
+                ) {
                     Task {
                         await memoryOptimizer.analyzeMemoryUsage()
                         let result = await memoryOptimizer.quickCleanupHeavy(limit: 3)
@@ -325,45 +394,52 @@ struct MenuBarDashboardTab: View {
                     }
                 }
             }
-            .padding(.horizontal)
         }
     }
 
-    private var topProcessesSection: some View {
-        VStack(spacing: 0) {
+    private var runningAppsSection: some View {
+        VStack(spacing: 8) {
             HStack {
-                Text("Running Apps")
-                    .font(.caption)
-                    .fontWeight(.medium)
+                Label("Running Apps", systemImage: "app.badge")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.secondary)
                 Spacer()
+                Text("\(processManager.processes.filter { $0.isUserProcess }.count) apps")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(Color(NSColor.tertiaryLabelColor))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color(NSColor.tertiaryLabelColor).opacity(0.1))
+                    .clipShape(Capsule())
             }
-            .padding(.horizontal)
-            .padding(.top, 4)
 
-            LazyVStack(spacing: 2) {
+            VStack(spacing: 4) {
                 let topProcesses = Array(processManager.processes
                     .filter { $0.isUserProcess }
                     .sorted { $0.memoryUsage > $1.memoryUsage }
                     .prefix(5))
 
                 ForEach(topProcesses) { process in
-                    MiniProcessRow(
+                    ModernProcessRow(
                         process: process,
                         onQuit: { quitProcess(process) },
                         onForceQuit: { forceQuitProcess(process) }
                     )
                 }
             }
-            .padding(.horizontal, 4)
         }
     }
 
     private var footerSection: some View {
         HStack {
             if let lastUpdate = systemMetrics.lastUpdateTime {
-                Text("Updated \(lastUpdate.formatted(date: .omitted, time: .shortened))")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
+                HStack(spacing: 4) {
+                    Image(systemName: "clock")
+                        .font(.system(size: 9))
+                    Text(lastUpdate.formatted(date: .omitted, time: .shortened))
+                        .font(.system(size: 10))
+                }
+                .foregroundColor(Color(NSColor.tertiaryLabelColor))
             }
 
             Spacer()
@@ -371,17 +447,27 @@ struct MenuBarDashboardTab: View {
             Button {
                 onExpandClick()
             } label: {
-                HStack(spacing: 4) {
+                HStack(spacing: 6) {
                     Text("Open Full App")
-                        .font(.caption)
-                    Image(systemName: "arrow.up.left.and.arrow.down.right")
-                        .font(.caption2)
+                        .font(.system(size: 11, weight: .medium))
+                    Image(systemName: "arrow.up.forward.square")
+                        .font(.system(size: 10, weight: .semibold))
                 }
+                .foregroundColor(.white)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(
+                    LinearGradient(
+                        colors: [.vibePurple, .vibeTeal],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .clipShape(Capsule())
             }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
+            .buttonStyle(.plain)
         }
-        .padding(.horizontal)
+        .padding(.top, 4)
     }
 
     private func quitProcess(_ process: ProcessInfo) {
@@ -440,129 +526,162 @@ struct MenuBarMemoryTab: View {
     @State private var showPurgeConfirmation = false
     @State private var isPurging = false
     @State private var purgeResult: PrivilegeOperationResult?
+    @State private var animateRing = false
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 12) {
-                // Memory gauge
-                memoryGaugeSection
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 16) {
+                // Large Memory Ring
+                memoryRingSection
+                    .padding(.top, 8)
 
-                // Memory breakdown
+                // Memory Breakdown
                 memoryBreakdownSection
 
-                // Quick cleanup buttons
+                // Cleanup Buttons
                 cleanupButtonsSection
 
-                // Cleanup candidates
+                // Candidates
                 cleanupCandidatesSection
 
-                // Last result
+                // Last Result
                 if let result = lastResult {
                     lastResultSection(result)
                 }
             }
-            .padding()
+            .padding(.horizontal, 12)
+            .padding(.bottom, 12)
         }
-        .frame(height: 420)
-    }
-
-    private var memoryGaugeSection: some View {
-        HStack {
-            if let memory = systemMetrics.memoryMetrics {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Memory Status")
-                        .font(.headline)
-
-                    HStack(spacing: 6) {
-                        Circle()
-                            .fill(pressureColor(memory.pressureLevel))
-                            .frame(width: 10, height: 10)
-                        Text(memory.pressureLevel.rawValue)
-                            .font(.subheadline)
-                            .foregroundColor(pressureColor(memory.pressureLevel))
-                    }
-
-                    Text("\(SystemMetricsService.formatBytes(memory.availableRAM)) available")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-
-                Spacer()
-
-                // Circular gauge
-                ZStack {
-                    Circle()
-                        .stroke(Color.secondary.opacity(0.2), lineWidth: 8)
-
-                    Circle()
-                        .trim(from: 0, to: memory.usedPercentage / 100)
-                        .stroke(pressureColor(memory.pressureLevel), style: StrokeStyle(lineWidth: 8, lineCap: .round))
-                        .rotationEffect(.degrees(-90))
-
-                    VStack(spacing: 0) {
-                        Text("\(Int(memory.usedPercentage))%")
-                            .font(.title3)
-                            .fontWeight(.bold)
-                        Text("Used")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                .frame(width: 70, height: 70)
+        .frame(height: 400)
+        .onAppear {
+            withAnimation(.easeOut(duration: 1.0).delay(0.2)) {
+                animateRing = true
             }
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
+    }
+
+    private var memoryRingSection: some View {
+        GlassCard {
+            HStack(spacing: 20) {
+                if let memory = systemMetrics.memoryMetrics {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Memory Status")
+                            .font(.system(size: 14, weight: .semibold))
+
+                        HStack(spacing: 6) {
+                            PulsingStatusDot(color: pressureColor(memory.pressureLevel))
+                            Text(memory.pressureLevel.rawValue)
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(pressureColor(memory.pressureLevel))
+                        }
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(SystemMetricsService.formatBytes(memory.availableRAM))
+                                .font(.system(size: 18, weight: .bold, design: .rounded))
+                            Text("Available")
+                                .font(.system(size: 10))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
+                    Spacer()
+
+                    // Animated Ring
+                    ZStack {
+                        // Background ring
+                        Circle()
+                            .stroke(Color.secondary.opacity(0.15), lineWidth: 10)
+
+                        // Progress ring
+                        Circle()
+                            .trim(from: 0, to: animateRing ? memory.usedPercentage / 100 : 0)
+                            .stroke(
+                                AngularGradient(
+                                    colors: [pressureColor(memory.pressureLevel), pressureColor(memory.pressureLevel).opacity(0.5)],
+                                    center: .center,
+                                    startAngle: .degrees(-90),
+                                    endAngle: .degrees(270)
+                                ),
+                                style: StrokeStyle(lineWidth: 10, lineCap: .round)
+                            )
+                            .rotationEffect(.degrees(-90))
+
+                        // Center text
+                        VStack(spacing: 0) {
+                            Text("\(Int(memory.usedPercentage))")
+                                .font(.system(size: 24, weight: .bold, design: .rounded))
+                            Text("%")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .frame(width: 90, height: 90)
+                }
+            }
+            .padding(16)
+        }
     }
 
     private var memoryBreakdownSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(spacing: 8) {
             if let memory = systemMetrics.memoryMetrics {
+                // Segmented bar
                 GeometryReader { geometry in
                     HStack(spacing: 2) {
-                        Rectangle()
-                            .fill(Color.orange)
-                            .frame(width: segmentWidth(for: memory.activeRAM, total: memory.totalRAM, in: geometry))
-
-                        Rectangle()
-                            .fill(Color.red)
-                            .frame(width: segmentWidth(for: memory.wiredRAM, total: memory.totalRAM, in: geometry))
-
-                        Rectangle()
-                            .fill(Color.purple)
-                            .frame(width: segmentWidth(for: memory.compressedRAM, total: memory.totalRAM, in: geometry))
-
-                        Rectangle()
-                            .fill(Color.green.opacity(0.5))
+                        MemorySegment(
+                            width: segmentWidth(for: memory.activeRAM, total: memory.totalRAM, in: geometry),
+                            color: .orange
+                        )
+                        MemorySegment(
+                            width: segmentWidth(for: memory.wiredRAM, total: memory.totalRAM, in: geometry),
+                            color: .red
+                        )
+                        MemorySegment(
+                            width: segmentWidth(for: memory.compressedRAM, total: memory.totalRAM, in: geometry),
+                            color: .purple
+                        )
+                        Spacer(minLength: 0)
                     }
-                    .cornerRadius(4)
+                    .background(Color.green.opacity(0.3))
+                    .clipShape(Capsule())
                 }
                 .frame(height: 8)
 
-                HStack(spacing: 12) {
-                    LegendItem(color: .orange, label: "App")
-                    LegendItem(color: .red, label: "Wired")
-                    LegendItem(color: .purple, label: "Compressed")
-                    LegendItem(color: .green.opacity(0.5), label: "Free")
+                // Legend
+                HStack(spacing: 16) {
+                    ModernLegendItem(color: .orange, label: "App")
+                    ModernLegendItem(color: .red, label: "Wired")
+                    ModernLegendItem(color: .purple, label: "Compressed")
+                    ModernLegendItem(color: .green.opacity(0.5), label: "Free")
                 }
-                .font(.caption2)
             }
         }
     }
 
     private var cleanupButtonsSection: some View {
         VStack(spacing: 8) {
-            HStack(spacing: 8) {
-                CleanupButton(title: "Smart Cleanup", icon: "sparkles", color: .blue) {
+            HStack(spacing: 10) {
+                GradientCleanupButton(
+                    title: "Smart Clean",
+                    icon: "sparkles",
+                    gradient: [.blue, .purple]
+                ) {
                     Task {
+                        // Refresh analysis before cleanup to ensure accurate candidate list
+                        await memoryOptimizer.analyzeMemoryUsage()
                         let result = await memoryOptimizer.smartCleanup()
                         lastResult = result
                     }
                 }
 
-                CleanupButton(title: "Close Background", icon: "moon.fill", color: .purple) {
+                GradientCleanupButton(
+                    title: "Background",
+                    icon: "moon.fill",
+                    gradient: [.purple, .pink]
+                ) {
                     Task {
+                        // Refresh analysis before cleanup to ensure accurate candidate list
+                        await memoryOptimizer.analyzeMemoryUsage()
                         let result = await memoryOptimizer.quickCleanupBackground()
                         lastResult = result
                     }
@@ -642,56 +761,49 @@ struct MenuBarMemoryTab: View {
     private var cleanupCandidatesSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Cleanup Candidates")
-                    .font(.caption)
-                    .fontWeight(.medium)
+                Label("Cleanup Candidates", systemImage: "trash")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.secondary)
 
                 Spacer()
 
                 if !memoryOptimizer.cleanupCandidates.isEmpty {
                     Text("\(memoryOptimizer.cleanupCandidates.count) apps")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(Color(NSColor.tertiaryLabelColor))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.orange.opacity(0.15))
+                        .clipShape(Capsule())
                 }
             }
 
             if memoryOptimizer.isAnalyzing {
-                HStack {
+                HStack(spacing: 8) {
                     ProgressView()
                         .controlSize(.small)
                     Text("Analyzing...")
-                        .font(.caption)
+                        .font(.system(size: 12))
                         .foregroundColor(.secondary)
                 }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
             } else if memoryOptimizer.cleanupCandidates.isEmpty {
-                HStack {
-                    Image(systemName: "checkmark.circle.fill")
+                HStack(spacing: 8) {
+                    Image(systemName: "checkmark.seal.fill")
                         .foregroundColor(.green)
                     Text("Memory is optimized")
-                        .font(.caption)
+                        .font(.system(size: 12, weight: .medium))
                         .foregroundColor(.secondary)
                 }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(Color.green.opacity(0.1))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
             } else {
                 VStack(spacing: 4) {
                     ForEach(Array(memoryOptimizer.cleanupCandidates.prefix(4))) { candidate in
-                        HStack {
-                            if let icon = candidate.icon {
-                                Image(nsImage: icon)
-                                    .resizable()
-                                    .frame(width: 16, height: 16)
-                            }
-                            Text(candidate.name)
-                                .font(.caption)
-                                .lineLimit(1)
-                            Spacer()
-                            Text(candidate.formattedMemoryUsage)
-                                .font(.caption)
-                                .foregroundColor(.orange)
-                        }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color(NSColor.controlBackgroundColor))
-                        .cornerRadius(6)
+                        CandidateRow(candidate: candidate)
                     }
                 }
             }
@@ -699,28 +811,40 @@ struct MenuBarMemoryTab: View {
     }
 
     private func lastResultSection(_ result: CleanupResult) -> some View {
-        HStack {
-            Image(systemName: result.success ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
-                .foregroundColor(result.success ? .green : .yellow)
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(result.success ? Color.green.opacity(0.2) : Color.yellow.opacity(0.2))
+                    .frame(width: 36, height: 36)
+
+                Image(systemName: result.success ? "checkmark" : "exclamationmark")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(result.success ? .green : .yellow)
+            }
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("Last Cleanup")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                Text("Cleanup Complete")
+                    .font(.system(size: 12, weight: .semibold))
                 Text("Freed \(result.formattedMemoryFreed)")
-                    .font(.caption)
-                    .fontWeight(.medium)
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
             }
 
             Spacer()
 
             Text(result.timestamp.formatted(date: .omitted, time: .shortened))
-                .font(.caption2)
-                .foregroundColor(.secondary)
+                .font(.system(size: 10))
+                .foregroundColor(Color(NSColor.tertiaryLabelColor))
         }
-        .padding(8)
-        .background(Color.green.opacity(0.1))
-        .cornerRadius(8)
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.green.opacity(0.08))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.green.opacity(0.2), lineWidth: 1)
+                )
+        )
     }
 
     private func pressureColor(_ level: MemoryPressureLevel) -> Color {
@@ -747,87 +871,91 @@ struct MenuBarBrowserTab: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Browser summary
-            browserSummarySection
+            // Header
+            browserHeaderSection
 
-            Divider()
-
-            // Tab list
+            // Content
             if browserAutomation.runningBrowsers.isEmpty {
-                noBrowsersView
+                emptyStateView(icon: "safari", title: "No Browsers Running", subtitle: "Open a browser to manage tabs")
             } else if browserAutomation.allTabs.isEmpty {
-                noTabsView
+                emptyStateView(icon: "checkmark.circle", title: "No Tabs Found", subtitle: "All tabs are already optimized")
             } else {
                 tabListSection
-            }
-
-            // Actions
-            if !browserAutomation.allTabs.isEmpty {
                 actionsSection
             }
         }
-        .frame(height: 420)
+        .frame(height: 400)
     }
 
-    private var browserSummarySection: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Browser Tabs")
-                    .font(.headline)
+    private var browserHeaderSection: some View {
+        GlassCard {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Browser Tabs")
+                        .font(.system(size: 14, weight: .semibold))
 
-                Text("\(browserAutomation.allTabs.count) tabs across \(browserAutomation.runningBrowsers.count) browsers")
-                    .font(.caption)
+                    Text("\(browserAutomation.allTabs.count) tabs across \(browserAutomation.runningBrowsers.count) browsers")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                Button {
+                    withAnimation(.spring()) { isRefreshing = true }
+                    Task {
+                        await browserAutomation.fetchAllTabs()
+                        withAnimation { isRefreshing = false }
+                    }
+                } label: {
+                    ZStack {
+                        Circle()
+                            .fill(Color.vibePurple.opacity(0.15))
+                            .frame(width: 32, height: 32)
+
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.vibePurple)
+                            .rotationEffect(isRefreshing ? .degrees(360) : .degrees(0))
+                            .animation(isRefreshing ? .linear(duration: 0.8).repeatForever(autoreverses: false) : .default, value: isRefreshing)
+                    }
+                }
+                .buttonStyle(.plain)
+                .disabled(isRefreshing)
+            }
+            .padding(14)
+        }
+        .padding(.horizontal, 12)
+        .padding(.top, 8)
+    }
+
+    private func emptyStateView(icon: String, title: String, subtitle: String) -> some View {
+        VStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(Color.secondary.opacity(0.1))
+                    .frame(width: 60, height: 60)
+
+                Image(systemName: icon)
+                    .font(.system(size: 26))
                     .foregroundColor(.secondary)
             }
 
-            Spacer()
+            Text(title)
+                .font(.system(size: 14, weight: .semibold))
 
-            Button {
-                isRefreshing = true
-                Task {
-                    await browserAutomation.fetchAllTabs()
-                    isRefreshing = false
-                }
-            } label: {
-                Image(systemName: "arrow.clockwise")
-                    .font(.caption)
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-            .disabled(isRefreshing)
-        }
-        .padding()
-    }
-
-    private var noBrowsersView: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "safari")
-                .font(.largeTitle)
-                .foregroundColor(.secondary)
-            Text("No browsers running")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private var noTabsView: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "checkmark.circle")
-                .font(.largeTitle)
-                .foregroundColor(.green)
-            Text("No tabs found")
-                .font(.subheadline)
+            Text(subtitle)
+                .font(.system(size: 12))
                 .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var tabListSection: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             LazyVStack(spacing: 4) {
                 ForEach(browserAutomation.allTabs.prefix(15)) { tab in
-                    BrowserTabRow(
+                    ModernBrowserTabRow(
                         tab: tab,
                         isSelected: selectedTabs.contains(tab),
                         onToggle: {
@@ -845,25 +973,35 @@ struct MenuBarBrowserTab: View {
                     )
                 }
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
         }
     }
 
     private var actionsSection: some View {
-        HStack {
+        HStack(spacing: 10) {
             if !selectedTabs.isEmpty {
-                Button("Close \(selectedTabs.count) Selected") {
+                Button {
                     Task {
                         for tab in selectedTabs {
                             try? await browserAutomation.closeTab(tab)
                         }
                         selectedTabs.removeAll()
                     }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 11))
+                        Text("Close \(selectedTabs.count)")
+                            .font(.system(size: 11, weight: .medium))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color.red)
+                    .clipShape(Capsule())
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.red)
-                .controlSize(.small)
+                .buttonStyle(.plain)
             }
 
             Spacer()
@@ -871,18 +1009,21 @@ struct MenuBarBrowserTab: View {
             Button("Select All") {
                 selectedTabs = Set(browserAutomation.allTabs)
             }
+            .font(.system(size: 11, weight: .medium))
             .buttonStyle(.bordered)
             .controlSize(.small)
 
             Button("Clear") {
                 selectedTabs.removeAll()
             }
+            .font(.system(size: 11, weight: .medium))
             .buttonStyle(.bordered)
             .controlSize(.small)
             .disabled(selectedTabs.isEmpty)
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(Color(NSColor.controlBackgroundColor).opacity(0.8))
     }
 }
 
@@ -893,129 +1034,132 @@ struct MenuBarSettingsTab: View {
     let onExpandClick: () -> Void
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 16) {
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 14) {
                 // Auto-cleanup toggle
-                autoCleanupSection
+                autoCleanupCard
+                    .padding(.top, 8)
 
-                // Thresholds (if enabled)
+                // Stats (if enabled)
                 if autoCleanup.isEnabled {
-                    thresholdsSection
-                    statisticsSection
+                    statsCard
+                    thresholdsCard
                 }
 
-                // Quick settings
-                quickSettingsSection
+                // Actions
+                actionsSection
 
-                // Open full settings
-                fullSettingsButton
+                Spacer(minLength: 20)
             }
-            .padding()
+            .padding(.horizontal, 12)
         }
-        .frame(height: 420)
+        .frame(height: 400)
     }
 
-    private var autoCleanupSection: some View {
-        VStack(spacing: 12) {
-            HStack {
-                Image(systemName: "wand.and.stars")
-                    .foregroundColor(.vibePurple)
-                Text("Auto-Cleanup")
-                    .font(.headline)
-                Spacer()
-                Toggle("", isOn: Binding(
-                    get: { autoCleanup.isEnabled },
-                    set: { newValue in
-                        if newValue {
-                            autoCleanup.enable()
-                        } else {
-                            autoCleanup.disable()
-                        }
-                    }
-                ))
-                .labelsHidden()
-            }
-
-            if autoCleanup.isEnabled {
+    private var autoCleanupCard: some View {
+        GlassCard {
+            VStack(spacing: 12) {
                 HStack {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.vibeTeal)
-                        .font(.caption)
-                    Text("Monitoring active")
-                        .font(.caption)
+                    ZStack {
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    colors: [.vibePurple, .vibeTeal],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(width: 36, height: 36)
+
+                        Image(systemName: "wand.and.stars")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.white)
+                    }
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Auto-Cleanup")
+                            .font(.system(size: 14, weight: .semibold))
+                        Text(autoCleanup.isEnabled ? "Actively monitoring" : "Currently disabled")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                    }
+
+                    Spacer()
+
+                    Toggle("", isOn: Binding(
+                        get: { autoCleanup.isEnabled },
+                        set: { newValue in
+                            if newValue {
+                                autoCleanup.enable()
+                            } else {
+                                autoCleanup.disable()
+                            }
+                        }
+                    ))
+                    .labelsHidden()
+                    .toggleStyle(.switch)
+                    .tint(.vibePurple)
+                }
+
+                if autoCleanup.isEnabled {
+                    HStack(spacing: 8) {
+                        PulsingStatusDot(color: .green)
+                        Text("System protection active")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(.green)
+                        Spacer()
+                    }
+                    .padding(10)
+                    .background(Color.green.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+            }
+            .padding(14)
+        }
+    }
+
+    private var statsCard: some View {
+        GlassCard {
+            VStack(spacing: 12) {
+                HStack {
+                    Label("Statistics", systemImage: "chart.bar.fill")
+                        .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(.secondary)
                     Spacer()
                 }
-            }
-        }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
-    }
 
-    private var thresholdsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Thresholds")
-                .font(.caption)
-                .fontWeight(.medium)
-
-            VStack(spacing: 8) {
-                HStack {
-                    Text("Memory Warning")
-                        .font(.caption)
-                    Spacer()
-                    Text("\(Int(autoCleanup.thresholds.memoryWarning))%")
-                        .font(.caption)
-                        .foregroundColor(.yellow)
-                }
-
-                HStack {
-                    Text("Memory Critical")
-                        .font(.caption)
-                    Spacer()
-                    Text("\(Int(autoCleanup.thresholds.memoryCritical))%")
-                        .font(.caption)
-                        .foregroundColor(.red)
-                }
-
-                HStack {
-                    Text("CPU Warning")
-                        .font(.caption)
-                    Spacer()
-                    Text("\(Int(autoCleanup.thresholds.cpuWarning))%")
-                        .font(.caption)
-                        .foregroundColor(.orange)
+                HStack(spacing: 0) {
+                    StatBox(value: "\(autoCleanup.totalCleanups)", label: "Cleanups", color: .blue)
+                    Divider().frame(height: 40)
+                    StatBox(value: formatBytes(Int64(autoCleanup.totalMemoryFreed)), label: "Freed", color: .green)
+                    Divider().frame(height: 40)
+                    StatBox(value: "\(autoCleanup.totalProcessesTerminated)", label: "Closed", color: .orange)
                 }
             }
+            .padding(14)
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
     }
 
-    private var statisticsSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Statistics")
-                .font(.caption)
-                .fontWeight(.medium)
+    private var thresholdsCard: some View {
+        GlassCard {
+            VStack(spacing: 10) {
+                HStack {
+                    Label("Thresholds", systemImage: "slider.horizontal.3")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
 
-            HStack(spacing: 16) {
-                StatItem(label: "Cleanups", value: "\(autoCleanup.totalCleanups)")
-                StatItem(label: "Memory Freed", value: formatBytes(Int64(autoCleanup.totalMemoryFreed)))
-                StatItem(label: "Apps Closed", value: "\(autoCleanup.totalProcessesTerminated)")
+                ThresholdRow(label: "Memory Warning", value: Int(autoCleanup.thresholds.memoryWarning), color: .yellow)
+                ThresholdRow(label: "Memory Critical", value: Int(autoCleanup.thresholds.memoryCritical), color: .red)
+                ThresholdRow(label: "CPU Warning", value: Int(autoCleanup.thresholds.cpuWarning), color: .orange)
             }
+            .padding(14)
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
     }
 
-    private var quickSettingsSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Quick Settings")
-                .font(.caption)
-                .fontWeight(.medium)
-
+    private var actionsSection: some View {
+        VStack(spacing: 10) {
             Button {
                 Task {
                     await autoCleanup.triggerImmediateCleanup()
@@ -1025,38 +1169,517 @@ struct MenuBarSettingsTab: View {
                     Image(systemName: "bolt.fill")
                     Text("Trigger Immediate Cleanup")
                 }
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(
+                    LinearGradient(
+                        colors: autoCleanup.isEnabled ? [.vibePurple, .vibeTeal] : [.gray, .gray],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 10))
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.vibePurple)
+            .buttonStyle(.plain)
             .disabled(!autoCleanup.isEnabled)
-        }
-    }
 
-    private var fullSettingsButton: some View {
-        Button {
-            onExpandClick()
-        } label: {
-            HStack {
-                Image(systemName: "gearshape.2")
-                Text("Open Full Settings")
+            Button {
+                onExpandClick()
+            } label: {
+                HStack {
+                    Image(systemName: "gearshape.2.fill")
+                    Text("Open Full Settings")
+                }
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.primary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(Color(NSColor.controlBackgroundColor))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                )
             }
-            .frame(maxWidth: .infinity)
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.bordered)
     }
 
     private func formatBytes(_ bytes: Int64) -> String {
         let mb = Double(bytes) / 1024.0 / 1024.0
         if mb >= 1024 {
-            return String(format: "%.1f GB", mb / 1024.0)
+            return String(format: "%.1fG", mb / 1024.0)
+        } else if mb >= 1 {
+            return String(format: "%.0fM", mb)
         } else {
-            return String(format: "%.0f MB", mb)
+            return "0"
         }
     }
 }
 
 // MARK: - Supporting Views
+
+struct VisualEffectBlur: NSViewRepresentable {
+    let material: NSVisualEffectView.Material
+    let blendingMode: NSVisualEffectView.BlendingMode
+
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let view = NSVisualEffectView()
+        view.material = material
+        view.blendingMode = blendingMode
+        view.state = .active
+        return view
+    }
+
+    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
+        nsView.material = material
+        nsView.blendingMode = blendingMode
+    }
+}
+
+struct ProBadge: View {
+    var body: some View {
+        Text("PRO")
+            .font(.system(size: 9, weight: .bold))
+            .foregroundColor(.white)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(
+                LinearGradient(
+                    colors: [.yellow, .orange],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .clipShape(Capsule())
+    }
+}
+
+struct PulsingStatusDot: View {
+    let color: Color
+    @State private var isPulsing = false
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(color.opacity(0.3))
+                .frame(width: 12, height: 12)
+                .scaleEffect(isPulsing ? 1.5 : 1.0)
+                .opacity(isPulsing ? 0 : 0.5)
+
+            Circle()
+                .fill(color)
+                .frame(width: 8, height: 8)
+        }
+        .onAppear {
+            withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: false)) {
+                isPulsing = true
+            }
+        }
+    }
+}
+
+struct GlassCard<Content: View>: View {
+    let content: Content
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+
+    var body: some View {
+        content
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(NSColor.controlBackgroundColor).opacity(0.8))
+                    .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
+            )
+    }
+}
+
+struct AnimatedGaugeCard: View {
+    let icon: String
+    let title: String
+    let value: Double
+    let color: Color
+    let animate: Bool
+
+    var body: some View {
+        VStack(spacing: 8) {
+            ZStack {
+                // Background circle
+                Circle()
+                    .stroke(color.opacity(0.2), lineWidth: 5)
+
+                // Progress circle
+                Circle()
+                    .trim(from: 0, to: animate ? value / 100 : 0)
+                    .stroke(
+                        AngularGradient(
+                            colors: [color, color.opacity(0.5)],
+                            center: .center
+                        ),
+                        style: StrokeStyle(lineWidth: 5, lineCap: .round)
+                    )
+                    .rotationEffect(.degrees(-90))
+
+                // Value text
+                Text("\(Int(value))")
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .foregroundColor(color)
+            }
+            .frame(width: 50, height: 50)
+
+            HStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 10))
+                Text(title)
+                    .font(.system(size: 10, weight: .medium))
+            }
+            .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(color.opacity(0.08))
+        )
+    }
+}
+
+struct ModernActionButton: View {
+    let icon: String
+    let title: String
+    let gradient: [Color]
+    let action: () -> Void
+
+    @State private var isHovered = false
+    @State private var isPressed = false
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 6) {
+                ZStack {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: gradient,
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 36, height: 36)
+                        .shadow(color: gradient[0].opacity(isHovered ? 0.4 : 0.2), radius: isHovered ? 8 : 4, x: 0, y: 2)
+
+                    Image(systemName: icon)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+
+                Text(title)
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(.primary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(NSColor.controlBackgroundColor).opacity(isHovered ? 1 : 0.6))
+            )
+            .scaleEffect(isPressed ? 0.95 : 1.0)
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isHovered = hovering
+            }
+        }
+    }
+}
+
+struct ModernProcessRow: View {
+    let process: ProcessInfo
+    let onQuit: () -> Void
+    let onForceQuit: () -> Void
+
+    @State private var isHovered = false
+
+    var body: some View {
+        HStack(spacing: 10) {
+            // App Icon
+            if let bundleId = process.bundleIdentifier,
+               let app = NSWorkspace.shared.runningApplications.first(where: { $0.bundleIdentifier == bundleId }),
+               let icon = app.icon {
+                Image(nsImage: icon)
+                    .resizable()
+                    .frame(width: 24, height: 24)
+            } else {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color.secondary.opacity(0.1))
+                        .frame(width: 24, height: 24)
+
+                    Image(systemName: process.isUserProcess ? "app.fill" : "gearshape.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            // Name
+            Text(process.name)
+                .font(.system(size: 12))
+                .lineLimit(1)
+
+            Spacer()
+
+            // Memory usage
+            Text(process.formattedMemoryUsage)
+                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                .foregroundColor(.secondary)
+
+            // Close button (on hover)
+            if isHovered {
+                Button(action: onForceQuit) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 14))
+                        .foregroundColor(.red.opacity(0.8))
+                }
+                .buttonStyle(.plain)
+                .transition(.scale.combined(with: .opacity))
+            }
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(isHovered ? Color(NSColor.selectedContentBackgroundColor).opacity(0.3) : Color.clear)
+        )
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isHovered = hovering
+            }
+        }
+        .contextMenu {
+            Button("Quit") { onQuit() }
+            Button("Force Quit") { onForceQuit() }
+        }
+    }
+}
+
+struct MemorySegment: View {
+    let width: CGFloat
+    let color: Color
+
+    var body: some View {
+        Rectangle()
+            .fill(color)
+            .frame(width: max(0, width))
+    }
+}
+
+struct ModernLegendItem: View {
+    let color: Color
+    let label: String
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Circle()
+                .fill(color)
+                .frame(width: 6, height: 6)
+            Text(label)
+                .font(.system(size: 10))
+                .foregroundColor(.secondary)
+        }
+    }
+}
+
+struct GradientCleanupButton: View {
+    let title: String
+    let icon: String
+    let gradient: [Color]
+    let action: () -> Void
+
+    @State private var isHovered = false
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 12, weight: .semibold))
+                Text(title)
+                    .font(.system(size: 11, weight: .semibold))
+            }
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(
+                LinearGradient(
+                    colors: gradient,
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .shadow(color: gradient[0].opacity(isHovered ? 0.4 : 0.2), radius: isHovered ? 8 : 4, x: 0, y: 2)
+            .scaleEffect(isHovered ? 1.02 : 1.0)
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isHovered = hovering
+            }
+        }
+    }
+}
+
+struct CandidateRow: View {
+    let candidate: CleanupCandidate
+
+    var body: some View {
+        HStack(spacing: 10) {
+            if let icon = candidate.icon {
+                Image(nsImage: icon)
+                    .resizable()
+                    .frame(width: 20, height: 20)
+            } else {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.secondary.opacity(0.1))
+                    .frame(width: 20, height: 20)
+            }
+
+            Text(candidate.name)
+                .font(.system(size: 11))
+                .lineLimit(1)
+
+            Spacer()
+
+            Text(candidate.formattedMemoryUsage)
+                .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                .foregroundColor(.orange)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(Color.orange.opacity(0.1))
+                .clipShape(Capsule())
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(Color(NSColor.controlBackgroundColor).opacity(0.5))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+}
+
+struct ModernBrowserTabRow: View {
+    let tab: BrowserTab
+    let isSelected: Bool
+    let onToggle: () -> Void
+    let onClose: () -> Void
+
+    @State private var isHovered = false
+
+    var body: some View {
+        HStack(spacing: 10) {
+            // Selection indicator
+            Button(action: onToggle) {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 16))
+                    .foregroundColor(isSelected ? .vibePurple : .secondary.opacity(0.5))
+            }
+            .buttonStyle(.plain)
+
+            // Browser icon
+            Image(systemName: tab.browser.icon)
+                .font(.system(size: 12))
+                .foregroundColor(.secondary)
+                .frame(width: 16)
+
+            // Tab info
+            VStack(alignment: .leading, spacing: 2) {
+                Text(tab.title)
+                    .font(.system(size: 11))
+                    .lineLimit(1)
+                Text(tab.domain)
+                    .font(.system(size: 9))
+                    .foregroundColor(Color(NSColor.tertiaryLabelColor))
+                    .lineLimit(1)
+            }
+
+            Spacer()
+
+            // Close button
+            if isHovered {
+                Button(action: onClose) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 14))
+                        .foregroundColor(.red.opacity(0.7))
+                }
+                .buttonStyle(.plain)
+                .transition(.scale.combined(with: .opacity))
+            }
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(isSelected ? Color.vibePurple.opacity(0.1) : (isHovered ? Color(NSColor.selectedContentBackgroundColor).opacity(0.2) : Color.clear))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(isSelected ? Color.vibePurple.opacity(0.3) : Color.clear, lineWidth: 1)
+        )
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isHovered = hovering
+            }
+        }
+    }
+}
+
+struct StatBox: View {
+    let value: String
+    let label: String
+    let color: Color
+
+    var body: some View {
+        VStack(spacing: 4) {
+            Text(value)
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .foregroundColor(color)
+            Text(label)
+                .font(.system(size: 10))
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+struct ThresholdRow: View {
+    let label: String
+    let value: Int
+    let color: Color
+
+    var body: some View {
+        HStack {
+            Text(label)
+                .font(.system(size: 11))
+                .foregroundColor(.secondary)
+            Spacer()
+            Text("\(value)%")
+                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                .foregroundColor(color)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(color.opacity(0.15))
+                .clipShape(Capsule())
+        }
+    }
+}
+
+// MARK: - Legacy Supporting Views (kept for compatibility)
 
 struct StatusDot: View {
     let color: Color
@@ -1279,7 +1902,6 @@ struct BrowserTabRow: View {
         }
     }
 }
-
 
 struct StatItem: View {
     let label: String

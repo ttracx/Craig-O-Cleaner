@@ -436,11 +436,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     // MARK: - NSMenuDelegate
 
-    nonisolated func menuNeedsUpdate(_ menu: NSMenu) {
-        Task { @MainActor in
-            updateMemoryStatusItem(menu)
-            updateRunningAppsMenu()
-        }
+    func menuNeedsUpdate(_ menu: NSMenu) {
+        // Update menu items synchronously - this is called on the main thread
+        updateMemoryStatusItem(menu)
+        updateRunningAppsMenu()
     }
 
     private func updateMemoryStatusItem(_ menu: NSMenu) {
@@ -464,10 +463,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func updateRunningAppsMenu() {
         guard let submenu = runningAppsMenuItem?.submenu else { return }
         submenu.removeAllItems()
-        
-        // Get running applications sorted by memory usage
+
+        // Get our own bundle ID and PID to exclude from the list
+        let ownBundleID = Bundle.main.bundleIdentifier
+        let ownPID = Foundation.ProcessInfo.processInfo.processIdentifier
+
+        // Get running applications sorted by memory usage, excluding ourselves
         let runningApps = NSWorkspace.shared.runningApplications
-            .filter { $0.activationPolicy == .regular && $0.localizedName != nil }
+            .filter {
+                $0.activationPolicy == .regular &&
+                $0.localizedName != nil &&
+                $0.bundleIdentifier != ownBundleID &&  // Exclude ourselves by bundle ID
+                $0.processIdentifier != ownPID          // Exclude ourselves by PID
+            }
             .sorted { ($0.localizedName ?? "") < ($1.localizedName ?? "") }
         
         if runningApps.isEmpty {
@@ -522,11 +530,24 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     @objc func forceQuitSelectedApp(_ sender: NSMenuItem) {
         guard let pid = sender.representedObject as? Int32 else { return }
-        
+
+        // CRITICAL: Never allow force quitting ourselves
+        let ownPID = Foundation.ProcessInfo.processInfo.processIdentifier
+        guard pid != ownPID else {
+            showNotification(title: "Cannot Force Quit", body: "Craig-O-Clean cannot force quit itself.")
+            return
+        }
+
         // Find the app
         if let app = NSWorkspace.shared.runningApplications.first(where: { $0.processIdentifier == pid }) {
             let appName = app.localizedName ?? "Unknown"
-            
+
+            // Additional safety: check bundle ID
+            if app.bundleIdentifier == Bundle.main.bundleIdentifier {
+                showNotification(title: "Cannot Force Quit", body: "Craig-O-Clean cannot force quit itself.")
+                return
+            }
+
             // Show confirmation alert
             let alert = NSAlert()
             alert.messageText = "Force Quit \"\(appName)\"?"
@@ -631,6 +652,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let tracker = AppLogger.shared.startPerformanceTracking(operation: "SmartCleanup")
 
             let optimizer = MemoryOptimizerService()
+
+            // Add our bundle ID to excluded list as extra safety
+            if let ownBundleID = Bundle.main.bundleIdentifier {
+                optimizer.excludedBundleIdentifiers.insert(ownBundleID)
+            }
+            // Also add common variations
+            optimizer.excludedBundleIdentifiers.insert("com.craigoclean.app")
+            optimizer.excludedBundleIdentifiers.insert("com.CraigOClean.app")
+            optimizer.excludedBundleIdentifiers.insert("com.Craig-O-Clean.app")
+
             await optimizer.analyzeMemoryUsage()
             let result = await optimizer.smartCleanup()
 
@@ -655,6 +686,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc func closeBackgroundApps() {
         Task { @MainActor in
             let optimizer = MemoryOptimizerService()
+
+            // Add our bundle ID to excluded list as extra safety
+            if let ownBundleID = Bundle.main.bundleIdentifier {
+                optimizer.excludedBundleIdentifiers.insert(ownBundleID)
+            }
+            optimizer.excludedBundleIdentifiers.insert("com.craigoclean.app")
+
             await optimizer.analyzeMemoryUsage()
             let result = await optimizer.quickCleanupBackground()
 
@@ -668,6 +706,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc func closeHeavyApps() {
         Task { @MainActor in
             let optimizer = MemoryOptimizerService()
+
+            // Add our bundle ID to excluded list as extra safety
+            if let ownBundleID = Bundle.main.bundleIdentifier {
+                optimizer.excludedBundleIdentifiers.insert(ownBundleID)
+            }
+            optimizer.excludedBundleIdentifiers.insert("com.craigoclean.app")
+
             await optimizer.analyzeMemoryUsage()
             let result = await optimizer.quickCleanupHeavy(limit: 3)
 

@@ -129,12 +129,22 @@ final class MemoryOptimizerService: ObservableObject {
     private var processManager: ProcessManager?
     
     // MARK: - Protected Processes
-    
+
     private let criticalProcessNames: Set<String> = [
         "kernel_task", "launchd", "WindowServer", "loginwindow",
         "SystemUIServer", "Dock", "Finder", "mds", "mds_stores",
-        "coreauthd", "securityd", "cfprefsd", "UserEventAgent"
+        "coreauthd", "securityd", "cfprefsd", "UserEventAgent",
+        "Craig-O-Clean"  // Never terminate ourselves
     ]
+
+    /// The PID of this app - we must never terminate ourselves
+    private let ownProcessId = Foundation.ProcessInfo.processInfo.processIdentifier
+
+    /// Our own bundle identifier - additional safety check
+    private let ownBundleId = Bundle.main.bundleIdentifier
+
+    /// Our running application reference for additional checks
+    private let ownRunningApp = NSRunningApplication.current
     
     // MARK: - Initialization
     
@@ -173,9 +183,37 @@ final class MemoryOptimizerService: ObservableObject {
         var candidates: [CleanupCandidate] = []
         
         for app in runningApps {
-            guard let bundleId = app.bundleIdentifier,
-                  !excludedBundleIdentifiers.contains(bundleId),
-                  !criticalProcessNames.contains(app.localizedName ?? "") else {
+            // CRITICAL: Never include ourselves in cleanup candidates - multiple checks
+            // Check 1: PID comparison
+            if app.processIdentifier == ownProcessId {
+                logger.debug("Excluding self by PID: \(app.localizedName ?? "unknown")")
+                continue
+            }
+
+            // Check 2: Direct app reference comparison
+            if app == ownRunningApp {
+                logger.debug("Excluding self by app reference: \(app.localizedName ?? "unknown")")
+                continue
+            }
+
+            // Check 3: Bundle ID must exist
+            guard let bundleId = app.bundleIdentifier else { continue }
+
+            // Check 4: Exclude by bundle ID list
+            if excludedBundleIdentifiers.contains(bundleId) {
+                logger.debug("Excluding by bundle ID list: \(app.localizedName ?? "unknown") (\(bundleId))")
+                continue
+            }
+
+            // Check 5: Exclude by our own bundle ID
+            if bundleId == ownBundleId {
+                logger.debug("Excluding self by bundle ID: \(app.localizedName ?? "unknown")")
+                continue
+            }
+
+            // Check 6: Exclude critical process names
+            if criticalProcessNames.contains(app.localizedName ?? "") {
+                logger.debug("Excluding critical process: \(app.localizedName ?? "unknown")")
                 continue
             }
             
@@ -266,8 +304,11 @@ final class MemoryOptimizerService: ObservableObject {
         var errors: [String] = []
         
         logger.info("Starting cleanup of \(self.selectedCandidates.count) apps...")
-        
-        for candidate in selectedCandidates {
+
+        // Extra safety: filter out our own process from selected candidates
+        let safeCandidates = selectedCandidates.filter { $0.processId != ownProcessId }
+
+        for candidate in safeCandidates {
             // Double-check it's not a critical process
             guard !criticalProcessNames.contains(candidate.name) else {
                 logger.warning("Skipping critical process: \(candidate.name)")
@@ -307,9 +348,45 @@ final class MemoryOptimizerService: ObservableObject {
     
     /// Terminate a single app gracefully
     func terminateApp(_ candidate: CleanupCandidate) async -> Bool {
+        // CRITICAL: Never terminate ourselves - check by PID
+        guard candidate.processId != ownProcessId else {
+            logger.warning("Prevented self-termination attempt by PID for: \(candidate.name)")
+            return false
+        }
+
+        // CRITICAL: Check against our running app reference
+        guard candidate.processId != ownRunningApp.processIdentifier else {
+            logger.warning("Prevented self-termination via NSRunningApplication.current for: \(candidate.name)")
+            return false
+        }
+
+        // CRITICAL: Also check by bundle identifier as defense in depth
+        if let bundleId = candidate.bundleIdentifier {
+            if excludedBundleIdentifiers.contains(bundleId) {
+                logger.warning("Prevented termination of excluded app by bundle ID: \(candidate.name) (\(bundleId))")
+                return false
+            }
+            // Check against our own bundle ID
+            if bundleId == ownBundleId {
+                logger.warning("Prevented self-termination via own bundle ID: \(candidate.name)")
+                return false
+            }
+        }
+
         // Re-fetch the app from NSWorkspace to ensure we have a valid reference
         guard let app = NSWorkspace.shared.runningApplications.first(where: { $0.processIdentifier == candidate.processId }) else {
             logger.warning("App not found: \(candidate.name)")
+            return false
+        }
+
+        // Final safety check: verify we're not about to terminate ourselves
+        if app == ownRunningApp {
+            logger.warning("Prevented self-termination via app reference match: \(candidate.name)")
+            return false
+        }
+
+        if app.bundleIdentifier == ownBundleId {
+            logger.warning("Prevented self-termination via bundle ID match: \(candidate.name)")
             return false
         }
 
@@ -337,7 +414,42 @@ final class MemoryOptimizerService: ObservableObject {
     
     /// Force quit an app (use with caution)
     func forceQuitApp(_ candidate: CleanupCandidate) async -> Bool {
+        // CRITICAL: Never force quit ourselves - check by PID
+        guard candidate.processId != ownProcessId else {
+            logger.warning("Prevented self force-quit attempt by PID for: \(candidate.name)")
+            return false
+        }
+
+        // CRITICAL: Check against our running app reference
+        guard candidate.processId != ownRunningApp.processIdentifier else {
+            logger.warning("Prevented self force-quit via NSRunningApplication.current for: \(candidate.name)")
+            return false
+        }
+
+        // CRITICAL: Also check by bundle identifier as defense in depth
+        if let bundleId = candidate.bundleIdentifier {
+            if excludedBundleIdentifiers.contains(bundleId) {
+                logger.warning("Prevented force-quit of excluded app by bundle ID: \(candidate.name) (\(bundleId))")
+                return false
+            }
+            if bundleId == ownBundleId {
+                logger.warning("Prevented self force-quit via own bundle ID: \(candidate.name)")
+                return false
+            }
+        }
+
         guard let app = NSWorkspace.shared.runningApplications.first(where: { $0.processIdentifier == candidate.processId }) else {
+            return false
+        }
+
+        // Final safety check: verify we're not about to force quit ourselves
+        if app == ownRunningApp {
+            logger.warning("Prevented self force-quit via app reference match: \(candidate.name)")
+            return false
+        }
+
+        if app.bundleIdentifier == ownBundleId {
+            logger.warning("Prevented self force-quit via bundle ID match: \(candidate.name)")
             return false
         }
         
@@ -437,9 +549,11 @@ extension MemoryOptimizerService {
         // Get frontmost app PID to exclude from cleanup (don't close what user is actively using)
         let frontmostPID = NSWorkspace.shared.frontmostApplication?.processIdentifier
 
-        // Filter background apps to only those still running and not frontmost
+        // Filter background apps to only those still running, not frontmost, and NOT ourselves
         let backgroundApps = getBackgroundApps().filter {
-            runningPIDs.contains($0.processId) && $0.processId != frontmostPID
+            runningPIDs.contains($0.processId) &&
+            $0.processId != frontmostPID &&
+            $0.processId != ownProcessId  // CRITICAL: Never include ourselves
         }
         selectedCandidates = Set(backgroundApps)
         return await executeCleanup()
@@ -455,9 +569,11 @@ extension MemoryOptimizerService {
         // Get frontmost app PID to exclude from cleanup (don't close what user is actively using)
         let frontmostPID = NSWorkspace.shared.frontmostApplication?.processIdentifier
 
-        // Filter heavy apps to only those still running and not frontmost
+        // Filter heavy apps to only those still running, not frontmost, and NOT ourselves
         let heavyApps = getTopMemoryConsumers(limit: limit).filter {
-            runningPIDs.contains($0.processId) && $0.processId != frontmostPID
+            runningPIDs.contains($0.processId) &&
+            $0.processId != frontmostPID &&
+            $0.processId != ownProcessId  // CRITICAL: Never include ourselves
         }
         selectedCandidates = Set(heavyApps)
         return await executeCleanup()
@@ -473,9 +589,11 @@ extension MemoryOptimizerService {
         // Get frontmost app PID to exclude from cleanup (don't close what user is actively using)
         let frontmostPID = NSWorkspace.shared.frontmostApplication?.processIdentifier
 
-        // Filter to only candidates that are still running and not the frontmost app
+        // Filter to only candidates that are still running, not frontmost, and NOT ourselves
         let validCandidates = cleanupCandidates.filter {
-            runningPIDs.contains($0.processId) && $0.processId != frontmostPID
+            runningPIDs.contains($0.processId) &&
+            $0.processId != frontmostPID &&
+            $0.processId != ownProcessId  // CRITICAL: Never include ourselves
         }
 
         // If no valid candidates, return early with empty result
