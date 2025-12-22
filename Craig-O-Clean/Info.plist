@@ -90,5 +90,14 @@
 	<!-- Response: { "url": "https://checkout.stripe.com/..." } -->
 	<key>StripeBackendBaseURL</key>
 	<string></string>
+
+	<!-- Privileged Helper Tool (SMJobBless) -->
+	<!-- This key defines the privileged helper that can be installed via SMJobBless -->
+	<!-- IMPORTANT: Update the code signing requirement with your actual Team ID for distribution -->
+	<key>SMPrivilegedExecutables</key>
+	<dict>
+		<key>com.CraigOClean.helper</key>
+		<string>identifier "com.CraigOClean.helper" and anchor apple generic</string>
+	</dict>
 </dict>
 </plist>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- The helper tool runs outside the sandbox with root privileges -->
+    <!-- It is installed via SMJobBless and managed by launchd -->
+    <!-- No additional entitlements are required for command execution -->
+</dict>
+</plist>

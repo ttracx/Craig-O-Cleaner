@@ -150,7 +150,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     // Services
     private var systemMetrics: SystemMetricsService?
     private var processManager: ProcessManager?
-    
+    private var privilegeService: PrivilegeService?
+
     // Menu items that need dynamic updates
     private var runningAppsMenuItem: NSMenuItem?
     
@@ -167,8 +168,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // Initialize system metrics for menu bar updates
         systemMetrics = SystemMetricsService()
         processManager = ProcessManager()
-        
+        privilegeService = PrivilegeService()
+
         AppLogger.shared.info("Services initialized", category: "App")
+
+        // Check helper status on launch
+        Task { @MainActor in
+            await privilegeService?.checkHelperStatus()
+        }
 
         // Request notification permissions
         requestNotificationPermissions()
@@ -376,6 +383,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let cleanHeavyItem = NSMenuItem(title: "🔥 Close Heavy Apps", action: #selector(closeHeavyApps), keyEquivalent: "h")
         cleanHeavyItem.target = self
         menu.addItem(cleanHeavyItem)
+
+        menu.addItem(NSMenuItem.separator())
+
+        // Memory Clean (sync + purge)
+        let memoryCleanItem = NSMenuItem(title: "⚡ Memory Clean", action: #selector(performMemoryClean), keyEquivalent: "m")
+        memoryCleanItem.target = self
+        menu.addItem(memoryCleanItem)
 
         menu.addItem(NSMenuItem.separator())
 
@@ -661,6 +675,65 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 title: "Heavy Apps Closed",
                 body: "Freed \(result.formattedMemoryFreed) by closing \(result.appsTerminated) memory-heavy apps"
             )
+        }
+    }
+
+    @objc func performMemoryClean() {
+        // Show confirmation dialog
+        let alert = NSAlert()
+        alert.messageText = "Memory Clean"
+        alert.informativeText = "This will run system commands to flush file system buffers and purge inactive memory.\n\nResults may vary depending on your system state. You may be prompted for your administrator password."
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "Continue")
+        alert.addButton(withTitle: "Cancel")
+
+        NSApp.activate(ignoringOtherApps: true)
+
+        if alert.runModal() == .alertFirstButtonReturn {
+            Task { @MainActor in
+                AppLogger.shared.info("Memory clean initiated from menu", category: "App")
+
+                // Show progress notification
+                showNotification(
+                    title: "Memory Clean Starting",
+                    body: "Flushing buffers and purging inactive memory..."
+                )
+
+                // Check helper status
+                await privilegeService?.checkHelperStatus()
+
+                // Execute memory cleanup
+                if let result = await privilegeService?.executeMemoryCleanup() {
+                    AppLogger.shared.info(
+                        "Memory clean completed",
+                        category: "App",
+                        metadata: [
+                            "success": "\(result.success)",
+                            "message": result.message
+                        ]
+                    )
+
+                    if result.success {
+                        showNotification(
+                            title: "Memory Clean Complete",
+                            body: result.message
+                        )
+                    } else {
+                        showNotification(
+                            title: "Memory Clean Issue",
+                            body: result.message
+                        )
+                    }
+
+                    // Refresh metrics
+                    await systemMetrics?.refreshAllMetrics()
+                } else {
+                    showNotification(
+                        title: "Memory Clean Failed",
+                        body: "Unable to execute memory cleanup. Please try again."
+                    )
+                }
+            }
         }
     }
 
