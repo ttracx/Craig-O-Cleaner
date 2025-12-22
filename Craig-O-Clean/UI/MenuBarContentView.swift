@@ -434,8 +434,12 @@ struct MenuBarDashboardTab: View {
 struct MenuBarMemoryTab: View {
     @ObservedObject var systemMetrics: SystemMetricsService
     @ObservedObject var memoryOptimizer: MemoryOptimizerService
+    @StateObject private var privilegeService = PrivilegeService()
 
     @State private var lastResult: CleanupResult?
+    @State private var showPurgeConfirmation = false
+    @State private var isPurging = false
+    @State private var purgeResult: PrivilegeOperationResult?
 
     var body: some View {
         ScrollView {
@@ -548,20 +552,90 @@ struct MenuBarMemoryTab: View {
     }
 
     private var cleanupButtonsSection: some View {
-        HStack(spacing: 8) {
-            CleanupButton(title: "Smart Cleanup", icon: "sparkles", color: .blue) {
-                Task {
-                    let result = await memoryOptimizer.smartCleanup()
-                    lastResult = result
+        VStack(spacing: 8) {
+            HStack(spacing: 8) {
+                CleanupButton(title: "Smart Cleanup", icon: "sparkles", color: .blue) {
+                    Task {
+                        let result = await memoryOptimizer.smartCleanup()
+                        lastResult = result
+                    }
+                }
+
+                CleanupButton(title: "Close Background", icon: "moon.fill", color: .purple) {
+                    Task {
+                        let result = await memoryOptimizer.quickCleanupBackground()
+                        lastResult = result
+                    }
                 }
             }
 
-            CleanupButton(title: "Close Background", icon: "moon.fill", color: .purple) {
-                Task {
-                    let result = await memoryOptimizer.quickCleanupBackground()
-                    lastResult = result
+            // Memory Purge Button
+            memoryPurgeButton
+        }
+    }
+
+    private var memoryPurgeButton: some View {
+        Button {
+            showPurgeConfirmation = true
+        } label: {
+            HStack(spacing: 8) {
+                if isPurging {
+                    ProgressView()
+                        .controlSize(.small)
+                } else {
+                    Image(systemName: "bolt.circle.fill")
+                        .font(.title3)
                 }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Memory Clean")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                    Text("Flush buffers & purge inactive memory")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
             }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(Color.vibePurple.opacity(0.15))
+            .foregroundColor(.vibePurple)
+            .cornerRadius(8)
+        }
+        .buttonStyle(.plain)
+        .disabled(isPurging)
+        .alert("Memory Clean", isPresented: $showPurgeConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Continue") {
+                performMemoryPurge()
+            }
+        } message: {
+            Text("This will run system commands to flush file system buffers and purge inactive memory.\n\nResults may vary depending on your system state. You may be prompted for your administrator password.")
+        }
+        .sheet(item: Binding(
+            get: { purgeResult.map { PurgeResultWrapper(result: $0) } },
+            set: { _ in purgeResult = nil }
+        )) { wrapper in
+            PurgeResultSheet(result: wrapper.result, onDismiss: { purgeResult = nil })
+        }
+    }
+
+    private func performMemoryPurge() {
+        isPurging = true
+        Task {
+            // Check helper status first
+            await privilegeService.checkHelperStatus()
+
+            // Execute memory cleanup
+            let result = await privilegeService.executeMemoryCleanup()
+            purgeResult = result
+            isPurging = false
+
+            // Refresh metrics after purge
+            await systemMetrics.refreshAllMetrics()
         }
     }
 
@@ -1234,6 +1308,65 @@ private func showCleanupResult(_ result: CleanupResult) async {
 
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
         try? await UNUserNotificationCenter.current().add(request)
+    }
+}
+
+// MARK: - Purge Result Support
+
+struct PurgeResultWrapper: Identifiable {
+    let id = UUID()
+    let result: PrivilegeOperationResult
+}
+
+struct PurgeResultSheet: View {
+    let result: PrivilegeOperationResult
+    let onDismiss: () -> Void
+
+    var body: some View {
+        VStack(spacing: 16) {
+            // Status icon
+            Image(systemName: result.success ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                .font(.system(size: 48))
+                .foregroundColor(result.success ? .vibeTeal : .vibeAmber)
+
+            // Title
+            Text(result.success ? "Memory Clean Complete" : "Memory Clean Issue")
+                .font(.headline)
+
+            // Message
+            Text(result.message)
+                .font(.body)
+                .multilineTextAlignment(.center)
+                .foregroundColor(.secondary)
+                .padding(.horizontal)
+
+            // Output (if any)
+            if let output = result.output, !output.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Details")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+
+                    Text(output)
+                        .font(.system(.caption, design: .monospaced))
+                        .padding(8)
+                        .background(Color(NSColor.textBackgroundColor))
+                        .cornerRadius(6)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal)
+            }
+
+            // Dismiss button
+            Button("Done") {
+                onDismiss()
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(result.success ? .vibeTeal : .vibePurple)
+        }
+        .padding(24)
+        .frame(width: 320)
     }
 }
 
