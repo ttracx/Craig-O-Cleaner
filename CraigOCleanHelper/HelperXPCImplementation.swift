@@ -249,7 +249,7 @@ final class HelperXPCDelegate: NSObject, NSXPCListenerDelegate {
         // Verify the connecting process
         // In production, you would verify the code signature of the connecting client
         // For now, we accept connections but log the audit token
-        let auditToken = newConnection.auditToken
+        _ = newConnection.auditToken
 
         logger.debug("Connection from process with audit token")
 
@@ -301,7 +301,7 @@ final class HelperXPCDelegate: NSObject, NSXPCListenerDelegate {
 extension NSXPCConnection {
     /// Get the audit token for the connected process
     var auditToken: audit_token_t? {
-        var token = audit_token_t()
+        let token = audit_token_t()
         // Note: In production, you would use private API or entitlements to get the audit token
         // For this helper, we trust connections from properly signed apps
         return token

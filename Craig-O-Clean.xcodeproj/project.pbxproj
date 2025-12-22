@@ -61,6 +61,7 @@
 		CD6C55E47B21D36A0111C5E2 /* DebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 005004B6FBE745A292ED0626 /* DebugLogger.swift */; };
 		D0772A7F122257F261F8D2FC /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE612226F696635A68EF9F73 /* UserProfile.swift */; };
 		D471E4959DDBAA172F05CFEC /* development_queue.md in Resources */ = {isa = PBXBuildFile; fileRef = 4000FD927BB10D7823C6BC94 /* development_queue.md */; };
+		DAEMON001AAAA0001AAAA0001 /* com.CraigOClean.helper.plist in Copy LaunchDaemons */ = {isa = PBXBuildFile; fileRef = DAEMON002AAAA0001AAAA0001 /* com.CraigOClean.helper.plist */; };
 		E8FCC9578554B05D3F7D8407 /* settings.json in Resources */ = {isa = PBXBuildFile; fileRef = F7ABA9E9F9B116B8C856B51C /* settings.json */; };
 		F24211EF11698488AAC7009C /* neuralquantum.md in Resources */ = {isa = PBXBuildFile; fileRef = E7F07DDAB628B4EEC3C63484 /* neuralquantum.md */; };
 		F541442A3FE6B7F6A73BFFD7 /* MemoryOptimizerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2EB8AA1C4FD005E3B8801FF /* MemoryOptimizerService.swift */; };
@@ -70,7 +71,7 @@
 		HELPER021AAAA0001AAAA0001 /* HelperXPCProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = HELPER011AAAA0001AAAA0001 /* HelperXPCProtocol.swift */; };
 		HELPER022AAAA0001AAAA0001 /* HelperXPCImplementation.swift in Sources */ = {isa = PBXBuildFile; fileRef = HELPER012AAAA0001AAAA0001 /* HelperXPCImplementation.swift */; };
 		HELPER023AAAA0001AAAA0001 /* launchd.plist in Copy launchd.plist */ = {isa = PBXBuildFile; fileRef = HELPER014AAAA0001AAAA0001 /* launchd.plist */; };
-		HELPER031AAAA0001AAAA0001 /* CraigOCleanHelper in CopyFiles */ = {isa = PBXBuildFile; fileRef = HELPER002AAAA0001AAAA0001 /* CraigOCleanHelper */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		HELPER031AAAA0001AAAA0001 /* com.CraigOClean.helper in CopyFiles */ = {isa = PBXBuildFile; fileRef = HELPER002AAAA0001AAAA0001 /* com.CraigOClean.helper */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -98,6 +99,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		DAEMON003AAAA0001AAAA0001 /* Copy LaunchDaemons */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Contents/Library/LaunchDaemons;
+			dstSubfolderSpec = 1;
+			files = (
+				DAEMON001AAAA0001AAAA0001 /* com.CraigOClean.helper.plist in Copy LaunchDaemons */,
+			);
+			name = "Copy LaunchDaemons";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		HELPER004AAAA0001AAAA0001 /* Copy launchd.plist */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -115,7 +127,7 @@
 			dstPath = Contents/Library/LaunchServices;
 			dstSubfolderSpec = 1;
 			files = (
-				HELPER031AAAA0001AAAA0001 /* CraigOCleanHelper in CopyFiles */,
+				HELPER031AAAA0001AAAA0001 /* com.CraigOClean.helper in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -176,6 +188,7 @@
 		CCF6DA95BADC4D75E281700A /* test-generator.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "test-generator.md"; sourceTree = "<group>"; };
 		CDE6E7BF2B81B73B7F577407 /* MemoryOptimizerServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryOptimizerServiceTests.swift; sourceTree = "<group>"; };
 		D373EFDBFA43CBD29EF8A9F2 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
+		DAEMON002AAAA0001AAAA0001 /* com.CraigOClean.helper.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = com.CraigOClean.helper.plist; sourceTree = "<group>"; };
 		DF3EC7588F3D7C2507C4C7F3 /* LoggingExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggingExtensions.swift; sourceTree = "<group>"; };
 		E6B5AE1B6DBE0E444E25200F /* PrivilegeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegeService.swift; sourceTree = "<group>"; };
 		E7F07DDAB628B4EEC3C63484 /* neuralquantum.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = neuralquantum.md; sourceTree = "<group>"; };
@@ -186,7 +199,7 @@
 		F78289CCD79A928D641472B8 /* ProcessManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessManagerView.swift; sourceTree = "<group>"; };
 		F7ABA9E9F9B116B8C856B51C /* settings.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = settings.json; sourceTree = "<group>"; };
 		FB5748E37851D981C3F01925 /* Craig-O-Clean.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Craig-O-Clean.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		HELPER002AAAA0001AAAA0001 /* CraigOCleanHelper */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CraigOCleanHelper; sourceTree = BUILT_PRODUCTS_DIR; };
+		HELPER002AAAA0001AAAA0001 /* com.CraigOClean.helper */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = com.CraigOClean.helper; sourceTree = BUILT_PRODUCTS_DIR; };
 		HELPER010AAAA0001AAAA0001 /* HelperMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperMain.swift; sourceTree = "<group>"; };
 		HELPER011AAAA0001AAAA0001 /* HelperXPCProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperXPCProtocol.swift; sourceTree = "<group>"; };
 		HELPER012AAAA0001AAAA0001 /* HelperXPCImplementation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperXPCImplementation.swift; sourceTree = "<group>"; };
@@ -346,6 +359,7 @@
 				1DC8639804F61A298AD88389 /* .vscode */,
 				5CB23B38D6DD33656D6F1EE6 /* Core */,
 				983642FA7180BCA9B0824C9C /* docs */,
+				DAEMON004AAAA0001AAAA0001 /* Library */,
 				002C4DF3EA614AFCA2C8F940 /* Tests */,
 				36274E6A08DF275509E4E474 /* UI */,
 			);
@@ -358,6 +372,22 @@
 				3347C167919A7F97FE2CDE86 /* ClearMindUITests.swift */,
 			);
 			path = ClearMindUITests;
+			sourceTree = "<group>";
+		};
+		DAEMON004AAAA0001AAAA0001 /* Library */ = {
+			isa = PBXGroup;
+			children = (
+				DAEMON005AAAA0001AAAA0001 /* LaunchDaemons */,
+			);
+			path = Library;
+			sourceTree = "<group>";
+		};
+		DAEMON005AAAA0001AAAA0001 /* LaunchDaemons */ = {
+			isa = PBXGroup;
+			children = (
+				DAEMON002AAAA0001AAAA0001 /* com.CraigOClean.helper.plist */,
+			);
+			path = LaunchDaemons;
 			sourceTree = "<group>";
 		};
 		E1E60033578611EECF63ED09 /* ClearMindTests */ = {
@@ -375,7 +405,7 @@
 			isa = PBXGroup;
 			children = (
 				FB5748E37851D981C3F01925 /* Craig-O-Clean.app */,
-				HELPER002AAAA0001AAAA0001 /* CraigOCleanHelper */,
+				HELPER002AAAA0001AAAA0001 /* com.CraigOClean.helper */,
 				5D0E02E94D7795EFC0334B3F /* Craig-O-CleanTests.xctest */,
 				3DA0C997E4BE59EFD9C1A412 /* Craig-O-CleanUITests.xctest */,
 			);
@@ -405,6 +435,7 @@
 				72E50CC81E7DFE8C4F4A01AD /* Sources */,
 				78C35A7BCE647FE143B9633C /* Resources */,
 				HELPER030AAAA0001AAAA0001 /* CopyFiles */,
+				DAEMON003AAAA0001AAAA0001 /* Copy LaunchDaemons */,
 			);
 			buildRules = (
 			);
@@ -468,7 +499,7 @@
 			);
 			name = CraigOCleanHelper;
 			productName = CraigOCleanHelper;
-			productReference = HELPER002AAAA0001AAAA0001 /* CraigOCleanHelper */;
+			productReference = HELPER002AAAA0001AAAA0001 /* com.CraigOClean.helper */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -660,7 +691,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "Craig-O-Clean/Craig-O-Clean.entitlements";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "Craig-O-Clean/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -858,7 +889,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "Craig-O-Clean/Craig-O-Clean.entitlements";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "Craig-O-Clean/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -884,7 +915,7 @@
 				INSTALL_PATH = "";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.CraigOClean.helper;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = com.CraigOClean.helper;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.9;
@@ -903,7 +934,7 @@
 				INSTALL_PATH = "";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.CraigOClean.helper;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = com.CraigOClean.helper;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;

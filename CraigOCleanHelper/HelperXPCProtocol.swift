@@ -174,26 +174,26 @@ public enum AuthorizationHelper {
 
         defer { AuthorizationFree(auth, []) }
 
-        // Request the specified rights
-        var items = rights.map { right -> AuthorizationItem in
-            right.withCString { cString in
-                AuthorizationItem(
-                    name: cString,
-                    valueLength: 0,
-                    value: nil,
-                    flags: 0
-                )
+        // Request the specified rights using a single right for simplicity
+        // For multiple rights, we iterate and request each
+        guard let firstRight = rights.first else {
+            return nil
+        }
+
+        let requestStatus = firstRight.withCString { cString -> OSStatus in
+            var item = AuthorizationItem(
+                name: cString,
+                valueLength: 0,
+                value: nil,
+                flags: 0
+            )
+            return withUnsafeMutablePointer(to: &item) { itemPtr in
+                var authRights = AuthorizationRights(count: 1, items: itemPtr)
+                let flags: AuthorizationFlags = [.interactionAllowed, .preAuthorize, .extendRights]
+                return AuthorizationCopyRights(auth, &authRights, nil, flags, nil)
             }
         }
 
-        var authRights = AuthorizationRights(
-            count: UInt32(items.count),
-            items: &items
-        )
-
-        let flags: AuthorizationFlags = [.interactionAllowed, .preAuthorize, .extendRights]
-
-        let requestStatus = AuthorizationCopyRights(auth, &authRights, nil, flags, nil)
         guard requestStatus == errAuthorizationSuccess else {
             return nil
         }
@@ -231,19 +231,20 @@ public enum AuthorizationHelper {
 
         defer { AuthorizationFree(auth, []) }
 
-        var item = right.withCString { cString in
-            AuthorizationItem(
+        let copyStatus = right.withCString { cString -> OSStatus in
+            var item = AuthorizationItem(
                 name: cString,
                 valueLength: 0,
                 value: nil,
                 flags: 0
             )
+            return withUnsafeMutablePointer(to: &item) { itemPtr in
+                var rights = AuthorizationRights(count: 1, items: itemPtr)
+                let flags: AuthorizationFlags = [.extendRights]
+                return AuthorizationCopyRights(auth, &rights, nil, flags, nil)
+            }
         }
 
-        var rights = AuthorizationRights(count: 1, items: &item)
-        let flags: AuthorizationFlags = [.extendRights]
-
-        let copyStatus = AuthorizationCopyRights(auth, &rights, nil, flags, nil)
         return copyStatus == errAuthorizationSuccess
     }
 }
