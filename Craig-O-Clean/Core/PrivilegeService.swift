@@ -64,6 +64,7 @@ public enum HelperStatus: Equatable {
 // MARK: - Privilege Service Protocol
 
 /// Protocol for privilege service to enable testing
+@MainActor
 public protocol PrivilegeServiceProtocol {
     var helperStatus: HelperStatus { get }
     var isHelperInstalled: Bool { get }
@@ -114,7 +115,9 @@ public final class PrivilegeService: ObservableObject, PrivilegeServiceProtocol 
     }
 
     deinit {
-        invalidateConnection()
+        // Capture connection reference before cleanup
+        // Note: Connection will be invalidated when the object is deallocated
+        xpcConnection?.invalidate()
     }
 
     // MARK: - Public Methods
@@ -152,7 +155,7 @@ public final class PrivilegeService: ObservableObject, PrivilegeServiceProtocol 
         }
     }
 
-    /// Install the privileged helper tool using SMJobBless
+    /// Install the privileged helper tool using SMAppService (macOS 13+)
     public func installHelper() async -> PrivilegeOperationResult {
         logger.info("Attempting to install helper...")
         isOperationInProgress = true
@@ -163,35 +166,12 @@ public final class PrivilegeService: ObservableObject, PrivilegeServiceProtocol 
             }
         }
 
-        // Request authorization for installation
-        guard let authRef = createAuthorizationRef() else {
-            let result = PrivilegeOperationResult(
-                success: false,
-                message: "Failed to create authorization. Please try again.",
-                errorCode: -1
-            )
-            lastOperationResult = result
-            return result
-        }
+        do {
+            // Use SMAppService for macOS 13+
+            let service = SMAppService.daemon(plistName: "\(kHelperToolMachServiceName).plist")
+            try service.register()
 
-        defer { AuthorizationFree(authRef, []) }
-
-        // Install helper using SMJobBless
-        var error: Unmanaged<CFError>?
-
-        // Note: SMJobBless requires proper code signing and entitlements
-        // The helper's Info.plist must have SMAuthorizedClients
-        // The app's Info.plist must have SMPrivilegedExecutables
-
-        let success = SMJobBless(
-            kSMDomainSystemLaunchd,
-            kHelperToolMachServiceName as CFString,
-            authRef,
-            &error
-        )
-
-        if success {
-            logger.info("Helper installed successfully")
+            logger.info("Helper installed successfully via SMAppService")
             await checkHelperStatus()
             let result = PrivilegeOperationResult(
                 success: true,
@@ -200,8 +180,8 @@ public final class PrivilegeService: ObservableObject, PrivilegeServiceProtocol 
             )
             lastOperationResult = result
             return result
-        } else {
-            let errorMessage = error?.takeRetainedValue().localizedDescription ?? "Unknown error"
+        } catch {
+            let errorMessage = error.localizedDescription
             logger.error("Helper installation failed: \(errorMessage)")
 
             helperStatus = .installationFailed(error: errorMessage)
@@ -434,20 +414,20 @@ public final class PrivilegeService: ObservableObject, PrivilegeServiceProtocol 
             return nil
         }
 
-        // Request rights for installation
-        var installItem = kAuthorizationRightInstall.withCString { cString in
-            AuthorizationItem(
+        // Request rights for installation using withCString to keep pointer alive
+        let copyStatus = kAuthorizationRightInstall.withCString { cString -> OSStatus in
+            var installItem = AuthorizationItem(
                 name: cString,
                 valueLength: 0,
                 value: nil,
                 flags: 0
             )
+            return withUnsafeMutablePointer(to: &installItem) { itemPtr in
+                var rights = AuthorizationRights(count: 1, items: itemPtr)
+                let flags: AuthorizationFlags = [.interactionAllowed, .preAuthorize, .extendRights]
+                return AuthorizationCopyRights(auth, &rights, nil, flags, nil)
+            }
         }
-
-        var rights = AuthorizationRights(count: 1, items: &installItem)
-
-        let flags: AuthorizationFlags = [.interactionAllowed, .preAuthorize, .extendRights]
-        let copyStatus = AuthorizationCopyRights(auth, &rights, nil, flags, nil)
 
         guard copyStatus == errAuthorizationSuccess else {
             logger.error("Failed to copy authorization rights")
@@ -469,20 +449,21 @@ public final class PrivilegeService: ObservableObject, PrivilegeServiceProtocol 
 
         defer { AuthorizationFree(auth, []) }
 
-        // Request memory clean rights
-        var cleanItem = kAuthorizationRightMemoryClean.withCString { cString in
-            AuthorizationItem(
+        // Request memory clean rights using withCString to keep pointer alive
+        let copyStatus = kAuthorizationRightMemoryClean.withCString { cString -> OSStatus in
+            var cleanItem = AuthorizationItem(
                 name: cString,
                 valueLength: 0,
                 value: nil,
                 flags: 0
             )
+            return withUnsafeMutablePointer(to: &cleanItem) { itemPtr in
+                var rights = AuthorizationRights(count: 1, items: itemPtr)
+                let flags: AuthorizationFlags = [.interactionAllowed, .preAuthorize, .extendRights]
+                return AuthorizationCopyRights(auth, &rights, nil, flags, nil)
+            }
         }
 
-        var rights = AuthorizationRights(count: 1, items: &cleanItem)
-        let flags: AuthorizationFlags = [.interactionAllowed, .preAuthorize, .extendRights]
-
-        let copyStatus = AuthorizationCopyRights(auth, &rights, nil, flags, nil)
         guard copyStatus == errAuthorizationSuccess else {
             return nil
         }

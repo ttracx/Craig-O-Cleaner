@@ -1,4 +1,4 @@
-# Helper Tool Setup Guide
+e# Helper Tool Setup Guide
 
 This document explains how to set up the CraigOCleanHelper privileged helper tool for development and production.
 

@@ -18,17 +18,7 @@
     <string>XPC!</string>
     <key>SMAuthorizedClients</key>
     <array>
-        <!--
-        IMPORTANT: Replace this with your actual code signing requirement.
-        The string below is a placeholder that needs to be updated with your
-        Apple Developer Team ID and app identifier.
-
-        Format: identifier "com.CraigOClean.app" and anchor apple generic and
-                certificate 1[field.1.2.840.113635.100.6.2.6] and
-                certificate leaf[field.1.2.840.113635.100.6.1.13] and
-                certificate leaf[subject.OU] = "YOUR_TEAM_ID"
-        -->
-        <string>identifier "com.CraigOClean.app" and anchor apple generic</string>
+        <string>identifier "com.craigoclean.app" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = "K36LFHM32T"</string>
     </array>
 </dict>
 </plist>
