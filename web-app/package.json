@@ -1,0 +1,29 @@
+{
+  "name": "craig-o-clean-web",
+  "version": "1.0.0",
+  "description": "Craig-O-Clean Device Optimizer - Progressive Web App",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "echo 'Static site - no build required'",
+    "serve": "npx serve -s . -l 3000",
+    "lighthouse": "npx lighthouse http://localhost:3000 --view",
+    "test": "echo 'No tests configured'"
+  },
+  "keywords": [
+    "pwa",
+    "progressive-web-app",
+    "device-cleaner",
+    "optimizer",
+    "android",
+    "mobile"
+  ],
+  "author": "Craig-O-Clean",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Icon Generator - Craig-O-Clean</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 { color: #00d4aa; }
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .icon-item {
+            background: #252542;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .icon-item canvas {
+            background: white;
+            border-radius: 8px;
+        }
+        .icon-item p {
+            margin: 10px 0 0;
+            font-size: 14px;
+            color: #a0a0b0;
+        }
+        button {
+            background: linear-gradient(135deg, #00d4aa, #7c3aed);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover { opacity: 0.9; }
+        .instructions {
+            background: #252542;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin: 5px 0;
+            color: #a0a0b0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Craig-O-Clean Icon Generator</h1>
+
+    <div class="instructions">
+        <p><strong>Instructions:</strong></p>
+        <ol>
+            <li>Open this file in a web browser</li>
+            <li>Click "Generate All Icons" button</li>
+            <li>Right-click each icon and "Save Image As..." with the suggested filename</li>
+            <li>Save all icons to the /icons folder</li>
+        </ol>
+    </div>
+
+    <button onclick="generateIcons()">Generate All Icons</button>
+
+    <div class="icon-grid" id="iconGrid"></div>
+
+    <script>
+        const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+
+        function generateIcons() {
+            const grid = document.getElementById('iconGrid');
+            grid.innerHTML = '';
+
+            sizes.forEach(size => {
+                const div = document.createElement('div');
+                div.className = 'icon-item';
+
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+
+                drawIcon(canvas);
+
+                div.appendChild(canvas);
+                div.innerHTML += `<p>icon-${size}.png</p>`;
+
+                grid.appendChild(div);
+            });
+        }
+
+        function drawIcon(canvas) {
+            const ctx = canvas.getContext('2d');
+            const size = canvas.width;
+            const scale = size / 512;
+
+            // Background gradient
+            const bgGradient = ctx.createLinearGradient(0, 0, size, size);
+            bgGradient.addColorStop(0, '#1a1a2e');
+            bgGradient.addColorStop(1, '#0f0f1a');
+
+            // Accent gradient
+            const accentGradient = ctx.createLinearGradient(0, 0, size, size);
+            accentGradient.addColorStop(0, '#00d4aa');
+            accentGradient.addColorStop(1, '#7c3aed');
+
+            // Draw rounded rectangle background
+            const radius = 102 * scale;
+            ctx.beginPath();
+            ctx.roundRect(0, 0, size, size, radius);
+            ctx.fillStyle = bgGradient;
+            ctx.fill();
+
+            // Draw outer ring
+            ctx.beginPath();
+            ctx.arc(size / 2, size / 2, 180 * scale, 0, Math.PI * 2);
+            ctx.strokeStyle = accentGradient;
+            ctx.lineWidth = 16 * scale;
+            ctx.stroke();
+
+            // Draw inner glow
+            ctx.beginPath();
+            ctx.arc(size / 2, size / 2, 140 * scale, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(0,212,170,0.2)';
+            ctx.lineWidth = 40 * scale;
+            ctx.stroke();
+
+            // Draw checkmark
+            ctx.beginPath();
+            ctx.moveTo(160 * scale, 256 * scale);
+            ctx.lineTo(230 * scale, 326 * scale);
+            ctx.lineTo(352 * scale, 186 * scale);
+            ctx.strokeStyle = accentGradient;
+            ctx.lineWidth = 28 * scale;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+
+            // Draw decorative dots
+            const dots = [
+                { x: 256, y: 100, color: '#00d4aa' },
+                { x: 256, y: 412, color: '#7c3aed' },
+                { x: 100, y: 256, color: '#00d4aa' },
+                { x: 412, y: 256, color: '#7c3aed' }
+            ];
+
+            dots.forEach(dot => {
+                ctx.beginPath();
+                ctx.arc(dot.x * scale, dot.y * scale, 8 * scale, 0, Math.PI * 2);
+                ctx.fillStyle = dot.color;
+                ctx.fill();
+            });
+        }
+
+        // Auto-generate on load
+        generateIcons();
+    </script>
+</body>
+</html>
