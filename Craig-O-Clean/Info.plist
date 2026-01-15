@@ -76,18 +76,41 @@
 	<true/>
 
 	<!-- In-App Purchase Product IDs (StoreKit 2) -->
+	<!-- Configure these products in App Store Connect with 7-day free trial -->
+	<!-- Monthly: $0.99/month | Yearly: $9.99/year (17% savings) -->
 	<key>IAPProductIDs</key>
 	<array>
 		<string>com.craigoclean.pro.monthly</string>
 		<string>com.craigoclean.pro.yearly</string>
 	</array>
 
+	<!-- Trial Configuration -->
+	<key>TrialDurationDays</key>
+	<integer>7</integer>
+
+	<!-- URL Schemes for Stripe callbacks -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.craigoclean.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>craigoclean</string>
+			</array>
+		</dict>
+	</array>
+
 	<!-- Stripe backend base URL (Stripe secret keys MUST stay on your server) -->
 	<!-- CONFIGURE THIS: Set to your backend URL that handles Stripe checkout -->
 	<!-- Example: https://api.yourdomain.com -->
-	<!-- Backend must implement: POST /stripe/create-checkout-session -->
-	<!-- Request: { "planId": "string", "userId": "string?" } -->
-	<!-- Response: { "url": "https://checkout.stripe.com/..." } -->
+	<!-- Backend must implement: -->
+	<!--   POST /stripe/create-checkout-session - Create checkout session -->
+	<!--   POST /stripe/create-portal-session - Create customer portal session -->
+	<!--   GET /stripe/subscription-status/:userId - Get subscription status -->
+	<!--   POST /stripe/webhook - Handle Stripe webhooks -->
+	<!-- Pricing: Monthly $0.99 (price_monthly_099), Yearly $9.99 (price_yearly_999) -->
+	<!-- Both prices should be configured with 7-day free trial in Stripe Dashboard -->
 	<key>StripeBackendBaseURL</key>
 	<string></string>
 

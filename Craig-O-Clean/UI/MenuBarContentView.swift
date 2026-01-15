@@ -42,11 +42,13 @@ struct MenuBarContentView: View {
     @EnvironmentObject var auth: AuthManager
     @EnvironmentObject var userStore: LocalUserStore
     @EnvironmentObject var subscriptions: SubscriptionManager
+    @EnvironmentObject var trialManager: TrialManager
 
     let onExpandClick: () -> Void
 
     @State private var selectedTab: MenuBarTab = .dashboard
     @State private var isRefreshing = false
+    @State private var showingPaywall = false
     @Namespace private var tabAnimation
 
     var body: some View {
@@ -124,8 +126,16 @@ struct MenuBarContentView: View {
                             .font(.system(size: 16, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
 
+                        // Show appropriate badge based on subscription status
                         if subscriptions.isPro {
                             ProBadge()
+                        } else if trialManager.isTrialActive {
+                            TrialBadge(
+                                daysRemaining: trialManager.trialDaysRemaining,
+                                isExpired: false
+                            )
+                        } else if trialManager.subscriptionStatus == .trialExpired {
+                            TrialBadge(daysRemaining: 0, isExpired: true)
                         }
                     }
 
@@ -1999,4 +2009,5 @@ struct PurgeResultSheet: View {
         .environmentObject(AuthManager.shared)
         .environmentObject(LocalUserStore.shared)
         .environmentObject(SubscriptionManager.shared)
+        .environmentObject(TrialManager.shared)
 }
