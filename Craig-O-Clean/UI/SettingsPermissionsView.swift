@@ -4,6 +4,7 @@
 
 import SwiftUI
 import AuthenticationServices
+import StoreKit
 
 struct SettingsPermissionsView: View {
     @EnvironmentObject var systemMetrics: SystemMetricsService
@@ -12,16 +13,18 @@ struct SettingsPermissionsView: View {
     @EnvironmentObject var userStore: LocalUserStore
     @EnvironmentObject var subscriptions: SubscriptionManager
     @EnvironmentObject var stripe: StripeCheckoutService
-    
+    @EnvironmentObject var trialManager: TrialManager
+
     @AppStorage("refreshInterval") private var refreshInterval: Double = 2.0
     @AppStorage("showInDock") private var showInDock = false
     @AppStorage("launchAtLogin") private var launchAtLogin = false
     @AppStorage("enableNotifications") private var enableNotifications = true
     @AppStorage("memoryWarningThreshold") private var memoryWarningThreshold: Double = 80.0
-    
+
     @State private var showingDiagnostics = false
     @State private var showingAbout = false
     @State private var showingPrivacyPolicy = false
+    @State private var showingPaywall = false
     @State private var accountErrorMessage: String?
     
     var body: some View {
@@ -149,108 +152,370 @@ struct SettingsPermissionsView: View {
 
     private var subscriptionSection: some View {
         SettingsSection(title: "Subscription", icon: "crown") {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(subscriptions.isPro ? "Pro Active" : "Free Plan")
-                            .font(.headline)
-                        Text(subscriptions.isPro ? "Thanks for supporting Craig-O-Clean." : "Upgrade to unlock Pro features.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
+            VStack(alignment: .leading, spacing: 16) {
+                // Current Status Card
+                subscriptionStatusCard
 
-                    Spacer()
-
-                    if subscriptions.isLoading {
-                        ProgressView()
-                            .scaleEffect(0.8)
-                    }
+                // Trial/Upgrade Banner
+                if trialManager.shouldShowPaywall || trialManager.subscriptionStatus == .free {
+                    trialUpgradeBanner
                 }
 
                 if let msg = subscriptions.lastErrorMessage {
                     Text(msg)
                         .font(.caption2)
                         .foregroundColor(.red)
-                }
-
-                // App Store subscriptions (StoreKit 2)
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Upgrade via App Store")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-
-                    if subscriptions.products.isEmpty {
-                        Button("Load Plans") {
-                            Task { await subscriptions.loadProducts() }
-                        }
-                        .buttonStyle(.bordered)
-                    } else {
-                        ForEach(subscriptions.products, id: \.id) { product in
-                            HStack {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(product.displayName)
-                                        .fontWeight(.medium)
-                                    Text(product.description)
-                                        .font(.caption2)
-                                        .foregroundColor(.secondary)
-                                }
-
-                                Spacer()
-
-                                Text(product.displayPrice)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-
-                                Button("Buy") {
-                                    Task { await subscriptions.purchase(product) }
-                                }
-                                .buttonStyle(.borderedProminent)
-                                .controlSize(.small)
-                            }
-                            .padding(.vertical, 4)
-                        }
-                    }
-
-                    HStack {
-                        Button("Restore Purchases") {
-                            Task { await subscriptions.restorePurchases() }
-                        }
-                        .buttonStyle(.bordered)
-
-                        Button("Manage Subscriptions") {
-                            if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
-                                NSWorkspace.shared.open(url)
-                            }
-                        }
-                        .buttonStyle(.bordered)
-
-                        Spacer()
-                    }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.red.opacity(0.1))
+                        .cornerRadius(6)
                 }
 
                 Divider()
 
-                // Stripe (external) – requires your backend
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Business / Team (Stripe)")
+                // Pricing Options (if not pro)
+                if !subscriptions.isPro {
+                    pricingOptionsSection
+                }
+
+                // Management Options
+                subscriptionManagementSection
+
+                // Stripe Option
+                if stripe.canCheckout {
+                    stripeSection
+                }
+            }
+        }
+        .sheet(isPresented: $showingPaywall) {
+            PaywallView()
+                .environmentObject(subscriptions)
+                .environmentObject(trialManager)
+                .environmentObject(stripe)
+                .environmentObject(auth)
+        }
+    }
+
+    private var subscriptionStatusCard: some View {
+        HStack(spacing: 16) {
+            // Status Icon
+            ZStack {
+                Circle()
+                    .fill(statusGradient)
+                    .frame(width: 50, height: 50)
+
+                Image(systemName: statusIcon)
+                    .font(.system(size: 22))
+                    .foregroundColor(.white)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 8) {
+                    Text(statusTitle)
+                        .font(.headline)
+
+                    if trialManager.isTrialActive {
+                        TrialBadge(
+                            daysRemaining: trialManager.trialDaysRemaining,
+                            isExpired: false
+                        )
+                    } else if subscriptions.isPro {
+                        ProBadge()
+                    }
+                }
+
+                Text(statusSubtitle)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                if let subscription = subscriptions.currentSubscription,
+                   let expiry = subscription.expirationDate {
+                    Text("Renews: \(expiry.formatted(date: .abbreviated, time: .omitted))")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Spacer()
+
+            if subscriptions.isLoading {
+                ProgressView()
+                    .scaleEffect(0.8)
+            }
+        }
+        .padding()
+        .background(Color(NSColor.controlBackgroundColor).opacity(0.5))
+        .cornerRadius(12)
+    }
+
+    private var statusIcon: String {
+        if subscriptions.isPro { return "crown.fill" }
+        switch trialManager.subscriptionStatus {
+        case .trial: return "clock.fill"
+        case .trialExpired: return "exclamationmark.triangle.fill"
+        default: return "sparkles"
+        }
+    }
+
+    private var statusTitle: String {
+        if subscriptions.isPro { return "Pro Active" }
+        switch trialManager.subscriptionStatus {
+        case .trial: return "Trial Active"
+        case .trialExpired: return "Trial Expired"
+        case .free: return "Free Plan"
+        default: return trialManager.subscriptionStatus.displayName
+        }
+    }
+
+    private var statusSubtitle: String {
+        if subscriptions.isPro {
+            return "Thanks for supporting Craig-O-Clean!"
+        }
+        return trialManager.trialStatusText
+    }
+
+    private var statusGradient: LinearGradient {
+        if subscriptions.isPro {
+            return LinearGradient(colors: [.green, .teal], startPoint: .topLeading, endPoint: .bottomTrailing)
+        }
+        switch trialManager.subscriptionStatus {
+        case .trial where trialManager.trialDaysRemaining <= 3:
+            return LinearGradient(colors: [.orange, .red], startPoint: .topLeading, endPoint: .bottomTrailing)
+        case .trial:
+            return LinearGradient(colors: [.blue, .purple], startPoint: .topLeading, endPoint: .bottomTrailing)
+        case .trialExpired:
+            return LinearGradient(colors: [.red, .pink], startPoint: .topLeading, endPoint: .bottomTrailing)
+        default:
+            return LinearGradient(colors: [.gray, .gray.opacity(0.5)], startPoint: .topLeading, endPoint: .bottomTrailing)
+        }
+    }
+
+    private var trialUpgradeBanner: some View {
+        Button {
+            if trialManager.subscriptionStatus == .free && !trialManager.hasUsedTrial {
+                trialManager.startTrial()
+            } else {
+                showingPaywall = true
+            }
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: bannerIcon)
+                    .font(.title2)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(bannerTitle)
                         .font(.subheadline)
                         .fontWeight(.semibold)
-
-                    Text("Use Stripe for off-App-Store sales (e.g., invoices or team licensing). A backend is required.")
+                    Text(bannerSubtitle)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .opacity(0.9)
+                }
 
-                    Button("Open Stripe Checkout") {
-                        Task {
-                            do {
-                                try await stripe.openCheckout(planId: "pro_team", userId: auth.userId)
-                            } catch {
-                                // Keep this minimal in UI; user can configure backend URL in Info.plist.
-                                subscriptions.lastErrorMessage = "Stripe checkout not configured."
-                            }
+                Spacer()
+
+                Text(bannerActionText)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.white.opacity(0.2))
+                    .clipShape(Capsule())
+            }
+            .foregroundColor(.white)
+            .padding(14)
+            .background(bannerGradient)
+            .cornerRadius(12)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var bannerIcon: String {
+        switch trialManager.subscriptionStatus {
+        case .trialExpired: return "exclamationmark.triangle.fill"
+        case .trial: return "clock.fill"
+        default: return "sparkles"
+        }
+    }
+
+    private var bannerTitle: String {
+        switch trialManager.subscriptionStatus {
+        case .trialExpired: return "Your trial has expired"
+        case .trial: return "\(trialManager.trialDaysRemaining) days remaining"
+        default: return "Start your 7-day free trial"
+        }
+    }
+
+    private var bannerSubtitle: String {
+        switch trialManager.subscriptionStatus {
+        case .trialExpired: return "Upgrade to continue using all features"
+        case .trial: return "Upgrade now to avoid interruption"
+        default: return "Full access to all Pro features"
+        }
+    }
+
+    private var bannerActionText: String {
+        switch trialManager.subscriptionStatus {
+        case .trialExpired, .trial: return "Upgrade"
+        default: return "Start Trial"
+        }
+    }
+
+    private var bannerGradient: LinearGradient {
+        switch trialManager.subscriptionStatus {
+        case .trialExpired:
+            return LinearGradient(colors: [.red, .orange], startPoint: .leading, endPoint: .trailing)
+        case .trial where trialManager.trialDaysRemaining <= 3:
+            return LinearGradient(colors: [.orange, .yellow], startPoint: .leading, endPoint: .trailing)
+        default:
+            return LinearGradient(colors: [.purple, .blue], startPoint: .leading, endPoint: .trailing)
+        }
+    }
+
+    private var pricingOptionsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Choose Your Plan")
+                .font(.subheadline)
+                .fontWeight(.semibold)
+
+            if subscriptions.products.isEmpty {
+                Button("Load Plans") {
+                    Task { await subscriptions.loadProducts() }
+                }
+                .buttonStyle(.bordered)
+            } else {
+                ForEach(subscriptions.products, id: \.id) { product in
+                    SubscriptionProductRow(
+                        product: product,
+                        isRecommended: product.id.contains("yearly"),
+                        onPurchase: {
+                            Task { await subscriptions.purchase(product) }
+                        }
+                    )
+                }
+            }
+
+            // Pricing info
+            HStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Monthly")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                    Text("$0.99/month")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 4) {
+                        Text("Yearly")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                        Text("SAVE 17%")
+                            .font(.system(size: 8, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 2)
+                            .background(Color.green)
+                            .clipShape(Capsule())
+                    }
+                    Text("$9.99/year")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+            }
+            .padding(.top, 4)
+        }
+    }
+
+    private var subscriptionManagementSection: some View {
+        HStack(spacing: 12) {
+            Button("Restore Purchases") {
+                Task { await subscriptions.restorePurchases() }
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+
+            Button("Manage Subscriptions") {
+                if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                    NSWorkspace.shared.open(url)
+                }
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+
+            Spacer()
+        }
+    }
+
+    private var stripeSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Divider()
+
+            Text("Alternative Payment")
+                .font(.subheadline)
+                .fontWeight(.semibold)
+
+            Text("Pay with credit card via Stripe for business purchases or if App Store is unavailable.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            HStack(spacing: 8) {
+                Button {
+                    Task {
+                        do {
+                            try await stripe.openCheckout(
+                                plan: .monthly,
+                                userId: auth.userId,
+                                email: userStore.profile?.email,
+                                includeTrial: !trialManager.hasUsedTrial
+                            )
+                        } catch {
+                            subscriptions.lastErrorMessage = error.localizedDescription
                         }
                     }
-                    .buttonStyle(.bordered)
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "creditcard")
+                        Text("$0.99/mo")
+                    }
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+
+                Button {
+                    Task {
+                        do {
+                            try await stripe.openCheckout(
+                                plan: .yearly,
+                                userId: auth.userId,
+                                email: userStore.profile?.email,
+                                includeTrial: !trialManager.hasUsedTrial
+                            )
+                        } catch {
+                            subscriptions.lastErrorMessage = error.localizedDescription
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "creditcard")
+                        Text("$9.99/yr")
+                    }
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+
+                Spacer()
+            }
+
+            if stripe.isProcessing {
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .scaleEffect(0.7)
+                    Text("Opening checkout...")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
             }
         }
@@ -1076,6 +1341,62 @@ struct PrivacyPolicySheet: View {
     }
 }
 
+// MARK: - Subscription Product Row
+
+struct SubscriptionProductRow: View {
+    let product: Product
+    let isRecommended: Bool
+    let onPurchase: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Text(product.displayName)
+                        .fontWeight(.medium)
+
+                    if isRecommended {
+                        Text("BEST VALUE")
+                            .font(.system(size: 8, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.green)
+                            .clipShape(Capsule())
+                    }
+                }
+
+                Text(product.description)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+
+            Text(product.displayPrice)
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+
+            Button("Subscribe") {
+                onPurchase()
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.small)
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(isRecommended ? Color.green.opacity(0.1) : Color.clear)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(isRecommended ? Color.green.opacity(0.3) : Color.secondary.opacity(0.2), lineWidth: 1)
+                )
+        )
+    }
+}
+
 // MARK: - Preview
 
 #Preview {
@@ -1086,5 +1407,6 @@ struct PrivacyPolicySheet: View {
         .environmentObject(LocalUserStore.shared)
         .environmentObject(SubscriptionManager.shared)
         .environmentObject(StripeCheckoutService.shared)
+        .environmentObject(TrialManager.shared)
         .frame(width: 700, height: 800)
 }
