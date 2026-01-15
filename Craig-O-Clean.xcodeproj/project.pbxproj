@@ -7,18 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0377F26B86A0C4C5E9346BD8 /* agent-orchestrator.md in Resources */ = {isa = PBXBuildFile; fileRef = 21F6370B8069E7737016F363 /* agent-orchestrator.md */; };
 		072BDC18CD3A1F412D79E65C /* MemoryCleanupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECA675EC13F9451E3C48A56 /* MemoryCleanupView.swift */; };
 		0835CC7B734975BC761C3801 /* AutoCleanupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ACBCDA24FEC65C0692216ED /* AutoCleanupService.swift */; };
 		088E79AB6DD39EED29F38834 /* ProcessManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F78289CCD79A928D641472B8 /* ProcessManagerView.swift */; };
-		110F4F282BFB669CBD94783D /* LocalUserStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4169E7CBDA3D4D26134CCF54 /* LocalUserStore.swift */; };
-		12CF28C3D91DBCDA957213C8 /* doc-generator.md in Resources */ = {isa = PBXBuildFile; fileRef = 6F3FE777777D63919E6F89AF /* doc-generator.md */; };
 		1817CC0947FD83F7BD9F49FC /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB392BCA4D07A3A6B3FB20CB /* DashboardView.swift */; };
 		1A683447D137A01FBA2C2231 /* LaunchAtLoginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C353CAB9F69732F92380EEC5 /* LaunchAtLoginManager.swift */; };
-		1AE867179C3F34A5D2FD8969 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38C1F2A36C537B59B2E05DC7 /* KeychainService.swift */; };
 		245906DA80EE0DEC93EF4CDE /* AutoCleanupSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C600236D643D1053BD64CC3 /* AutoCleanupSettingsView.swift */; };
 		2A25D8B619D2FCFD6DA92D5E /* BrowserAutomationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D4847DB072B4F05BF47CF1B /* BrowserAutomationService.swift */; };
-		2D1CBBB021F3073929CD6B16 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D373EFDBFA43CBD29EF8A9F2 /* AuthManager.swift */; };
 		2FE223FFC5AB086E1F390837 /* SystemCPUMonitorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23FD6D8224281B502229F05E /* SystemCPUMonitorView.swift */; };
 		320BA199692F2B0CE464C826 /* ClearMindUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3347C167919A7F97FE2CDE86 /* ClearMindUITests.swift */; };
 		324625357741BF0140A7A9FA /* MemoryOptimizerServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDE6E7BF2B81B73B7F577407 /* MemoryOptimizerServiceTests.swift */; };
@@ -27,51 +22,28 @@
 		355FAAD5BF1BF63578425832 /* MainAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCD420995497279132891BA0 /* MainAppView.swift */; };
 		3B0E8AA93F8ABDFBB5985716 /* BrowserTabsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B84B8FF558F22E8EE95AE3E /* BrowserTabsView.swift */; };
 		4448E560834F1714EA0C69D1 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6275418776631AC59FE3F4B0 /* MenuBarView.swift */; };
-		458FDD6D953DD8F63BE6E892 /* LoggingExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF3EC7588F3D7C2507C4C7F3 /* LoggingExtensions.swift */; };
-		49E3275F73CF9D4FE893F645 /* migration-assistant.md in Resources */ = {isa = PBXBuildFile; fileRef = 6E45DD9E369B812DD4B1BDA3 /* migration-assistant.md */; };
 		4F3C963C04FE8AA89A0AD535 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 496C4A64B26A83B21DBF72D2 /* ContentView.swift */; };
-		5240F2A9EBAFE0D91B3A52AA /* quantum-algorithm-expert.md in Resources */ = {isa = PBXBuildFile; fileRef = 88845EC57AF9F2A8579A6835 /* quantum-algorithm-expert.md */; };
-		638BDF1781C15AE76CBDDAD4 /* api-designer.md in Resources */ = {isa = PBXBuildFile; fileRef = 7DB21B0821B69E3809538493 /* api-designer.md */; };
-		6560E92F033253FEDA428F24 /* SystemMemoryMonitorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A711D2A3A9F1FAFD2A080378 /* SystemMemoryMonitorView.swift */; };
-		6D2423BD099944833A154D2E /* swiftui-expert.md in Resources */ = {isa = PBXBuildFile; fileRef = EE6F297D6A9B1021F1802218 /* swiftui-expert.md */; };
+		67890ABCDEF01020304050607 /* SystemMemoryMonitorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7890ABCDEF01020304050607 /* SystemMemoryMonitorView.swift */; };
 		6F58AD285DFDAEE78860DD75 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 561A9E2E0EC0F17E52040D18 /* SettingsView.swift */; };
-		76AA5266392F1EA1C3F0E2F2 /* mvp_catalog.md in Resources */ = {isa = PBXBuildFile; fileRef = 73793E99C27868BE33687D42 /* mvp_catalog.md */; };
-		82965E6DDCCF35FF37A263F0 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D77B39515B63779F6FE7D6 /* AppLogger.swift */; };
 		87335D2F7C44B47F4FD9D493 /* PermissionsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5AD137740797927A1A06757 /* PermissionsService.swift */; };
 		886A773C5B7B618EF84E9140 /* Craig_O_CleanApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A963F27F151E1C97ACCFAE4B /* Craig_O_CleanApp.swift */; };
-		909153CFDB7F323A27FE23FC /* test-generator.md in Resources */ = {isa = PBXBuildFile; fileRef = CCF6DA95BADC4D75E281700A /* test-generator.md */; };
 		9494BC4E8B0AA61CD9DC21D9 /* MenuBarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79BF4035D745B5DB567701E7 /* MenuBarContentView.swift */; };
 		980877B7ED3E66AB16FECA4B /* BrowserAutomationServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3AAA25C8BFC4DC9FCC62823 /* BrowserAutomationServiceTests.swift */; };
 		9A3F893F8F82316375784ED0 /* SystemMemoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3776CD73A28435270067999F /* SystemMemoryManager.swift */; };
 		9C95320DF11F602202AD0D02 /* VibeCaaSColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD32BF4A67DF2580185C8A76 /* VibeCaaSColors.swift */; };
-		A308881FB6905A4000FD49DB /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3DEE9BCD149D55EFF82384 /* SubscriptionManager.swift */; };
-		A370BDFD589DCA285A78BE23 /* ecosystem_map.md in Resources */ = {isa = PBXBuildFile; fileRef = C2C937A79D41177B5F784B84 /* ecosystem_map.md */; };
+		A1B2C3D4E5F67890ABCDEF01 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F7890ABCDEF01 /* AuthManager.swift */; };
 		A3918E318F5B93FD0F444DBF /* SystemMetricsServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97EC0CFD10106180B82D3171 /* SystemMetricsServiceTests.swift */; };
-		A73AC451DA1792D2AC8AC66B /* PrivilegeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6B5AE1B6DBE0E444E25200F /* PrivilegeService.swift */; };
-		AC95EB784A5A13A96B98ACF0 /* StripeCheckoutService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7798250499084D4E366B7DD6 /* StripeCheckoutService.swift */; };
-		AF8B641F8150833DF888B9BF /* vibecaas-branding.md in Resources */ = {isa = PBXBuildFile; fileRef = 18CFD344C174F6DCB3004D69 /* vibecaas-branding.md */; };
-		AFA5C9C9C8E8DE0937C8E3C7 /* security-auditor.md in Resources */ = {isa = PBXBuildFile; fileRef = 5E23660F44F889F1CFF08403 /* security-auditor.md */; };
-		B4B5614CC93F6C26BF3FDA12 /* AGENT_QUICK_REFERENCE.md in Resources */ = {isa = PBXBuildFile; fileRef = 46A17DEE0F4CED0F5980E9A4 /* AGENT_QUICK_REFERENCE.md */; };
+		B2C3D4E5F67890ABCDEF0102 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3C4D5E6F7890ABCDEF0102 /* KeychainService.swift */; };
 		B94280F2C48B84B7CCCED60F /* SettingsPermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 253B9B7F0FD0202F49F06356 /* SettingsPermissionsView.swift */; };
-		C089DB2582C7E449EDCB2CEC /* performance-optimizer.md in Resources */ = {isa = PBXBuildFile; fileRef = 8C51B2A0DEC52AE660FE4A3A /* performance-optimizer.md */; };
 		C1CF78B065B69217240721DE /* Craig-O-Cleaner-logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 6A95705D710AB1609EBE0FFA /* Craig-O-Cleaner-logo.png */; };
+		C3D4E5F67890ABCDEF010203 /* LocalUserStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4D5E6F7890ABCDEF010203 /* LocalUserStore.swift */; };
 		C4715D919A5DBEF825CE493A /* ProcessDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68B2DE05F77C4B544BE495A3 /* ProcessDetailsView.swift */; };
 		C72688306B4BEE5732CCBB8A /* ProcessManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2145AF91FEE09DA3360DEF7 /* ProcessManager.swift */; };
-		C8D843FE5FD8146FF44DE62C /* code-reviewer.md in Resources */ = {isa = PBXBuildFile; fileRef = 1218AFEF97EF65080C3D2B84 /* code-reviewer.md */; };
-		CD6C55E47B21D36A0111C5E2 /* DebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 005004B6FBE745A292ED0626 /* DebugLogger.swift */; };
-		D0772A7F122257F261F8D2FC /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE612226F696635A68EF9F73 /* UserProfile.swift */; };
-		D471E4959DDBAA172F05CFEC /* development_queue.md in Resources */ = {isa = PBXBuildFile; fileRef = 4000FD927BB10D7823C6BC94 /* development_queue.md */; };
-		DAEMON001AAAA0001AAAA0001 /* com.CraigOClean.helper.plist in Copy LaunchDaemons */ = {isa = PBXBuildFile; fileRef = DAEMON002AAAA0001AAAA0001 /* com.CraigOClean.helper.plist */; };
-		E8FCC9578554B05D3F7D8407 /* settings.json in Resources */ = {isa = PBXBuildFile; fileRef = F7ABA9E9F9B116B8C856B51C /* settings.json */; };
-		F24211EF11698488AAC7009C /* neuralquantum.md in Resources */ = {isa = PBXBuildFile; fileRef = E7F07DDAB628B4EEC3C63484 /* neuralquantum.md */; };
+		D4E5F67890ABCDEF01020304 /* StripeCheckoutService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5E6F7890ABCDEF01020304 /* StripeCheckoutService.swift */; };
+		E5F67890ABCDEF0102030405 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E6F7890ABCDEF0102030405 /* SubscriptionManager.swift */; };
 		F541442A3FE6B7F6A73BFFD7 /* MemoryOptimizerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2EB8AA1C4FD005E3B8801FF /* MemoryOptimizerService.swift */; };
 		F5F21EDE8F69891F6A77AD61 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44536121E1A03039EB5C837E /* Assets.xcassets */; };
-		FCDB0AD71575E2BEDB875936 /* refactor-assistant.md in Resources */ = {isa = PBXBuildFile; fileRef = 8F05A23B626F8558679E7DDF /* refactor-assistant.md */; };
-		HELPER020AAAA0001AAAA0001 /* HelperMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = HELPER010AAAA0001AAAA0001 /* HelperMain.swift */; };
-		HELPER021AAAA0001AAAA0001 /* HelperXPCProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = HELPER011AAAA0001AAAA0001 /* HelperXPCProtocol.swift */; };
-		HELPER022AAAA0001AAAA0001 /* HelperXPCImplementation.swift in Sources */ = {isa = PBXBuildFile; fileRef = HELPER012AAAA0001AAAA0001 /* HelperXPCImplementation.swift */; };
-		HELPER023AAAA0001AAAA0001 /* launchd.plist in Copy launchd.plist */ = {isa = PBXBuildFile; fileRef = HELPER014AAAA0001AAAA0001 /* launchd.plist */; };
-		HELPER031AAAA0001AAAA0001 /* com.CraigOClean.helper in CopyFiles */ = {isa = PBXBuildFile; fileRef = HELPER002AAAA0001AAAA0001 /* com.CraigOClean.helper */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		F67890ABCDEF010203040506 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F7890ABCDEF010203040506 /* UserProfile.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -89,134 +61,52 @@
 			remoteGlobalIDString = 0415B46CA7B47AC35FB319C5;
 			remoteInfo = "Craig-O-Clean";
 		};
-		HELPER032AAAA0001AAAA0001 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C5DB498AAFA985B2D9AA1345 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = HELPER001AAAA0001AAAA0001;
-			remoteInfo = CraigOCleanHelper;
-		};
 /* End PBXContainerItemProxy section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		DAEMON003AAAA0001AAAA0001 /* Copy LaunchDaemons */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = Contents/Library/LaunchDaemons;
-			dstSubfolderSpec = 1;
-			files = (
-				DAEMON001AAAA0001AAAA0001 /* com.CraigOClean.helper.plist in Copy LaunchDaemons */,
-			);
-			name = "Copy LaunchDaemons";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		HELPER004AAAA0001AAAA0001 /* Copy launchd.plist */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 7;
-			files = (
-				HELPER023AAAA0001AAAA0001 /* launchd.plist in Copy launchd.plist */,
-			);
-			name = "Copy launchd.plist";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		HELPER030AAAA0001AAAA0001 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = Contents/Library/LaunchServices;
-			dstSubfolderSpec = 1;
-			files = (
-				HELPER031AAAA0001AAAA0001 /* com.CraigOClean.helper in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		005004B6FBE745A292ED0626 /* DebugLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogger.swift; sourceTree = "<group>"; };
 		0ECA675EC13F9451E3C48A56 /* MemoryCleanupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryCleanupView.swift; sourceTree = "<group>"; };
-		1218AFEF97EF65080C3D2B84 /* code-reviewer.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "code-reviewer.md"; sourceTree = "<group>"; };
-		18CFD344C174F6DCB3004D69 /* vibecaas-branding.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "vibecaas-branding.md"; sourceTree = "<group>"; };
+		1A2B3C4D5E6F7890ABCDEF01 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 		1C600236D643D1053BD64CC3 /* AutoCleanupSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoCleanupSettingsView.swift; sourceTree = "<group>"; };
-		21F6370B8069E7737016F363 /* agent-orchestrator.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "agent-orchestrator.md"; sourceTree = "<group>"; };
 		23FD6D8224281B502229F05E /* SystemCPUMonitorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemCPUMonitorView.swift; sourceTree = "<group>"; };
 		253B9B7F0FD0202F49F06356 /* SettingsPermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPermissionsView.swift; sourceTree = "<group>"; };
-		26D77B39515B63779F6FE7D6 /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
 		2ACBCDA24FEC65C0692216ED /* AutoCleanupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoCleanupService.swift; sourceTree = "<group>"; };
+		2B3C4D5E6F7890ABCDEF0102 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		3347C167919A7F97FE2CDE86 /* ClearMindUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClearMindUITests.swift; sourceTree = "<group>"; };
 		3776CD73A28435270067999F /* SystemMemoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMemoryManager.swift; sourceTree = "<group>"; };
-		38C1F2A36C537B59B2E05DC7 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
+		3C4D5E6F7890ABCDEF010203 /* LocalUserStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalUserStore.swift; sourceTree = "<group>"; };
 		3DA0C997E4BE59EFD9C1A412 /* Craig-O-CleanUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Craig-O-CleanUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		4000FD927BB10D7823C6BC94 /* development_queue.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = development_queue.md; sourceTree = "<group>"; };
-		4169E7CBDA3D4D26134CCF54 /* LocalUserStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalUserStore.swift; sourceTree = "<group>"; };
 		44536121E1A03039EB5C837E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		46A17DEE0F4CED0F5980E9A4 /* AGENT_QUICK_REFERENCE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENT_QUICK_REFERENCE.md; sourceTree = "<group>"; };
 		477BC22033C9D76D94AE2979 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		496C4A64B26A83B21DBF72D2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		4A3DEE9BCD149D55EFF82384 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		4CF233DB0FFB9F908AA51D49 /* SystemMetricsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMetricsService.swift; sourceTree = "<group>"; };
+		4D5E6F7890ABCDEF01020304 /* StripeCheckoutService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StripeCheckoutService.swift; sourceTree = "<group>"; };
 		561A9E2E0EC0F17E52040D18 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		5B84B8FF558F22E8EE95AE3E /* BrowserTabsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabsView.swift; sourceTree = "<group>"; };
 		5D0E02E94D7795EFC0334B3F /* Craig-O-CleanTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Craig-O-CleanTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		5E23660F44F889F1CFF08403 /* security-auditor.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "security-auditor.md"; sourceTree = "<group>"; };
+		5E6F7890ABCDEF0102030405 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		6275418776631AC59FE3F4B0 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
 		68B2DE05F77C4B544BE495A3 /* ProcessDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessDetailsView.swift; sourceTree = "<group>"; };
 		6A95705D710AB1609EBE0FFA /* Craig-O-Cleaner-logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Craig-O-Cleaner-logo.png"; sourceTree = "<group>"; };
 		6D4847DB072B4F05BF47CF1B /* BrowserAutomationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserAutomationService.swift; sourceTree = "<group>"; };
-		6E45DD9E369B812DD4B1BDA3 /* migration-assistant.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "migration-assistant.md"; sourceTree = "<group>"; };
-		6F3FE777777D63919E6F89AF /* doc-generator.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "doc-generator.md"; sourceTree = "<group>"; };
-		73793E99C27868BE33687D42 /* mvp_catalog.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = mvp_catalog.md; sourceTree = "<group>"; };
-		7798250499084D4E366B7DD6 /* StripeCheckoutService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StripeCheckoutService.swift; sourceTree = "<group>"; };
+		6F7890ABCDEF010203040506 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
+		7890ABCDEF01020304050607 /* SystemMemoryMonitorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMemoryMonitorView.swift; sourceTree = "<group>"; };
 		79BF4035D745B5DB567701E7 /* MenuBarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
-		7DB21B0821B69E3809538493 /* api-designer.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "api-designer.md"; sourceTree = "<group>"; };
-		88845EC57AF9F2A8579A6835 /* quantum-algorithm-expert.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "quantum-algorithm-expert.md"; sourceTree = "<group>"; };
-		8C51B2A0DEC52AE660FE4A3A /* performance-optimizer.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "performance-optimizer.md"; sourceTree = "<group>"; };
-		8F05A23B626F8558679E7DDF /* refactor-assistant.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "refactor-assistant.md"; sourceTree = "<group>"; };
 		97EC0CFD10106180B82D3171 /* SystemMetricsServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMetricsServiceTests.swift; sourceTree = "<group>"; };
 		A2145AF91FEE09DA3360DEF7 /* ProcessManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessManager.swift; sourceTree = "<group>"; };
 		A3AAA25C8BFC4DC9FCC62823 /* BrowserAutomationServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserAutomationServiceTests.swift; sourceTree = "<group>"; };
-		A711D2A3A9F1FAFD2A080378 /* SystemMemoryMonitorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMemoryMonitorView.swift; sourceTree = "<group>"; };
 		A963F27F151E1C97ACCFAE4B /* Craig_O_CleanApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Craig_O_CleanApp.swift; sourceTree = "<group>"; };
 		BB392BCA4D07A3A6B3FB20CB /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		BCD420995497279132891BA0 /* MainAppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainAppView.swift; sourceTree = "<group>"; };
 		BD32BF4A67DF2580185C8A76 /* VibeCaaSColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VibeCaaSColors.swift; sourceTree = "<group>"; };
-		C2C937A79D41177B5F784B84 /* ecosystem_map.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ecosystem_map.md; sourceTree = "<group>"; };
 		C2EB8AA1C4FD005E3B8801FF /* MemoryOptimizerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryOptimizerService.swift; sourceTree = "<group>"; };
 		C353CAB9F69732F92380EEC5 /* LaunchAtLoginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLoginManager.swift; sourceTree = "<group>"; };
 		C5AD137740797927A1A06757 /* PermissionsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsService.swift; sourceTree = "<group>"; };
-		CCF6DA95BADC4D75E281700A /* test-generator.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "test-generator.md"; sourceTree = "<group>"; };
 		CDE6E7BF2B81B73B7F577407 /* MemoryOptimizerServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryOptimizerServiceTests.swift; sourceTree = "<group>"; };
-		D373EFDBFA43CBD29EF8A9F2 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
-		DAEMON002AAAA0001AAAA0001 /* com.CraigOClean.helper.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = com.CraigOClean.helper.plist; sourceTree = "<group>"; };
-		DF3EC7588F3D7C2507C4C7F3 /* LoggingExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggingExtensions.swift; sourceTree = "<group>"; };
-		E6B5AE1B6DBE0E444E25200F /* PrivilegeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegeService.swift; sourceTree = "<group>"; };
-		E7F07DDAB628B4EEC3C63484 /* neuralquantum.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = neuralquantum.md; sourceTree = "<group>"; };
-		EE612226F696635A68EF9F73 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
-		EE6F297D6A9B1021F1802218 /* swiftui-expert.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "swiftui-expert.md"; sourceTree = "<group>"; };
 		F46711DF1122D3DB4697AA40 /* PermissionsServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsServiceTests.swift; sourceTree = "<group>"; };
 		F6E10BBC32BAE5E056982A8B /* Craig-O-Clean.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Craig-O-Clean.entitlements"; sourceTree = "<group>"; };
 		F78289CCD79A928D641472B8 /* ProcessManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessManagerView.swift; sourceTree = "<group>"; };
-		F7ABA9E9F9B116B8C856B51C /* settings.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = settings.json; sourceTree = "<group>"; };
 		FB5748E37851D981C3F01925 /* Craig-O-Clean.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Craig-O-Clean.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		HELPER002AAAA0001AAAA0001 /* com.CraigOClean.helper */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = com.CraigOClean.helper; sourceTree = BUILT_PRODUCTS_DIR; };
-		HELPER010AAAA0001AAAA0001 /* HelperMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperMain.swift; sourceTree = "<group>"; };
-		HELPER011AAAA0001AAAA0001 /* HelperXPCProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperXPCProtocol.swift; sourceTree = "<group>"; };
-		HELPER012AAAA0001AAAA0001 /* HelperXPCImplementation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperXPCImplementation.swift; sourceTree = "<group>"; };
-		HELPER013AAAA0001AAAA0001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		HELPER014AAAA0001AAAA0001 /* launchd.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = launchd.plist; sourceTree = "<group>"; };
-		HELPER015AAAA0001AAAA0001 /* CraigOCleanHelper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CraigOCleanHelper.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
-
-/* Begin PBXFrameworksBuildPhase section */
-		HELPER005AAAA0001AAAA0001 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		002C4DF3EA614AFCA2C8F940 /* Tests */ = {
@@ -226,14 +116,6 @@
 				B8A61F36CA41840EEF5A959F /* ClearMindUITests */,
 			);
 			path = Tests;
-			sourceTree = "<group>";
-		};
-		1DC8639804F61A298AD88389 /* .vscode */ = {
-			isa = PBXGroup;
-			children = (
-				F7ABA9E9F9B116B8C856B51C /* settings.json */,
-			);
-			path = .vscode;
 			sourceTree = "<group>";
 		};
 		36274E6A08DF275509E4E474 /* UI */ = {
@@ -255,7 +137,6 @@
 			isa = PBXGroup;
 			children = (
 				AAA8B2312C2FDE28DD3FAF8F /* Craig-O-Clean */,
-				HELPER009AAAA0001AAAA0001 /* CraigOCleanHelper */,
 				E593D80C629AC472168D6BBF /* Products */,
 			);
 			sourceTree = "<group>";
@@ -263,78 +144,19 @@
 		5CB23B38D6DD33656D6F1EE6 /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				26D77B39515B63779F6FE7D6 /* AppLogger.swift */,
-				D373EFDBFA43CBD29EF8A9F2 /* AuthManager.swift */,
+				1A2B3C4D5E6F7890ABCDEF01 /* AuthManager.swift */,
 				2ACBCDA24FEC65C0692216ED /* AutoCleanupService.swift */,
 				6D4847DB072B4F05BF47CF1B /* BrowserAutomationService.swift */,
-				005004B6FBE745A292ED0626 /* DebugLogger.swift */,
-				38C1F2A36C537B59B2E05DC7 /* KeychainService.swift */,
-				4169E7CBDA3D4D26134CCF54 /* LocalUserStore.swift */,
-				DF3EC7588F3D7C2507C4C7F3 /* LoggingExtensions.swift */,
+				2B3C4D5E6F7890ABCDEF0102 /* KeychainService.swift */,
+				3C4D5E6F7890ABCDEF010203 /* LocalUserStore.swift */,
 				C2EB8AA1C4FD005E3B8801FF /* MemoryOptimizerService.swift */,
 				C5AD137740797927A1A06757 /* PermissionsService.swift */,
-				E6B5AE1B6DBE0E444E25200F /* PrivilegeService.swift */,
-				7798250499084D4E366B7DD6 /* StripeCheckoutService.swift */,
-				4A3DEE9BCD149D55EFF82384 /* SubscriptionManager.swift */,
+				4D5E6F7890ABCDEF01020304 /* StripeCheckoutService.swift */,
+				5E6F7890ABCDEF0102030405 /* SubscriptionManager.swift */,
 				4CF233DB0FFB9F908AA51D49 /* SystemMetricsService.swift */,
-				EE612226F696635A68EF9F73 /* UserProfile.swift */,
+				6F7890ABCDEF010203040506 /* UserProfile.swift */,
 			);
 			path = Core;
-			sourceTree = "<group>";
-		};
-		68B21B48BCE777E5E9103A0C /* agents */ = {
-			isa = PBXGroup;
-			children = (
-				21F6370B8069E7737016F363 /* agent-orchestrator.md */,
-				7DB21B0821B69E3809538493 /* api-designer.md */,
-				1218AFEF97EF65080C3D2B84 /* code-reviewer.md */,
-				6F3FE777777D63919E6F89AF /* doc-generator.md */,
-				6E45DD9E369B812DD4B1BDA3 /* migration-assistant.md */,
-				8C51B2A0DEC52AE660FE4A3A /* performance-optimizer.md */,
-				88845EC57AF9F2A8579A6835 /* quantum-algorithm-expert.md */,
-				8F05A23B626F8558679E7DDF /* refactor-assistant.md */,
-				5E23660F44F889F1CFF08403 /* security-auditor.md */,
-				EE6F297D6A9B1021F1802218 /* swiftui-expert.md */,
-				CCF6DA95BADC4D75E281700A /* test-generator.md */,
-				18CFD344C174F6DCB3004D69 /* vibecaas-branding.md */,
-			);
-			path = agents;
-			sourceTree = "<group>";
-		};
-		79433C4105E0715808E87972 /* rules */ = {
-			isa = PBXGroup;
-			children = (
-				E7F07DDAB628B4EEC3C63484 /* neuralquantum.md */,
-			);
-			path = rules;
-			sourceTree = "<group>";
-		};
-		85FB7526BA568B09C0DE743E /* .cursor */ = {
-			isa = PBXGroup;
-			children = (
-				46A17DEE0F4CED0F5980E9A4 /* AGENT_QUICK_REFERENCE.md */,
-				68B21B48BCE777E5E9103A0C /* agents */,
-				79433C4105E0715808E87972 /* rules */,
-			);
-			path = .cursor;
-			sourceTree = "<group>";
-		};
-		8E6A66107C8C5FAFC4A85617 /* adr */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = adr;
-			sourceTree = "<group>";
-		};
-		983642FA7180BCA9B0824C9C /* docs */ = {
-			isa = PBXGroup;
-			children = (
-				4000FD927BB10D7823C6BC94 /* development_queue.md */,
-				C2C937A79D41177B5F784B84 /* ecosystem_map.md */,
-				73793E99C27868BE33687D42 /* mvp_catalog.md */,
-				8E6A66107C8C5FAFC4A85617 /* adr */,
-			);
-			path = docs;
 			sourceTree = "<group>";
 		};
 		AAA8B2312C2FDE28DD3FAF8F /* Craig-O-Clean */ = {
@@ -353,13 +175,9 @@
 				561A9E2E0EC0F17E52040D18 /* SettingsView.swift */,
 				23FD6D8224281B502229F05E /* SystemCPUMonitorView.swift */,
 				3776CD73A28435270067999F /* SystemMemoryManager.swift */,
-				A711D2A3A9F1FAFD2A080378 /* SystemMemoryMonitorView.swift */,
+				7890ABCDEF01020304050607 /* SystemMemoryMonitorView.swift */,
 				BD32BF4A67DF2580185C8A76 /* VibeCaaSColors.swift */,
-				85FB7526BA568B09C0DE743E /* .cursor */,
-				1DC8639804F61A298AD88389 /* .vscode */,
 				5CB23B38D6DD33656D6F1EE6 /* Core */,
-				983642FA7180BCA9B0824C9C /* docs */,
-				DAEMON004AAAA0001AAAA0001 /* Library */,
 				002C4DF3EA614AFCA2C8F940 /* Tests */,
 				36274E6A08DF275509E4E474 /* UI */,
 			);
@@ -372,22 +190,6 @@
 				3347C167919A7F97FE2CDE86 /* ClearMindUITests.swift */,
 			);
 			path = ClearMindUITests;
-			sourceTree = "<group>";
-		};
-		DAEMON004AAAA0001AAAA0001 /* Library */ = {
-			isa = PBXGroup;
-			children = (
-				DAEMON005AAAA0001AAAA0001 /* LaunchDaemons */,
-			);
-			path = Library;
-			sourceTree = "<group>";
-		};
-		DAEMON005AAAA0001AAAA0001 /* LaunchDaemons */ = {
-			isa = PBXGroup;
-			children = (
-				DAEMON002AAAA0001AAAA0001 /* com.CraigOClean.helper.plist */,
-			);
-			path = LaunchDaemons;
 			sourceTree = "<group>";
 		};
 		E1E60033578611EECF63ED09 /* ClearMindTests */ = {
@@ -405,24 +207,10 @@
 			isa = PBXGroup;
 			children = (
 				FB5748E37851D981C3F01925 /* Craig-O-Clean.app */,
-				HELPER002AAAA0001AAAA0001 /* com.CraigOClean.helper */,
 				5D0E02E94D7795EFC0334B3F /* Craig-O-CleanTests.xctest */,
 				3DA0C997E4BE59EFD9C1A412 /* Craig-O-CleanUITests.xctest */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		HELPER009AAAA0001AAAA0001 /* CraigOCleanHelper */ = {
-			isa = PBXGroup;
-			children = (
-				HELPER010AAAA0001AAAA0001 /* HelperMain.swift */,
-				HELPER011AAAA0001AAAA0001 /* HelperXPCProtocol.swift */,
-				HELPER012AAAA0001AAAA0001 /* HelperXPCImplementation.swift */,
-				HELPER013AAAA0001AAAA0001 /* Info.plist */,
-				HELPER014AAAA0001AAAA0001 /* launchd.plist */,
-				HELPER015AAAA0001AAAA0001 /* CraigOCleanHelper.entitlements */,
-			);
-			path = CraigOCleanHelper;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -434,13 +222,10 @@
 			buildPhases = (
 				72E50CC81E7DFE8C4F4A01AD /* Sources */,
 				78C35A7BCE647FE143B9633C /* Resources */,
-				HELPER030AAAA0001AAAA0001 /* CopyFiles */,
-				DAEMON003AAAA0001AAAA0001 /* Copy LaunchDaemons */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				HELPER033AAAA0001AAAA0001 /* PBXTargetDependency */,
 			);
 			name = "Craig-O-Clean";
 			packageProductDependencies = (
@@ -485,23 +270,6 @@
 			productReference = 3DA0C997E4BE59EFD9C1A412 /* Craig-O-CleanUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
-		HELPER001AAAA0001AAAA0001 /* CraigOCleanHelper */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = HELPER008AAAA0001AAAA0001 /* Build configuration list for PBXNativeTarget "CraigOCleanHelper" */;
-			buildPhases = (
-				HELPER003AAAA0001AAAA0001 /* Sources */,
-				HELPER005AAAA0001AAAA0001 /* Frameworks */,
-				HELPER004AAAA0001AAAA0001 /* Copy launchd.plist */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = CraigOCleanHelper;
-			productName = CraigOCleanHelper;
-			productReference = HELPER002AAAA0001AAAA0001 /* com.CraigOClean.helper */;
-			productType = "com.apple.product-type.tool";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -509,20 +277,17 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					0415B46CA7B47AC35FB319C5 = {
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
 					};
 					7467991BBA646C3A88C57F87 = {
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
 					};
 					926F2C4AEE3C34614C862130 = {
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
 						TestTargetID = 0415B46CA7B47AC35FB319C5;
-					};
-					HELPER001AAAA0001AAAA0001 = {
-						ProvisioningStyle = Manual;
 					};
 				};
 			};
@@ -540,7 +305,6 @@
 			projectRoot = "";
 			targets = (
 				0415B46CA7B47AC35FB319C5 /* Craig-O-Clean */,
-				HELPER001AAAA0001AAAA0001 /* CraigOCleanHelper */,
 				7467991BBA646C3A88C57F87 /* Craig-O-CleanTests */,
 				926F2C4AEE3C34614C862130 /* Craig-O-CleanUITests */,
 			);
@@ -552,26 +316,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B4B5614CC93F6C26BF3FDA12 /* AGENT_QUICK_REFERENCE.md in Resources */,
 				F5F21EDE8F69891F6A77AD61 /* Assets.xcassets in Resources */,
 				C1CF78B065B69217240721DE /* Craig-O-Cleaner-logo.png in Resources */,
-				0377F26B86A0C4C5E9346BD8 /* agent-orchestrator.md in Resources */,
-				638BDF1781C15AE76CBDDAD4 /* api-designer.md in Resources */,
-				C8D843FE5FD8146FF44DE62C /* code-reviewer.md in Resources */,
-				D471E4959DDBAA172F05CFEC /* development_queue.md in Resources */,
-				12CF28C3D91DBCDA957213C8 /* doc-generator.md in Resources */,
-				A370BDFD589DCA285A78BE23 /* ecosystem_map.md in Resources */,
-				49E3275F73CF9D4FE893F645 /* migration-assistant.md in Resources */,
-				76AA5266392F1EA1C3F0E2F2 /* mvp_catalog.md in Resources */,
-				F24211EF11698488AAC7009C /* neuralquantum.md in Resources */,
-				C089DB2582C7E449EDCB2CEC /* performance-optimizer.md in Resources */,
-				5240F2A9EBAFE0D91B3A52AA /* quantum-algorithm-expert.md in Resources */,
-				FCDB0AD71575E2BEDB875936 /* refactor-assistant.md in Resources */,
-				AFA5C9C9C8E8DE0937C8E3C7 /* security-auditor.md in Resources */,
-				E8FCC9578554B05D3F7D8407 /* settings.json in Resources */,
-				6D2423BD099944833A154D2E /* swiftui-expert.md in Resources */,
-				909153CFDB7F323A27FE23FC /* test-generator.md in Resources */,
-				AF8B641F8150833DF888B9BF /* vibecaas-branding.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -593,8 +339,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				82965E6DDCCF35FF37A263F0 /* AppLogger.swift in Sources */,
-				2D1CBBB021F3073929CD6B16 /* AuthManager.swift in Sources */,
+				A1B2C3D4E5F67890ABCDEF01 /* AuthManager.swift in Sources */,
 				0835CC7B734975BC761C3801 /* AutoCleanupService.swift in Sources */,
 				245906DA80EE0DEC93EF4CDE /* AutoCleanupSettingsView.swift in Sources */,
 				2A25D8B619D2FCFD6DA92D5E /* BrowserAutomationService.swift in Sources */,
@@ -602,30 +347,27 @@
 				4F3C963C04FE8AA89A0AD535 /* ContentView.swift in Sources */,
 				886A773C5B7B618EF84E9140 /* Craig_O_CleanApp.swift in Sources */,
 				1817CC0947FD83F7BD9F49FC /* DashboardView.swift in Sources */,
-				CD6C55E47B21D36A0111C5E2 /* DebugLogger.swift in Sources */,
-				1AE867179C3F34A5D2FD8969 /* KeychainService.swift in Sources */,
+				B2C3D4E5F67890ABCDEF0102 /* KeychainService.swift in Sources */,
 				1A683447D137A01FBA2C2231 /* LaunchAtLoginManager.swift in Sources */,
-				110F4F282BFB669CBD94783D /* LocalUserStore.swift in Sources */,
-				458FDD6D953DD8F63BE6E892 /* LoggingExtensions.swift in Sources */,
+				C3D4E5F67890ABCDEF010203 /* LocalUserStore.swift in Sources */,
 				355FAAD5BF1BF63578425832 /* MainAppView.swift in Sources */,
 				072BDC18CD3A1F412D79E65C /* MemoryCleanupView.swift in Sources */,
 				F541442A3FE6B7F6A73BFFD7 /* MemoryOptimizerService.swift in Sources */,
 				9494BC4E8B0AA61CD9DC21D9 /* MenuBarContentView.swift in Sources */,
 				4448E560834F1714EA0C69D1 /* MenuBarView.swift in Sources */,
 				87335D2F7C44B47F4FD9D493 /* PermissionsService.swift in Sources */,
-				A73AC451DA1792D2AC8AC66B /* PrivilegeService.swift in Sources */,
 				C4715D919A5DBEF825CE493A /* ProcessDetailsView.swift in Sources */,
 				C72688306B4BEE5732CCBB8A /* ProcessManager.swift in Sources */,
 				088E79AB6DD39EED29F38834 /* ProcessManagerView.swift in Sources */,
 				B94280F2C48B84B7CCCED60F /* SettingsPermissionsView.swift in Sources */,
 				6F58AD285DFDAEE78860DD75 /* SettingsView.swift in Sources */,
-				AC95EB784A5A13A96B98ACF0 /* StripeCheckoutService.swift in Sources */,
-				A308881FB6905A4000FD49DB /* SubscriptionManager.swift in Sources */,
+				D4E5F67890ABCDEF01020304 /* StripeCheckoutService.swift in Sources */,
+				E5F67890ABCDEF0102030405 /* SubscriptionManager.swift in Sources */,
 				2FE223FFC5AB086E1F390837 /* SystemCPUMonitorView.swift in Sources */,
 				9A3F893F8F82316375784ED0 /* SystemMemoryManager.swift in Sources */,
-				6560E92F033253FEDA428F24 /* SystemMemoryMonitorView.swift in Sources */,
+				67890ABCDEF01020304050607 /* SystemMemoryMonitorView.swift in Sources */,
 				329F8E7152478A41EE5C939F /* SystemMetricsService.swift in Sources */,
-				D0772A7F122257F261F8D2FC /* UserProfile.swift in Sources */,
+				F67890ABCDEF010203040506 /* UserProfile.swift in Sources */,
 				9C95320DF11F602202AD0D02 /* VibeCaaSColors.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -635,16 +377,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				320BA199692F2B0CE464C826 /* ClearMindUITests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		HELPER003AAAA0001AAAA0001 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				HELPER020AAAA0001AAAA0001 /* HelperMain.swift in Sources */,
-				HELPER021AAAA0001AAAA0001 /* HelperXPCProtocol.swift in Sources */,
-				HELPER022AAAA0001AAAA0001 /* HelperXPCImplementation.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -660,11 +392,6 @@
 			isa = PBXTargetDependency;
 			target = 0415B46CA7B47AC35FB319C5 /* Craig-O-Clean */;
 			targetProxy = 6E4B18B1380D6EBE394A4430 /* PBXContainerItemProxy */;
-		};
-		HELPER033AAAA0001AAAA0001 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = HELPER001AAAA0001AAAA0001 /* CraigOCleanHelper */;
-			targetProxy = HELPER032AAAA0001AAAA0001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -689,16 +416,25 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				AUTOMATION_APPLE_EVENTS = YES;
 				CODE_SIGN_ENTITLEMENTS = "Craig-O-Clean/Craig-O-Clean.entitlements";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K36LFHM32T;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				INFOPLIST_FILE = "Craig-O-Clean/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = CraigOClean;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.craigoclean.app;
 				PRODUCT_NAME = "Craig-O-Clean";
 				SDKROOT = macosx;
@@ -710,6 +446,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -748,6 +485,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -762,6 +500,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.9;
@@ -772,6 +511,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -809,6 +549,7 @@
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -829,6 +570,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.9;
@@ -887,58 +629,26 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				AUTOMATION_APPLE_EVENTS = YES;
 				CODE_SIGN_ENTITLEMENTS = "Craig-O-Clean/Craig-O-Clean.entitlements";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				INFOPLIST_FILE = "Craig-O-Clean/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = CraigOClean;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.craigoclean.app;
 				PRODUCT_NAME = "Craig-O-Clean";
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-			};
-			name = Release;
-		};
-		HELPER006AAAA0001AAAA0001 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = CraigOCleanHelper/CraigOCleanHelper.entitlements;
-				CODE_SIGN_IDENTITY = "-";
-				CODE_SIGN_STYLE = Manual;
-				ENABLE_HARDENED_RUNTIME = YES;
-				INFOPLIST_FILE = CraigOCleanHelper/Info.plist;
-				INSTALL_PATH = "";
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.CraigOClean.helper;
-				PRODUCT_NAME = com.CraigOClean.helper;
-				SDKROOT = macosx;
-				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 5.9;
-			};
-			name = Debug;
-		};
-		HELPER007AAAA0001AAAA0001 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = CraigOCleanHelper/CraigOCleanHelper.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Distribution: Phamy Xaypanya (K36LFHM32T)";
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = K36LFHM32T;
-				ENABLE_HARDENED_RUNTIME = YES;
-				INFOPLIST_FILE = CraigOCleanHelper/Info.plist;
-				INSTALL_PATH = "";
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.CraigOClean.helper;
-				PRODUCT_NAME = com.CraigOClean.helper;
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				SDKROOT = macosx;
-				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 5.9;
 			};
 			name = Release;
 		};
@@ -977,15 +687,6 @@
 			buildConfigurations = (
 				3F61628DD91179FB4A686B8D /* Debug */,
 				D2495FE6838FAF7B55549F97 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
-		HELPER008AAAA0001AAAA0001 /* Build configuration list for PBXNativeTarget "CraigOCleanHelper" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				HELPER006AAAA0001AAAA0001 /* Debug */,
-				HELPER007AAAA0001AAAA0001 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
