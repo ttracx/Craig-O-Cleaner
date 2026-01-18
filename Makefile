@@ -1,4 +1,4 @@
-# ClearMind Control Center Makefile
+# Craig-O-Clean Makefile
 # Build, test, and package commands
 
 .PHONY: all build release test clean archive dmg help setup sync setup-auto-sync watch-sync \
@@ -11,11 +11,11 @@ all: build
 SCHEME = Craig-O-Clean
 PROJECT = Craig-O-Clean.xcodeproj
 BUILD_DIR = build
-APP_NAME = ClearMind Control Center
+APP_NAME = Craig-O-Clean
 
 # Help target
 help:
-	@echo "ClearMind Control Center - Build Commands"
+	@echo "Craig-O-Clean - Build Commands"
 	@echo ""
 	@echo "Usage: make [target]"
 	@echo ""
@@ -119,8 +119,8 @@ dmg: archive
 		hdiutil create -volname "$(APP_NAME)" \
 			-srcfolder "$(BUILD_DIR)/$(SCHEME).xcarchive/Products/Applications/$(APP_NAME).app" \
 			-ov -format UDZO \
-			$(BUILD_DIR)/ClearMind.dmg; \
-		echo "DMG created at $(BUILD_DIR)/ClearMind.dmg"; \
+			$(BUILD_DIR)/Craig-O-Clean.dmg; \
+		echo "DMG created at $(BUILD_DIR)/Craig-O-Clean.dmg"; \
 	else \
 		echo "Error: App bundle not found in archive"; \
 		exit 1; \

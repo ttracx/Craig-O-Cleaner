@@ -1,5 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict/>
+<dict>
+	<!-- App Sandbox - Required for Mac App Store distribution -->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+
+	<!-- Network Client - Required for StoreKit/IAP and optional Stripe backend -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+
+	<!-- Apple Events / Automation - Required for browser tab management via AppleScript -->
+	<key>com.apple.security.automation.apple-events</key>
+	<true/>
+
+	<!-- Scripting Targets - Specific apps the app can control via AppleScript -->
+	<key>com.apple.security.scripting-targets</key>
+	<dict>
+		<!-- Safari -->
+		<key>com.apple.Safari</key>
+		<array>
+			<string>com.apple.Safari.scripting</string>
+		</array>
+		<!-- Google Chrome -->
+		<key>com.google.Chrome</key>
+		<array>
+			<string>com.google.Chrome.scripting</string>
+		</array>
+		<!-- Microsoft Edge -->
+		<key>com.microsoft.edgemac</key>
+		<array>
+			<string>com.microsoft.edgemac.scripting</string>
+		</array>
+		<!-- Brave Browser -->
+		<key>com.brave.Browser</key>
+		<array>
+			<string>com.brave.Browser.scripting</string>
+		</array>
+		<!-- Arc Browser -->
+		<key>company.thebrowser.Browser</key>
+		<array>
+			<string>company.thebrowser.Browser.scripting</string>
+		</array>
+		<!-- System Events - for process management -->
+		<key>com.apple.systemevents</key>
+		<array>
+			<string>com.apple.systemevents.scripting</string>
+		</array>
+	</dict>
+
+	<!-- User-selected read-write access for file operations (if needed) -->
+	<key>com.apple.security.files.user-selected.read-write</key>
+	<true/>
+
+	<!-- Temporary exception for process management during memory cleanup -->
+	<!-- This allows the app to get process information -->
+	<key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
+	<array>
+		<string>com.apple.coreservices.launchservicesd</string>
+	</array>
+</dict>
 </plist>

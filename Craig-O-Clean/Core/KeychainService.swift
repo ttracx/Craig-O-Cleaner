@@ -62,5 +62,25 @@ final class KeychainService {
             throw KeychainError.unexpectedStatus(status)
         }
     }
+
+    // MARK: - Convenience Methods
+
+    /// Default service name for simple key-value storage
+    private static let defaultService = "com.craigoclean.app"
+
+    /// Store a string value with a simple key (uses default service)
+    func store(string value: String, for key: String) {
+        try? setString(value, service: Self.defaultService, account: key)
+    }
+
+    /// Retrieve a string value by key (uses default service)
+    func retrieveString(for key: String) -> String? {
+        try? getString(service: Self.defaultService, account: key)
+    }
+
+    /// Delete a value by key (uses default service)
+    func delete(for key: String) {
+        try? delete(service: Self.defaultService, account: key)
+    }
 }
 
