@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Background circle -->
+    <path
+        android:fillColor="#6D4AFF"
+        android:pathData="M54,54m-40,0a40,40 0,1 1,80 0a40,40 0,1 1,-80 0"/>
+    <!-- Cleaning brush/broom icon -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,30
+                         L54,45
+                         M44,50 L64,50
+                         L62,72 Q54,78 46,72 L44,50
+                         M38,50 L34,42 Q32,38 36,36 L40,40 L44,50
+                         M70,50 L74,42 Q76,38 72,36 L68,40 L64,50
+                         M48,55 L48,65
+                         M54,55 L54,68
+                         M60,55 L60,65"/>
+    <!-- Sparkle effects -->
+    <path
+        android:fillColor="#14B8A6"
+        android:pathData="M72,32 L74,36 L78,34 L74,38 L76,42 L72,38 L68,40 L72,36 Z"/>
+    <path
+        android:fillColor="#14B8A6"
+        android:pathData="M32,38 L34,42 L38,40 L34,44 L36,48 L32,44 L28,46 L32,42 Z"
+        android:scaleX="0.8"
+        android:scaleY="0.8"/>
+</vector>

@@ -1,0 +1,83 @@
+# Craig-O-Clean Suite .gitignore
+
+# ===== Shared =====
+*.log
+*.tmp
+.env
+.env.local
+.env.*.local
+
+# ===== Android =====
+android/.gradle/
+android/.idea/
+android/build/
+android/app/build/
+android/local.properties
+android/*.iml
+android/.cxx/
+android/captures/
+android/.externalNativeBuild/
+android/app/release/
+android/app/debug/
+android/*.jks
+android/*.keystore
+
+# ===== Windows =====
+windows/.vs/
+windows/bin/
+windows/obj/
+windows/packages/
+windows/*.user
+windows/*.suo
+windows/*.userosscache
+windows/*.sln.docstates
+windows/artifacts/
+windows/*.msix
+windows/*.appx
+windows/AppPackages/
+windows/BundleArtifacts/
+
+# ===== Linux =====
+linux/.dart_tool/
+linux/.flutter-plugins
+linux/.flutter-plugins-dependencies
+linux/.packages
+linux/.pub-cache/
+linux/.pub/
+linux/build/
+linux/*.snap
+linux/*.flatpak
+linux/parts/
+linux/prime/
+linux/stage/
+
+# ===== Backend =====
+backend/node_modules/
+backend/dist/
+backend/coverage/
+backend/.nyc_output/
+backend/*.tsbuildinfo
+backend/.env
+backend/.env.local
+
+# ===== IDE =====
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ===== Test =====
+coverage/
+*.lcov
+.nyc_output/
+test-results/
+playwright-report/
+
+# ===== Build artifacts =====
+*.zip
+*.tar.gz
+*.aab
+*.apk

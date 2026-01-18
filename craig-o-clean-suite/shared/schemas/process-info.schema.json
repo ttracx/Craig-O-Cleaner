@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://craig-o-clean.vibecaas.com/schemas/process-info.json",
+  "title": "ProcessInfo",
+  "description": "Cross-platform process information schema for Craig-O-Clean Suite",
+  "type": "object",
+  "required": ["pid", "name"],
+  "properties": {
+    "pid": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Process ID"
+    },
+    "name": {
+      "type": "string",
+      "description": "Process name or executable name"
+    },
+    "displayName": {
+      "type": "string",
+      "description": "Human-readable display name (app name if available)"
+    },
+    "packageName": {
+      "type": "string",
+      "description": "Package identifier (Android) or bundle ID"
+    },
+    "cpuPercent": {
+      "type": "number",
+      "minimum": 0,
+      "description": "CPU usage percentage"
+    },
+    "memoryBytes": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Memory usage in bytes (RSS/Working Set)"
+    },
+    "memoryPercent": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Memory usage as percentage of total"
+    },
+    "threadCount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of threads"
+    },
+    "state": {
+      "$ref": "#/definitions/ProcessState"
+    },
+    "user": {
+      "type": "string",
+      "description": "User/owner of the process"
+    },
+    "startTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Process start time"
+    },
+    "executablePath": {
+      "type": "string",
+      "description": "Full path to executable"
+    },
+    "commandLine": {
+      "type": "string",
+      "description": "Full command line arguments"
+    },
+    "parentPid": {
+      "type": "integer",
+      "description": "Parent process ID"
+    },
+    "priority": {
+      "type": "integer",
+      "description": "Process priority/nice value"
+    },
+    "isSystemProcess": {
+      "type": "boolean",
+      "description": "Whether this is a system/protected process"
+    },
+    "canTerminate": {
+      "type": "boolean",
+      "description": "Whether the process can be terminated by the app"
+    },
+    "icon": {
+      "type": "string",
+      "format": "uri",
+      "description": "URI to process/app icon"
+    },
+    "category": {
+      "$ref": "#/definitions/ProcessCategory"
+    }
+  },
+  "definitions": {
+    "ProcessState": {
+      "type": "string",
+      "enum": ["running", "sleeping", "stopped", "zombie", "unknown"],
+      "description": "Current process state"
+    },
+    "ProcessCategory": {
+      "type": "string",
+      "enum": [
+        "user_app",
+        "background_service",
+        "system_process",
+        "system_service",
+        "unknown"
+      ],
+      "description": "Category of the process"
+    }
+  }
+}

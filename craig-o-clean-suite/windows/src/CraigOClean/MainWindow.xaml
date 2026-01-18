@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) Craig-O-Clean. All rights reserved. -->
+<!-- Licensed under the MIT License. -->
+<winex:WindowEx
+    x:Class="CraigOClean.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:CraigOClean"
+    xmlns:viewmodels="using:CraigOClean.ViewModels"
+    xmlns:winex="using:WinUIEx"
+    Title="Craig-O-Clean"
+    Width="1200"
+    Height="800"
+    MinWidth="900"
+    MinHeight="600"
+    PersistenceId="MainWindow">
+
+    <Grid x:Name="RootGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Custom Title Bar -->
+        <Grid x:Name="AppTitleBar"
+              Grid.Row="0"
+              Height="48"
+              Background="{StaticResource PrimaryGradientBrush}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!-- App Icon and Title -->
+            <StackPanel Grid.Column="0"
+                        Orientation="Horizontal"
+                        Margin="16,0,0,0"
+                        VerticalAlignment="Center">
+                <Image Source="ms-appx:///Assets/Square44x44Logo.png"
+                       Width="20"
+                       Height="20"
+                       Margin="0,0,12,0"/>
+                <TextBlock Text="Craig-O-Clean"
+                           Foreground="White"
+                           FontWeight="SemiBold"
+                           FontSize="14"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <!-- Status Indicators -->
+            <StackPanel Grid.Column="1"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="24">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE950;"
+                              FontSize="14"
+                              Foreground="White"/>
+                    <TextBlock x:Name="CpuStatusText"
+                               Text="CPU: --%"
+                               Foreground="White"
+                               FontSize="12"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE7F4;"
+                              FontSize="14"
+                              Foreground="White"/>
+                    <TextBlock x:Name="MemoryStatusText"
+                               Text="RAM: --%"
+                               Foreground="White"
+                               FontSize="12"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Subscription Badge -->
+            <Border x:Name="SubscriptionBadge"
+                    Grid.Column="2"
+                    Background="#22FFFFFF"
+                    CornerRadius="12"
+                    Padding="12,4"
+                    Margin="0,0,140,0"
+                    VerticalAlignment="Center">
+                <TextBlock x:Name="SubscriptionText"
+                           Text="Trial"
+                           Foreground="White"
+                           FontSize="11"
+                           FontWeight="SemiBold"/>
+            </Border>
+        </Grid>
+
+        <!-- Navigation View -->
+        <NavigationView x:Name="NavView"
+                        Grid.Row="1"
+                        IsBackButtonVisible="Collapsed"
+                        IsSettingsVisible="True"
+                        PaneDisplayMode="Left"
+                        OpenPaneLength="200"
+                        SelectionChanged="NavView_SelectionChanged"
+                        Loaded="NavView_Loaded">
+
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="Dashboard"
+                                    Tag="dashboard"
+                                    Icon="Home"
+                                    Style="{StaticResource NavItemStyle}">
+                    <NavigationViewItem.InfoBadge>
+                        <InfoBadge x:Name="DashboardBadge"
+                                   Style="{StaticResource AttentionIconInfoBadgeStyle}"
+                                   Visibility="Collapsed"/>
+                    </NavigationViewItem.InfoBadge>
+                </NavigationViewItem>
+
+                <NavigationViewItem Content="Processes"
+                                    Tag="processes"
+                                    Style="{StaticResource NavItemStyle}">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE71D;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+
+                <NavigationViewItemSeparator />
+
+                <NavigationViewItem Content="Upgrade to Pro"
+                                    Tag="paywall"
+                                    Style="{StaticResource NavItemStyle}"
+                                    x:Name="PaywallNavItem">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE735;" Foreground="{StaticResource AccentBrush}"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem Content="Help"
+                                    Tag="help"
+                                    Icon="Help"
+                                    Style="{StaticResource NavItemStyle}"/>
+            </NavigationView.FooterMenuItems>
+
+            <!-- Content Frame -->
+            <Frame x:Name="ContentFrame"
+                   Padding="0"
+                   NavigationFailed="ContentFrame_NavigationFailed"/>
+        </NavigationView>
+
+        <!-- Loading Overlay -->
+        <Grid x:Name="LoadingOverlay"
+              Grid.RowSpan="2"
+              Background="#80000000"
+              Visibility="Collapsed">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                <ProgressRing IsActive="True"
+                              Width="60"
+                              Height="60"/>
+                <TextBlock x:Name="LoadingText"
+                           Text="Loading..."
+                           Foreground="White"
+                           FontSize="14"
+                           Margin="0,16,0,0"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</winex:WindowEx>

@@ -1,0 +1,341 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      version: ${{ steps.get_version.outputs.version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version
+        id: get_version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Craig-O-Clean Suite v${{ steps.get_version.outputs.version }}
+          draft: true
+          prerelease: false
+          body: |
+            ## Craig-O-Clean Suite v${{ steps.get_version.outputs.version }}
+
+            ### Downloads
+
+            #### Android
+            - `craig-o-clean-android-v${{ steps.get_version.outputs.version }}.aab` - Google Play Bundle
+
+            #### Windows
+            - `craig-o-clean-windows-v${{ steps.get_version.outputs.version }}.msix` - Microsoft Store Package
+            - `craig-o-clean-windows-sideload-v${{ steps.get_version.outputs.version }}.zip` - Sideload Package
+
+            #### Linux
+            - `craig-o-clean-linux-v${{ steps.get_version.outputs.version }}.tar.gz` - Linux Binary
+            - `craig-o-clean-v${{ steps.get_version.outputs.version }}.flatpak` - Flatpak Package
+            - `craig-o-clean-v${{ steps.get_version.outputs.version }}.snap` - Snap Package
+
+            ### Changelog
+            See [CHANGELOG.md](./CHANGELOG.md) for details.
+
+  build-android:
+    name: Build Android Release
+    runs-on: ubuntu-latest
+    needs: create-release
+    defaults:
+      run:
+        working-directory: android
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Decode keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > app/keystore.jks
+
+      - name: Build release bundle
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          ./gradlew bundleRelease
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: android/app/build/outputs/bundle/release/app-release.aab
+          asset_name: craig-o-clean-android-v${{ needs.create-release.outputs.version }}.aab
+          asset_content_type: application/octet-stream
+
+  build-windows:
+    name: Build Windows Release
+    runs-on: windows-latest
+    needs: create-release
+    defaults:
+      run:
+        working-directory: windows
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore CraigOClean.sln
+
+      - name: Build MSIX
+        run: |
+          dotnet publish src/CraigOClean/CraigOClean.csproj `
+            --configuration Release `
+            -p:Platform=x64 `
+            -p:PublishProfile=MSIX `
+            -p:AppxPackageDir=../../artifacts/
+
+      - name: Upload MSIX Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: windows/artifacts/CraigOClean.msix
+          asset_name: craig-o-clean-windows-v${{ needs.create-release.outputs.version }}.msix
+          asset_content_type: application/octet-stream
+
+      - name: Build sideload
+        run: |
+          dotnet publish src/CraigOClean/CraigOClean.csproj `
+            --configuration Release `
+            -p:Platform=x64 `
+            -p:PublishProfile=Sideload `
+            -p:AppxPackageDir=../../artifacts/sideload/
+
+      - name: Create sideload zip
+        run: |
+          Compress-Archive -Path artifacts/sideload/* -DestinationPath artifacts/sideload.zip
+
+      - name: Upload Sideload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: windows/artifacts/sideload.zip
+          asset_name: craig-o-clean-windows-sideload-v${{ needs.create-release.outputs.version }}.zip
+          asset_content_type: application/zip
+
+  build-linux:
+    name: Build Linux Release
+    runs-on: ubuntu-latest
+    needs: create-release
+    defaults:
+      run:
+        working-directory: linux
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev \
+            libsecret-1-dev libayatana-appindicator3-dev
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Linux
+        run: flutter build linux --release
+
+      - name: Package tarball
+        run: |
+          cd build/linux/x64/release/bundle
+          tar -czvf ../../../../../craig-o-clean-linux.tar.gz *
+
+      - name: Upload Tarball Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: linux/craig-o-clean-linux.tar.gz
+          asset_name: craig-o-clean-linux-v${{ needs.create-release.outputs.version }}.tar.gz
+          asset_content_type: application/gzip
+
+  build-flatpak:
+    name: Build Flatpak Release
+    runs-on: ubuntu-latest
+    needs: create-release
+    defaults:
+      run:
+        working-directory: linux
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            flatpak flatpak-builder \
+            clang cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev \
+            libsecret-1-dev libayatana-appindicator3-dev
+          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user -y flathub org.freedesktop.Platform//23.08 org.freedesktop.Sdk//23.08
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Linux release
+        run: flutter build linux --release
+
+      - name: Build Flatpak
+        run: |
+          flatpak-builder --user --install-deps-from=flathub --force-clean build-dir flatpak/com.craigoclean.CraigOClean.yml
+          flatpak build-bundle ~/.local/share/flatpak/repo craig-o-clean.flatpak com.craigoclean.CraigOClean
+
+      - name: Upload Flatpak Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: linux/craig-o-clean.flatpak
+          asset_name: craig-o-clean-v${{ needs.create-release.outputs.version }}.flatpak
+          asset_content_type: application/octet-stream
+
+  build-snap:
+    name: Build Snap Release
+    runs-on: ubuntu-latest
+    needs: create-release
+    defaults:
+      run:
+        working-directory: linux
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev \
+            libsecret-1-dev libayatana-appindicator3-dev
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Linux release
+        run: flutter build linux --release
+
+      - name: Build Snap
+        uses: snapcore/action-build@v1
+        id: snapcraft
+        with:
+          path: linux
+
+      - name: Upload Snap Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ${{ steps.snapcraft.outputs.snap }}
+          asset_name: craig-o-clean-v${{ needs.create-release.outputs.version }}.snap
+          asset_content_type: application/octet-stream
+
+  deploy-backend:
+    name: Deploy Backend
+    runs-on: ubuntu-latest
+    needs: create-release
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: backend
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/backend:latest
+            ghcr.io/${{ github.repository }}/backend:v${{ needs.create-release.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

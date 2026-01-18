@@ -1,0 +1,186 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://craig-o-clean.vibecaas.com/schemas/system-metrics.json",
+  "title": "SystemMetrics",
+  "description": "Cross-platform system metrics schema for Craig-O-Clean Suite",
+  "type": "object",
+  "required": ["timestamp", "cpu", "memory"],
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of metrics collection"
+    },
+    "cpu": {
+      "$ref": "#/definitions/CpuMetrics"
+    },
+    "memory": {
+      "$ref": "#/definitions/MemoryMetrics"
+    },
+    "swap": {
+      "$ref": "#/definitions/SwapMetrics"
+    },
+    "loadAverage": {
+      "$ref": "#/definitions/LoadAverage"
+    }
+  },
+  "definitions": {
+    "CpuMetrics": {
+      "type": "object",
+      "required": ["usagePercent"],
+      "properties": {
+        "usagePercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Overall CPU usage percentage"
+        },
+        "userPercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "CPU usage by user processes"
+        },
+        "systemPercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "CPU usage by system processes"
+        },
+        "idlePercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "CPU idle percentage"
+        },
+        "coreCount": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of CPU cores"
+        },
+        "coreUsage": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "description": "Per-core usage percentages"
+        },
+        "frequency": {
+          "type": "object",
+          "properties": {
+            "current": {
+              "type": "number",
+              "description": "Current frequency in MHz"
+            },
+            "min": {
+              "type": "number",
+              "description": "Minimum frequency in MHz"
+            },
+            "max": {
+              "type": "number",
+              "description": "Maximum frequency in MHz"
+            }
+          }
+        }
+      }
+    },
+    "MemoryMetrics": {
+      "type": "object",
+      "required": ["totalBytes", "usedBytes", "availableBytes", "usagePercent"],
+      "properties": {
+        "totalBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total physical memory in bytes"
+        },
+        "usedBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Used memory in bytes"
+        },
+        "availableBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Available memory in bytes"
+        },
+        "freeBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Free memory in bytes (may differ from available)"
+        },
+        "usagePercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Memory usage percentage"
+        },
+        "pressure": {
+          "$ref": "#/definitions/MemoryPressure"
+        },
+        "cached": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Cached memory in bytes"
+        },
+        "buffers": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Buffer memory in bytes (Linux)"
+        }
+      }
+    },
+    "SwapMetrics": {
+      "type": "object",
+      "properties": {
+        "totalBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total swap space in bytes"
+        },
+        "usedBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Used swap space in bytes"
+        },
+        "freeBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Free swap space in bytes"
+        },
+        "usagePercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Swap usage percentage"
+        }
+      }
+    },
+    "LoadAverage": {
+      "type": "object",
+      "properties": {
+        "oneMinute": {
+          "type": "number",
+          "minimum": 0,
+          "description": "1-minute load average"
+        },
+        "fiveMinute": {
+          "type": "number",
+          "minimum": 0,
+          "description": "5-minute load average"
+        },
+        "fifteenMinute": {
+          "type": "number",
+          "minimum": 0,
+          "description": "15-minute load average"
+        }
+      }
+    },
+    "MemoryPressure": {
+      "type": "string",
+      "enum": ["normal", "elevated", "critical"],
+      "description": "Memory pressure level based on available memory thresholds"
+    }
+  }
+}

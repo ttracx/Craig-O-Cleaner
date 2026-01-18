@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "name": "Craig-O-Clean Feature Configuration",
+  "version": "1.0.0",
+  "description": "Feature gating configuration for Craig-O-Clean Suite",
+  "products": {
+    "monthly": {
+      "id": "craigoclean_monthly",
+      "name": "Craig-O-Clean Monthly",
+      "description": "Full access to all Craig-O-Clean features",
+      "price": {
+        "amount": 0.99,
+        "currency": "USD",
+        "period": "month"
+      },
+      "trialDays": 7,
+      "platformIds": {
+        "googlePlay": "craigoclean_monthly",
+        "microsoftStore": "craigoclean_monthly",
+        "stripe": "price_craigoclean_monthly"
+      }
+    },
+    "yearly": {
+      "id": "craigoclean_yearly",
+      "name": "Craig-O-Clean Yearly",
+      "description": "Full access to all Craig-O-Clean features - Best value!",
+      "price": {
+        "amount": 9.99,
+        "currency": "USD",
+        "period": "year"
+      },
+      "trialDays": 7,
+      "platformIds": {
+        "googlePlay": "craigoclean_yearly",
+        "microsoftStore": "craigoclean_yearly",
+        "stripe": "price_craigoclean_yearly"
+      },
+      "badge": "Best Value - 2 Months Free!"
+    }
+  },
+  "tiers": {
+    "free": {
+      "name": "Free",
+      "features": {
+        "viewMetrics": true,
+        "viewProcessList": true,
+        "viewMetricsDetail": false,
+        "endProcesses": false,
+        "forceKillProcesses": false,
+        "quickActionsFromTray": false,
+        "quickActionsFromNotification": false,
+        "bulkProcessActions": false,
+        "memoryCleanup": false,
+        "advancedCleanup": false,
+        "customRefreshRate": false,
+        "exportMetrics": false
+      },
+      "limits": {
+        "processListMaxVisible": 10,
+        "refreshRateSeconds": 5
+      }
+    },
+    "trial": {
+      "name": "Trial",
+      "durationDays": 7,
+      "features": {
+        "viewMetrics": true,
+        "viewProcessList": true,
+        "viewMetricsDetail": true,
+        "endProcesses": true,
+        "forceKillProcesses": true,
+        "quickActionsFromTray": true,
+        "quickActionsFromNotification": true,
+        "bulkProcessActions": true,
+        "memoryCleanup": true,
+        "advancedCleanup": true,
+        "customRefreshRate": true,
+        "exportMetrics": true
+      },
+      "limits": {
+        "processListMaxVisible": -1,
+        "refreshRateSeconds": 1
+      }
+    },
+    "paid": {
+      "name": "Pro",
+      "features": {
+        "viewMetrics": true,
+        "viewProcessList": true,
+        "viewMetricsDetail": true,
+        "endProcesses": true,
+        "forceKillProcesses": true,
+        "quickActionsFromTray": true,
+        "quickActionsFromNotification": true,
+        "bulkProcessActions": true,
+        "memoryCleanup": true,
+        "advancedCleanup": true,
+        "customRefreshRate": true,
+        "exportMetrics": true
+      },
+      "limits": {
+        "processListMaxVisible": -1,
+        "refreshRateSeconds": 1
+      }
+    }
+  },
+  "trialSettings": {
+    "durationDays": 7,
+    "showCountdown": true,
+    "countdownWarningDays": 2,
+    "showBannerOnExpiry": true,
+    "gracePeriodHours": 0
+  },
+  "offlineSettings": {
+    "gracePeriodHours": 72,
+    "checkIntervalHours": 24,
+    "allowOfflineStart": true
+  },
+  "paywallConfig": {
+    "showOnGatedFeatureAttempt": true,
+    "showOnAppStart": false,
+    "showAfterTrialExpiry": true,
+    "highlightYearly": true,
+    "showTrialBadge": true,
+    "showPriceComparison": true,
+    "messaging": {
+      "trialActive": "Trial: {{daysLeft}} days left",
+      "trialExpired": "Your trial has ended. Subscribe to continue.",
+      "subscriptionExpired": "Your subscription has ended. Resubscribe to continue.",
+      "featureGated": "This feature requires a subscription.",
+      "restoreSuccess": "Purchases restored successfully!",
+      "restoreNoPurchases": "No previous purchases found."
+    }
+  },
+  "protectedProcesses": {
+    "description": "Processes that cannot be terminated by users",
+    "android": [
+      "com.android.systemui",
+      "com.android.phone",
+      "com.android.settings",
+      "system_server"
+    ],
+    "windows": [
+      "System",
+      "Registry",
+      "smss.exe",
+      "csrss.exe",
+      "wininit.exe",
+      "services.exe",
+      "lsass.exe",
+      "svchost.exe",
+      "winlogon.exe",
+      "dwm.exe",
+      "explorer.exe"
+    ],
+    "linux": [
+      "init",
+      "systemd",
+      "kthreadd",
+      "dbus-daemon",
+      "gdm",
+      "Xorg",
+      "gnome-shell",
+      "plasmashell"
+    ],
+    "macos": [
+      "kernel_task",
+      "launchd",
+      "WindowServer",
+      "loginwindow"
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base Theme -->
+    <style name="Theme.CraigOClean" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/vibe_purple</item>
+        <item name="android:navigationBarColor">@color/background_light</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:colorPrimary">@color/vibe_purple</item>
+        <item name="android:colorAccent">@color/aqua_teal</item>
+        <item name="android:windowBackground">@color/background_light</item>
+    </style>
+
+    <!-- Splash Theme -->
+    <style name="Theme.CraigOClean.Splash" parent="Theme.CraigOClean">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+</resources>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?android:attr/colorControlNormal">
+    <!-- CPU/Memory monitoring icon -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M9,3L9,1L15,1L15,3L9,3Z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M9,23L9,21L15,21L15,23L9,23Z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M23,9L21,9L21,15L23,15L23,9Z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M3,9L1,9L1,15L3,15L3,9Z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M6,5L18,5A1,1 0,0 1,19 6L19,18A1,1 0,0 1,18 19L6,19A1,1 0,0 1,5 18L5,6A1,1 0,0 1,6 5Z"/>
+    <path
+        android:fillColor="#6D4AFF"
+        android:pathData="M8,8L16,8L16,16L8,16L8,8Z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M10,10L10,14L11,14L11,12L13,14L14,14L14,10L13,10L13,12L11,10Z"/>
+</vector>
