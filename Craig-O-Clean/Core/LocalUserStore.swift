@@ -25,10 +25,32 @@ final class LocalUserStore: ObservableObject {
     }
 
     func updateProfile(_ mutate: (inout UserProfile) -> Void) {
-        guard var existing = profile else { return }
+        // If no profile exists, create a default one first
+        var existing = profile ?? createDefaultProfile()
         mutate(&existing)
         profile = existing
         persistToDisk()
+    }
+
+    /// Create a default user profile for new users
+    private func createDefaultProfile() -> UserProfile {
+        let deviceId = UUID().uuidString
+        return UserProfile(
+            userId: deviceId,
+            createdAt: Date(),
+            lastSignInAt: Date(),
+            hasUsedTrial: false,
+            subscriptionStatus: .free,
+            deviceId: deviceId
+        )
+    }
+
+    /// Ensure a profile exists (creates default if needed)
+    func ensureProfileExists() {
+        if profile == nil {
+            profile = createDefaultProfile()
+            persistToDisk()
+        }
     }
 
     private func loadFromDisk() {
