@@ -1,0 +1,114 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: craigoclean-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-craigoclean}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-craigoclean_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-craigoclean}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-craigoclean}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API Service
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: craigoclean-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3000
+      HOST: 0.0.0.0
+      DATABASE_URL: postgresql://${POSTGRES_USER:-craigoclean}:${POSTGRES_PASSWORD:-craigoclean_dev_password}@postgres:5432/${POSTGRES_DB:-craigoclean}?schema=public
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      STRIPE_PRICE_MONTHLY: ${STRIPE_PRICE_MONTHLY:-price_craigoclean_monthly}
+      STRIPE_PRICE_YEARLY: ${STRIPE_PRICE_YEARLY:-price_craigoclean_yearly}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-30d}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,craigoclean://}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-100}
+      RATE_LIMIT_TIME_WINDOW: ${RATE_LIMIT_TIME_WINDOW:-60000}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      SUCCESS_URL: ${SUCCESS_URL:-craigoclean://billing/success}
+      CANCEL_URL: ${CANCEL_URL:-craigoclean://billing/cancel}
+    ports:
+      - "${API_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+
+  # Development service (uses local source with hot reload)
+  api-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: craigoclean-api-dev
+    profiles:
+      - dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      HOST: 0.0.0.0
+      DATABASE_URL: postgresql://${POSTGRES_USER:-craigoclean}:${POSTGRES_PASSWORD:-craigoclean_dev_password}@postgres:5432/${POSTGRES_DB:-craigoclean}?schema=public
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      STRIPE_PRICE_MONTHLY: ${STRIPE_PRICE_MONTHLY:-price_craigoclean_monthly}
+      STRIPE_PRICE_YEARLY: ${STRIPE_PRICE_YEARLY:-price_craigoclean_yearly}
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-key-change-in-production-32chars}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-30d}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,craigoclean://}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-100}
+      RATE_LIMIT_TIME_WINDOW: ${RATE_LIMIT_TIME_WINDOW:-60000}
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      SUCCESS_URL: ${SUCCESS_URL:-craigoclean://billing/success}
+      CANCEL_URL: ${CANCEL_URL:-craigoclean://billing/cancel}
+    ports:
+      - "${API_PORT:-3000}:3000"
+    volumes:
+      - ./src:/app/src:ro
+      - ./prisma:/app/prisma
+    command: sh -c "npx prisma migrate dev --name init && npm run dev"
+
+  # Stripe CLI for webhook testing (development only)
+  stripe-cli:
+    image: stripe/stripe-cli:latest
+    container_name: craigoclean-stripe-cli
+    profiles:
+      - dev
+    depends_on:
+      - api-dev
+    environment:
+      STRIPE_API_KEY: ${STRIPE_SECRET_KEY}
+    command: listen --forward-to http://api-dev:3000/webhooks/stripe --skip-verify
+    network_mode: "service:api-dev"
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  default:
+    name: craigoclean-network

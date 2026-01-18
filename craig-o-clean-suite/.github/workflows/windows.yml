@@ -1,0 +1,155 @@
+name: Windows Build
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'windows/**'
+      - 'shared/**'
+      - '.github/workflows/windows.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'windows/**'
+      - 'shared/**'
+
+env:
+  DOTNET_VERSION: '8.0.x'
+
+jobs:
+  test:
+    name: Unit Tests
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: windows
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore CraigOClean.sln
+
+      - name: Build
+        run: dotnet build CraigOClean.sln --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test CraigOClean.sln --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: windows/**/TestResults/*.trx
+
+  build:
+    name: Build MSIX
+    runs-on: windows-latest
+    needs: test
+    defaults:
+      run:
+        working-directory: windows
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Install Windows App SDK
+        run: |
+          dotnet workload install maui-windows
+
+      - name: Restore dependencies
+        run: dotnet restore CraigOClean.sln
+
+      - name: Build Release
+        run: dotnet build src/CraigOClean/CraigOClean.csproj --configuration Release -p:Platform=x64
+
+      - name: Create MSIX Package
+        run: |
+          dotnet publish src/CraigOClean/CraigOClean.csproj `
+            --configuration Release `
+            -p:Platform=x64 `
+            -p:PublishProfile=MSIX `
+            -p:AppxPackageDir=../../artifacts/
+
+      - name: Upload MSIX
+        uses: actions/upload-artifact@v4
+        with:
+          name: msix-package
+          path: windows/artifacts/*.msix
+
+  build-sideload:
+    name: Build Sideload Package
+    runs-on: windows-latest
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    defaults:
+      run:
+        working-directory: windows
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore CraigOClean.sln
+
+      - name: Build sideload package
+        run: |
+          dotnet publish src/CraigOClean/CraigOClean.csproj `
+            --configuration Release `
+            -p:Platform=x64 `
+            -p:PublishProfile=Sideload `
+            -p:AppxPackageDir=../../artifacts/sideload/
+
+      - name: Upload sideload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: sideload-package
+          path: windows/artifacts/sideload/
+
+  code-analysis:
+    name: Code Analysis
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: windows
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore CraigOClean.sln
+
+      - name: Run code analysis
+        run: dotnet build CraigOClean.sln --configuration Release /p:RunAnalyzers=true /p:TreatWarningsAsErrors=false
+
+      - name: Upload analysis results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: code-analysis
+          path: windows/**/bin/Release/**/*.sarif

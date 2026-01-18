@@ -1,0 +1,325 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "name": "Craig-O-Clean Telemetry Events",
+  "version": "1.0.0",
+  "description": "Analytics event definitions for Craig-O-Clean Suite",
+  "privacyPolicy": {
+    "dataCollection": "minimal",
+    "pii": false,
+    "retention": "90days",
+    "optOut": true
+  },
+  "events": {
+    "app_lifecycle": {
+      "app_launched": {
+        "description": "App was launched",
+        "properties": {
+          "platform": {
+            "type": "string",
+            "enum": ["android", "windows", "linux", "macos"]
+          },
+          "version": {
+            "type": "string"
+          },
+          "entitlementStatus": {
+            "type": "string"
+          },
+          "isFirstLaunch": {
+            "type": "boolean"
+          }
+        }
+      },
+      "app_backgrounded": {
+        "description": "App moved to background",
+        "properties": {
+          "sessionDuration": {
+            "type": "number",
+            "unit": "seconds"
+          }
+        }
+      },
+      "app_foregrounded": {
+        "description": "App returned to foreground",
+        "properties": {}
+      }
+    },
+    "navigation": {
+      "screen_viewed": {
+        "description": "User viewed a screen",
+        "properties": {
+          "screenName": {
+            "type": "string",
+            "enum": [
+              "dashboard",
+              "process_list",
+              "process_detail",
+              "memory_cleanup",
+              "settings",
+              "paywall",
+              "about"
+            ]
+          },
+          "previousScreen": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "metrics": {
+      "metrics_refreshed": {
+        "description": "System metrics were refreshed",
+        "properties": {
+          "refreshSource": {
+            "type": "string",
+            "enum": ["auto", "manual", "background"]
+          },
+          "cpuUsage": {
+            "type": "number",
+            "privacy": "aggregate_only"
+          },
+          "memoryPressure": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "process_actions": {
+      "process_end_attempted": {
+        "description": "User attempted to end a process",
+        "properties": {
+          "processCategory": {
+            "type": "string"
+          },
+          "wasGated": {
+            "type": "boolean"
+          },
+          "success": {
+            "type": "boolean"
+          }
+        }
+      },
+      "process_force_kill_attempted": {
+        "description": "User attempted to force kill a process",
+        "properties": {
+          "processCategory": {
+            "type": "string"
+          },
+          "wasGated": {
+            "type": "boolean"
+          },
+          "success": {
+            "type": "boolean"
+          }
+        }
+      },
+      "bulk_action_performed": {
+        "description": "User performed bulk action on processes",
+        "properties": {
+          "actionType": {
+            "type": "string"
+          },
+          "processCount": {
+            "type": "number"
+          },
+          "successCount": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "cleanup": {
+      "cleanup_started": {
+        "description": "Memory cleanup was started",
+        "properties": {
+          "cleanupType": {
+            "type": "string",
+            "enum": ["quick", "deep", "guided"]
+          },
+          "estimatedSavings": {
+            "type": "number",
+            "unit": "bytes"
+          }
+        }
+      },
+      "cleanup_completed": {
+        "description": "Memory cleanup completed",
+        "properties": {
+          "cleanupType": {
+            "type": "string"
+          },
+          "actualSavings": {
+            "type": "number",
+            "unit": "bytes"
+          },
+          "duration": {
+            "type": "number",
+            "unit": "milliseconds"
+          }
+        }
+      }
+    },
+    "quick_access": {
+      "quick_action_used": {
+        "description": "User used a quick action from tray/notification",
+        "properties": {
+          "actionType": {
+            "type": "string",
+            "enum": [
+              "open_app",
+              "kill_top_hog",
+              "quick_cleanup",
+              "view_app_info"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": ["tray", "notification", "tile"]
+          },
+          "wasGated": {
+            "type": "boolean"
+          }
+        }
+      },
+      "tray_opened": {
+        "description": "Tray popover was opened",
+        "properties": {}
+      },
+      "notification_tapped": {
+        "description": "Persistent notification was tapped",
+        "properties": {
+          "action": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "billing": {
+      "paywall_shown": {
+        "description": "Paywall was shown to user",
+        "properties": {
+          "trigger": {
+            "type": "string",
+            "enum": [
+              "feature_gated",
+              "trial_expired",
+              "manual",
+              "app_start"
+            ]
+          },
+          "entitlementStatus": {
+            "type": "string"
+          }
+        }
+      },
+      "plan_selected": {
+        "description": "User selected a plan",
+        "properties": {
+          "planId": {
+            "type": "string"
+          },
+          "hasFreeTrial": {
+            "type": "boolean"
+          }
+        }
+      },
+      "purchase_started": {
+        "description": "Purchase flow was started",
+        "properties": {
+          "productId": {
+            "type": "string"
+          },
+          "billingSource": {
+            "type": "string"
+          }
+        }
+      },
+      "purchase_completed": {
+        "description": "Purchase was completed successfully",
+        "properties": {
+          "productId": {
+            "type": "string"
+          },
+          "billingSource": {
+            "type": "string"
+          },
+          "isTrialConversion": {
+            "type": "boolean"
+          }
+        }
+      },
+      "purchase_failed": {
+        "description": "Purchase failed",
+        "properties": {
+          "productId": {
+            "type": "string"
+          },
+          "errorType": {
+            "type": "string"
+          }
+        }
+      },
+      "purchase_cancelled": {
+        "description": "User cancelled purchase",
+        "properties": {
+          "productId": {
+            "type": "string"
+          }
+        }
+      },
+      "subscription_restored": {
+        "description": "Subscription was restored",
+        "properties": {
+          "productId": {
+            "type": "string"
+          },
+          "billingSource": {
+            "type": "string"
+          }
+        }
+      },
+      "trial_started": {
+        "description": "Trial was started",
+        "properties": {
+          "trialDays": {
+            "type": "number"
+          }
+        }
+      },
+      "trial_expired": {
+        "description": "Trial expired",
+        "properties": {
+          "convertedToPaid": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "errors": {
+      "error_occurred": {
+        "description": "An error occurred in the app",
+        "properties": {
+          "errorCode": {
+            "type": "string"
+          },
+          "errorCategory": {
+            "type": "string",
+            "enum": [
+              "billing",
+              "metrics",
+              "process",
+              "network",
+              "permission",
+              "unknown"
+            ]
+          },
+          "screenName": {
+            "type": "string"
+          },
+          "isFatal": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}
