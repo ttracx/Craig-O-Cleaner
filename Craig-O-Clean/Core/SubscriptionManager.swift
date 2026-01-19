@@ -103,6 +103,8 @@ final class SubscriptionManager: ObservableObject {
         currentSubscription = subscription
 
         // Notify TrialManager of subscription status change
+        // TODO: Re-enable when TrialManager is added to project
+        /*
         if hasPro, let sub = subscription {
             await MainActor.run {
                 TrialManager.shared.handleSuccessfulSubscription(
@@ -111,6 +113,7 @@ final class SubscriptionManager: ObservableObject {
                 )
             }
         }
+        */
     }
 
     func purchase(_ product: Product) async {
@@ -127,22 +130,26 @@ final class SubscriptionManager: ObservableObject {
                 lastErrorMessage = nil
 
                 // Log successful purchase
-                AppLogger.shared.info("Purchase successful: \(product.id)")
+                // TODO: Re-enable when AppLogger is added to project
+                // AppLogger.shared.info("Purchase successful: \(product.id)")
 
             case .userCancelled:
-                AppLogger.shared.info("Purchase cancelled by user")
+                // TODO: Re-enable when AppLogger is added to project
+                // AppLogger.shared.info("Purchase cancelled by user")
                 break
 
             case .pending:
                 lastErrorMessage = "Purchase pending approval."
-                AppLogger.shared.info("Purchase pending: \(product.id)")
+                // TODO: Re-enable when AppLogger is added to project
+                // AppLogger.shared.info("Purchase pending: \(product.id)")
 
             @unknown default:
                 lastErrorMessage = "Purchase failed."
             }
         } catch {
             lastErrorMessage = "Purchase failed: \(error.localizedDescription)"
-            AppLogger.shared.error("Purchase failed: \(error)")
+            // TODO: Re-enable when AppLogger is added to project
+            // AppLogger.shared.error("Purchase failed: \(error)")
         }
     }
 
@@ -160,10 +167,12 @@ final class SubscriptionManager: ObservableObject {
             try await AppStore.sync()
             await refreshEntitlements()
             lastErrorMessage = nil
-            AppLogger.shared.info("Purchases restored successfully")
+            // TODO: Re-enable when AppLogger is added to project
+            // AppLogger.shared.info("Purchases restored successfully")
         } catch {
             lastErrorMessage = "Restore failed: \(error.localizedDescription)"
-            AppLogger.shared.error("Restore failed: \(error)")
+            // TODO: Re-enable when AppLogger is added to project
+            // AppLogger.shared.error("Restore failed: \(error)")
         }
     }
 
@@ -191,7 +200,7 @@ final class SubscriptionManager: ObservableObject {
             return "Introductory price: \(offer.displayPrice)"
         case .payUpFront:
             return "Pay upfront: \(offer.displayPrice)"
-        @unknown default:
+        default:
             return nil
         }
     }

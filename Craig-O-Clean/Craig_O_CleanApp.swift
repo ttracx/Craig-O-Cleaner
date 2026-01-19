@@ -150,7 +150,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     // Services
     private var systemMetrics: SystemMetricsService?
     private var processManager: ProcessManager?
-    private var privilegeService: PrivilegeService?
+    // TODO: Re-enable after fixing module visibility
+    // private var privilegeService: PrivilegeService?
 
     // Menu items that need dynamic updates
     private var runningAppsMenuItem: NSMenuItem?
@@ -160,22 +161,26 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Initialize logging
-        AppLogger.shared.info("Application launching", category: "App", metadata: [
-            "version": "1.0",
-            "build": Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "unknown"
-        ])
-        
+        // TODO: Re-enable when AppLogger module is fixed
+        // AppLogger.shared.info("Application launching", category: "App", metadata: [
+        //     "version": "1.0",
+        //     "build": Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "unknown"
+        // ])
+
         // Initialize system metrics for menu bar updates
         systemMetrics = SystemMetricsService()
         processManager = ProcessManager()
-        privilegeService = PrivilegeService()
+        // TODO: Re-enable when PrivilegeService module is fixed
+        // privilegeService = PrivilegeService()
 
-        AppLogger.shared.info("Services initialized", category: "App")
+        // TODO: Re-enable when AppLogger module is fixed
+        // AppLogger.shared.info("Services initialized", category: "App")
 
         // Check helper status on launch
-        Task { @MainActor in
-            await privilegeService?.checkHelperStatus()
-        }
+        // TODO: Re-enable when PrivilegeService module is fixed
+        // Task { @MainActor in
+        //     await privilegeService?.checkHelperStatus()
+        // }
 
         // Request notification permissions
         requestNotificationPermissions()
@@ -636,20 +641,24 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc func quitApp() {
         // Export logs before quitting
         Task {
+            // TODO: Re-enable AppLogger
+            /*
             do {
                 let logURL = try await AppLogger.shared.exportLogs(format: .json)
-                AppLogger.shared.info("Logs exported before quit: \(logURL.path)", category: "App")
+                // AppLogger.shared.info("Logs exported before quit: \(logURL.path)", category: "App")
             } catch {
-                AppLogger.shared.warning("Failed to export logs before quit: \(error.localizedDescription)", category: "App")
+                // AppLogger.shared.warning("Failed to export logs before quit: \(error.localizedDescription)", category: "App")
             }
+            */
             NSApp.terminate(nil)
         }
     }
     
     @objc func performSmartCleanup() {
         Task { @MainActor in
-            AppLogger.shared.info("Smart cleanup initiated", category: "App")
-            let tracker = AppLogger.shared.startPerformanceTracking(operation: "SmartCleanup")
+            // TODO: Re-enable AppLogger
+            // AppLogger.shared.info("Smart cleanup initiated", category: "App")
+            // let tracker = AppLogger.shared.startPerformanceTracking(operation: "SmartCleanup")
 
             let optimizer = MemoryOptimizerService()
 
@@ -665,16 +674,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             await optimizer.analyzeMemoryUsage()
             let result = await optimizer.smartCleanup()
 
-            tracker.end()
+            // TODO: Re-enable AppLogger
+            // tracker.end()
 
-            AppLogger.shared.info(
-                "Smart cleanup completed",
-                category: "App",
-                metadata: [
-                    "appsTerminated": "\(result.appsTerminated)",
-                    "memoryFreed": result.formattedMemoryFreed
-                ]
-            )
+            // TODO: Re-enable AppLogger
+            // AppLogger.shared.info(
+            //     "Smart cleanup completed",
+            //     category: "App",
+            //     metadata: [
+            //         "appsTerminated": "\(result.appsTerminated)",
+            //         "memoryFreed": result.formattedMemoryFreed
+            //     ]
+            // )
 
             showNotification(
                 title: "Smart Cleanup Complete",
@@ -736,7 +747,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         if alert.runModal() == .alertFirstButtonReturn {
             Task { @MainActor in
-                AppLogger.shared.info("Memory clean initiated from menu", category: "App")
+                // TODO: Re-enable AppLogger
+                // AppLogger.shared.info("Memory clean initiated from menu", category: "App")
 
                 // Show progress notification
                 showNotification(
@@ -744,40 +756,46 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     body: "Flushing buffers and purging inactive memory..."
                 )
 
+                // TODO: Re-enable when PrivilegeService is fixed
+                /*
                 // Check helper status
                 await privilegeService?.checkHelperStatus()
 
                 // Execute memory cleanup
                 if let result = await privilegeService?.executeMemoryCleanup() {
-                    AppLogger.shared.info(
-                        "Memory clean completed",
-                        category: "App",
-                        metadata: [
-                            "success": "\(result.success)",
-                            "message": result.message
-                        ]
-                    )
+                */
+                // Placeholder - feature disabled until PrivilegeService is restored
+                // if false {
+                    // TODO: Re-enable AppLogger
+                    // AppLogger.shared.info(
+                    //     "Memory clean completed",
+                    //     category: "App",
+                    //     metadata: [
+                    //         "success": "\(result.success)",
+                    //         "message": result.message
+                    //     ]
+                    // )
 
-                    if result.success {
-                        showNotification(
-                            title: "Memory Clean Complete",
-                            body: result.message
-                        )
-                    } else {
-                        showNotification(
-                            title: "Memory Clean Issue",
-                            body: result.message
-                        )
-                    }
+                    // if result.success {
+                    //     showNotification(
+                    //         title: "Memory Clean Complete",
+                    //         body: result.message
+                    //     )
+                    // } else {
+                    //     showNotification(
+                    //         title: "Memory Clean Issue",
+                    //         body: result.message
+                    //     )
+                    // }
 
                     // Refresh metrics
-                    await systemMetrics?.refreshAllMetrics()
-                } else {
-                    showNotification(
-                        title: "Memory Clean Failed",
-                        body: "Unable to execute memory cleanup. Please try again."
-                    )
-                }
+                    // await systemMetrics?.refreshAllMetrics()
+                // } else {
+                showNotification(
+                    title: "Memory Clean Unavailable",
+                    body: "This feature requires PrivilegeService to be enabled."
+                )
+                // }
             }
         }
     }

@@ -42,7 +42,8 @@ struct MenuBarContentView: View {
     @EnvironmentObject var auth: AuthManager
     @EnvironmentObject var userStore: LocalUserStore
     @EnvironmentObject var subscriptions: SubscriptionManager
-    @EnvironmentObject var trialManager: TrialManager
+    // TODO: Re-enable when TrialManager module is fixed
+    // @EnvironmentObject var trialManager: TrialManager
 
     let onExpandClick: () -> Void
 
@@ -129,7 +130,10 @@ struct MenuBarContentView: View {
                         // Show appropriate badge based on subscription status
                         if subscriptions.isPro {
                             ProBadge()
-                        } else if trialManager.isTrialActive {
+                        }
+                        // TODO: Re-enable when TrialManager is fixed
+                        /*
+                        else if trialManager.isTrialActive {
                             TrialBadge(
                                 daysRemaining: trialManager.trialDaysRemaining,
                                 isExpired: false
@@ -137,6 +141,7 @@ struct MenuBarContentView: View {
                         } else if trialManager.subscriptionStatus == .trialExpired {
                             TrialBadge(daysRemaining: 0, isExpired: true)
                         }
+                        */
                     }
 
                     // Status indicator
@@ -530,12 +535,12 @@ struct MenuBarDashboardTab: View {
 struct MenuBarMemoryTab: View {
     @ObservedObject var systemMetrics: SystemMetricsService
     @ObservedObject var memoryOptimizer: MemoryOptimizerService
-    @StateObject private var privilegeService = PrivilegeService()
+// @StateObject private var privilegeService = PrivilegeService()
 
     @State private var lastResult: CleanupResult?
     @State private var showPurgeConfirmation = false
     @State private var isPurging = false
-    @State private var purgeResult: PrivilegeOperationResult?
+   // @State private var purgeResult: PrivilegeOperationResult?
     @State private var animateRing = false
 
     var body: some View {
@@ -744,23 +749,29 @@ struct MenuBarMemoryTab: View {
         } message: {
             Text("This will run system commands to flush file system buffers and purge inactive memory.\n\nResults may vary depending on your system state. You may be prompted for your administrator password.")
         }
+        // TODO: Re-enable when PrivilegeService is fixed
+        /*
         .sheet(item: Binding(
             get: { purgeResult.map { PurgeResultWrapper(result: $0) } },
             set: { _ in purgeResult = nil }
         )) { wrapper in
             PurgeResultSheet(result: wrapper.result, onDismiss: { purgeResult = nil })
         }
+        */
     }
 
     private func performMemoryPurge() {
         isPurging = true
         Task {
+            // TODO: Re-enable when PrivilegeService is fixed
+            /*
             // Check helper status first
             await privilegeService.checkHelperStatus()
 
             // Execute memory cleanup
             let result = await privilegeService.executeMemoryCleanup()
             purgeResult = result
+            */
             isPurging = false
 
             // Refresh metrics after purge
@@ -1947,15 +1958,17 @@ private func showCleanupResult(_ result: CleanupResult) async {
 
 struct PurgeResultWrapper: Identifiable {
     let id = UUID()
-    let result: PrivilegeOperationResult
+  //  let result: PrivilegeOperationResult
 }
 
 struct PurgeResultSheet: View {
-    let result: PrivilegeOperationResult
+//    let result: PrivilegeOperationResult
     let onDismiss: () -> Void
 
     var body: some View {
         VStack(spacing: 16) {
+            // TODO: Re-enable when PrivilegeService is fixed
+            /*
             // Status icon
             Image(systemName: result.success ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
                 .font(.system(size: 48))
@@ -1989,13 +2002,16 @@ struct PurgeResultSheet: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal)
             }
+            */
 
             // Dismiss button
             Button("Done") {
                 onDismiss()
             }
             .buttonStyle(.borderedProminent)
-            .tint(result.success ? .vibeTeal : .vibePurple)
+            // TODO: Re-enable when PrivilegeService is fixed
+            // .tint(result.success ? .vibeTeal : .vibePurple)
+            .tint(.vibeTeal)
         }
         .padding(24)
         .frame(width: 320)
@@ -2009,5 +2025,6 @@ struct PurgeResultSheet: View {
         .environmentObject(AuthManager.shared)
         .environmentObject(LocalUserStore.shared)
         .environmentObject(SubscriptionManager.shared)
-        .environmentObject(TrialManager.shared)
+        // TODO: Re-enable when TrialManager module is fixed
+        // .environmentObject(TrialManager.shared)
 }

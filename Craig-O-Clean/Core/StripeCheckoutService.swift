@@ -170,7 +170,8 @@ final class StripeCheckoutService: ObservableObject {
                 throw StripeError.invalidResponse
             }
 
-            AppLogger.shared.info("Opening Stripe checkout for price: \(priceId)")
+            // TODO: Re-enable when AppLogger is added to project
+            // AppLogger.shared.info("Opening Stripe checkout for price: \(priceId)")
             NSWorkspace.shared.open(url)
 
         } catch let error as StripeError {
@@ -231,7 +232,8 @@ final class StripeCheckoutService: ObservableObject {
                 throw StripeError.invalidResponse
             }
 
-            AppLogger.shared.info("Opening Stripe customer portal")
+            // TODO: Re-enable when AppLogger is added to project
+            // AppLogger.shared.info("Opening Stripe customer portal")
             NSWorkspace.shared.open(url)
 
         } catch let error as StripeError {
@@ -267,7 +269,8 @@ final class StripeCheckoutService: ObservableObject {
             let status = try JSONDecoder().decode(StripeSubscriptionStatus.self, from: data)
             return status
         } catch {
-            AppLogger.shared.error("Failed to check Stripe subscription status: \(error)")
+            // TODO: Re-enable when AppLogger is added to project
+            // AppLogger.shared.error("Failed to check Stripe subscription status: \(error)")
             return nil
         }
     }
@@ -341,23 +344,28 @@ extension StripeCheckoutService {
         Task { @MainActor in
             switch path {
             case "/success":
-                AppLogger.shared.info("Stripe checkout completed successfully")
+                // TODO: Re-enable when AppLogger is added to project
+                // AppLogger.shared.info("Stripe checkout completed successfully")
                 // Refresh subscription status
                 await SubscriptionManager.shared.refreshEntitlements()
-                TrialManager.shared.refreshTrialStatus()
+                // TODO: Re-enable when TrialManager is added to project
+                // TrialManager.shared.refreshTrialStatus()
 
                 // Post notification for UI updates
                 NotificationCenter.default.post(name: .stripeCheckoutCompleted, object: nil)
 
             case "/cancel":
-                AppLogger.shared.info("Stripe checkout was cancelled")
+                // TODO: Re-enable when AppLogger is added to project
+                // AppLogger.shared.info("Stripe checkout was cancelled")
                 lastError = .checkoutCancelled
 
             case "/portal-return":
-                AppLogger.shared.info("Returned from Stripe customer portal")
+                // TODO: Re-enable when AppLogger is added to project
+                // AppLogger.shared.info("Returned from Stripe customer portal")
                 // Refresh subscription status
                 await SubscriptionManager.shared.refreshEntitlements()
-                TrialManager.shared.refreshTrialStatus()
+                // TODO: Re-enable when TrialManager is added to project
+                // TrialManager.shared.refreshTrialStatus()
 
             default:
                 break

@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		127FE76D306047399C129BD1 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0BFC84511241D18B26E6FC /* PaywallView.swift */; };
+		C8779F97192645DCBD6D9584 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D01515630B409EA1310EF4 /* AppLogger.swift */; };
+		01C6C128BF2C4D1785807C48 /* TrialManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3FDB3A7AE0E43668008F6EB /* TrialManager.swift */; };
+		37081B9A81AC4AAD89014AB2 /* PrivilegeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8F6221E6CFB4F658E745547 /* PrivilegeService.swift */; };
+		1BB559C2F26B4D2398D62009 /* DebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D350B359D5421F816720F5 /* DebugLogger.swift */; };
+		C5E0BF15781E4F6CB83CF8D8 /* LoggingExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7313236940042A799441B8A /* LoggingExtensions.swift */; };
 		072BDC18CD3A1F412D79E65C /* MemoryCleanupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECA675EC13F9451E3C48A56 /* MemoryCleanupView.swift */; };
 		0835CC7B734975BC761C3801 /* AutoCleanupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ACBCDA24FEC65C0692216ED /* AutoCleanupService.swift */; };
 		088E79AB6DD39EED29F38834 /* ProcessManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F78289CCD79A928D641472B8 /* ProcessManagerView.swift */; };
@@ -64,6 +70,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		7B0BFC84511241D18B26E6FC /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		19D01515630B409EA1310EF4 /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
+		B3FDB3A7AE0E43668008F6EB /* TrialManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrialManager.swift; sourceTree = "<group>"; };
+		F8F6221E6CFB4F658E745547 /* PrivilegeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegeService.swift; sourceTree = "<group>"; };
+		A2D350B359D5421F816720F5 /* DebugLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogger.swift; sourceTree = "<group>"; };
+		F7313236940042A799441B8A /* LoggingExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggingExtensions.swift; sourceTree = "<group>"; };
 		0ECA675EC13F9451E3C48A56 /* MemoryCleanupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryCleanupView.swift; sourceTree = "<group>"; };
 		1A2B3C4D5E6F7890ABCDEF01 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 		1C600236D643D1053BD64CC3 /* AutoCleanupSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoCleanupSettingsView.swift; sourceTree = "<group>"; };
@@ -143,7 +155,13 @@
 		};
 		5CB23B38D6DD33656D6F1EE6 /* Core */ = {
 			isa = PBXGroup;
-			children = (
+			children = (				7B0BFC84511241D18B26E6FC /* PaywallView.swift */,
+				19D01515630B409EA1310EF4 /* AppLogger.swift */,
+				B3FDB3A7AE0E43668008F6EB /* TrialManager.swift */,
+				F8F6221E6CFB4F658E745547 /* PrivilegeService.swift */,
+				A2D350B359D5421F816720F5 /* DebugLogger.swift */,
+				F7313236940042A799441B8A /* LoggingExtensions.swift */,
+
 				1A2B3C4D5E6F7890ABCDEF01 /* AuthManager.swift */,
 				2ACBCDA24FEC65C0692216ED /* AutoCleanupService.swift */,
 				6D4847DB072B4F05BF47CF1B /* BrowserAutomationService.swift */,
@@ -327,7 +345,13 @@
 		3ED0B822CBDCF4AA7124AB51 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
-			files = (
+			files = (				127FE76D306047399C129BD1 /* PaywallView.swift in Sources */,
+				C8779F97192645DCBD6D9584 /* AppLogger.swift in Sources */,
+				01C6C128BF2C4D1785807C48 /* TrialManager.swift in Sources */,
+				37081B9A81AC4AAD89014AB2 /* PrivilegeService.swift in Sources */,
+				1BB559C2F26B4D2398D62009 /* DebugLogger.swift in Sources */,
+				C5E0BF15781E4F6CB83CF8D8 /* LoggingExtensions.swift in Sources */,
+
 				980877B7ED3E66AB16FECA4B /* BrowserAutomationServiceTests.swift in Sources */,
 				324625357741BF0140A7A9FA /* MemoryOptimizerServiceTests.swift in Sources */,
 				34EDD517A8CA42765ED159B7 /* PermissionsServiceTests.swift in Sources */,
