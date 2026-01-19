@@ -13,7 +13,7 @@ struct SettingsPermissionsView: View {
     @EnvironmentObject var userStore: LocalUserStore
     @EnvironmentObject var subscriptions: SubscriptionManager
     @EnvironmentObject var stripe: StripeCheckoutService
-    // @EnvironmentObject var // trialManager: TrialManager
+    @EnvironmentObject var trialManager: TrialManager
 
     @AppStorage("refreshInterval") private var refreshInterval: Double = 2.0
     @AppStorage("showInDock") private var showInDock = false
@@ -157,10 +157,9 @@ struct SettingsPermissionsView: View {
                 subscriptionStatusCard
 
                 // Trial/Upgrade Banner
-                // TODO: Re-enable when TrialManager is fixed
-                // if trialManager.shouldShowPaywall || trialManager.subscriptionStatus == .free {
-                //     trialUpgradeBanner
-                // }
+                if trialManager.shouldShowPaywall || trialManager.subscriptionStatus == .free {
+                    trialUpgradeBanner
+                }
 
                 if let msg = subscriptions.lastErrorMessage {
                     Text(msg)
@@ -188,8 +187,6 @@ struct SettingsPermissionsView: View {
                 }
             }
         }
-        // TODO: Re-enable when TrialManager and PaywallView are fixed
-        /*
         .sheet(isPresented: $showingPaywall) {
             PaywallView()
                 .environmentObject(subscriptions)
@@ -197,7 +194,6 @@ struct SettingsPermissionsView: View {
                 .environmentObject(stripe)
                 .environmentObject(auth)
         }
-        */
     }
 
     private var subscriptionStatusCard: some View {
@@ -218,16 +214,12 @@ struct SettingsPermissionsView: View {
                     Text(statusTitle)
                         .font(.headline)
 
-                    // TODO: Re-enable when TrialManager is fixed
-                    /*
                     if trialManager.isTrialActive {
                         TrialBadge(
                             daysRemaining: trialManager.trialDaysRemaining,
                             isExpired: false
                         )
-                    } else
-                    */
-                    if subscriptions.isPro {
+                    } else if subscriptions.isPro {
                         ProBadge()
                     }
                 }
@@ -258,46 +250,34 @@ struct SettingsPermissionsView: View {
 
     private var statusIcon: String {
         if subscriptions.isPro { return "crown.fill" }
-        // TODO: Re-enable when TrialManager is fixed
-        /*
         switch trialManager.subscriptionStatus {
         case .trial: return "clock.fill"
         case .trialExpired: return "exclamationmark.triangle.fill"
         default: return "sparkles"
         }
-        */
-        return "sparkles"
     }
 
     private var statusTitle: String {
         if subscriptions.isPro { return "Pro Active" }
-        // TODO: Re-enable when TrialManager is fixed
-        /*
         switch trialManager.subscriptionStatus {
         case .trial: return "Trial Active"
         case .trialExpired: return "Trial Expired"
         case .free: return "Free Plan"
         default: return trialManager.subscriptionStatus.displayName
         }
-        */
-        return "Active"
     }
 
     private var statusSubtitle: String {
         if subscriptions.isPro {
             return "Thanks for supporting Craig-O-Clean!"
         }
-        // TODO: Re-enable when TrialManager is fixed
-        // return trialManager.trialStatusText
-        return "All features available"
+        return trialManager.trialStatusText
     }
 
     private var statusGradient: LinearGradient {
         if subscriptions.isPro {
             return LinearGradient(colors: [.green, .teal], startPoint: .topLeading, endPoint: .bottomTrailing)
         }
-        // TODO: Re-enable when TrialManager is fixed
-        /*
         switch trialManager.subscriptionStatus {
         case .trial where trialManager.trialDaysRemaining <= 3:
             return LinearGradient(colors: [.orange, .red], startPoint: .topLeading, endPoint: .bottomTrailing)
@@ -308,21 +288,15 @@ struct SettingsPermissionsView: View {
         default:
             return LinearGradient(colors: [.gray, .gray.opacity(0.5)], startPoint: .topLeading, endPoint: .bottomTrailing)
         }
-        */
-        return LinearGradient(colors: [.blue, .purple], startPoint: .topLeading, endPoint: .bottomTrailing)
     }
 
     private var trialUpgradeBanner: some View {
         Button {
-            // TODO: Re-enable when TrialManager is fixed
-            /*
             if trialManager.subscriptionStatus == .free && !trialManager.hasUsedTrial {
                 trialManager.startTrial()
             } else {
                 showingPaywall = true
             }
-            */
-            showingPaywall = true
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: bannerIcon)
@@ -356,55 +330,37 @@ struct SettingsPermissionsView: View {
     }
 
     private var bannerIcon: String {
-        // TODO: Re-enable when TrialManager is fixed
-        /*
         switch trialManager.subscriptionStatus {
         case .trialExpired: return "exclamationmark.triangle.fill"
         case .trial: return "clock.fill"
         default: return "sparkles"
         }
-        */
-        return "sparkles"
     }
 
     private var bannerTitle: String {
-        // TODO: Re-enable when TrialManager is fixed
-        /*
         switch trialManager.subscriptionStatus {
         case .trialExpired: return "Your trial has expired"
         case .trial: return "\(trialManager.trialDaysRemaining) days remaining"
         default: return "Start your 7-day free trial"
         }
-        */
-        return "Upgrade to Pro"
     }
 
     private var bannerSubtitle: String {
-        // TODO: Re-enable when TrialManager is fixed
-        /*
         switch trialManager.subscriptionStatus {
         case .trialExpired: return "Upgrade to continue using all features"
         case .trial: return "Upgrade now to avoid interruption"
         default: return "Full access to all Pro features"
         }
-        */
-        return "Full access to all Pro features"
     }
 
     private var bannerActionText: String {
-        // TODO: Re-enable when TrialManager is fixed
-        /*
         switch trialManager.subscriptionStatus {
         case .trialExpired, .trial: return "Upgrade"
         default: return "Start Trial"
         }
-        */
-        return "Upgrade"
     }
 
     private var bannerGradient: LinearGradient {
-        // TODO: Re-enable when TrialManager is fixed
-        /*
         switch trialManager.subscriptionStatus {
         case .trialExpired:
             return LinearGradient(colors: [.red, .orange], startPoint: .leading, endPoint: .trailing)
@@ -413,8 +369,6 @@ struct SettingsPermissionsView: View {
         default:
             return LinearGradient(colors: [.purple, .blue], startPoint: .leading, endPoint: .trailing)
         }
-        */
-        return LinearGradient(colors: [.purple, .blue], startPoint: .leading, endPoint: .trailing)
     }
 
     private var pricingOptionsSection: some View {
@@ -515,9 +469,7 @@ struct SettingsPermissionsView: View {
                                 plan: .monthly,
                                 userId: auth.userId,
                                 email: userStore.profile?.email,
-                                // TODO: Re-enable when TrialManager is fixed
-                                // includeTrial: !trialManager.hasUsedTrial
-                                includeTrial: false
+                                includeTrial: !trialManager.hasUsedTrial
                             )
                         } catch {
                             subscriptions.lastErrorMessage = error.localizedDescription
@@ -539,9 +491,7 @@ struct SettingsPermissionsView: View {
                                 plan: .yearly,
                                 userId: auth.userId,
                                 email: userStore.profile?.email,
-                                // TODO: Re-enable when TrialManager is fixed
-                                // includeTrial: !trialManager.hasUsedTrial
-                                includeTrial: false
+                                includeTrial: !trialManager.hasUsedTrial
                             )
                         } catch {
                             subscriptions.lastErrorMessage = error.localizedDescription
@@ -1169,8 +1119,8 @@ struct DiagnosticsSheet: View {
                     // App Info
                     GroupBox("App Information") {
                         VStack(alignment: .leading, spacing: 8) {
-                            DiagnosticRow(label: "App Version", value: "1.0 (1)")
-                            DiagnosticRow(label: "Bundle ID", value: "com.CraigOClean.controlcenter")
+                            DiagnosticRow(label: "App Version", value: appVersion)
+                            DiagnosticRow(label: "Bundle ID", value: bundleIdentifier)
                             DiagnosticRow(label: "Uptime", value: formatUptime())
                         }
                         .padding(.vertical, 8)
@@ -1202,7 +1152,17 @@ struct DiagnosticsSheet: View {
         }
         .frame(width: 500, height: 500)
     }
-    
+
+    private var appVersion: String {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+        return "\(version) (\(build))"
+    }
+
+    private var bundleIdentifier: String {
+        Bundle.main.bundleIdentifier ?? "com.craigoclean.app"
+    }
+
     private func formatUptime() -> String {
         let uptime = Foundation.ProcessInfo.processInfo.systemUptime
         let hours = Int(uptime) / 3600
@@ -1230,8 +1190,8 @@ struct DiagnosticsSheet: View {
             
             App Information
             ================
-            Version: 1.0 (1)
-            Bundle ID: com.CraigOClean.controlcenter
+            Version: \(appVersion)
+            Bundle ID: \(bundleIdentifier)
             """
             
             try? diagnostics.write(to: url, atomically: true, encoding: .utf8)
@@ -1345,7 +1305,7 @@ struct PrivacyPolicySheet: View {
                         .font(.title3)
                         .fontWeight(.bold)
                     
-                    Text("Last updated: November 2025")
+                    Text("Last updated: January 2026")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
