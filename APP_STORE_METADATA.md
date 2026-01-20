@@ -184,7 +184,7 @@ Unlock advanced features with a subscription:
 • Early access to new features and updates
 • Remove ads and upgrade notifications
 
-Try Pro free for 7 days! Choose monthly ($4.99) or yearly ($39.99, save 33%).
+Try Pro free for 7 days! Choose monthly ($0.99) or yearly ($9.99, save 17%).
 
 🔒 PRIVACY & SECURITY
 Craig-O-Clean is committed to your privacy:
@@ -479,8 +479,8 @@ FREE TRIAL:
 • All Pro features unlocked during trial
 
 PRO SUBSCRIPTIONS:
-• Monthly: $4.99/month (com.craigoclean.pro.monthly)
-• Yearly: $39.99/year (com.craigoclean.pro.yearly)
+• Monthly: $0.99/month (com.craigoclean.pro.monthly)
+• Yearly: $9.99/year (com.craigoclean.pro.yearly)
 
 TO TEST SUBSCRIPTIONS:
 1. Wait for trial to expire (or use sandbox test user)
@@ -634,8 +634,8 @@ FREE TRIAL:
 • No payment during trial
 
 SUBSCRIPTIONS:
-• Monthly: $4.99 (com.craigoclean.pro.monthly)
-• Yearly: $39.99 (com.craigoclean.pro.yearly)
+• Monthly: $0.99 (com.craigoclean.pro.monthly)
+• Yearly: $9.99 (com.craigoclean.pro.yearly)
 
 TO TEST:
 1. Trial expires or use sandbox test user

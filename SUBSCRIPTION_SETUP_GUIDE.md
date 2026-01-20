@@ -11,8 +11,8 @@
 ## 📋 Overview
 
 Craig-O-Clean offers two subscription tiers:
-1. **Monthly Subscription** - $4.99/month
-2. **Yearly Subscription** - $39.99/year (Save 33%)
+1. **Monthly Subscription** - $0.99/month
+2. **Yearly Subscription** - $9.99/year (Save 17%)
 
 Both include:
 - Unlimited automatic cleanups
@@ -76,11 +76,11 @@ Craig-O-Clean Pro Monthly
 
 #### Base Price (US)
 ```
-$4.99 USD
+$0.99 USD
 ```
 
 **Pricing Strategy**:
-- Tier: Select the tier that equals $4.99
+- Tier: Select the tier that equals $0.99
 - Click "Add Pricing" for other territories
 - Apple will auto-fill equivalent prices
 - Review and adjust for major markets if needed
@@ -89,10 +89,10 @@ $4.99 USD
 
 | Territory | Price | Notes |
 |-----------|-------|-------|
-| United States | $4.99 | Base price |
+| United States | $0.99 | Base price |
 | Canada | $6.99 CAD | Auto-filled |
-| United Kingdom | £4.99 | Adjust to match expectations |
-| European Union | €4.99 | Adjust to match expectations |
+| United Kingdom | £0.99 | Adjust to match expectations |
+| European Union | €0.99 | Adjust to match expectations |
 | Australia | $7.99 AUD | Auto-filled |
 | Japan | ¥700 | Adjust to match expectations |
 
@@ -151,7 +151,7 @@ This is a monthly auto-renewable subscription that grants access to Pro features
 - Priority support
 
 Free trial: 7 days
-Price: $4.99/month
+Price: $0.99/month
 
 The subscription can be tested with sandbox test users.
 ```
@@ -214,22 +214,22 @@ Craig-O-Clean Pro Yearly
 
 #### Base Price (US)
 ```
-$39.99 USD
+$9.99 USD
 ```
 
 **Value Proposition**:
-- Monthly: $4.99 × 12 = $59.88/year
-- Yearly: $39.99/year
-- **Savings: $19.89 (33% off)**
+- Monthly: $0.99 × 12 = $59.88/year
+- Yearly: $9.99/year
+- **Savings: $1.89 (17% off)**
 
 #### Recommended Pricing by Territory
 
 | Territory | Price | Notes |
 |-----------|-------|-------|
-| United States | $39.99 | Base price |
-| Canada | $54.99 CAD | Auto-filled |
-| United Kingdom | £39.99 | Adjust if needed |
-| European Union | €39.99 | Adjust if needed |
+| United States | $9.99 | Base price |
+| Canada | $50.99 CAD | Auto-filled |
+| United Kingdom | £9.99 | Adjust if needed |
+| European Union | €9.99 | Adjust if needed |
 | Australia | $59.99 AUD | Auto-filled |
 | Japan | ¥5,800 | Adjust if needed |
 
@@ -246,13 +246,13 @@ Yearly Pro Access
 
 **Description**:
 ```
-Get unlimited access to all Craig-O-Clean Pro features with a yearly subscription. Save 33% compared to monthly!
+Get unlimited access to all Craig-O-Clean Pro features with a yearly subscription. Save 17% compared to monthly!
 
 ✓ Unlimited automatic memory cleanups
 ✓ Advanced scheduling and automation
 ✓ Priority customer support
 ✓ All future features and updates
-✓ Best value - Save $19.89/year
+✓ Best value - Save $1.89/year
 
 Cancel anytime. Subscription automatically renews unless auto-renew is turned off at least 24 hours before the end of the current period.
 ```
@@ -271,7 +271,7 @@ This is a yearly auto-renewable subscription that grants access to Pro features:
 - Priority support
 
 Free trial: 7 days
-Price: $39.99/year (save 33% vs monthly)
+Price: $9.99/year (save 17% vs monthly)
 
 The subscription can be tested with sandbox test users.
 ```
@@ -498,7 +498,7 @@ Sandbox subscriptions renew much faster:
 | **Product ID** | com.craigoclean.pro.monthly |
 | **Display Name** | Monthly Pro Access |
 | **Duration** | 1 Month |
-| **Price** | $4.99 USD |
+| **Price** | $0.99 USD |
 | **Free Trial** | 7 Days |
 | **Family Sharing** | No |
 
@@ -509,7 +509,7 @@ Sandbox subscriptions renew much faster:
 | **Product ID** | com.craigoclean.pro.yearly |
 | **Display Name** | Yearly Pro Access |
 | **Duration** | 1 Year |
-| **Price** | $39.99 USD (33% off) |
+| **Price** | $9.99 USD (17% off) |
 | **Free Trial** | 7 Days |
 | **Family Sharing** | No |
 
@@ -519,13 +519,13 @@ Sandbox subscriptions renew much faster:
 
 ### Pricing Strategy
 
-1. **Monthly**: Entry-level pricing ($4.99)
+1. **Monthly**: Entry-level pricing ($0.99)
    - Low barrier to entry
    - Monthly commitment flexibility
    - Good for trial conversions
 
-2. **Yearly**: Best value ($39.99)
-   - 33% discount vs monthly
+2. **Yearly**: Best value ($9.99)
+   - 17% discount vs monthly
    - Clear savings message
    - Better LTV per customer
 
@@ -599,8 +599,8 @@ Keep them simple and clear:
 SUBSCRIPTION TERMS
 
 Craig-O-Clean Pro offers two auto-renewable subscription options:
-• Monthly: $4.99/month
-• Yearly: $39.99/year (save 33%)
+• Monthly: $0.99/month
+• Yearly: $9.99/year (save 17%)
 
 FREE TRIAL
 New subscribers receive a 7-day free trial. Your subscription will automatically begin after the trial period ends.
@@ -641,8 +641,8 @@ Unlock Craig-O-Clean Pro
 
 **Pricing Display**:
 ```
-Monthly: $4.99/month
-Yearly: $39.99/year (Save 33%)
+Monthly: $0.99/month
+Yearly: $9.99/year (Save 17%)
 
 Start 7-Day Free Trial
 ```
@@ -661,8 +661,8 @@ Terms of Service | Privacy Policy | Restore Purchases
 ### Before Submitting
 
 - [ ] Subscription group created: "Craig-O-Clean Pro Subscriptions"
-- [ ] Monthly subscription: com.craigoclean.pro.monthly ($4.99)
-- [ ] Yearly subscription: com.craigoclean.pro.yearly ($39.99)
+- [ ] Monthly subscription: com.craigoclean.pro.monthly ($0.99)
+- [ ] Yearly subscription: com.craigoclean.pro.yearly ($9.99)
 - [ ] Both subscriptions have 7-day free trial
 - [ ] Prices set for all major territories
 - [ ] English descriptions complete
@@ -721,5 +721,5 @@ Terms of Service | Privacy Policy | Restore Purchases
 **Document Version**: 1.0
 **Last Updated**: January 20, 2026
 **Products**:
-- com.craigoclean.pro.monthly ($4.99/month)
-- com.craigoclean.pro.yearly ($39.99/year)
+- com.craigoclean.pro.monthly ($0.99/month)
+- com.craigoclean.pro.yearly ($9.99/year)

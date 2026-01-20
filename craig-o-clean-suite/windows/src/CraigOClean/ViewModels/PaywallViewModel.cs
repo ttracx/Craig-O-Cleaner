@@ -42,13 +42,13 @@ public sealed partial class PaywallViewModel : ObservableObject
     private bool _canStartTrial;
 
     [ObservableProperty]
-    private string _monthlyPrice = "$4.99/month";
+    private string _monthlyPrice = "$0.99/month";
 
     [ObservableProperty]
-    private string _yearlyPrice = "$39.99/year";
+    private string _yearlyPrice = "$9.99/year";
 
     [ObservableProperty]
-    private string _yearlySavings = "Save 33%";
+    private string _yearlySavings = "Save 17%";
 
     [ObservableProperty]
     private bool _isMonthlySelected;
