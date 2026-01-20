@@ -7,27 +7,30 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3134FABB77F435E86E6FED7 /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66FAA11487974A19801962C /* SnapshotHelper.swift */; };
-
-		127FE76D306047399C129BD1 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0BFC84511241D18B26E6FC /* PaywallView.swift */; };
-		C8779F97192645DCBD6D9584 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D01515630B409EA1310EF4 /* AppLogger.swift */; };
 		01C6C128BF2C4D1785807C48 /* TrialManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3FDB3A7AE0E43668008F6EB /* TrialManager.swift */; };
-		37081B9A81AC4AAD89014AB2 /* PrivilegeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8F6221E6CFB4F658E745547 /* PrivilegeService.swift */; };
-		1BB559C2F26B4D2398D62009 /* DebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D350B359D5421F816720F5 /* DebugLogger.swift */; };
-		C5E0BF15781E4F6CB83CF8D8 /* LoggingExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7313236940042A799441B8A /* LoggingExtensions.swift */; };
 		072BDC18CD3A1F412D79E65C /* MemoryCleanupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECA675EC13F9451E3C48A56 /* MemoryCleanupView.swift */; };
 		0835CC7B734975BC761C3801 /* AutoCleanupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ACBCDA24FEC65C0692216ED /* AutoCleanupService.swift */; };
 		088E79AB6DD39EED29F38834 /* ProcessManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F78289CCD79A928D641472B8 /* ProcessManagerView.swift */; };
+		127FE76D306047399C129BD1 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0BFC84511241D18B26E6FC /* PaywallView.swift */; };
 		1817CC0947FD83F7BD9F49FC /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB392BCA4D07A3A6B3FB20CB /* DashboardView.swift */; };
 		1A683447D137A01FBA2C2231 /* LaunchAtLoginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C353CAB9F69732F92380EEC5 /* LaunchAtLoginManager.swift */; };
+		1BB559C2F26B4D2398D62009 /* DebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D350B359D5421F816720F5 /* DebugLogger.swift */; };
 		245906DA80EE0DEC93EF4CDE /* AutoCleanupSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C600236D643D1053BD64CC3 /* AutoCleanupSettingsView.swift */; };
 		2A25D8B619D2FCFD6DA92D5E /* BrowserAutomationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D4847DB072B4F05BF47CF1B /* BrowserAutomationService.swift */; };
+		2BC5E1AF2F1FFFEC00093C17 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0BFC84511241D18B26E6FC /* PaywallView.swift */; };
+		2BC5E1B02F1FFFEC00093C17 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D01515630B409EA1310EF4 /* AppLogger.swift */; };
+		2BC5E1B12F1FFFEC00093C17 /* TrialManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3FDB3A7AE0E43668008F6EB /* TrialManager.swift */; };
+		2BC5E1B22F1FFFEC00093C17 /* PrivilegeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8F6221E6CFB4F658E745547 /* PrivilegeService.swift */; };
+		2BC5E1B32F1FFFEC00093C17 /* DebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D350B359D5421F816720F5 /* DebugLogger.swift */; };
+		2BC5E1B42F1FFFEC00093C17 /* LoggingExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7313236940042A799441B8A /* LoggingExtensions.swift */; };
 		2FE223FFC5AB086E1F390837 /* SystemCPUMonitorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23FD6D8224281B502229F05E /* SystemCPUMonitorView.swift */; };
+		3134FABB77F435E86E6FED7 /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66FAA11487974A19801962C /* SnapshotHelper.swift */; };
 		320BA199692F2B0CE464C826 /* ClearMindUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3347C167919A7F97FE2CDE86 /* ClearMindUITests.swift */; };
 		324625357741BF0140A7A9FA /* MemoryOptimizerServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDE6E7BF2B81B73B7F577407 /* MemoryOptimizerServiceTests.swift */; };
 		329F8E7152478A41EE5C939F /* SystemMetricsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF233DB0FFB9F908AA51D49 /* SystemMetricsService.swift */; };
 		34EDD517A8CA42765ED159B7 /* PermissionsServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F46711DF1122D3DB4697AA40 /* PermissionsServiceTests.swift */; };
 		355FAAD5BF1BF63578425832 /* MainAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCD420995497279132891BA0 /* MainAppView.swift */; };
+		37081B9A81AC4AAD89014AB2 /* PrivilegeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8F6221E6CFB4F658E745547 /* PrivilegeService.swift */; };
 		3B0E8AA93F8ABDFBB5985716 /* BrowserTabsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B84B8FF558F22E8EE95AE3E /* BrowserTabsView.swift */; };
 		4448E560834F1714EA0C69D1 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6275418776631AC59FE3F4B0 /* MenuBarView.swift */; };
 		4F3C963C04FE8AA89A0AD535 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 496C4A64B26A83B21DBF72D2 /* ContentView.swift */; };
@@ -46,7 +49,9 @@
 		C1CF78B065B69217240721DE /* Craig-O-Cleaner-logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 6A95705D710AB1609EBE0FFA /* Craig-O-Cleaner-logo.png */; };
 		C3D4E5F67890ABCDEF010203 /* LocalUserStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4D5E6F7890ABCDEF010203 /* LocalUserStore.swift */; };
 		C4715D919A5DBEF825CE493A /* ProcessDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68B2DE05F77C4B544BE495A3 /* ProcessDetailsView.swift */; };
+		C5E0BF15781E4F6CB83CF8D8 /* LoggingExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7313236940042A799441B8A /* LoggingExtensions.swift */; };
 		C72688306B4BEE5732CCBB8A /* ProcessManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2145AF91FEE09DA3360DEF7 /* ProcessManager.swift */; };
+		C8779F97192645DCBD6D9584 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D01515630B409EA1310EF4 /* AppLogger.swift */; };
 		D4E5F67890ABCDEF01020304 /* StripeCheckoutService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5E6F7890ABCDEF01020304 /* StripeCheckoutService.swift */; };
 		E5F67890ABCDEF0102030405 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E6F7890ABCDEF0102030405 /* SubscriptionManager.swift */; };
 		F541442A3FE6B7F6A73BFFD7 /* MemoryOptimizerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2EB8AA1C4FD005E3B8801FF /* MemoryOptimizerService.swift */; };
@@ -72,15 +77,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		66FAA11487974A19801962C /* SnapshotHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotHelper.swift; sourceTree = "<group>"; };
-
-		7B0BFC84511241D18B26E6FC /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
-		19D01515630B409EA1310EF4 /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
-		B3FDB3A7AE0E43668008F6EB /* TrialManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrialManager.swift; sourceTree = "<group>"; };
-		F8F6221E6CFB4F658E745547 /* PrivilegeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegeService.swift; sourceTree = "<group>"; };
-		A2D350B359D5421F816720F5 /* DebugLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogger.swift; sourceTree = "<group>"; };
-		F7313236940042A799441B8A /* LoggingExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggingExtensions.swift; sourceTree = "<group>"; };
 		0ECA675EC13F9451E3C48A56 /* MemoryCleanupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryCleanupView.swift; sourceTree = "<group>"; };
+		19D01515630B409EA1310EF4 /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
 		1A2B3C4D5E6F7890ABCDEF01 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 		1C600236D643D1053BD64CC3 /* AutoCleanupSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoCleanupSettingsView.swift; sourceTree = "<group>"; };
 		23FD6D8224281B502229F05E /* SystemCPUMonitorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemCPUMonitorView.swift; sourceTree = "<group>"; };
@@ -101,16 +99,20 @@
 		5D0E02E94D7795EFC0334B3F /* Craig-O-CleanTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Craig-O-CleanTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5E6F7890ABCDEF0102030405 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		6275418776631AC59FE3F4B0 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
+		66FAA11487974A19801962C /* SnapshotHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotHelper.swift; sourceTree = "<group>"; };
 		68B2DE05F77C4B544BE495A3 /* ProcessDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessDetailsView.swift; sourceTree = "<group>"; };
 		6A95705D710AB1609EBE0FFA /* Craig-O-Cleaner-logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Craig-O-Cleaner-logo.png"; sourceTree = "<group>"; };
 		6D4847DB072B4F05BF47CF1B /* BrowserAutomationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserAutomationService.swift; sourceTree = "<group>"; };
 		6F7890ABCDEF010203040506 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
 		7890ABCDEF01020304050607 /* SystemMemoryMonitorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMemoryMonitorView.swift; sourceTree = "<group>"; };
 		79BF4035D745B5DB567701E7 /* MenuBarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
+		7B0BFC84511241D18B26E6FC /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		97EC0CFD10106180B82D3171 /* SystemMetricsServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMetricsServiceTests.swift; sourceTree = "<group>"; };
 		A2145AF91FEE09DA3360DEF7 /* ProcessManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessManager.swift; sourceTree = "<group>"; };
+		A2D350B359D5421F816720F5 /* DebugLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogger.swift; sourceTree = "<group>"; };
 		A3AAA25C8BFC4DC9FCC62823 /* BrowserAutomationServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserAutomationServiceTests.swift; sourceTree = "<group>"; };
 		A963F27F151E1C97ACCFAE4B /* Craig_O_CleanApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Craig_O_CleanApp.swift; sourceTree = "<group>"; };
+		B3FDB3A7AE0E43668008F6EB /* TrialManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrialManager.swift; sourceTree = "<group>"; };
 		BB392BCA4D07A3A6B3FB20CB /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		BCD420995497279132891BA0 /* MainAppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainAppView.swift; sourceTree = "<group>"; };
 		BD32BF4A67DF2580185C8A76 /* VibeCaaSColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VibeCaaSColors.swift; sourceTree = "<group>"; };
@@ -120,7 +122,9 @@
 		CDE6E7BF2B81B73B7F577407 /* MemoryOptimizerServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryOptimizerServiceTests.swift; sourceTree = "<group>"; };
 		F46711DF1122D3DB4697AA40 /* PermissionsServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsServiceTests.swift; sourceTree = "<group>"; };
 		F6E10BBC32BAE5E056982A8B /* Craig-O-Clean.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Craig-O-Clean.entitlements"; sourceTree = "<group>"; };
+		F7313236940042A799441B8A /* LoggingExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggingExtensions.swift; sourceTree = "<group>"; };
 		F78289CCD79A928D641472B8 /* ProcessManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessManagerView.swift; sourceTree = "<group>"; };
+		F8F6221E6CFB4F658E745547 /* PrivilegeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegeService.swift; sourceTree = "<group>"; };
 		FB5748E37851D981C3F01925 /* Craig-O-Clean.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Craig-O-Clean.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -145,7 +149,8 @@
 				79BF4035D745B5DB567701E7 /* MenuBarContentView.swift */,
 				F78289CCD79A928D641472B8 /* ProcessManagerView.swift */,
 				253B9B7F0FD0202F49F06356 /* SettingsPermissionsView.swift */,
-				7B0BFC84511241D18B26E6FC /* PaywallView.swift */,);
+				7B0BFC84511241D18B26E6FC /* PaywallView.swift */,
+			);
 			path = UI;
 			sourceTree = "<group>";
 		};
@@ -159,12 +164,12 @@
 		};
 		5CB23B38D6DD33656D6F1EE6 /* Core */ = {
 			isa = PBXGroup;
-			children = (19D01515630B409EA1310EF4 /* AppLogger.swift */,
+			children = (
+				19D01515630B409EA1310EF4 /* AppLogger.swift */,
 				B3FDB3A7AE0E43668008F6EB /* TrialManager.swift */,
 				F8F6221E6CFB4F658E745547 /* PrivilegeService.swift */,
 				A2D350B359D5421F816720F5 /* DebugLogger.swift */,
 				F7313236940042A799441B8A /* LoggingExtensions.swift */,
-
 				1A2B3C4D5E6F7890ABCDEF01 /* AuthManager.swift */,
 				2ACBCDA24FEC65C0692216ED /* AutoCleanupService.swift */,
 				6D4847DB072B4F05BF47CF1B /* BrowserAutomationService.swift */,
@@ -301,9 +306,6 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
-					0415B46CA7B47AC35FB319C5 = {
-						ProvisioningStyle = Automatic;
-					};
 					7467991BBA646C3A88C57F87 = {
 						ProvisioningStyle = Automatic;
 					};
@@ -349,13 +351,13 @@
 		3ED0B822CBDCF4AA7124AB51 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
-			files = (				127FE76D306047399C129BD1 /* PaywallView.swift in Sources */,
-				C8779F97192645DCBD6D9584 /* AppLogger.swift in Sources */,
-				01C6C128BF2C4D1785807C48 /* TrialManager.swift in Sources */,
-				37081B9A81AC4AAD89014AB2 /* PrivilegeService.swift in Sources */,
-				1BB559C2F26B4D2398D62009 /* DebugLogger.swift in Sources */,
-				C5E0BF15781E4F6CB83CF8D8 /* LoggingExtensions.swift in Sources */,
-
+			files = (
+				2BC5E1AF2F1FFFEC00093C17 /* PaywallView.swift in Sources */,
+				2BC5E1B02F1FFFEC00093C17 /* AppLogger.swift in Sources */,
+				2BC5E1B12F1FFFEC00093C17 /* TrialManager.swift in Sources */,
+				2BC5E1B22F1FFFEC00093C17 /* PrivilegeService.swift in Sources */,
+				2BC5E1B32F1FFFEC00093C17 /* DebugLogger.swift in Sources */,
+				2BC5E1B42F1FFFEC00093C17 /* LoggingExtensions.swift in Sources */,
 				980877B7ED3E66AB16FECA4B /* BrowserAutomationServiceTests.swift in Sources */,
 				324625357741BF0140A7A9FA /* MemoryOptimizerServiceTests.swift in Sources */,
 				34EDD517A8CA42765ED159B7 /* PermissionsServiceTests.swift in Sources */,
@@ -397,13 +399,13 @@
 				329F8E7152478A41EE5C939F /* SystemMetricsService.swift in Sources */,
 				F67890ABCDEF010203040506 /* UserProfile.swift in Sources */,
 				9C95320DF11F602202AD0D02 /* VibeCaaSColors.swift in Sources */,
-			
 				01C6C128BF2C4D1785807C48 /* TrialManager.swift in Sources */,
 				37081B9A81AC4AAD89014AB2 /* PrivilegeService.swift in Sources */,
 				C8779F97192645DCBD6D9584 /* AppLogger.swift in Sources */,
 				1BB559C2F26B4D2398D62009 /* DebugLogger.swift in Sources */,
 				C5E0BF15781E4F6CB83CF8D8 /* LoggingExtensions.swift in Sources */,
-				127FE76D306047399C129BD1 /* PaywallView.swift in Sources */,);
+				127FE76D306047399C129BD1 /* PaywallView.swift in Sources */,
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		AFD4E813DB23574FCA92535D /* Sources */ = {
@@ -411,8 +413,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				320BA199692F2B0CE464C826 /* ClearMindUITests.swift in Sources */,
-			
-				3134FABB77F435E86E6FED7 /* SnapshotHelper.swift in Sources */,);
+				3134FABB77F435E86E6FED7 /* SnapshotHelper.swift in Sources */,
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
@@ -436,12 +438,12 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				GENERATE_INFOPLIST_FILE = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.craigoclean.app.uitests;
 				SDKROOT = macosx;
 				TEST_TARGET_NAME = "Craig-O-Clean";
@@ -454,14 +456,28 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				AUTOMATION_APPLE_EVENTS = YES;
 				CODE_SIGN_ENTITLEMENTS = "Craig-O-Clean/Craig-O-Clean.entitlements";
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = K36LFHM32T;
 				ENABLE_APP_SANDBOX = YES;
+				ENABLE_FILE_ACCESS_DOWNLOADS_FOLDER = readwrite;
+				ENABLE_FILE_ACCESS_MOVIES_FOLDER = readwrite;
+				ENABLE_FILE_ACCESS_MUSIC_FOLDER = readwrite;
+				ENABLE_FILE_ACCESS_PICTURE_FOLDER = readwrite;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = YES;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = YES;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = YES;
+				ENABLE_RESOURCE_ACCESS_CAMERA = YES;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = YES;
+				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
+				ENABLE_RESOURCE_ACCESS_PRINTING = YES;
+				ENABLE_RESOURCE_ACCESS_USB = YES;
 				ENABLE_USER_SELECTED_FILES = readwrite;
 				INFOPLIST_FILE = "Craig-O-Clean/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = CraigOClean;
@@ -470,9 +486,10 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 3;
+				MARKETING_VERSION = 1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.craigoclean.app;
 				PRODUCT_NAME = "Craig-O-Clean";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
@@ -618,12 +635,12 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				GENERATE_INFOPLIST_FILE = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.craigoclean.app.tests;
 				SDKROOT = macosx;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Craig-O-Clean.app/Contents/MacOS/Craig-O-Clean";
@@ -635,12 +652,12 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				GENERATE_INFOPLIST_FILE = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.craigoclean.app.tests;
 				SDKROOT = macosx;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Craig-O-Clean.app/Contents/MacOS/Craig-O-Clean";
@@ -652,12 +669,12 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				GENERATE_INFOPLIST_FILE = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.craigoclean.app.uitests;
 				SDKROOT = macosx;
 				TEST_TARGET_NAME = "Craig-O-Clean";
@@ -670,11 +687,30 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				AUTOMATION_APPLE_EVENTS = YES;
 				CODE_SIGN_ENTITLEMENTS = "Craig-O-Clean/Craig-O-Clean.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = K36LFHM32T;
 				ENABLE_APP_SANDBOX = YES;
+				ENABLE_FILE_ACCESS_DOWNLOADS_FOLDER = readwrite;
+				ENABLE_FILE_ACCESS_MOVIES_FOLDER = readwrite;
+				ENABLE_FILE_ACCESS_MUSIC_FOLDER = readwrite;
+				ENABLE_FILE_ACCESS_PICTURE_FOLDER = readwrite;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = YES;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = YES;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = YES;
+				ENABLE_RESOURCE_ACCESS_CAMERA = YES;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = YES;
+				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
+				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = YES;
+				ENABLE_RESOURCE_ACCESS_PRINTING = YES;
+				ENABLE_RESOURCE_ACCESS_USB = YES;
 				ENABLE_USER_SELECTED_FILES = readwrite;
 				INFOPLIST_FILE = "Craig-O-Clean/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = CraigOClean;
@@ -683,9 +719,16 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 3;
+				MARKETING_VERSION = 1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.craigoclean.app;
 				PRODUCT_NAME = "Craig-O-Clean";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = YES;
+				RUNTIME_EXCEPTION_ALLOW_JIT = YES;
+				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = YES;
+				RUNTIME_EXCEPTION_DEBUGGING_TOOL = NO;
+				RUNTIME_EXCEPTION_DISABLE_EXECUTABLE_PAGE_PROTECTION = NO;
+				RUNTIME_EXCEPTION_DISABLE_LIBRARY_VALIDATION = NO;
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 			};

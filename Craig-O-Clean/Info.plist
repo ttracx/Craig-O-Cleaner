@@ -2,9 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- Bundle Configuration -->
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Craig-O-Clean</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -13,82 +14,10 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>Craig-O-Clean</string>
-	<key>CFBundleDisplayName</key>
-	<string>Craig-O-Clean</string>
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
-	<key>CFBundleVersion</key>
-	<string>$(CURRENT_PROJECT_VERSION)</string>
-	
-	<!-- Application Category -->
-	<key>LSApplicationCategoryType</key>
-	<string>public.app-category.utilities</string>
-	
-	<!-- Minimum System Version -->
-	<key>LSMinimumSystemVersion</key>
-	<string>14.0</string>
-	
-	<!-- Menu Bar App (Agent) - Hides from Dock by default -->
-	<key>LSUIElement</key>
-	<true/>
-	
-	<!-- Principal Class -->
-	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
-	
-	<!-- Human Readable Copyright -->
-	<key>NSHumanReadableCopyright</key>
-	<string>© 2025 CraigOClean.com powered by VibeCaaS.com a division of NeuralQuantum.ai LLC. All rights reserved.</string>
-	
-	<!-- Privacy Usage Descriptions -->
-	
-	<!-- AppleScript/Automation Permission -->
-	<key>NSAppleEventsUsageDescription</key>
-	<string>Craig-O-Clean needs Automation permission to manage browser tabs, terminate processes, and control applications. This allows you to view and close tabs across all your browsers and manage system processes from one place.</string>
-
-	<!-- Accessibility Permission -->
-	<key>NSAccessibilityUsageDescription</key>
-	<string>Craig-O-Clean uses Accessibility access to provide advanced system monitoring, window management, and process control features. This enables full control over running applications and system processes.</string>
-
-	<!-- Full Disk Access Permission -->
-	<key>NSSystemExtensionUsageDescription</key>
-	<string>Craig-O-Clean requires Full Disk Access to monitor all processes, read system logs, and access application data for comprehensive system management and cleanup operations.</string>
-
-	<!-- System Administration Permission (for purge command and process management) -->
-	<key>NSSystemAdministrationUsageDescription</key>
-	<string>Craig-O-Clean may request administrator privileges to run advanced system commands like memory purge, terminate protected processes, and perform system-level cleanup operations.</string>
-	
-	<!-- Supported Architectures (Apple Silicon optimized) -->
-	<key>LSArchitecturePriority</key>
-	<array>
-		<string>arm64</string>
-		<string>x86_64</string>
-	</array>
-	
-	<!-- High Resolution Capable -->
-	<key>NSHighResolutionCapable</key>
-	<true/>
-	
-	<!-- Supports Secure Coding -->
-	<key>NSSupportsSecureCoding</key>
-	<true/>
-
-	<!-- In-App Purchase Product IDs (StoreKit 2) -->
-	<!-- Configure these products in App Store Connect with 7-day free trial -->
-	<!-- Monthly: $0.99/month | Yearly: $9.99/year (17% savings) -->
-	<key>IAPProductIDs</key>
-	<array>
-		<string>com.craigoclean.pro.monthly</string>
-		<string>com.craigoclean.pro.yearly</string>
-	</array>
-
-	<!-- Trial Configuration -->
-	<key>TrialDurationDays</key>
-	<integer>7</integer>
-
-	<!-- URL Schemes for Stripe callbacks -->
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -100,27 +29,48 @@
 			</array>
 		</dict>
 	</array>
-
-	<!-- Stripe backend base URL (Stripe secret keys MUST stay on your server) -->
-	<!-- CONFIGURE THIS: Set to your backend URL that handles Stripe checkout -->
-	<!-- Example: https://api.yourdomain.com -->
-	<!-- Backend must implement: -->
-	<!--   POST /stripe/create-checkout-session - Create checkout session -->
-	<!--   POST /stripe/create-portal-session - Create customer portal session -->
-	<!--   GET /stripe/subscription-status/:userId - Get subscription status -->
-	<!--   POST /stripe/webhook - Handle Stripe webhooks -->
-	<!-- Pricing: Monthly $0.99 (price_monthly_099), Yearly $9.99 (price_yearly_999) -->
-	<!-- Both prices should be configured with 7-day free trial in Stripe Dashboard -->
-	<key>StripeBackendBaseURL</key>
-	<string></string>
-
-	<!-- Privileged Helper Tool (SMJobBless) -->
-	<!-- This key defines the privileged helper that can be installed via SMJobBless -->
-	<!-- IMPORTANT: Update the code signing requirement with your actual Team ID for distribution -->
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>IAPProductIDs</key>
+	<array>
+		<string>com.craigoclean.pro.monthly</string>
+		<string>com.craigoclean.pro.yearly</string>
+	</array>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.utilities</string>
+	<key>LSArchitecturePriority</key>
+	<array>
+		<string>arm64</string>
+		<string>x86_64</string>
+	</array>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.0</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSAccessibilityUsageDescription</key>
+	<string>Craig-O-Clean uses Accessibility access to provide advanced system monitoring, window management, and process control features. This enables full control over running applications and system processes.</string>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Craig-O-Clean needs Automation permission to manage browser tabs, terminate processes, and control applications. This allows you to view and close tabs across all your browsers and manage system processes from one place.</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>© 2026 CraigOClean.com powered by VibeCaaS.com a division of NeuralQuantum.ai LLC. All rights reserved.</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSSupportsSecureCoding</key>
+	<true/>
+	<key>NSSystemAdministrationUsageDescription</key>
+	<string>Craig-O-Clean may request administrator privileges to run advanced system commands like memory purge, terminate protected processes, and perform system-level cleanup operations.</string>
+	<key>NSSystemExtensionUsageDescription</key>
+	<string>Craig-O-Clean requires Full Disk Access to monitor all processes, read system logs, and access application data for comprehensive system management and cleanup operations.</string>
 	<key>SMPrivilegedExecutables</key>
 	<dict>
 		<key>com.CraigOClean.helper</key>
 		<string>identifier "com.CraigOClean.helper" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = "K36LFHM32T"</string>
 	</dict>
+	<key>StripeBackendBaseURL</key>
+	<string></string>
+	<key>TrialDurationDays</key>
+	<integer>7</integer>
 </dict>
 </plist>

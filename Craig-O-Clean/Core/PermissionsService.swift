@@ -390,7 +390,7 @@ final class PermissionsService: ObservableObject {
             .appendingPathComponent("Library/Application Support/com.apple.TCC")
 
         if FileManager.default.fileExists(atPath: appSupportPath.path) {
-            if let contents = try? FileManager.default.contentsOfDirectory(
+            if let _ = try? FileManager.default.contentsOfDirectory(
                 at: appSupportPath,
                 includingPropertiesForKeys: nil,
                 options: []
