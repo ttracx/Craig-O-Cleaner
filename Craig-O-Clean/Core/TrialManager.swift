@@ -29,7 +29,7 @@ final class TrialManager: ObservableObject {
     // MARK: - Constants
 
     static let trialDurationDays = 7
-    private static let trialReminderDays = [3, 1]  // Days before expiry to send reminders
+    nonisolated private static let trialReminderDays = [3, 1]  // Days before expiry to send reminders
 
     // MARK: - Initialization
 
