@@ -1,5 +1,15 @@
 {
+  "name": "craig-o-clean-domain-verification",
+  "version": "1.0.0",
+  "description": "Domain verification server for Sign In with Apple",
+  "main": "domain-verification-server.js",
+  "scripts": {
+    "serve-domain-verification": "node domain-verification-server.js",
+    "start": "node domain-verification-server.js",
+    "test-verification": "curl http://localhost:3000/.well-known/apple-developer-domain-association.txt"
+  },
   "dependencies": {
+    "express": "^4.18.2",
     "jsonwebtoken": "^9.0.3"
   }
 }

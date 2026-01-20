@@ -1,25 +1,14 @@
 # Snapfile for Craig-O-Clean macOS app
 
+# IMPORTANT: snapshot only works with iOS apps
+# For macOS apps, use xcodebuild test directly
+# This file is kept for reference but won't be used
+
 # The name of the scheme which contains the UI Tests
-scheme("Craig-O-Clean")
+# scheme("Craig-O-Clean")
 
 # Where should the resulting screenshots be stored?
-output_directory("./Screenshots/fastlane")
+# output_directory("./Screenshots/fastlane")
 
-# Clear all previously generated screenshots before creating new ones
-clear_previous_screenshots(true)
-
-# For macOS apps, we don't need device specifications
-# But we can specify languages if needed
-languages([
-  "en-US"
-])
-
-# Arguments to pass to the app on launch
-launch_arguments([
-  "--uitesting",
-  "--enable-debug-logging"
-])
-
-# For more information about all available options run
-# fastlane action snapshot
+# For macOS apps, run UI tests directly:
+# xcodebuild test -scheme Craig-O-Clean -destination 'platform=macOS'

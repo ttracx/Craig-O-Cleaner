@@ -33,7 +33,25 @@ platform :mac do
 
   desc "Take screenshots for App Store"
   lane :screenshots do
-    snapshot
+    # Note: fastlane snapshot only works for iOS/tvOS
+    # For macOS apps, we run UI tests directly with xcodebuild
+
+    # Create screenshots directory
+    screenshots_dir = "./Screenshots/fastlane/en-US"
+    sh("mkdir -p #{screenshots_dir}")
+
+    # Run UI tests which will capture screenshots via snapshot() calls
+    scan(
+      scheme: "Craig-O-Clean",
+      destination: "platform=macOS",
+      output_directory: "./test_output",
+      result_bundle: true,
+      clean: false
+    )
+
+    UI.success("✅ UI tests completed! Check test_output for results.")
+    UI.important("📸 Screenshots are captured during tests and saved to the test results bundle.")
+    UI.important("To extract screenshots, use: xcrun xcresulttool get --path test_output/Craig-O-Clean.xcresult --format json")
   end
 
   desc "Build and sign the app"

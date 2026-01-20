@@ -436,6 +436,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				GENERATE_INFOPLIST_FILE = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.craigoclean.app.uitests;
 				SDKROOT = macosx;
 				TEST_TARGET_NAME = "Craig-O-Clean";
@@ -617,6 +618,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
+				GENERATE_INFOPLIST_FILE = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.craigoclean.app.tests;
 				SDKROOT = macosx;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Craig-O-Clean.app/Contents/MacOS/Craig-O-Clean";
@@ -633,6 +635,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
+				GENERATE_INFOPLIST_FILE = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.craigoclean.app.tests;
 				SDKROOT = macosx;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Craig-O-Clean.app/Contents/MacOS/Craig-O-Clean";
@@ -649,6 +652,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				GENERATE_INFOPLIST_FILE = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.craigoclean.app.uitests;
 				SDKROOT = macosx;
 				TEST_TARGET_NAME = "Craig-O-Clean";

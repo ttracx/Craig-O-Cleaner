@@ -82,6 +82,9 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 
+# Apple Domain Verification (DO commit this - it's public and required)
+# .well-known/apple-developer-domain-association.txt should be committed
+
 # Code Injection
 #
 # After new code Injection tools there's a generated folder /iOSInjectionProject
