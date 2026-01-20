@@ -1,0 +1,251 @@
+=== CRAIG-O-CLEAN - APP STORE METADATA ===
+=== PLAIN TEXT VERSION - NO SPECIAL CHARACTERS ===
+
+===== PROMOTIONAL TEXT (170 chars max) =====
+
+Transform your Mac's performance with intelligent cleanup, real-time monitoring, and automated optimization. Get instant insights into CPU, memory, and disk usage.
+
+
+===== DESCRIPTION (4000 chars max) =====
+
+Craig-O-Clean is a powerful macOS system utility designed to keep your Mac running at peak performance. Monitor system resources in real-time, optimize memory usage, and maintain a clean, efficient computing environment.
+
+KEY FEATURES
+
+Real-Time System Monitoring
+- Live CPU, memory, and disk usage tracking
+- Memory pressure detection and warnings
+- Process-level resource monitoring
+- Instant performance insights
+
+Smart Memory Optimization
+- Intelligent memory cleanup algorithms
+- Background app management
+- Heavy process identification
+- Automated optimization suggestions
+
+Process Management
+- View all running applications
+- Monitor memory and CPU usage per app
+- Terminate or force-quit processes safely
+- Identify resource-hungry applications
+
+Browser Tab Management
+- Manage Safari and Chrome tabs
+- Close multiple tabs at once
+- Reduce browser memory footprint
+- Improve browsing performance
+
+Menu Bar Convenience
+- Quick access from your menu bar
+- Mini dashboard with live stats
+- One-click cleanup actions
+- System health at a glance
+
+Automated Cleanup (Pro)
+- Set custom memory thresholds
+- Automatic background cleanup
+- Smart process termination
+- Scheduled optimization
+
+DESIGNED FOR PERFORMANCE
+
+Craig-O-Clean is built with performance in mind. Our lightweight monitoring system uses minimal resources while providing comprehensive insights into your Mac's health. The app features a modern, intuitive interface that makes system optimization accessible to everyone.
+
+SUBSCRIPTION DETAILS
+
+Craig-O-Clean offers a free version with core monitoring features. Upgrade to Pro for advanced automation, custom thresholds, and priority support.
+
+Monthly Pro: $4.99/month
+Yearly Pro: $39.99/year (save 33%)
+
+Free 7-day trial included with all Pro subscriptions. Cancel anytime.
+
+Payment will be charged to your iTunes Account at confirmation of purchase. Subscription automatically renews unless auto-renew is turned off at least 24 hours before the end of the current period. Your account will be charged for renewal within 24 hours prior to the end of the current period.
+
+You can manage your subscription and turn off auto-renewal in your Account Settings after purchase.
+
+Privacy Policy: https://craigoclean.com/privacy
+Terms of Use: https://craigoclean.com/terms
+
+SYSTEM REQUIREMENTS
+
+- macOS 14.0 or later
+- 50 MB of available storage
+- Internet connection for subscription features
+
+
+===== KEYWORDS (100 chars max) =====
+
+performance,memory,optimizer,cleanup,monitor,cpu,disk,speed,mac,utility,process,ram,cache,system
+
+
+===== SUPPORT URL =====
+
+https://craigoclean.com/support
+
+
+===== MARKETING URL =====
+
+https://craigoclean.com
+
+
+===== PRIVACY POLICY URL =====
+
+https://craigoclean.com/privacy
+
+
+===== COPYRIGHT =====
+
+2026 NeuralQuantum.ai LLC
+
+
+===== WHAT'S NEW IN VERSION 3.0 =====
+
+Version 3.0 - Major Performance and Stability Update
+
+NEW FEATURES
+- Complete UI redesign with modern glass morphism effects
+- Real-time system monitoring with live charts
+- Smart memory optimization algorithms
+- Browser tab management for Safari and Chrome
+- Menu bar mini-dashboard for quick access
+
+IMPROVEMENTS
+- 50% faster system scanning
+- Reduced memory footprint
+- Improved process detection accuracy
+- Better memory pressure calculations
+- Enhanced subscription management
+
+BUG FIXES
+- Fixed crash when accessing Settings
+- Resolved permission detection issues
+- Fixed memory leak in auto-cleanup service
+- Improved stability on macOS Sequoia
+
+SAFETY UPDATES
+- Disabled automatic purge command for system stability
+- Auto-cleanup now requires explicit user opt-in
+- Enhanced safety checks for process termination
+- Better error handling throughout the app
+
+Thank you for using Craig-O-Clean! We appreciate your feedback and support.
+
+
+===== REVIEWER NOTES =====
+
+TESTING INSTRUCTIONS FOR APPLE REVIEWERS
+
+Thank you for reviewing Craig-O-Clean. This app is a macOS system utility for monitoring and optimizing performance.
+
+TEST ACCOUNT (if needed):
+Email: reviewer@craigoclean.com
+Password: AppleReview2026
+
+RECOMMENDED TESTING WORKFLOW:
+
+1. LAUNCH AND PERMISSIONS
+   - Launch the app
+   - Grant Accessibility permission when prompted (System Settings > Privacy & Security > Accessibility)
+   - Grant Full Disk Access permission (System Settings > Privacy & Security > Full Disk Access)
+   - These permissions are required for process monitoring and memory optimization
+
+2. MAIN DASHBOARD
+   - View real-time CPU, memory, and disk metrics
+   - Observe live updates every 2 seconds
+   - Check memory pressure indicator (Normal/Warning/Critical)
+
+3. MEMORY OPTIMIZATION
+   - Navigate to Memory tab
+   - Click "Analyze Memory" to scan for cleanup candidates
+   - Review suggested apps for cleanup
+   - Click "Smart Cleanup" to free memory (safe - only terminates background apps)
+
+4. PROCESS MANAGEMENT
+   - Navigate to Processes tab
+   - View all running applications with memory usage
+   - Sort by memory or CPU usage
+   - Test terminating a non-critical process
+
+5. BROWSER TAB MANAGEMENT
+   - Open Safari or Chrome with multiple tabs
+   - Navigate to Browser tab in Craig-O-Clean
+   - View all open tabs
+   - Select tabs and close them
+   - Verify tabs are closed in browser
+
+6. MENU BAR FEATURES
+   - Click Craig-O-Clean icon in menu bar
+   - View mini-dashboard with system stats
+   - Test quick cleanup actions
+   - Navigate between Dashboard, Memory, Browser, and Settings tabs
+
+7. SETTINGS
+   - Click Settings in menu bar or File > Settings
+   - View auto-cleanup configuration (disabled by default for safety)
+   - Check subscription status
+   - Review permissions status
+
+8. SUBSCRIPTION (OPTIONAL)
+   - Click "Upgrade to Pro" button
+   - Sandbox environment will show test subscription
+   - Monthly: $4.99, Yearly: $39.99
+   - 7-day free trial included
+   - Test subscription flow if desired
+
+IMPORTANT NOTES:
+
+SAFETY FEATURES
+- Auto-cleanup is DISABLED by default and requires explicit user opt-in
+- Memory purge command has been disabled from automatic execution for system stability
+- Only background apps are terminated during cleanup
+- System-critical processes (Finder, Dock, WindowServer) are protected
+- All cleanup actions show confirmation dialogs
+
+PERMISSIONS EXPLANATION
+- Accessibility: Required to monitor running processes and their resource usage
+- Full Disk Access: Required to accurately measure memory pressure and disk usage
+- These are standard permissions for system monitoring utilities
+
+SUBSCRIPTION DETAILS
+- Free version includes core monitoring features
+- Pro version unlocks automated cleanup and advanced features
+- 7-day free trial for all Pro subscriptions
+- Standard App Store subscription management
+
+ENCRYPTION USAGE
+- HTTPS for API communication (subscription validation)
+- StoreKit for in-app purchase processing
+- Keychain for secure credential storage
+- Uses only standard Apple-provided encryption (Category 5 Part 2 exempt)
+
+KNOWN LIMITATIONS
+- Some system processes may not be terminable due to macOS protection
+- Memory measurements are estimates based on available APIs
+- Browser tab management requires browsers to be running
+
+If you encounter any issues during testing, please contact:
+Email: support@craigoclean.com
+Developer: Tommy Xaypanya / Phamy Xaypanya
+
+Thank you for your time and consideration!
+
+
+===== APP SUBTITLE (30 chars max) =====
+
+Mac Performance Optimizer
+
+
+===== CATEGORY =====
+
+Primary: Utilities
+Secondary: Productivity
+
+
+===== AGE RATING =====
+
+4+ (No objectionable content)
+
+
+===== END OF METADATA =====

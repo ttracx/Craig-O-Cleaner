@@ -233,6 +233,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             .environmentObject(LocalUserStore.shared)
             .environmentObject(SubscriptionManager.shared)
             .environmentObject(StripeCheckoutService.shared)
+            .environmentObject(TrialManager.shared)
         )
 
         // Hide dock icon (menu bar app only)
@@ -868,6 +869,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             .environmentObject(LocalUserStore.shared)
             .environmentObject(SubscriptionManager.shared)
             .environmentObject(StripeCheckoutService.shared)
+            .environmentObject(TrialManager.shared)
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 1100, height: 750),
             styleMask: [.titled, .closable, .miniaturizable, .resizable],

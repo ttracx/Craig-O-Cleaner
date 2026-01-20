@@ -173,6 +173,11 @@ struct MainAppView: View {
         .environmentObject(browserAutomation)
         .environmentObject(permissions)
         .environmentObject(autoCleanup)
+        .environmentObject(AuthManager.shared)
+        .environmentObject(LocalUserStore.shared)
+        .environmentObject(SubscriptionManager.shared)
+        .environmentObject(StripeCheckoutService.shared)
+        .environmentObject(TrialManager.shared)
     }
 
     // MARK: - Detail View Builder
