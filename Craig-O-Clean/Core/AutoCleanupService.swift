@@ -109,11 +109,14 @@ final class AutoCleanupService: ObservableObject {
 
         loadSettings()
 
-        logger.info("AutoCleanupService initialized")
+        logger.info("AutoCleanupService initialized - monitoring will NOT auto-start to prevent crashes")
 
-        if isEnabled {
-            startMonitoring()
-        }
+        // CRITICAL FIX: Do NOT auto-start monitoring on init
+        // Previously, this would automatically run purge command which can crash macOS
+        // User must explicitly enable monitoring via the UI
+        // if isEnabled {
+        //     startMonitoring()
+        // }
     }
 
     deinit {
@@ -166,17 +169,19 @@ final class AutoCleanupService: ObservableObject {
         isMonitoring = true
         logger.info("Starting resource monitoring")
 
-        // Check every 5 seconds
-        monitoringTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
+        // Check every 30 seconds (increased from 5 to reduce system load)
+        monitoringTimer = Timer.scheduledTimer(withTimeInterval: 30.0, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 await self?.performCleanupCheck(forced: false)
             }
         }
 
-        // Trigger initial check
-        Task {
-            await performCleanupCheck(forced: false)
-        }
+        // CRITICAL FIX: Do NOT trigger immediate check on startup
+        // This was causing crashes by running purge command immediately
+        // Timer will handle checks on its schedule
+        // Task {
+        //     await performCleanupCheck(forced: false)
+        // }
     }
 
     private func stopMonitoring() {
@@ -237,17 +242,20 @@ final class AutoCleanupService: ObservableObject {
         var memoryFreed: UInt64 = 0
         var terminatedCount = 0
 
-        // Step 1: Purge system memory
-        let (success, message) = await memoryOptimizer.runPurgeCommand()
-        if success {
-            logger.info("Memory purge successful: \(message)")
+        // CRITICAL FIX: NEVER run purge command automatically
+        // The purge command is extremely aggressive and can crash macOS
+        // It should ONLY be run manually by user with explicit confirmation
+        //
+        // Step 1: Purge system memory - DISABLED FOR SAFETY
+        // let (success, message) = await memoryOptimizer.runPurgeCommand()
+        // if success {
+        //     logger.info("Memory purge successful: \(message)")
+        //     let inactiveBytes = systemMetrics.memoryMetrics?.inactiveRAM ?? 0
+        //     memoryFreed += UInt64(Double(inactiveBytes) * 0.3)
+        //     recordEvent(.memoryPurge, reason: "Memory usage \(String(format: "%.1f", memoryUsage))%", memoryFreed: memoryFreed, processesTerminated: nil)
+        // }
 
-            // Estimate memory freed (rough approximation based on inactive memory)
-            let inactiveBytes = systemMetrics.memoryMetrics?.inactiveRAM ?? 0
-            memoryFreed += UInt64(Double(inactiveBytes) * 0.3) // Conservative estimate
-
-            recordEvent(.memoryPurge, reason: "Memory usage \(String(format: "%.1f", memoryUsage))%", memoryFreed: memoryFreed, processesTerminated: nil)
-        }
+        logger.warning("Auto-cleanup SKIPPING dangerous purge command for safety - only terminating processes")
 
         // Step 2: Identify and terminate memory-heavy processes
         let processes = processManager.processes
@@ -381,7 +389,12 @@ final class AutoCleanupService: ObservableObject {
     // MARK: - Private Methods - Settings
 
     private func loadSettings() {
-        isEnabled = UserDefaults.standard.bool(forKey: isEnabledKey)
+        // CRITICAL FIX: Force auto-cleanup to be disabled by default for safety
+        // Even if it was previously enabled, reset it to prevent automatic crashes
+        isEnabled = false
+        UserDefaults.standard.set(false, forKey: isEnabledKey)
+
+        logger.warning("Auto-cleanup forced to DISABLED state for safety - user must manually enable")
 
         thresholds.memoryWarning = UserDefaults.standard.double(forKey: memoryWarningKey)
         if thresholds.memoryWarning == 0 { thresholds.memoryWarning = 75.0 }
