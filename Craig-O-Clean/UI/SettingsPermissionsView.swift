@@ -1261,7 +1261,7 @@ struct AboutSheet: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
 
-                Text("© 2025 CraigOClean.com powered by VibeCaaS.com")
+                Text("© 2026 CraigOClean.com powered by VibeCaaS.com")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }

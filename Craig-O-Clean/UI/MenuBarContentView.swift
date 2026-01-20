@@ -890,8 +890,14 @@ struct MenuBarBrowserTab: View {
             browserHeaderSection
 
             // Content
-            if browserAutomation.runningBrowsers.isEmpty {
+            if browserAutomation.isLoading && browserAutomation.allTabs.isEmpty {
+                // Show loading state when fetching tabs
+                loadingStateView
+            } else if browserAutomation.runningBrowsers.isEmpty {
                 emptyStateView(icon: "safari", title: "No Browsers Running", subtitle: "Open a browser to manage tabs")
+            } else if browserAutomation.allTabs.isEmpty, let error = browserAutomation.lastError {
+                // Show error state only when tab fetch fails AND no tabs were retrieved
+                errorStateView(error: error)
             } else if browserAutomation.allTabs.isEmpty {
                 emptyStateView(icon: "checkmark.circle", title: "No Tabs Found", subtitle: "All tabs are already optimized")
             } else {
@@ -900,18 +906,126 @@ struct MenuBarBrowserTab: View {
             }
         }
         .frame(height: 400)
+        .onAppear {
+            // Refresh tabs when browser tab view appears
+            if browserAutomation.allTabs.isEmpty && !browserAutomation.isLoading {
+                Task {
+                    await browserAutomation.fetchAllTabs()
+                }
+            }
+        }
+    }
+
+    private var loadingStateView: some View {
+        VStack(spacing: 16) {
+            ZStack {
+                Circle()
+                    .fill(Color.vibePurple.opacity(0.1))
+                    .frame(width: 70, height: 70)
+
+                ProgressView()
+                    .scaleEffect(1.2)
+            }
+
+            Text("Loading Browser Tabs...")
+                .font(.system(size: 14, weight: .semibold))
+
+            Text("Fetching tabs from running browsers")
+                .font(.system(size: 12))
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func errorStateView(error: BrowserAutomationError) -> some View {
+        VStack(spacing: 16) {
+            ZStack {
+                Circle()
+                    .fill(Color.orange.opacity(0.15))
+                    .frame(width: 70, height: 70)
+
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.system(size: 28))
+                    .foregroundColor(.orange)
+            }
+
+            Text("Unable to Access Tabs")
+                .font(.system(size: 14, weight: .semibold))
+
+            Text(error.localizedDescription ?? "An unknown error occurred")
+                .font(.system(size: 12))
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 24)
+
+            if case .automationPermissionDenied = error {
+                Button {
+                    // Open System Settings to Automation
+                    if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation") {
+                        NSWorkspace.shared.open(url)
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "gear")
+                            .font(.system(size: 11))
+                        Text("Open System Settings")
+                            .font(.system(size: 11, weight: .medium))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(Color.vibePurple)
+                    .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+
+            Button {
+                Task {
+                    await browserAutomation.fetchAllTabs()
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 11))
+                    Text("Try Again")
+                        .font(.system(size: 11, weight: .medium))
+                }
+                .foregroundColor(.vibePurple)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Color.vibePurple.opacity(0.15))
+                .clipShape(Capsule())
+            }
+            .buttonStyle(.plain)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var browserHeaderSection: some View {
         GlassCard {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Browser Tabs")
-                        .font(.system(size: 14, weight: .semibold))
+                    HStack(spacing: 6) {
+                        Text("Browser Tabs")
+                            .font(.system(size: 14, weight: .semibold))
 
-                    Text("\(browserAutomation.allTabs.count) tabs across \(browserAutomation.runningBrowsers.count) browsers")
-                        .font(.system(size: 11))
-                        .foregroundColor(.secondary)
+                        if browserAutomation.isLoading {
+                            ProgressView()
+                                .controlSize(.small)
+                                .scaleEffect(0.7)
+                        }
+                    }
+
+                    if browserAutomation.isLoading {
+                        Text("Fetching tabs...")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("\(browserAutomation.allTabs.count) tabs across \(browserAutomation.runningBrowsers.count) browsers")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                    }
                 }
 
                 Spacer()
@@ -933,12 +1047,12 @@ struct MenuBarBrowserTab: View {
                         Image(systemName: "arrow.clockwise")
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundColor(.vibePurple)
-                            .rotationEffect(isRefreshing ? .degrees(360) : .degrees(0))
-                            .animation(isRefreshing ? .linear(duration: 0.8).repeatForever(autoreverses: false) : .default, value: isRefreshing)
+                            .rotationEffect((isRefreshing || browserAutomation.isLoading) ? .degrees(360) : .degrees(0))
+                            .animation((isRefreshing || browserAutomation.isLoading) ? .linear(duration: 0.8).repeatForever(autoreverses: false) : .default, value: isRefreshing || browserAutomation.isLoading)
                     }
                 }
                 .buttonStyle(.plain)
-                .disabled(isRefreshing)
+                .disabled(isRefreshing || browserAutomation.isLoading)
             }
             .padding(14)
         }

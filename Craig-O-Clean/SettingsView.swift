@@ -105,12 +105,8 @@ struct SettingsView: View {
                                     .fontWeight(.bold)
                                     .foregroundColor(.accentColor)
 
-                                
+
                                 Text("Version 1.0")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                
-                                Text("macOS Memory Manager for Craig Ross")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
@@ -201,7 +197,7 @@ struct SettingsView: View {
             
             // Copyright notice - VibeCaaS branding
             VStack(spacing: 6) {
-                Text("© 2025 ")
+                Text("© 2026 ")
                     .font(.caption2)
                     .foregroundColor(.secondary)
                 + Text("CraigOClean.com")
