@@ -54,7 +54,7 @@ You need an app-specific shared secret if:
 
 ---
 
-## Step 2: Configure in Your Backend
+## Step 2: Configure Backend for Apple AppStore
 
 ### Environment Variables
 
@@ -62,7 +62,7 @@ Add the secret to your backend configuration:
 
 ```bash
 # .env (DO NOT COMMIT THIS FILE)
-APP_STORE_SHARED_SECRET=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
+APP_STORE_SHARED_SECRET=8e29d4581e0346309377690ba3ff347a
 APP_STORE_VERIFY_URL_PRODUCTION=https://buy.itunes.apple.com/verifyReceipt
 APP_STORE_VERIFY_URL_SANDBOX=https://sandbox.itunes.apple.com/verifyReceipt
 ```
