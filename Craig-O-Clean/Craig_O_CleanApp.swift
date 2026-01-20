@@ -640,7 +640,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         NSApp.orderFrontStandardAboutPanel(options: [
             .applicationName: "Craig-O-Clean",
             .applicationVersion: "1.0",
-            .credits: NSAttributedString(string: "macOS Memory Manager for Craig Ross\n\n© 2025 CraigOClean.com powered by VibeCaaS.com\na division of NeuralQuantum.ai LLC\n\nMonitor • Optimize • Control")
+            .credits: NSAttributedString(string: "© 2026 CraigOClean.com powered by VibeCaaS.com\na division of NeuralQuantum.ai LLC\n\nMonitor • Optimize • Control")
         ])
         NSApp.activate(ignoringOtherApps: true)
     }
