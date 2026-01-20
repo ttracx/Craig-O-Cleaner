@@ -314,6 +314,8 @@ final class AutoCleanupService: ObservableObject {
 
     private func isSystemCriticalProcess(_ process: ProcessInfo) -> Bool {
         // Never terminate critical system processes
+        // Note: Browsers are NOT included here - they should be terminable during cleanup
+        // if they're consuming excessive memory. Only true system-critical processes are protected.
         let criticalProcesses = [
             "WindowServer",
             "loginwindow",
@@ -322,13 +324,7 @@ final class AutoCleanupService: ObservableObject {
             "kernel_task",
             "Finder",
             "Dock",
-            "Safari",
-            "Google Chrome",
-            "Microsoft Edge",
-            "Craig-O-Clean",
-            "Xcode",
-            "Terminal",
-            "iTerm2"
+            "Craig-O-Clean"
         ]
 
         return criticalProcesses.contains { process.name.contains($0) }

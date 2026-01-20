@@ -125,8 +125,36 @@ class ProcessManager: ObservableObject {
     private var previousSystemTime: Date?
     
     init() {
+        // Pre-populate CPU ticks so first measurement shows non-zero values
+        initializeCPUTicks()
         startAutoUpdate()
         startCPUHistoryTracking()
+    }
+
+    /// Pre-populate CPU tick data so the first visible measurement can calculate deltas
+    private func initializeCPUTicks() {
+        let pidsPointer = UnsafeMutablePointer<Int32>.allocate(capacity: Int(maxproc))
+        defer { pidsPointer.deallocate() }
+
+        let count = proc_listallpids(pidsPointer, Int32(MemoryLayout<Int32>.size * Int(maxproc)))
+        guard count > 0 else { return }
+
+        let pids = Array(UnsafeBufferPointer(start: pidsPointer, count: Int(count)))
+        let currentTime = Date()
+
+        for pid in pids where pid > 0 {
+            var taskInfo = proc_taskinfo()
+            let taskInfoSize = Int32(MemoryLayout<proc_taskinfo>.size)
+            let result = proc_pidinfo(pid, PROC_PIDTASKINFO, 0, &taskInfo, taskInfoSize)
+
+            if result > 0 {
+                previousCPUTicks[pid] = (
+                    user: taskInfo.pti_total_user,
+                    system: taskInfo.pti_total_system,
+                    time: currentTime
+                )
+            }
+        }
     }
     
     deinit {
