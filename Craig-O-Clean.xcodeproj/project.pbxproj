@@ -145,7 +145,7 @@
 				79BF4035D745B5DB567701E7 /* MenuBarContentView.swift */,
 				F78289CCD79A928D641472B8 /* ProcessManagerView.swift */,
 				253B9B7F0FD0202F49F06356 /* SettingsPermissionsView.swift */,
-			);
+				7B0BFC84511241D18B26E6FC /* PaywallView.swift */,);
 			path = UI;
 			sourceTree = "<group>";
 		};
@@ -159,8 +159,7 @@
 		};
 		5CB23B38D6DD33656D6F1EE6 /* Core */ = {
 			isa = PBXGroup;
-			children = (				7B0BFC84511241D18B26E6FC /* PaywallView.swift */,
-				19D01515630B409EA1310EF4 /* AppLogger.swift */,
+			children = (19D01515630B409EA1310EF4 /* AppLogger.swift */,
 				B3FDB3A7AE0E43668008F6EB /* TrialManager.swift */,
 				F8F6221E6CFB4F658E745547 /* PrivilegeService.swift */,
 				A2D350B359D5421F816720F5 /* DebugLogger.swift */,
@@ -398,7 +397,13 @@
 				329F8E7152478A41EE5C939F /* SystemMetricsService.swift in Sources */,
 				F67890ABCDEF010203040506 /* UserProfile.swift in Sources */,
 				9C95320DF11F602202AD0D02 /* VibeCaaSColors.swift in Sources */,
-			);
+			
+				01C6C128BF2C4D1785807C48 /* TrialManager.swift in Sources */,
+				37081B9A81AC4AAD89014AB2 /* PrivilegeService.swift in Sources */,
+				C8779F97192645DCBD6D9584 /* AppLogger.swift in Sources */,
+				1BB559C2F26B4D2398D62009 /* DebugLogger.swift in Sources */,
+				C5E0BF15781E4F6CB83CF8D8 /* LoggingExtensions.swift in Sources */,
+				127FE76D306047399C129BD1 /* PaywallView.swift in Sources */,);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		AFD4E813DB23574FCA92535D /* Sources */ = {

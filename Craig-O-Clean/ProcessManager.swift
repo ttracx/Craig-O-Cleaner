@@ -3,6 +3,7 @@ import AppKit
 
 // Constants
 private let PROC_PIDPATHINFO_MAXSIZE: Int = 1024 * 4
+private let maxproc: Int = 4096  // Maximum number of processes to query
 
 // MARK: - Enhanced Process Information Model
 struct ProcessInfo: Identifiable, Hashable {

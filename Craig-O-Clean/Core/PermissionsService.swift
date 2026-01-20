@@ -312,15 +312,18 @@ final class PermissionsService: ObservableObject {
     
     /// Check accessibility permission
     func checkAccessibilityPermission() -> PermissionStatus {
+        // Log app info for debugging
+        let bundleID = Bundle.main.bundleIdentifier ?? "unknown"
+        let executablePath = Bundle.main.executablePath ?? "unknown"
+
         // First try the standard check without prompting
         let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: false]
         let trusted = AXIsProcessTrustedWithOptions(options as CFDictionary)
 
-        // Log detailed info for debugging
-        let bundleID = Bundle.main.bundleIdentifier ?? "unknown"
-        logger.info("Accessibility check - Bundle: \(bundleID), Trusted: \(trusted)")
+        logger.info("Accessibility check - Bundle: \(bundleID), Path: \(executablePath), Trusted: \(trusted)")
 
         if trusted {
+            logger.info("Accessibility permission: GRANTED")
             return .granted
         }
 
@@ -328,7 +331,13 @@ final class PermissionsService: ObservableObject {
         let simpleTrusted = AXIsProcessTrusted()
         logger.info("Accessibility fallback check - AXIsProcessTrusted: \(simpleTrusted)")
 
-        return simpleTrusted ? .granted : .denied
+        if simpleTrusted {
+            logger.info("Accessibility permission: GRANTED (via fallback)")
+            return .granted
+        }
+
+        logger.warning("Accessibility permission: DENIED or NOT DETERMINED")
+        return .denied
     }
     
     /// Request accessibility permission (opens System Settings)
@@ -342,31 +351,82 @@ final class PermissionsService: ObservableObject {
 
     /// Check Full Disk Access permission
     func checkFullDiskAccessPermission() -> PermissionStatus {
-        // Try to access a protected location that requires Full Disk Access
-        // For example, try to read Safari's history database
-        let protectedPaths = [
-            URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Safari/History.db"),
-            URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Application Support/com.apple.sharedfilelist"),
-        ]
+        // Try multiple methods to detect Full Disk Access
 
-        for path in protectedPaths {
-            // Check if we can access file attributes (requires Full Disk Access)
-            if let attributes = try? FileManager.default.attributesOfItem(atPath: path.path) {
-                // Successfully accessed protected file
-                if attributes[.type] != nil {
+        // Method 1: Try to access Safari's history database (most reliable if it exists)
+        let safariHistoryPath = URL(fileURLWithPath: NSHomeDirectory())
+            .appendingPathComponent("Library/Safari/History.db")
+
+        if FileManager.default.fileExists(atPath: safariHistoryPath.path) {
+            // File exists, try to read attributes
+            if let attributes = try? FileManager.default.attributesOfItem(atPath: safariHistoryPath.path),
+               attributes[.type] != nil {
+                logger.info("Full Disk Access granted: Safari history accessible")
+                return .granted
+            }
+        }
+
+        // Method 2: Try to access Mail directory (widely present)
+        let mailDir = URL(fileURLWithPath: NSHomeDirectory())
+            .appendingPathComponent("Library/Mail")
+
+        if FileManager.default.fileExists(atPath: mailDir.path) {
+            // Directory exists, try to enumerate contents
+            if let contents = try? FileManager.default.contentsOfDirectory(
+                at: mailDir,
+                includingPropertiesForKeys: [.isDirectoryKey],
+                options: []
+            ) {
+                // If we can read any contents, we have Full Disk Access
+                if !contents.isEmpty {
+                    logger.info("Full Disk Access granted: Mail directory accessible")
                     return .granted
                 }
             }
         }
 
-        // Also check if we can enumerate protected directories
-        let protectedDir = URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Mail")
-        if let contents = try? FileManager.default.contentsOfDirectory(at: protectedDir, includingPropertiesForKeys: nil) {
-            if !contents.isEmpty {
+        // Method 3: Try to read from /Library/Application Support (system-wide protected location)
+        let appSupportPath = URL(fileURLWithPath: NSHomeDirectory())
+            .appendingPathComponent("Library/Application Support/com.apple.TCC")
+
+        if FileManager.default.fileExists(atPath: appSupportPath.path) {
+            if let contents = try? FileManager.default.contentsOfDirectory(
+                at: appSupportPath,
+                includingPropertiesForKeys: nil,
+                options: []
+            ) {
+                logger.info("Full Disk Access granted: TCC directory accessible")
                 return .granted
             }
         }
 
+        // Method 4: Check if we can access the TCC database itself (most reliable indicator)
+        let tccDbPath = "/Library/Application Support/com.apple.TCC/TCC.db"
+        if FileManager.default.isReadableFile(atPath: tccDbPath) {
+            logger.info("Full Disk Access granted: TCC database readable")
+            return .granted
+        }
+
+        // Method 5: Try accessing user's Desktop (less protected but still requires some access)
+        let desktopPath = URL(fileURLWithPath: NSHomeDirectory())
+            .appendingPathComponent("Desktop")
+
+        // Check if we can enumerate Desktop - if we can't even do this, definitely no Full Disk Access
+        if FileManager.default.fileExists(atPath: desktopPath.path) {
+            if let _ = try? FileManager.default.contentsOfDirectory(
+                at: desktopPath,
+                includingPropertiesForKeys: nil,
+                options: []
+            ) {
+                // We can access Desktop, but couldn't access more protected locations
+                // This suggests limited access, not Full Disk Access
+                logger.info("Full Disk Access denied: Can access Desktop but not protected locations")
+                return .denied
+            }
+        }
+
+        // If we reached here, we couldn't verify Full Disk Access
+        logger.warning("Full Disk Access check inconclusive, defaulting to denied")
         return .denied
     }
 

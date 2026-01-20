@@ -85,7 +85,7 @@ struct MenuBarContentView: View {
         }
         .onDisappear {
             // Stop auto cleanup service to prevent memory leaks
-            autoCleanupHolder.service?.stopAutoCleanup()
+            autoCleanupHolder.service?.disable()
             systemMetrics.stopMonitoring()
         }
     }
@@ -1950,7 +1950,7 @@ private func showCleanupResult(_ result: CleanupResult) async {
             try await UNUserNotificationCenter.current().add(request)
         } catch {
             // Log notification failure but don't disrupt user experience
-            AppLogger.shared.warning("Failed to show cleanup notification: \(error.localizedDescription)")
+            await AppLogger.shared.warning("Failed to show cleanup notification: \(error.localizedDescription)")
         }
     }
 }

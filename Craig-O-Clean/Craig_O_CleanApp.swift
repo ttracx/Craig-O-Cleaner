@@ -10,10 +10,23 @@ import UserNotifications
 struct Craig_O_CleanApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
+    // Shared services for Settings scene
+    @StateObject private var systemMetrics = SystemMetricsService()
+    @StateObject private var permissions = PermissionsService()
+    @StateObject private var trialManager = TrialManager.shared
+
     var body: some Scene {
-        // Settings scene (required but hidden for menu bar apps)
+        // Settings scene (shows when user selects File > Settings)
         Settings {
-            EmptyView()
+            SettingsPermissionsView()
+                .environmentObject(systemMetrics)
+                .environmentObject(permissions)
+                .environmentObject(AuthManager.shared)
+                .environmentObject(LocalUserStore.shared)
+                .environmentObject(SubscriptionManager.shared)
+                .environmentObject(StripeCheckoutService.shared)
+                .environmentObject(trialManager)
+                .frame(minWidth: 700, minHeight: 600)
         }
     }
 }
