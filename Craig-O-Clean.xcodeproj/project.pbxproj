@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3134FABB77F435E86E6FED7 /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66FAA11487974A19801962C /* SnapshotHelper.swift */; };
+
 		127FE76D306047399C129BD1 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0BFC84511241D18B26E6FC /* PaywallView.swift */; };
 		C8779F97192645DCBD6D9584 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D01515630B409EA1310EF4 /* AppLogger.swift */; };
 		01C6C128BF2C4D1785807C48 /* TrialManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3FDB3A7AE0E43668008F6EB /* TrialManager.swift */; };
@@ -70,6 +72,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		66FAA11487974A19801962C /* SnapshotHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotHelper.swift; sourceTree = "<group>"; };
+
 		7B0BFC84511241D18B26E6FC /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		19D01515630B409EA1310EF4 /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
 		B3FDB3A7AE0E43668008F6EB /* TrialManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrialManager.swift; sourceTree = "<group>"; };
@@ -205,6 +209,7 @@
 		B8A61F36CA41840EEF5A959F /* ClearMindUITests */ = {
 			isa = PBXGroup;
 			children = (
+				66FAA11487974A19801962C /* SnapshotHelper.swift */,
 				3347C167919A7F97FE2CDE86 /* ClearMindUITests.swift */,
 			);
 			path = ClearMindUITests;
@@ -401,7 +406,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				320BA199692F2B0CE464C826 /* ClearMindUITests.swift in Sources */,
-			);
+			
+				3134FABB77F435E86E6FED7 /* SnapshotHelper.swift in Sources */,);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */

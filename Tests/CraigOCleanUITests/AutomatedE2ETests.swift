@@ -32,6 +32,7 @@ final class AutomatedE2ETests: XCTestCase {
         screenshotCounter = 0
 
         app = XCUIApplication()
+        setupSnapshot(app)
         app.launchArguments = ["--uitesting", "--enable-debug-logging"]
         app.launchEnvironment = [
             "UITEST_MODE": "true",
@@ -40,6 +41,8 @@ final class AutomatedE2ETests: XCTestCase {
 
         logTestEvent("Starting test: \(name)")
         app.launch()
+
+        snapshot("0Launch")
 
         // Wait for app to be ready
         XCTAssertTrue(waitForAppReady(), "App should be ready within timeout")
@@ -183,6 +186,8 @@ final class AutomatedE2ETests: XCTestCase {
         // Verify Dashboard content
         let systemHealth = app.staticTexts["System Health"]
         XCTAssertTrue(systemHealth.waitForExistence(timeout: 5), "Dashboard should show System Health")
+
+        snapshot("1Dashboard")
     }
 
     func test_B04_NavigationToProcesses() throws {
@@ -191,6 +196,8 @@ final class AutomatedE2ETests: XCTestCase {
         // Verify Process Manager content
         let searchField = app.textFields.firstMatch
         XCTAssertTrue(searchField.waitForExistence(timeout: 5), "Process search field should exist")
+
+        snapshot("2Processes")
     }
 
     func test_B05_NavigationToMemoryCleanup() throws {
@@ -199,6 +206,8 @@ final class AutomatedE2ETests: XCTestCase {
         // Verify Memory Cleanup content
         let memoryStatus = app.staticTexts["Memory Status"]
         XCTAssertTrue(memoryStatus.waitForExistence(timeout: 5), "Memory Status section should exist")
+
+        snapshot("3MemoryCleanup")
     }
 
     func test_B06_NavigationToAutoCleanup() throws {
@@ -207,6 +216,8 @@ final class AutomatedE2ETests: XCTestCase {
         // Verify Auto-Cleanup content loads
         _ = waitForViewTransition()
         captureScreenshot(name: "auto_cleanup_view")
+
+        snapshot("4AutoCleanup")
     }
 
     func test_B07_NavigationToBrowserTabs() throws {
@@ -215,6 +226,8 @@ final class AutomatedE2ETests: XCTestCase {
         // View should show content
         _ = waitForViewTransition()
         captureScreenshot(name: "browser_tabs_view")
+
+        snapshot("5BrowserTabs")
     }
 
     func test_B08_NavigationToSettings() throws {
@@ -223,6 +236,8 @@ final class AutomatedE2ETests: XCTestCase {
         // Verify Settings sections
         let generalSection = app.staticTexts["General"]
         XCTAssertTrue(generalSection.waitForExistence(timeout: 5), "General section should exist in Settings")
+
+        snapshot("6Settings")
     }
 
     // MARK: - Dashboard Tests

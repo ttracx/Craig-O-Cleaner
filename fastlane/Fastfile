@@ -1,0 +1,84 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:mac)
+
+platform :mac do
+  # Load App Store Connect API Key
+  before_all do
+    # Method 1: Using JSON file (recommended)
+    @api_key = app_store_connect_api_key(
+      key_id: "G6XU698DPT",
+      issuer_id: "c0528ef6-6818-4168-a759-16361557e455",
+      key_filepath: "./fastlane/AuthKey_G6XU698DPT.p8",
+      duration: 1200,
+      in_house: false
+    )
+
+    # Alternative: Load from JSON file
+    # @api_key_path = "fastlane/AppStoreConnectAPIKey.json"
+  end
+
+  desc "Take screenshots for App Store"
+  lane :screenshots do
+    snapshot
+  end
+
+  desc "Build and sign the app"
+  lane :build do
+    build_app(
+      scheme: "Craig-O-Clean",
+      export_method: "app-store"
+    )
+  end
+
+  desc "Upload to TestFlight"
+  lane :beta do
+    build
+    upload_to_testflight(
+      api_key: @api_key,
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "Upload a new build to App Store Connect"
+  lane :release do
+    build
+    upload_to_app_store(
+      api_key: @api_key,
+      submit_for_review: false,
+      automatic_release: false,
+      force: true
+    )
+  end
+
+  desc "Upload metadata and screenshots to App Store Connect"
+  lane :metadata do
+    upload_to_app_store(
+      api_key: @api_key,
+      skip_binary_upload: true,
+      skip_screenshots: false,
+      submit_for_review: false
+    )
+  end
+
+  desc "Download metadata from App Store Connect"
+  lane :download_metadata do
+    download_from_app_store(
+      api_key: @api_key,
+      app_identifier: "com.craigoclean.app"
+    )
+  end
+end
