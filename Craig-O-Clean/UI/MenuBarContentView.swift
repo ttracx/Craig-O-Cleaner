@@ -952,7 +952,7 @@ struct MenuBarBrowserTab: View {
             Text("Unable to Access Tabs")
                 .font(.system(size: 14, weight: .semibold))
 
-            Text(error.localizedDescription ?? "An unknown error occurred")
+            Text(error.localizedDescription)
                 .font(.system(size: 12))
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
