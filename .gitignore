@@ -107,3 +107,4 @@ fastlane/AppStoreConnectAPIKey.json
 fastlane/*.p8
 node_modules/
 APP_SPECIFIC_SHARED_SECRET_GUIDE.md
+Craig-O-Clean.xcodeproj/project.pbxproj
