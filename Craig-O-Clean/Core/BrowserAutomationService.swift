@@ -427,23 +427,58 @@ final class BrowserAutomationService: ObservableObject {
     // MARK: - AppleScript Generators
     
     private func safariTabScript() -> String {
+        // Safari 15+ (macOS Monterey) uses Tab Groups
+        // We need to iterate through all tab groups to get all tabs
+        // Falls back to direct tab access for older Safari versions
         return """
         set output to ""
         tell application "Safari"
-            set windowCount to count of windows
+            set windowList to every window
+            set windowCount to count of windowList
             repeat with w from 1 to windowCount
                 set win to window w
                 set winName to name of win
-                set tabCount to count of tabs of win
                 set activeTabIndex to 0
                 try
                     set activeTabIndex to index of current tab of win
                 end try
+
+                -- Try to get tabs from Tab Groups first (Safari 15+)
+                set allTabs to {}
+                set hasTabGroups to false
+                try
+                    set tabGroupList to tab groups of win
+                    if (count of tabGroupList) > 0 then
+                        set hasTabGroups to true
+                        repeat with tg in tabGroupList
+                            set groupTabs to tabs of tg
+                            repeat with gt in groupTabs
+                                set end of allTabs to gt
+                            end repeat
+                        end repeat
+                    end if
+                end try
+
+                -- If no tab groups or tab groups failed, get tabs directly from window
+                if not hasTabGroups then
+                    try
+                        set allTabs to tabs of win
+                    end try
+                end if
+
+                set tabCount to count of allTabs
                 set output to output & "WINDOW:" & w & "|" & winName & "|" & activeTabIndex & linefeed
+
                 repeat with t from 1 to tabCount
-                    set theTab to tab t of win
-                    set tabName to name of theTab
-                    set tabURL to URL of theTab
+                    set theTab to item t of allTabs
+                    set tabName to ""
+                    set tabURL to ""
+                    try
+                        set tabName to name of theTab
+                    end try
+                    try
+                        set tabURL to URL of theTab
+                    end try
                     set isActive to (t = activeTabIndex)
                     set output to output & "TAB:" & t & "|" & tabName & "|" & tabURL & "|" & isActive & linefeed
                 end repeat
@@ -454,23 +489,42 @@ final class BrowserAutomationService: ObservableObject {
     }
     
     private func chromiumTabScript(for browser: SupportedBrowser) -> String {
+        // Chromium browsers (Chrome, Edge, Brave) expose tabs directly
+        // Tab groups exist but are not exposed via AppleScript - tabs are still accessible
         return """
         set output to ""
         tell application "\(browser.rawValue)"
-            set windowCount to count of windows
+            set windowList to every window
+            set windowCount to count of windowList
             repeat with w from 1 to windowCount
                 set win to window w
-                set winName to title of win
-                set tabCount to count of tabs of win
+                set winName to ""
                 set activeTabIndex to 0
+                try
+                    set winName to title of win
+                end try
                 try
                     set activeTabIndex to active tab index of win
                 end try
+
+                set allTabs to {}
+                try
+                    set allTabs to tabs of win
+                end try
+                set tabCount to count of allTabs
+
                 set output to output & "WINDOW:" & w & "|" & winName & "|" & activeTabIndex & linefeed
+
                 repeat with t from 1 to tabCount
                     set theTab to tab t of win
-                    set tabName to title of theTab
-                    set tabURL to URL of theTab
+                    set tabName to ""
+                    set tabURL to ""
+                    try
+                        set tabName to title of theTab
+                    end try
+                    try
+                        set tabURL to URL of theTab
+                    end try
                     set isActive to (t = activeTabIndex)
                     set output to output & "TAB:" & t & "|" & tabName & "|" & tabURL & "|" & isActive & linefeed
                 end repeat
@@ -481,23 +535,42 @@ final class BrowserAutomationService: ObservableObject {
     }
     
     private func arcTabScript() -> String {
+        // Arc browser has a unique tab model with spaces and pinned tabs
+        // The standard tabs of window should return all accessible tabs
         return """
         set output to ""
         tell application "Arc"
-            set windowCount to count of windows
+            set windowList to every window
+            set windowCount to count of windowList
             repeat with w from 1 to windowCount
                 set win to window w
-                set winName to title of win
-                set tabCount to count of tabs of win
+                set winName to ""
                 set activeTabIndex to 0
+                try
+                    set winName to title of win
+                end try
                 try
                     set activeTabIndex to index of active tab of win
                 end try
+
+                set allTabs to {}
+                try
+                    set allTabs to tabs of win
+                end try
+                set tabCount to count of allTabs
+
                 set output to output & "WINDOW:" & w & "|" & winName & "|" & activeTabIndex & linefeed
+
                 repeat with t from 1 to tabCount
                     set theTab to tab t of win
-                    set tabName to title of theTab
-                    set tabURL to URL of theTab
+                    set tabName to ""
+                    set tabURL to ""
+                    try
+                        set tabName to title of theTab
+                    end try
+                    try
+                        set tabURL to URL of theTab
+                    end try
                     set isActive to (t = activeTabIndex)
                     set output to output & "TAB:" & t & "|" & tabName & "|" & tabURL & "|" & isActive & linefeed
                 end repeat
