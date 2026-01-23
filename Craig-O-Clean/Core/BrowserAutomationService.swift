@@ -17,9 +17,10 @@ enum SupportedBrowser: String, CaseIterable, Identifiable, Hashable {
     case brave = "Brave Browser"
     case arc = "Arc"
     case firefox = "Firefox"
-    
+
     var id: String { rawValue }
-    
+
+    /// Primary bundle identifier for the browser
     var bundleIdentifier: String {
         switch self {
         case .safari: return "com.apple.Safari"
@@ -30,7 +31,25 @@ enum SupportedBrowser: String, CaseIterable, Identifiable, Hashable {
         case .firefox: return "org.mozilla.firefox"
         }
     }
-    
+
+    /// All possible bundle identifiers for this browser (including Beta, Dev, Canary versions)
+    var allBundleIdentifiers: [String] {
+        switch self {
+        case .safari:
+            return ["com.apple.Safari", "com.apple.SafariTechnologyPreview"]
+        case .chrome:
+            return ["com.google.Chrome", "com.google.Chrome.beta", "com.google.Chrome.dev", "com.google.Chrome.canary"]
+        case .edge:
+            return ["com.microsoft.edgemac", "com.microsoft.edgemac.Beta", "com.microsoft.edgemac.Dev", "com.microsoft.edgemac.Canary"]
+        case .brave:
+            return ["com.brave.Browser", "com.brave.Browser.beta", "com.brave.Browser.nightly"]
+        case .arc:
+            return ["company.thebrowser.Browser"]
+        case .firefox:
+            return ["org.mozilla.firefox", "org.mozilla.firefoxdeveloperedition", "org.mozilla.nightly"]
+        }
+    }
+
     var icon: String {
         switch self {
         case .safari: return "safari"
@@ -41,7 +60,7 @@ enum SupportedBrowser: String, CaseIterable, Identifiable, Hashable {
         case .firefox: return "globe"
         }
     }
-    
+
     var supportsTabScripting: Bool {
         switch self {
         case .safari, .chrome, .edge, .brave, .arc:
@@ -151,9 +170,11 @@ final class BrowserAutomationService: ObservableObject {
     @Published private(set) var permissionStatus: [SupportedBrowser: Bool] = [:]
     
     // MARK: - Private Properties
-    
+
     private let logger = Logger(subsystem: "com.CraigOClean.controlcenter", category: "BrowserAutomation")
     private var refreshTimer: Timer?
+    /// Maps browser type to its currently running application name (for AppleScript)
+    private var runningBrowserAppNames: [SupportedBrowser: String] = [:]
     
     // MARK: - Computed Properties
     
@@ -181,22 +202,45 @@ final class BrowserAutomationService: ObservableObject {
     }
     
     // MARK: - Public Methods
-    
-    /// Detect which supported browsers are installed
+
+    /// Detect which supported browsers are installed (checks all variants: stable, beta, dev, canary)
     func detectInstalledBrowsers() {
         installedBrowsers = SupportedBrowser.allCases.filter { browser in
-            NSWorkspace.shared.urlForApplication(withBundleIdentifier: browser.bundleIdentifier) != nil
+            // Check if any variant of the browser is installed
+            browser.allBundleIdentifiers.contains { bundleId in
+                NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleId) != nil
+            }
         }
         logger.info("Detected installed browsers: \(self.installedBrowsers.map { $0.rawValue }.joined(separator: ", "))")
         updateRunningBrowsers()
     }
-    
-    /// Update list of currently running browsers
+
+    /// Update list of currently running browsers (checks all variants)
     func updateRunningBrowsers() {
         let running = NSWorkspace.shared.runningApplications
+        runningBrowserAppNames.removeAll()
+
         runningBrowsers = installedBrowsers.filter { browser in
-            running.contains { $0.bundleIdentifier == browser.bundleIdentifier }
+            // Check if any variant of the browser is running
+            for bundleId in browser.allBundleIdentifiers {
+                if let runningApp = running.first(where: { $0.bundleIdentifier == bundleId }) {
+                    // Store the actual app name for AppleScript usage
+                    if let appName = runningApp.localizedName {
+                        runningBrowserAppNames[browser] = appName
+                    }
+                    return true
+                }
+            }
+            return false
         }
+
+        logger.debug("Running browsers: \(self.runningBrowsers.map { $0.rawValue }.joined(separator: ", "))")
+    }
+
+    /// Get the actual application name for AppleScript (handles browser variants)
+    func getAppleScriptAppName(for browser: SupportedBrowser) -> String {
+        // Return the detected running app name, or fall back to the default name
+        return runningBrowserAppNames[browser] ?? browser.rawValue
     }
     
     /// Fetch all tabs from all running browsers
@@ -260,12 +304,13 @@ final class BrowserAutomationService: ObservableObject {
     
     /// Close a specific tab
     func closeTab(_ tab: BrowserTab) async throws {
+        let appName = getAppleScriptAppName(for: tab.browser)
         let script: String
-        
+
         switch tab.browser {
         case .safari:
             script = """
-            tell application "Safari"
+            tell application "\(appName)"
                 tell window \(tab.windowIndex)
                     close tab \(tab.tabIndex)
                 end tell
@@ -273,7 +318,7 @@ final class BrowserAutomationService: ObservableObject {
             """
         case .chrome, .edge, .brave:
             script = """
-            tell application "\(tab.browser.rawValue)"
+            tell application "\(appName)"
                 tell window \(tab.windowIndex)
                     close tab \(tab.tabIndex)
                 end tell
@@ -281,7 +326,7 @@ final class BrowserAutomationService: ObservableObject {
             """
         case .arc:
             script = """
-            tell application "Arc"
+            tell application "\(appName)"
                 tell window \(tab.windowIndex)
                     close tab \(tab.tabIndex)
                 end tell
@@ -290,10 +335,10 @@ final class BrowserAutomationService: ObservableObject {
         case .firefox:
             throw BrowserAutomationError.unsupportedBrowser(tab.browser)
         }
-        
+
         _ = try await executeAppleScript(script)
-        logger.info("Closed tab: \(tab.title) in \(tab.browser.rawValue)")
-        
+        logger.info("Closed tab: \(tab.title) in \(appName)")
+
         // Refresh tabs after closing
         await fetchAllTabs()
     }
@@ -315,34 +360,16 @@ final class BrowserAutomationService: ObservableObject {
     
     /// Close all tabs in a window
     func closeAllTabsInWindow(browser: SupportedBrowser, windowIndex: Int) async throws {
-        let script: String
-        
-        switch browser {
-        case .safari:
-            script = """
-            tell application "Safari"
-                close window \(windowIndex)
-            end tell
-            """
-        case .chrome, .edge, .brave:
-            script = """
-            tell application "\(browser.rawValue)"
-                close window \(windowIndex)
-            end tell
-            """
-        case .arc:
-            script = """
-            tell application "Arc"
-                close window \(windowIndex)
-            end tell
-            """
-        case .firefox:
-            throw BrowserAutomationError.unsupportedBrowser(browser)
-        }
-        
+        let appName = getAppleScriptAppName(for: browser)
+        let script = """
+        tell application "\(appName)"
+            close window \(windowIndex)
+        end tell
+        """
+
         _ = try await executeAppleScript(script)
-        logger.info("Closed all tabs in window \(windowIndex) of \(browser.rawValue)")
-        
+        logger.info("Closed all tabs in window \(windowIndex) of \(appName)")
+
         await fetchAllTabs()
     }
     
@@ -427,23 +454,59 @@ final class BrowserAutomationService: ObservableObject {
     // MARK: - AppleScript Generators
     
     private func safariTabScript() -> String {
+        // Safari 15+ (macOS Monterey) uses Tab Groups
+        // We need to iterate through all tab groups to get all tabs
+        // Falls back to direct tab access for older Safari versions
+        let appName = getAppleScriptAppName(for: .safari)
         return """
         set output to ""
-        tell application "Safari"
-            set windowCount to count of windows
+        tell application "\(appName)"
+            set windowList to every window
+            set windowCount to count of windowList
             repeat with w from 1 to windowCount
                 set win to window w
                 set winName to name of win
-                set tabCount to count of tabs of win
                 set activeTabIndex to 0
                 try
                     set activeTabIndex to index of current tab of win
                 end try
+
+                -- Try to get tabs from Tab Groups first (Safari 15+)
+                set allTabs to {}
+                set hasTabGroups to false
+                try
+                    set tabGroupList to tab groups of win
+                    if (count of tabGroupList) > 0 then
+                        set hasTabGroups to true
+                        repeat with tg in tabGroupList
+                            set groupTabs to tabs of tg
+                            repeat with gt in groupTabs
+                                set end of allTabs to gt
+                            end repeat
+                        end repeat
+                    end if
+                end try
+
+                -- If no tab groups or tab groups failed, get tabs directly from window
+                if not hasTabGroups then
+                    try
+                        set allTabs to tabs of win
+                    end try
+                end if
+
+                set tabCount to count of allTabs
                 set output to output & "WINDOW:" & w & "|" & winName & "|" & activeTabIndex & linefeed
+
                 repeat with t from 1 to tabCount
-                    set theTab to tab t of win
-                    set tabName to name of theTab
-                    set tabURL to URL of theTab
+                    set theTab to item t of allTabs
+                    set tabName to ""
+                    set tabURL to ""
+                    try
+                        set tabName to name of theTab
+                    end try
+                    try
+                        set tabURL to URL of theTab
+                    end try
                     set isActive to (t = activeTabIndex)
                     set output to output & "TAB:" & t & "|" & tabName & "|" & tabURL & "|" & isActive & linefeed
                 end repeat
@@ -454,23 +517,43 @@ final class BrowserAutomationService: ObservableObject {
     }
     
     private func chromiumTabScript(for browser: SupportedBrowser) -> String {
+        // Chromium browsers (Chrome, Edge, Brave) expose tabs directly
+        // Tab groups exist but are not exposed via AppleScript - tabs are still accessible
+        let appName = getAppleScriptAppName(for: browser)
         return """
         set output to ""
-        tell application "\(browser.rawValue)"
-            set windowCount to count of windows
+        tell application "\(appName)"
+            set windowList to every window
+            set windowCount to count of windowList
             repeat with w from 1 to windowCount
                 set win to window w
-                set winName to title of win
-                set tabCount to count of tabs of win
+                set winName to ""
                 set activeTabIndex to 0
+                try
+                    set winName to title of win
+                end try
                 try
                     set activeTabIndex to active tab index of win
                 end try
+
+                set allTabs to {}
+                try
+                    set allTabs to tabs of win
+                end try
+                set tabCount to count of allTabs
+
                 set output to output & "WINDOW:" & w & "|" & winName & "|" & activeTabIndex & linefeed
+
                 repeat with t from 1 to tabCount
                     set theTab to tab t of win
-                    set tabName to title of theTab
-                    set tabURL to URL of theTab
+                    set tabName to ""
+                    set tabURL to ""
+                    try
+                        set tabName to title of theTab
+                    end try
+                    try
+                        set tabURL to URL of theTab
+                    end try
                     set isActive to (t = activeTabIndex)
                     set output to output & "TAB:" & t & "|" & tabName & "|" & tabURL & "|" & isActive & linefeed
                 end repeat
@@ -481,23 +564,43 @@ final class BrowserAutomationService: ObservableObject {
     }
     
     private func arcTabScript() -> String {
+        // Arc browser has a unique tab model with spaces and pinned tabs
+        // The standard tabs of window should return all accessible tabs
+        let appName = getAppleScriptAppName(for: .arc)
         return """
         set output to ""
-        tell application "Arc"
-            set windowCount to count of windows
+        tell application "\(appName)"
+            set windowList to every window
+            set windowCount to count of windowList
             repeat with w from 1 to windowCount
                 set win to window w
-                set winName to title of win
-                set tabCount to count of tabs of win
+                set winName to ""
                 set activeTabIndex to 0
+                try
+                    set winName to title of win
+                end try
                 try
                     set activeTabIndex to index of active tab of win
                 end try
+
+                set allTabs to {}
+                try
+                    set allTabs to tabs of win
+                end try
+                set tabCount to count of allTabs
+
                 set output to output & "WINDOW:" & w & "|" & winName & "|" & activeTabIndex & linefeed
+
                 repeat with t from 1 to tabCount
                     set theTab to tab t of win
-                    set tabName to title of theTab
-                    set tabURL to URL of theTab
+                    set tabName to ""
+                    set tabURL to ""
+                    try
+                        set tabName to title of theTab
+                    end try
+                    try
+                        set tabURL to URL of theTab
+                    end try
                     set isActive to (t = activeTabIndex)
                     set output to output & "TAB:" & t & "|" & tabName & "|" & tabURL & "|" & isActive & linefeed
                 end repeat
