@@ -17,6 +17,9 @@ private let kAuthorizationRightInstall = "com.CraigOClean.helper.install"
 /// Authorization rights for memory cleanup
 private let kAuthorizationRightMemoryClean = "com.CraigOClean.helper.memoryclean"
 
+/// Authorization rights for force killing processes
+private let kAuthorizationRightForceKill = "com.CraigOClean.helper.forcekill"
+
 // MARK: - Privilege Service Result
 
 /// Result of a privileged operation
@@ -75,6 +78,8 @@ public protocol PrivilegeServiceProtocol {
     func executeMemoryCleanup() async -> PrivilegeOperationResult
     func executeSync() async -> PrivilegeOperationResult
     func executePurge() async -> PrivilegeOperationResult
+    func forceKillProcess(pid: Int32) async -> PrivilegeOperationResult
+    func forceKillProcessByName(processName: String) async -> PrivilegeOperationResult
 }
 
 // MARK: - Privilege Service
@@ -276,6 +281,46 @@ public final class PrivilegeService: ObservableObject, PrivilegeServiceProtocol 
         }
     }
 
+    /// Force kill a process by PID using the privileged helper
+    public func forceKillProcess(pid: Int32) async -> PrivilegeOperationResult {
+        logger.info("Force killing process with PID: \(pid)")
+        isOperationInProgress = true
+
+        defer {
+            Task { @MainActor in
+                isOperationInProgress = false
+            }
+        }
+
+        if shouldUseDebugFallback() {
+            return await forceKillProcessViaAppleScript(pid: pid)
+        }
+
+        return await executeViaHelperForceKill { helper, authData, reply in
+            helper.forceKillProcess(pid: pid, authData: authData, reply: reply)
+        }
+    }
+
+    /// Force kill a process by name using the privileged helper
+    public func forceKillProcessByName(processName: String) async -> PrivilegeOperationResult {
+        logger.info("Force killing process by name: \(processName)")
+        isOperationInProgress = true
+
+        defer {
+            Task { @MainActor in
+                isOperationInProgress = false
+            }
+        }
+
+        if shouldUseDebugFallback() {
+            return await forceKillProcessByNameViaAppleScript(processName: processName)
+        }
+
+        return await executeViaHelperForceKill { helper, authData, reply in
+            helper.forceKillProcessByName(processName: processName, authData: authData, reply: reply)
+        }
+    }
+
     // MARK: - Private Methods - XPC
 
     /// Get or create the XPC connection to the helper
@@ -402,6 +447,63 @@ public final class PrivilegeService: ObservableObject, PrivilegeServiceProtocol 
         }
     }
 
+    /// Execute a force kill command via the helper
+    private func executeViaHelperForceKill(
+        command: @escaping (HelperXPCProtocolProxy, Data?, @escaping (HelperCommandResultProxy) -> Void) -> Void
+    ) async -> PrivilegeOperationResult {
+
+        // Create authorization data for force kill
+        guard let authData = createAuthorizationDataForForceKill() else {
+            let result = PrivilegeOperationResult(
+                success: false,
+                message: "Failed to obtain authorization. Please grant administrator privileges and try again.",
+                errorCode: -1
+            )
+            lastOperationResult = result
+            return result
+        }
+
+        return await withCheckedContinuation { continuation in
+            let connection = getConnection()
+
+            guard let proxy = connection.remoteObjectProxyWithErrorHandler({ error in
+                let result = PrivilegeOperationResult(
+                    success: false,
+                    message: "Connection to helper failed: \(error.localizedDescription)",
+                    errorCode: -2
+                )
+                Task { @MainActor [weak self] in
+                    self?.lastOperationResult = result
+                }
+                continuation.resume(returning: result)
+            }) as? HelperXPCProtocolProxy else {
+                let result = PrivilegeOperationResult(
+                    success: false,
+                    message: "Failed to connect to helper tool.",
+                    errorCode: -3
+                )
+                Task { @MainActor [weak self] in
+                    self?.lastOperationResult = result
+                }
+                continuation.resume(returning: result)
+                return
+            }
+
+            command(proxy, authData) { commandResult in
+                let result = PrivilegeOperationResult(
+                    success: commandResult.success,
+                    message: commandResult.message,
+                    errorCode: commandResult.errorCode,
+                    output: commandResult.output
+                )
+                Task { @MainActor [weak self] in
+                    self?.lastOperationResult = result
+                }
+                continuation.resume(returning: result)
+            }
+        }
+    }
+
     // MARK: - Private Methods - Authorization
 
     /// Create an authorization reference
@@ -458,6 +560,45 @@ public final class PrivilegeService: ObservableObject, PrivilegeServiceProtocol 
                 flags: 0
             )
             return withUnsafeMutablePointer(to: &cleanItem) { itemPtr in
+                var rights = AuthorizationRights(count: 1, items: itemPtr)
+                let flags: AuthorizationFlags = [.interactionAllowed, .preAuthorize, .extendRights]
+                return AuthorizationCopyRights(auth, &rights, nil, flags, nil)
+            }
+        }
+
+        guard copyStatus == errAuthorizationSuccess else {
+            return nil
+        }
+
+        var externalForm = AuthorizationExternalForm()
+        let externalStatus = AuthorizationMakeExternalForm(auth, &externalForm)
+        guard externalStatus == errAuthorizationSuccess else {
+            return nil
+        }
+
+        return Data(bytes: &externalForm, count: MemoryLayout<AuthorizationExternalForm>.size)
+    }
+
+    /// Create authorization data for force kill operations
+    private func createAuthorizationDataForForceKill() -> Data? {
+        var authRef: AuthorizationRef?
+        let status = AuthorizationCreate(nil, nil, [], &authRef)
+
+        guard status == errAuthorizationSuccess, let auth = authRef else {
+            return nil
+        }
+
+        defer { AuthorizationFree(auth, []) }
+
+        // Request force kill rights using withCString to keep pointer alive
+        let copyStatus = kAuthorizationRightForceKill.withCString { cString -> OSStatus in
+            var killItem = AuthorizationItem(
+                name: cString,
+                valueLength: 0,
+                value: nil,
+                flags: 0
+            )
+            return withUnsafeMutablePointer(to: &killItem) { itemPtr in
                 var rights = AuthorizationRights(count: 1, items: itemPtr)
                 let flags: AuthorizationFlags = [.interactionAllowed, .preAuthorize, .extendRights]
                 return AuthorizationCopyRights(auth, &rights, nil, flags, nil)
@@ -549,6 +690,26 @@ public final class PrivilegeService: ObservableObject, PrivilegeServiceProtocol 
         return await runAppleScript(script, operation: "purge")
     }
 
+    /// Force kill process by PID via AppleScript (debug fallback)
+    private func forceKillProcessViaAppleScript(pid: Int32) async -> PrivilegeOperationResult {
+        logger.warning("Using AppleScript fallback for force kill (Debug mode)")
+        let script = """
+        do shell script "/bin/kill -9 \(pid)" with administrator privileges
+        """
+        return await runAppleScript(script, operation: "force kill PID \(pid)")
+    }
+
+    /// Force kill process by name via AppleScript (debug fallback)
+    private func forceKillProcessByNameViaAppleScript(processName: String) async -> PrivilegeOperationResult {
+        logger.warning("Using AppleScript fallback for force kill by name (Debug mode)")
+        // Sanitize process name
+        let sanitizedName = processName.replacingOccurrences(of: "\"", with: "\\\"")
+        let script = """
+        do shell script "/usr/bin/killall -9 '\(sanitizedName)'" with administrator privileges
+        """
+        return await runAppleScript(script, operation: "force kill '\(processName)'")
+    }
+
     /// Run an AppleScript with error handling
     private func runAppleScript(_ source: String, operation: String) async -> PrivilegeOperationResult {
         return await withCheckedContinuation { continuation in
@@ -592,6 +753,8 @@ public final class PrivilegeService: ObservableObject, PrivilegeServiceProtocol 
     func executePurge(authData: Data?, reply: @escaping (HelperCommandResultProxy) -> Void)
     func isPurgeAvailable(reply: @escaping (Bool) -> Void)
     func ping(reply: @escaping (Bool) -> Void)
+    func forceKillProcess(pid: Int32, authData: Data?, reply: @escaping (HelperCommandResultProxy) -> Void)
+    func forceKillProcessByName(processName: String, authData: Data?, reply: @escaping (HelperCommandResultProxy) -> Void)
 }
 
 /// Proxy for helper command result (mirrors HelperCommandResult)

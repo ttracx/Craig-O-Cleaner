@@ -24,8 +24,14 @@ final class HelperXPCImplementation: NSObject, HelperXPCProtocol {
     /// Path to the purge command
     private let purgePath = "/usr/bin/purge"
 
+    /// Path to the kill command
+    private let killPath = "/bin/kill"
+
+    /// Path to the killall command
+    private let killallPath = "/usr/bin/killall"
+
     /// Allowed commands that the helper can execute
-    private let allowedCommands: Set<String> = ["/bin/sync", "/usr/bin/purge"]
+    private let allowedCommands: Set<String> = ["/bin/sync", "/usr/bin/purge", "/bin/kill", "/usr/bin/killall"]
 
     // MARK: - HelperXPCProtocol Implementation
 
@@ -156,6 +162,123 @@ final class HelperXPCImplementation: NSObject, HelperXPCProtocol {
         reply(true)
     }
 
+    func forceKillProcess(pid: Int32, authData: Data?, reply: @escaping (HelperCommandResult) -> Void) {
+        logger.info("Force kill process requested for PID: \(pid)")
+
+        // Verify authorization
+        guard AuthorizationHelper.verifyAuthorization(data: authData, right: kAuthorizationRightForceKill) else {
+            logger.error("Authorization failed for force kill")
+            reply(HelperCommandResult(
+                success: false,
+                message: "Authorization required. Please grant administrator privileges.",
+                errorCode: -1
+            ))
+            return
+        }
+
+        // Security check: Don't allow killing critical system processes
+        let criticalPIDs: Set<Int32> = [0, 1] // kernel and launchd
+        if criticalPIDs.contains(pid) {
+            logger.error("Attempted to kill critical system process: \(pid)")
+            reply(HelperCommandResult(
+                success: false,
+                message: "Cannot kill critical system process (PID \(pid)). This process is essential for system operation.",
+                errorCode: -6
+            ))
+            return
+        }
+
+        // Verify the process exists before attempting to kill it
+        let result = kill(pid, 0) // Signal 0 checks if process exists
+        if result != 0 && errno == ESRCH {
+            logger.warning("Process \(pid) does not exist")
+            reply(HelperCommandResult(
+                success: false,
+                message: "Process with PID \(pid) does not exist or has already been terminated.",
+                errorCode: -7
+            ))
+            return
+        }
+
+        // Execute kill -9 <PID>
+        let killResult = executeCommand(killPath, arguments: ["-9", String(pid)])
+
+        if killResult.success {
+            logger.info("Successfully force killed process \(pid)")
+            reply(HelperCommandResult(
+                success: true,
+                message: "Process \(pid) was successfully force quit.",
+                errorCode: 0
+            ))
+        } else {
+            logger.error("Failed to force kill process \(pid): \(killResult.message)")
+            reply(killResult)
+        }
+    }
+
+    func forceKillProcessByName(processName: String, authData: Data?, reply: @escaping (HelperCommandResult) -> Void) {
+        logger.info("Force kill process by name requested: \(processName)")
+
+        // Verify authorization
+        guard AuthorizationHelper.verifyAuthorization(data: authData, right: kAuthorizationRightForceKill) else {
+            logger.error("Authorization failed for force kill by name")
+            reply(HelperCommandResult(
+                success: false,
+                message: "Authorization required. Please grant administrator privileges.",
+                errorCode: -1
+            ))
+            return
+        }
+
+        // Security check: Don't allow killing critical system processes
+        let criticalProcesses: Set<String> = ["kernel_task", "launchd", "WindowServer"]
+        if criticalProcesses.contains(processName) {
+            logger.error("Attempted to kill critical system process: \(processName)")
+            reply(HelperCommandResult(
+                success: false,
+                message: "Cannot kill critical system process '\(processName)'. This process is essential for system operation.",
+                errorCode: -6
+            ))
+            return
+        }
+
+        // Sanitize process name to prevent command injection
+        let sanitizedName = processName.replacingOccurrences(of: "\"", with: "")
+            .replacingOccurrences(of: "'", with: "")
+            .replacingOccurrences(of: ";", with: "")
+            .replacingOccurrences(of: "&", with: "")
+            .replacingOccurrences(of: "|", with: "")
+            .replacingOccurrences(of: "`", with: "")
+            .replacingOccurrences(of: "$", with: "")
+
+        if sanitizedName != processName {
+            logger.error("Process name contains invalid characters: \(processName)")
+            reply(HelperCommandResult(
+                success: false,
+                message: "Process name contains invalid characters.",
+                errorCode: -8
+            ))
+            return
+        }
+
+        // Execute killall -9 "processName"
+        let killallResult = executeCommand(killallPath, arguments: ["-9", sanitizedName])
+
+        // Note: killall returns exit code 1 if no processes were matched
+        // but this is not necessarily an error if the process already terminated
+        if killallResult.success || killallResult.errorCode == 1 {
+            logger.info("Force kill by name completed for '\(processName)'")
+            reply(HelperCommandResult(
+                success: true,
+                message: "Process '\(processName)' was successfully force quit.",
+                errorCode: 0
+            ))
+        } else {
+            logger.error("Failed to force kill '\(processName)': \(killallResult.message)")
+            reply(killallResult)
+        }
+    }
+
     // MARK: - Private Methods
 
     /// Execute a command with given arguments
@@ -278,6 +401,20 @@ final class HelperXPCDelegate: NSObject, NSXPCListenerDelegate {
             dataClasses,
             for: #selector(HelperXPCProtocol.executePurge(authData:reply:)),
             argumentIndex: 0,
+            ofReply: false
+        )
+
+        newConnection.exportedInterface?.setClasses(
+            dataClasses,
+            for: #selector(HelperXPCProtocol.forceKillProcess(pid:authData:reply:)),
+            argumentIndex: 1,
+            ofReply: false
+        )
+
+        newConnection.exportedInterface?.setClasses(
+            dataClasses,
+            for: #selector(HelperXPCProtocol.forceKillProcessByName(processName:authData:reply:)),
+            argumentIndex: 1,
             ofReply: false
         )
 

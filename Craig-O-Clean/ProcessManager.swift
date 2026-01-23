@@ -124,7 +124,10 @@ class ProcessManager: ObservableObject {
     private let maxHistoryPoints = 60 // Keep 60 data points (1 minute at 1 second intervals)
     private var previousSystemCPU: host_cpu_load_info?
     private var previousSystemTime: Date?
-    
+
+    // Privilege service for admin operations
+    private lazy var privilegeService: PrivilegeService = PrivilegeService()
+
     init() {
         // Pre-populate CPU ticks so first measurement shows non-zero values
         initializeCPUTicks()
@@ -563,57 +566,50 @@ class ProcessManager: ObservableObject {
     }
     
     func forceQuitProcess(_ process: ProcessInfo) async -> Bool {
-        // Method 1: Try NSRunningApplication.forceTerminate() first (works for user apps)
+        // Method 1: Try NSRunningApplication.forceTerminate() (works for user apps within sandbox)
         if let app = NSWorkspace.shared.runningApplications.first(where: { $0.processIdentifier == process.pid }) {
-            if app.forceTerminate() {
+            let success = app.forceTerminate()
+            if success {
                 await cleanupProcessHistory(for: process.pid)
                 return true
             }
         }
-        
-        // Method 2: Try killall -9 "App Name" via shell command
-        if await runShellForceKill(byName: process.name) {
-            await cleanupProcessHistory(for: process.pid)
-            return true
-        }
-        
-        // Method 3: Try pkill -9 by bundle identifier (if available)
-        if let bundleId = process.bundleIdentifier {
-            if await runShellForceKill(byBundleId: bundleId) {
+
+        // Method 2: Try AppleScript force quit (works for some apps within sandbox)
+        if process.isUserProcess, let bundleId = process.bundleIdentifier {
+            let success = await runAppleScriptForceQuit(bundleId: bundleId)
+            if success {
                 await cleanupProcessHistory(for: process.pid)
                 return true
             }
         }
-        
-        // Method 4: Try kill -9 PID via shell command
-        if await runShellForceKill(byPID: process.pid) {
-            await cleanupProcessHistory(for: process.pid)
-            return true
-        }
-        
-        // Method 5: Last resort - direct SIGKILL (may fail for sandboxed apps)
-        let result = kill(process.pid, SIGKILL)
-        if result == 0 {
-            await cleanupProcessHistory(for: process.pid)
-            return true
-        }
-        
+
+        // Shell commands (killall, pkill, kill) are blocked by App Sandbox
+        // If the above methods fail, the process requires admin privileges
         return false
     }
     
     // MARK: - Shell Command Force Kill Methods
-    
+    // NOTE: These methods are DISABLED because the app is sandboxed (com.apple.security.app-sandbox = true)
+    // Sandboxed apps cannot execute external shell commands like killall, pkill, or kill
+    // To use these methods, either:
+    // 1. Remove sandbox entitlement (prevents App Store distribution)
+    // 2. Use the privileged helper tool (requires implementation)
+    // 3. Use NSRunningApplication.forceTerminate() which works within sandbox
+
+    /*
     /// Force kill process by application name using: killall -9 "App Name"
+    /// WARNING: Does not work in sandboxed apps
     private func runShellForceKill(byName name: String) async -> Bool {
         return await withCheckedContinuation { continuation in
             let task = Process()
             task.executableURL = URL(fileURLWithPath: "/usr/bin/killall")
             task.arguments = ["-9", name]
-            
+
             // Suppress output
             task.standardOutput = FileHandle.nullDevice
             task.standardError = FileHandle.nullDevice
-            
+
             do {
                 try task.run()
                 task.waitUntilExit()
@@ -624,17 +620,18 @@ class ProcessManager: ObservableObject {
             }
         }
     }
-    
+
     /// Force kill process by bundle identifier using: pkill -9 -f "bundle.identifier"
+    /// WARNING: Does not work in sandboxed apps
     private func runShellForceKill(byBundleId bundleId: String) async -> Bool {
         return await withCheckedContinuation { continuation in
             let task = Process()
             task.executableURL = URL(fileURLWithPath: "/usr/bin/pkill")
             task.arguments = ["-9", "-f", bundleId]
-            
+
             task.standardOutput = FileHandle.nullDevice
             task.standardError = FileHandle.nullDevice
-            
+
             do {
                 try task.run()
                 task.waitUntilExit()
@@ -645,17 +642,18 @@ class ProcessManager: ObservableObject {
             }
         }
     }
-    
+
     /// Force kill process by PID using: kill -9 PID
+    /// WARNING: Does not work in sandboxed apps
     private func runShellForceKill(byPID pid: Int32) async -> Bool {
         return await withCheckedContinuation { continuation in
             let task = Process()
             task.executableURL = URL(fileURLWithPath: "/bin/kill")
             task.arguments = ["-9", String(pid)]
-            
+
             task.standardOutput = FileHandle.nullDevice
             task.standardError = FileHandle.nullDevice
-            
+
             do {
                 try task.run()
                 task.waitUntilExit()
@@ -666,6 +664,7 @@ class ProcessManager: ObservableObject {
             }
         }
     }
+    */
     
     /// Graceful quit via AppleScript
     private func runAppleScriptQuit(processName: String) async -> Bool {
@@ -675,7 +674,7 @@ class ProcessManager: ObservableObject {
                 quit
             end tell
             """
-            
+
             var error: NSDictionary?
             if let scriptObject = NSAppleScript(source: script) {
                 scriptObject.executeAndReturnError(&error)
@@ -684,6 +683,30 @@ class ProcessManager: ObservableObject {
                 } else {
                     continuation.resume(returning: false)
                 }
+            } else {
+                continuation.resume(returning: false)
+            }
+        }
+    }
+
+    /// Force quit via AppleScript using bundle identifier
+    private func runAppleScriptForceQuit(bundleId: String) async -> Bool {
+        return await withCheckedContinuation { continuation in
+            let script = """
+            tell application "System Events"
+                set appProcesses to every process whose bundle identifier is "\(bundleId)"
+                repeat with appProcess in appProcesses
+                    try
+                        tell appProcess to quit
+                    end try
+                end repeat
+            end tell
+            """
+
+            var error: NSDictionary?
+            if let scriptObject = NSAppleScript(source: script) {
+                scriptObject.executeAndReturnError(&error)
+                continuation.resume(returning: error == nil)
             } else {
                 continuation.resume(returning: false)
             }
@@ -699,7 +722,7 @@ class ProcessManager: ObservableObject {
     }
     
     // MARK: - Batch Kill Methods
-    
+
     /// Kill all helper processes for an app (e.g., "Google Chrome Helper")
     func killAllHelperProcesses(for appName: String) async -> Int {
         let helperNames = [
@@ -708,14 +731,21 @@ class ProcessManager: ObservableObject {
             "\(appName) Helper (GPU)",
             "\(appName) Helper (Plugin)"
         ]
-        
+
         var killedCount = 0
         for helperName in helperNames {
-            if await runShellForceKill(byName: helperName) {
-                killedCount += 1
+            // Find helper processes and force quit them
+            let helperProcesses = processes.filter { $0.name.contains(helperName) }
+            for process in helperProcesses {
+                if let app = NSWorkspace.shared.runningApplications.first(where: { $0.processIdentifier == process.pid }) {
+                    if app.forceTerminate() {
+                        killedCount += 1
+                        await cleanupProcessHistory(for: process.pid)
+                    }
+                }
             }
         }
-        
+
         return killedCount
     }
     
@@ -724,7 +754,6 @@ class ProcessManager: ObservableObject {
     func killHeavyApps(appNames: [String]? = nil) async -> [String] {
         let defaultHeavyApps = [
             "Google Chrome",
-            "Google Chrome Helper",
             "Safari",
             "Firefox",
             "Microsoft Edge",
@@ -738,54 +767,84 @@ class ProcessManager: ObservableObject {
             "Android Studio",
             "Spotify"
         ]
-        
+
         let appsToKill = appNames ?? defaultHeavyApps
         var killedApps: [String] = []
-        
+
         for appName in appsToKill {
-            // Check if process is actually running before trying to kill
-            let isRunning = processes.contains { $0.name == appName }
-            if isRunning {
-                if await runShellForceKill(byName: appName) {
-                    killedApps.append(appName)
+            // Find process by name
+            if let process = processes.first(where: { $0.name == appName }) {
+                // Try to force quit using NSRunningApplication
+                if let app = NSWorkspace.shared.runningApplications.first(where: { $0.processIdentifier == process.pid }) {
+                    if app.forceTerminate() {
+                        killedApps.append(appName)
+                        await cleanupProcessHistory(for: process.pid)
+                    }
                 }
             }
         }
-        
-        // Also kill Chrome helpers specifically
-        if appsToKill.contains("Google Chrome") {
-            _ = await killAllHelperProcesses(for: "Google Chrome")
-        }
-        
+
         // Refresh process list after killing
         updateProcessList()
-        
+
         return killedApps
     }
     
     /// Restart Finder (common fix for UI issues)
     func restartFinder() async -> Bool {
-        return await runShellForceKill(byName: "Finder")
-        // Finder will automatically restart after being killed
+        // Find Finder process and force quit it
+        if let finder = processes.first(where: { $0.name == "Finder" }) {
+            if let app = NSWorkspace.shared.runningApplications.first(where: { $0.processIdentifier == finder.pid }) {
+                let success = app.forceTerminate()
+                if success {
+                    await cleanupProcessHistory(for: finder.pid)
+                }
+                return success
+                // Finder will automatically restart after being killed
+            }
+        }
+        return false
     }
-    
+
     /// Restart Dock (common fix for UI issues)
     func restartDock() async -> Bool {
-        return await runShellForceKill(byName: "Dock")
-        // Dock will automatically restart after being killed
+        // Find Dock process and force quit it
+        if let dock = processes.first(where: { $0.name == "Dock" }) {
+            if let app = NSWorkspace.shared.runningApplications.first(where: { $0.processIdentifier == dock.pid }) {
+                let success = app.forceTerminate()
+                if success {
+                    await cleanupProcessHistory(for: dock.pid)
+                }
+                return success
+                // Dock will automatically restart after being killed
+            }
+        }
+        return false
     }
     
-    /// Force kill process using AppleScript with administrator privileges (prompts for password)
+    /// Force kill process using privileged helper or AppleScript with administrator privileges
     func forceQuitWithAdminPrivileges(_ process: ProcessInfo) async -> Bool {
+        // Try using the privileged helper first
+        let result = await privilegeService.forceKillProcess(pid: process.pid)
+
+        if result.success {
+            await cleanupProcessHistory(for: process.pid)
+            return true
+        }
+
+        // Fallback to AppleScript if helper is not available
         return await withCheckedContinuation { continuation in
             let script = """
-            do shell script "kill -9 \(process.pid)" with administrator privileges
+            do shell script "/bin/kill -9 \(process.pid)" with administrator privileges
             """
-            
+
             var error: NSDictionary?
             if let scriptObject = NSAppleScript(source: script) {
                 scriptObject.executeAndReturnError(&error)
                 if error == nil {
+                    Task { @MainActor in
+                        await self.cleanupProcessHistory(for: process.pid)
+                    }
                     continuation.resume(returning: true)
                 } else {
                     print("[ProcessManager] Admin kill failed: \(error ?? [:])")

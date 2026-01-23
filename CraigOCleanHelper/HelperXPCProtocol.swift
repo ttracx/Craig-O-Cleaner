@@ -15,6 +15,9 @@ let kAuthorizationRightInstall = "com.CraigOClean.helper.install"
 /// Authorization rights for memory cleanup
 let kAuthorizationRightMemoryClean = "com.CraigOClean.helper.memoryclean"
 
+/// Authorization rights for force killing processes
+let kAuthorizationRightForceKill = "com.CraigOClean.helper.forcekill"
+
 // MARK: - Command Result
 
 /// Result of executing a privileged command
@@ -91,6 +94,23 @@ public protocol HelperXPCProtocol {
     /// Verify the helper is running and responsive
     /// - Parameter reply: Callback with true if helper is alive
     func ping(reply: @escaping (Bool) -> Void)
+
+    /// Force kill a process by PID using SIGKILL
+    /// This method uses elevated privileges to terminate stubborn processes
+    /// that cannot be killed through normal means (sandbox restrictions, system processes)
+    /// - Parameters:
+    ///   - pid: The process ID to force kill
+    ///   - authData: Authorization data for privilege verification
+    ///   - reply: Callback with the result of the operation
+    func forceKillProcess(pid: Int32, authData: Data?, reply: @escaping (HelperCommandResult) -> Void)
+
+    /// Force kill a process by name using killall -9
+    /// This is useful when you know the process name but not the PID
+    /// - Parameters:
+    ///   - processName: The name of the process to force kill
+    ///   - authData: Authorization data for privilege verification
+    ///   - reply: Callback with the result of the operation
+    func forceKillProcessByName(processName: String, authData: Data?, reply: @escaping (HelperCommandResult) -> Void)
 }
 
 // MARK: - App Protocol (Reverse Communication)
@@ -149,6 +169,20 @@ public extension NSXPCConnection {
             resultClasses,
             for: #selector(HelperXPCProtocol.executePurge(authData:reply:)),
             argumentIndex: 1,
+            ofReply: true
+        )
+
+        connection.remoteObjectInterface?.setClasses(
+            resultClasses,
+            for: #selector(HelperXPCProtocol.forceKillProcess(pid:authData:reply:)),
+            argumentIndex: 2,
+            ofReply: true
+        )
+
+        connection.remoteObjectInterface?.setClasses(
+            resultClasses,
+            for: #selector(HelperXPCProtocol.forceKillProcessByName(processName:authData:reply:)),
+            argumentIndex: 2,
             ofReply: true
         )
 

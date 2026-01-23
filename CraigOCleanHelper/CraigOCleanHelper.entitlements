@@ -2,8 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <!-- App Sandbox required for App Store distribution -->
-    <key>com.apple.security.app-sandbox</key>
-    <true/>
+    <!--
+    NOTE: Sandbox is REMOVED for privileged helper tool
+    The helper runs with elevated privileges and needs unrestricted access
+    to execute system commands like kill -9 for force quitting processes.
+
+    The main app remains sandboxed for App Store compliance.
+    Only the helper tool is unsandboxed.
+    -->
 </dict>
 </plist>
