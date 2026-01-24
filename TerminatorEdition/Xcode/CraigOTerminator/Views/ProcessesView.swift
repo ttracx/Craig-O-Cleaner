@@ -110,11 +110,37 @@ struct ProcessesView: View {
                 Divider()
 
                 // Process list
-                List(filteredProcesses, selection: $selectedProcess) { process in
-                    ProcessRow(process: process)
-                        .tag(process)
+                if isRefreshing && processes.isEmpty {
+                    VStack {
+                        ProgressView()
+                            .controlSize(.large)
+                        Text("Loading processes...")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding()
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if processes.isEmpty {
+                    VStack {
+                        Image(systemName: "gearshape.2")
+                            .font(.system(size: 48))
+                            .foregroundStyle(.secondary)
+                        Text("No processes found")
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
+                        Button("Refresh") {
+                            Task { await refreshProcesses() }
+                        }
+                        .padding(.top)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    List(filteredProcesses, selection: $selectedProcess) { process in
+                        ProcessRow(process: process)
+                            .tag(process)
+                    }
+                    .listStyle(.plain)
                 }
-                .listStyle(.plain)
 
                 // Footer
                 HStack {
@@ -157,53 +183,93 @@ struct ProcessesView: View {
         }
     }
 
-    @MainActor
     private func refreshProcesses() async {
-        guard !isRefreshing else { return }
-        isRefreshing = true
-
-        let executor = CommandExecutor.shared
-
-        // Get process list (now runs off main thread in CommandExecutor)
-        guard let result = try? await executor.execute("ps aux | tail -n +2") else {
-            isRefreshing = false
+        guard !isRefreshing else {
+            print("ProcessesView: Already refreshing, skipping")
             return
         }
 
-        // Process the result
-        var processArray: [ProcessInfo] = []
+        print("ProcessesView: Starting refresh...")
 
-        for line in result.output.components(separatedBy: "\n") {
-            let parts = line.split(separator: " ", omittingEmptySubsequences: true)
-            guard parts.count >= 11 else { continue }
-
-            let user = String(parts[0])
-            let pid = Int32(parts[1]) ?? 0
-            let cpuPercent = Double(parts[2]) ?? 0
-            let name = String(parts[10...].joined(separator: " ").split(separator: "/").last ?? "")
-                .trimmingCharacters(in: .whitespaces)
-
-            // Calculate memory in MB (rough estimate)
-            let memoryMB = (Double(parts[5]) ?? 0) / 1024
-
-            let isSystem = user == "root" ||
-                          user == "_windowserver" ||
-                          user.hasPrefix("_") ||
-                          name.hasPrefix("com.apple")
-
-            processArray.append(ProcessInfo(
-                id: pid,
-                name: name.isEmpty ? "Unknown" : name,
-                cpuPercent: cpuPercent,
-                memoryMB: memoryMB,
-                user: user,
-                isSystemProcess: isSystem
-            ))
+        await MainActor.run {
+            isRefreshing = true
         }
 
-        // Update state
-        processes = processArray
-        isRefreshing = false
+        // Execute ps command to get process list
+        let task = Process()
+        task.launchPath = "/bin/ps"
+        task.arguments = ["aux"]
+
+        let pipe = Pipe()
+        task.standardOutput = pipe
+        task.standardError = pipe
+
+        do {
+            try task.run()
+            task.waitUntilExit()
+
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            guard let output = String(data: data, encoding: .utf8) else {
+                print("ProcessesView: Failed to decode output")
+                await MainActor.run {
+                    isRefreshing = false
+                }
+                return
+            }
+
+            print("ProcessesView: Got output, processing \(output.components(separatedBy: "\n").count) lines")
+
+            // Process the result
+            var processArray: [ProcessInfo] = []
+            let lines = output.components(separatedBy: "\n")
+
+            for (index, line) in lines.enumerated() {
+                // Skip header line
+                if index == 0 { continue }
+
+                let parts = line.split(separator: " ", omittingEmptySubsequences: true)
+                guard parts.count >= 11 else { continue }
+
+                let user = String(parts[0])
+                let pid = Int32(parts[1]) ?? 0
+                let cpuPercent = Double(parts[2]) ?? 0
+                let name = String(parts[10...].joined(separator: " ").split(separator: "/").last ?? "")
+                    .trimmingCharacters(in: .whitespaces)
+
+                // Calculate memory in MB (RSS is in KB on macOS)
+                let memoryMB = (Double(parts[5]) ?? 0) / 1024
+
+                let isSystem = user == "root" ||
+                              user == "_windowserver" ||
+                              user.hasPrefix("_") ||
+                              name.hasPrefix("com.apple")
+
+                processArray.append(ProcessInfo(
+                    id: pid,
+                    name: name.isEmpty ? "Unknown" : name,
+                    cpuPercent: cpuPercent,
+                    memoryMB: memoryMB,
+                    user: user,
+                    isSystemProcess: isSystem
+                ))
+            }
+
+            print("ProcessesView: Processed \(processArray.count) processes")
+
+            // Update state on main actor
+            await MainActor.run {
+                processes = processArray
+                isRefreshing = false
+            }
+
+            print("ProcessesView: Refresh complete")
+
+        } catch {
+            print("ProcessesView: Error executing ps command: \(error)")
+            await MainActor.run {
+                isRefreshing = false
+            }
+        }
     }
 }
 
@@ -324,25 +390,33 @@ struct ProcessDetailView: View {
         .frame(minWidth: 280)
     }
 
-    @MainActor
     private func terminateProcess() async {
-        let executor = CommandExecutor.shared
-        _ = try? await executor.execute("kill \(process.id)")
+        let task = Process()
+        task.launchPath = "/bin/kill"
+        task.arguments = ["\(process.id)"]
+        try? task.run()
+        task.waitUntilExit()
+
         try? await Task.sleep(nanoseconds: 500_000_000)
         onAction()
     }
 
-    @MainActor
     private func forceKillProcess() async {
-        let executor = CommandExecutor.shared
-        _ = try? await executor.execute("kill -9 \(process.id)")
+        let task = Process()
+        task.launchPath = "/bin/kill"
+        task.arguments = ["-9", "\(process.id)"]
+        try? task.run()
+        task.waitUntilExit()
+
         try? await Task.sleep(nanoseconds: 500_000_000)
         onAction()
     }
 
     private func openInActivityMonitor() async {
-        let executor = CommandExecutor.shared
-        _ = try? await executor.execute("open -a 'Activity Monitor'")
+        let task = Process()
+        task.launchPath = "/usr/bin/open"
+        task.arguments = ["-a", "Activity Monitor"]
+        try? task.run()
     }
 }
 

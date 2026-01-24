@@ -98,12 +98,13 @@ struct BrowsersView: View {
         refreshTimer = nil
     }
 
-    @MainActor
     private func refreshBrowsers() async {
         guard !isRefreshing else { return }
-        isRefreshing = true
 
-        let executor = CommandExecutor.shared
+        await MainActor.run {
+            isRefreshing = true
+        }
+
         var updatedBrowsers: [BrowserInfo] = []
 
         let browserConfigs: [(name: String, bundleId: String, icon: String)] = [
@@ -116,42 +117,82 @@ struct BrowsersView: View {
         ]
 
         for config in browserConfigs {
-            let isRunning = (try? await executor.execute("pgrep -x '\(config.name)' >/dev/null && echo 'running'").output.contains("running")) ?? false
+            // Check if browser is running using pgrep
+            var isRunning = false
+            let pgrepTask = Process()
+            pgrepTask.launchPath = "/usr/bin/pgrep"
+            pgrepTask.arguments = ["-i", config.name]
+            let pgrepPipe = Pipe()
+            pgrepTask.standardOutput = pgrepPipe
+            pgrepTask.standardError = Pipe()
+
+            try? pgrepTask.run()
+            pgrepTask.waitUntilExit()
+
+            if pgrepTask.terminationStatus == 0 {
+                let data = pgrepPipe.fileHandleForReading.readDataToEndOfFile()
+                if let output = String(data: data, encoding: .utf8), !output.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    isRunning = true
+                }
+            }
 
             var tabCount = 0
             var memoryUsage: Double = 0
 
             if isRunning {
                 // Get tab count via AppleScript
-                if config.name == "Safari" {
-                    if let result = try? await executor.executeAppleScript("""
-                        tell application "Safari"
-                            set tabCount to 0
-                            repeat with w in windows
-                                set tabCount to tabCount + (count of tabs of w)
-                            end repeat
-                            return tabCount
-                        end tell
-                        """) {
-                        tabCount = Int(result.output.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
-                    }
-                } else if config.name == "Google Chrome" {
-                    if let result = try? await executor.executeAppleScript("""
-                        tell application "Google Chrome"
-                            set tabCount to 0
-                            repeat with w in windows
-                                set tabCount to tabCount + (count of tabs of w)
-                            end repeat
-                            return tabCount
-                        end tell
-                        """) {
-                        tabCount = Int(result.output.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+                if config.name == "Safari" || config.name == "Google Chrome" {
+                    let script = """
+                    tell application "\(config.name)"
+                        set tabCount to 0
+                        repeat with w in windows
+                            set tabCount to tabCount + (count of tabs of w)
+                        end repeat
+                        return tabCount
+                    end tell
+                    """
+
+                    let asTask = Process()
+                    asTask.launchPath = "/usr/bin/osascript"
+                    asTask.arguments = ["-e", script]
+                    let asPipe = Pipe()
+                    asTask.standardOutput = asPipe
+                    asTask.standardError = Pipe()
+
+                    try? asTask.run()
+                    asTask.waitUntilExit()
+
+                    if asTask.terminationStatus == 0 {
+                        let data = asPipe.fileHandleForReading.readDataToEndOfFile()
+                        if let output = String(data: data, encoding: .utf8) {
+                            tabCount = Int(output.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+                        }
                     }
                 }
 
                 // Get memory usage
-                if let result = try? await executor.execute("ps aux | grep -i '\(config.name)' | grep -v grep | awk '{sum += $6} END {print sum/1024}'") {
-                    memoryUsage = Double(result.output.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+                let memTask = Process()
+                memTask.launchPath = "/bin/ps"
+                memTask.arguments = ["aux"]
+                let memPipe = Pipe()
+                memTask.standardOutput = memPipe
+                memTask.standardError = Pipe()
+
+                try? memTask.run()
+                memTask.waitUntilExit()
+
+                if let data = try? memPipe.fileHandleForReading.readDataToEndOfFile(),
+                   let output = String(data: data, encoding: .utf8) {
+                    var totalMem: Double = 0
+                    for line in output.components(separatedBy: "\n") {
+                        if line.range(of: config.name, options: .caseInsensitive) != nil {
+                            let parts = line.split(separator: " ", omittingEmptySubsequences: true)
+                            if parts.count >= 6, let mem = Double(parts[5]) {
+                                totalMem += mem
+                            }
+                        }
+                    }
+                    memoryUsage = totalMem / 1024 // Convert KB to MB
                 }
             }
 
@@ -165,8 +206,11 @@ struct BrowsersView: View {
             ))
         }
 
-        browsers = updatedBrowsers
-        isRefreshing = false
+        // Update state on main actor
+        await MainActor.run {
+            browsers = updatedBrowsers
+            isRefreshing = false
+        }
     }
 }
 
@@ -293,87 +337,101 @@ struct BrowserDetailView: View {
     }
 
     private func closeHeavyTabs() async {
-        let executor = CommandExecutor.shared
-
         if browser.name == "Safari" {
-            _ = try? await executor.executeAppleScript("""
-                tell application "Safari"
-                    -- Close tabs using more than 500MB (placeholder - Safari doesn't expose memory per tab)
-                    -- This would close duplicate tabs instead as a practical alternative
-                    set urlList to {}
-                    repeat with w in windows
-                        repeat with t in tabs of w
-                            set tabURL to URL of t
-                            if urlList contains tabURL then
-                                close t
-                            else
-                                set end of urlList to tabURL
-                            end if
-                        end repeat
+            let script = """
+            tell application "Safari"
+                -- Close duplicate tabs as Safari doesn't expose memory per tab
+                set urlList to {}
+                repeat with w in windows
+                    repeat with t in tabs of w
+                        set tabURL to URL of t
+                        if urlList contains tabURL then
+                            close t
+                        else
+                            set end of urlList to tabURL
+                        end if
                     end repeat
-                end tell
-                """)
+                end repeat
+            end tell
+            """
+
+            let task = Process()
+            task.launchPath = "/usr/bin/osascript"
+            task.arguments = ["-e", script]
+            try? task.run()
+            task.waitUntilExit()
         }
 
         onAction()
     }
 
     private func clearCache() async {
-        let executor = CommandExecutor.shared
-
+        let cachePath: String
         switch browser.name {
         case "Safari":
-            _ = try? await executor.execute("rm -rf ~/Library/Caches/com.apple.Safari/* 2>/dev/null")
+            cachePath = "~/Library/Caches/com.apple.Safari"
         case "Google Chrome":
-            _ = try? await executor.execute("rm -rf ~/Library/Caches/Google/Chrome/* 2>/dev/null")
+            cachePath = "~/Library/Caches/Google/Chrome"
         case "Firefox":
-            _ = try? await executor.execute("rm -rf ~/Library/Caches/Firefox/* 2>/dev/null")
+            cachePath = "~/Library/Caches/Firefox"
         case "Microsoft Edge":
-            _ = try? await executor.execute("rm -rf ~/Library/Caches/Microsoft\\ Edge/* 2>/dev/null")
+            cachePath = "~/Library/Caches/Microsoft Edge"
         case "Brave":
-            _ = try? await executor.execute("rm -rf ~/Library/Caches/BraveSoftware/* 2>/dev/null")
+            cachePath = "~/Library/Caches/BraveSoftware"
         case "Arc":
-            _ = try? await executor.execute("rm -rf ~/Library/Caches/company.thebrowser.Browser/* 2>/dev/null")
+            cachePath = "~/Library/Caches/company.thebrowser.Browser"
         default:
-            break
+            onAction()
+            return
         }
+
+        let expandedPath = (cachePath as NSString).expandingTildeInPath
+        let task = Process()
+        task.launchPath = "/bin/rm"
+        task.arguments = ["-rf", expandedPath + "/*"]
+        try? task.run()
+        task.waitUntilExit()
 
         onAction()
     }
 
     private func closeAllTabs() async {
-        let executor = CommandExecutor.shared
+        if browser.name == "Safari" || browser.name == "Google Chrome" {
+            let script = """
+            tell application "\(browser.name)"
+                repeat with w in windows
+                    close tabs of w
+                end repeat
+            end tell
+            """
 
-        if browser.name == "Safari" {
-            _ = try? await executor.executeAppleScript("""
-                tell application "Safari"
-                    repeat with w in windows
-                        close tabs of w
-                    end repeat
-                end tell
-                """)
-        } else if browser.name == "Google Chrome" {
-            _ = try? await executor.executeAppleScript("""
-                tell application "Google Chrome"
-                    repeat with w in windows
-                        close tabs of w
-                    end repeat
-                end tell
-                """)
+            let task = Process()
+            task.launchPath = "/usr/bin/osascript"
+            task.arguments = ["-e", script]
+            try? task.run()
+            task.waitUntilExit()
         }
 
         onAction()
     }
 
     private func forceQuit() async {
-        let executor = CommandExecutor.shared
-        _ = try? await executor.execute("pkill -9 -f '\(browser.name)'")
+        let task = Process()
+        task.launchPath = "/usr/bin/pkill"
+        task.arguments = ["-9", "-f", browser.name]
+        try? task.run()
+        task.waitUntilExit()
+
         onAction()
     }
 
     private func launchBrowser() async {
-        let executor = CommandExecutor.shared
-        _ = try? await executor.execute("open -a '\(browser.name)'")
+        let task = Process()
+        task.launchPath = "/usr/bin/open"
+        task.arguments = ["-a", browser.name]
+        try? task.run()
+        task.waitUntilExit()
+
         try? await Task.sleep(nanoseconds: 1_000_000_000)
         onAction()
     }

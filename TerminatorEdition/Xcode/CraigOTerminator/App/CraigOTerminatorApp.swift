@@ -4,12 +4,20 @@ import SwiftUI
 struct CraigOTerminatorApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var appState = AppState.shared
+    @StateObject private var permissionsManager = PermissionsManager.shared
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(appState)
+                .environmentObject(permissionsManager)
                 .frame(minWidth: 1000, idealWidth: 1200, minHeight: 700, idealHeight: 800)
+                .sheet(isPresented: $permissionsManager.showPermissionsSheet) {
+                    PermissionsSheet(
+                        permissionsManager: permissionsManager,
+                        isPresented: $permissionsManager.showPermissionsSheet
+                    )
+                }
         }
         .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 1200, height: 800)
@@ -57,6 +65,11 @@ struct CraigOTerminatorApp: App {
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Check permissions first
+        Task { @MainActor in
+            PermissionsManager.shared.checkFirstLaunch()
+        }
+
         // Initialize the Terminator Engine
         Task { @MainActor in
             await AppState.shared.initialize()
