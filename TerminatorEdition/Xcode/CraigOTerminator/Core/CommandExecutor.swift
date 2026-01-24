@@ -75,66 +75,74 @@ public final class CommandExecutor: ObservableObject {
         defer { isExecuting = false }
 
         let startTime = Date()
-
-        let process = Process()
-        let outputPipe = Pipe()
-        let errorPipe = Pipe()
-
-        process.executableURL = URL(fileURLWithPath: "/bin/zsh")
-        process.arguments = ["-c", command]
-        process.standardOutput = outputPipe
-        process.standardError = errorPipe
-
-        if let dir = workingDirectory {
-            process.currentDirectoryURL = URL(fileURLWithPath: dir)
-        }
-
-        // Set environment
-        var environment = ProcessInfo.processInfo.environment
-        environment["PATH"] = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin"
-        process.environment = environment
-
-        do {
-            try process.run()
-        } catch {
-            throw CommandError.executionFailed(exitCode: -1, error: error.localizedDescription)
-        }
-
-        // Handle timeout
         let effectiveTimeout = timeout ?? defaultTimeout
-        let timeoutTask = Task {
-            try await Task.sleep(nanoseconds: UInt64(effectiveTimeout * 1_000_000_000))
-            if process.isRunning {
-                process.terminate()
+
+        // Run the blocking process operation off the main thread
+        return try await Task.detached { [weak self] in
+            let process = Process()
+            let outputPipe = Pipe()
+            let errorPipe = Pipe()
+
+            process.executableURL = URL(fileURLWithPath: "/bin/zsh")
+            process.arguments = ["-c", command]
+            process.standardOutput = outputPipe
+            process.standardError = errorPipe
+
+            if let dir = workingDirectory {
+                process.currentDirectoryURL = URL(fileURLWithPath: dir)
             }
-        }
 
-        process.waitUntilExit()
-        timeoutTask.cancel()
+            // Set environment
+            var environment = ProcessInfo.processInfo.environment
+            environment["PATH"] = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin"
+            process.environment = environment
 
-        let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
-        let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
-
-        let output = String(data: outputData, encoding: .utf8) ?? ""
-        let errorOutput = String(data: errorData, encoding: .utf8) ?? ""
-
-        let result = CommandResult(
-            output: output,
-            errorOutput: errorOutput,
-            exitCode: process.terminationStatus,
-            duration: Date().timeIntervalSince(startTime)
-        )
-
-        lastResult = result
-
-        if process.terminationStatus != 0 && !errorOutput.isEmpty {
-            // Don't throw for common non-critical errors
-            if !errorOutput.contains("No such file") && !errorOutput.contains("Permission denied") {
-                // Log but don't throw
+            do {
+                try process.run()
+            } catch {
+                throw CommandError.executionFailed(exitCode: -1, error: error.localizedDescription)
             }
-        }
 
-        return result
+            // Handle timeout
+            let timeoutTask = Task {
+                try await Task.sleep(nanoseconds: UInt64(effectiveTimeout * 1_000_000_000))
+                if process.isRunning {
+                    process.terminate()
+                }
+            }
+
+            // Wait for process completion (now off main thread)
+            process.waitUntilExit()
+            timeoutTask.cancel()
+
+            let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+            let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+
+            let output = String(data: outputData, encoding: .utf8) ?? ""
+            let errorOutput = String(data: errorData, encoding: .utf8) ?? ""
+
+            let result = CommandResult(
+                output: output,
+                errorOutput: errorOutput,
+                exitCode: process.terminationStatus,
+                duration: Date().timeIntervalSince(startTime)
+            )
+
+            if let self = self {
+                await MainActor.run {
+                    self.lastResult = result
+                }
+            }
+
+            if process.terminationStatus != 0 && !errorOutput.isEmpty {
+                // Don't throw for common non-critical errors
+                if !errorOutput.contains("No such file") && !errorOutput.contains("Permission denied") {
+                    // Log but don't throw
+                }
+            }
+
+            return result
+        }.value
     }
 
     /// Execute a privileged command using osascript for authorization
@@ -207,32 +215,36 @@ public final class CommandExecutor: ObservableObject {
     public func executeAppleScript(_ script: String) async throws -> CommandResult {
         let startTime = Date()
 
-        let process = Process()
-        let outputPipe = Pipe()
-        let errorPipe = Pipe()
+        // Run the blocking process operation off the main thread
+        return try await Task.detached {
+            let process = Process()
+            let outputPipe = Pipe()
+            let errorPipe = Pipe()
 
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
-        process.arguments = ["-e", script]
-        process.standardOutput = outputPipe
-        process.standardError = errorPipe
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+            process.arguments = ["-e", script]
+            process.standardOutput = outputPipe
+            process.standardError = errorPipe
 
-        do {
-            try process.run()
-        } catch {
-            throw CommandError.executionFailed(exitCode: -1, error: error.localizedDescription)
-        }
+            do {
+                try process.run()
+            } catch {
+                throw CommandError.executionFailed(exitCode: -1, error: error.localizedDescription)
+            }
 
-        process.waitUntilExit()
+            // Wait for process completion (now off main thread)
+            process.waitUntilExit()
 
-        let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
-        let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+            let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+            let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
 
-        return CommandResult(
-            output: String(data: outputData, encoding: .utf8) ?? "",
-            errorOutput: String(data: errorData, encoding: .utf8) ?? "",
-            exitCode: process.terminationStatus,
-            duration: Date().timeIntervalSince(startTime)
-        )
+            return CommandResult(
+                output: String(data: outputData, encoding: .utf8) ?? "",
+                errorOutput: String(data: errorData, encoding: .utf8) ?? "",
+                exitCode: process.terminationStatus,
+                duration: Date().timeIntervalSince(startTime)
+            )
+        }.value
     }
 
     // MARK: - Convenience Methods

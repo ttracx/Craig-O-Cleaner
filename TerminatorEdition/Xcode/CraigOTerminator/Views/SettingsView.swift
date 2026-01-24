@@ -15,6 +15,11 @@ struct SettingsView: View {
 
     var body: some View {
         TabView {
+            AccountSettingsView()
+            .tabItem {
+                Label("Account", systemImage: "person.circle")
+            }
+
             GeneralSettingsView(
                 showMenuBarIcon: $showMenuBarIcon,
                 launchAtLogin: $launchAtLogin,
@@ -49,7 +54,7 @@ struct SettingsView: View {
                 Label("Advanced", systemImage: "slider.horizontal.3")
             }
         }
-        .frame(width: 500, height: 400)
+        .frame(width: 500, height: 500)
     }
 }
 
@@ -416,26 +421,31 @@ struct AISettingsView: View {
         // Get list of installed models
         if let result = try? await executor.execute("ollama list") {
             let lines = result.output.components(separatedBy: "\n")
-            var models: [String] = []
+            var models: Set<String> = [] // Use Set to avoid duplicates
 
             for line in lines {
                 let parts = line.split(separator: " ", omittingEmptySubsequences: true)
                 if parts.count > 0 && !line.contains("NAME") {
                     let modelName = String(parts[0]).components(separatedBy: ":").first ?? ""
                     if !modelName.isEmpty && modelName != "NAME" {
-                        models.append(modelName)
+                        models.insert(modelName)
                     }
                 }
             }
 
-            availableModels = models.sorted()
+            let sortedModels = models.sorted()
 
-            // If no model is selected and we have models, select the first one or lfm2.5-thinking
-            if ollamaModel.isEmpty && !models.isEmpty {
-                if models.contains("lfm2.5-thinking") {
-                    ollamaModel = "lfm2.5-thinking"
-                } else {
-                    ollamaModel = models.first ?? "llama3.2"
+            // Defer state updates to avoid publishing during view update
+            await MainActor.run {
+                availableModels = sortedModels
+
+                // If no model is selected and we have models, select the first one or lfm2.5-thinking
+                if ollamaModel.isEmpty && !sortedModels.isEmpty {
+                    if sortedModels.contains("lfm2.5-thinking") {
+                        ollamaModel = "lfm2.5-thinking"
+                    } else {
+                        ollamaModel = sortedModels.first ?? "llama3.2"
+                    }
                 }
             }
         }

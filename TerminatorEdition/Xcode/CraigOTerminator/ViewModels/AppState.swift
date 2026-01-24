@@ -124,15 +124,19 @@ final class AppState: ObservableObject {
 
     @MainActor
     func updateMetrics() async {
+        var newCpuUsage: Double = 0
+        var newMemoryUsage: Double = 0
+        var newDiskUsage: Double = 0
+
         // CPU Usage
         if let result = try? await executor.execute("top -l 1 -s 0 | grep 'CPU usage'") {
             if let match = result.output.range(of: #"(\d+\.?\d*)% user"#, options: .regularExpression) {
                 let userStr = String(result.output[match]).replacingOccurrences(of: "% user", with: "")
-                cpuUsage = Double(userStr) ?? 0
+                newCpuUsage = Double(userStr) ?? 0
 
                 if let sysMatch = result.output.range(of: #"(\d+\.?\d*)% sys"#, options: .regularExpression) {
                     let sysStr = String(result.output[sysMatch]).replacingOccurrences(of: "% sys", with: "")
-                    cpuUsage += Double(sysStr) ?? 0
+                    newCpuUsage += Double(sysStr) ?? 0
                 }
             }
         }
@@ -157,17 +161,20 @@ final class AppState: ObservableObject {
                 }
 
                 if totalBytes > 0 {
-                    memoryUsage = (usedBytes / totalBytes) * 100
+                    newMemoryUsage = (usedBytes / totalBytes) * 100
                 }
             }
         }
 
         // Disk Usage
         if let result = try? await executor.execute("df -h / | tail -1 | awk '{print $5}'") {
-            diskUsage = Double(result.output.replacingOccurrences(of: "%", with: "")) ?? 0
+            newDiskUsage = Double(result.output.replacingOccurrences(of: "%", with: "")) ?? 0
         }
 
-        // Calculate health score
+        // Batch all published property updates together
+        cpuUsage = newCpuUsage
+        memoryUsage = newMemoryUsage
+        diskUsage = newDiskUsage
         calculateHealthScore()
     }
 
@@ -213,7 +220,7 @@ final class AppState: ObservableObject {
 
         let startTime = Date()
         var memoryFreed: UInt64 = 0
-        var diskFreed: UInt64 = 0
+        let diskFreed: UInt64 = 0
 
         // Batch all privileged operations together to minimize prompts
         operationProgress = 0.2

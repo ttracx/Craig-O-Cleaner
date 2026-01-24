@@ -180,7 +180,7 @@ struct CleanupView: View {
 
         for category in CleanupCategory.allCases {
             var size: UInt64 = 0
-            var count = 0
+            let count = 0
 
             switch category {
             case .userCaches:

@@ -159,52 +159,50 @@ struct ProcessesView: View {
 
     @MainActor
     private func refreshProcesses() async {
+        guard !isRefreshing else { return }
         isRefreshing = true
 
         let executor = CommandExecutor.shared
 
-        // Get process list
-        let result = try? await executor.execute("ps aux | tail -n +2")
+        // Get process list (now runs off main thread in CommandExecutor)
+        guard let result = try? await executor.execute("ps aux | tail -n +2") else {
+            isRefreshing = false
+            return
+        }
 
-        // Process the result off the main actor to avoid blocking
-        let newProcesses: [ProcessInfo] = await Task.detached {
-            guard let result = result else { return [] }
-            var processArray: [ProcessInfo] = []
+        // Process the result
+        var processArray: [ProcessInfo] = []
 
-            for line in result.output.components(separatedBy: "\n") {
-                let parts = line.split(separator: " ", omittingEmptySubsequences: true)
-                guard parts.count >= 11 else { continue }
+        for line in result.output.components(separatedBy: "\n") {
+            let parts = line.split(separator: " ", omittingEmptySubsequences: true)
+            guard parts.count >= 11 else { continue }
 
-                let user = String(parts[0])
-                let pid = Int32(parts[1]) ?? 0
-                let cpuPercent = Double(parts[2]) ?? 0
-                let name = String(parts[10...].joined(separator: " ").split(separator: "/").last ?? "")
-                    .trimmingCharacters(in: .whitespaces)
+            let user = String(parts[0])
+            let pid = Int32(parts[1]) ?? 0
+            let cpuPercent = Double(parts[2]) ?? 0
+            let name = String(parts[10...].joined(separator: " ").split(separator: "/").last ?? "")
+                .trimmingCharacters(in: .whitespaces)
 
-                // Calculate memory in MB (rough estimate)
-                let memoryMB = (Double(parts[5]) ?? 0) / 1024
+            // Calculate memory in MB (rough estimate)
+            let memoryMB = (Double(parts[5]) ?? 0) / 1024
 
-                let isSystem = user == "root" ||
-                              user == "_windowserver" ||
-                              user.hasPrefix("_") ||
-                              name.hasPrefix("com.apple")
+            let isSystem = user == "root" ||
+                          user == "_windowserver" ||
+                          user.hasPrefix("_") ||
+                          name.hasPrefix("com.apple")
 
-                processArray.append(ProcessInfo(
-                    id: pid,
-                    name: name.isEmpty ? "Unknown" : name,
-                    cpuPercent: cpuPercent,
-                    memoryMB: memoryMB,
-                    user: user,
-                    isSystemProcess: isSystem
-                ))
-            }
+            processArray.append(ProcessInfo(
+                id: pid,
+                name: name.isEmpty ? "Unknown" : name,
+                cpuPercent: cpuPercent,
+                memoryMB: memoryMB,
+                user: user,
+                isSystemProcess: isSystem
+            ))
+        }
 
-            return processArray
-        }.value
-
-        // Update state on main actor with a small delay to prevent reentrancy
-        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 second
-        processes = newProcesses
+        // Update state
+        processes = processArray
         isRefreshing = false
     }
 }
@@ -331,11 +329,7 @@ struct ProcessDetailView: View {
         let executor = CommandExecutor.shared
         _ = try? await executor.execute("kill \(process.id)")
         try? await Task.sleep(nanoseconds: 500_000_000)
-        // Defer the callback to avoid reentrancy
-        Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 100_000_000)
-            onAction()
-        }
+        onAction()
     }
 
     @MainActor
@@ -343,11 +337,7 @@ struct ProcessDetailView: View {
         let executor = CommandExecutor.shared
         _ = try? await executor.execute("kill -9 \(process.id)")
         try? await Task.sleep(nanoseconds: 500_000_000)
-        // Defer the callback to avoid reentrancy
-        Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 100_000_000)
-            onAction()
-        }
+        onAction()
     }
 
     private func openInActivityMonitor() async {
