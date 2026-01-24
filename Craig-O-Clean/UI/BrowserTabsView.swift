@@ -236,7 +236,7 @@ struct BrowserTabsView: View {
     }
     
     // MARK: - No Tabs View
-    
+
     private var noTabsView: some View {
         VStack(spacing: 16) {
             Image(systemName: "tray")
@@ -247,6 +247,31 @@ struct BrowserTabsView: View {
                 .fontWeight(.medium)
             Text("Open some tabs in your browsers to manage them here")
                 .foregroundColor(.secondary)
+
+            // Diagnostic info
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Diagnostic Info:")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.secondary)
+
+                Text("Running browsers: \(browserAutomation.runningBrowsers.map { $0.rawValue }.joined(separator: ", "))")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+
+                Text("Installed browsers: \(browserAutomation.installedBrowsers.map { $0.rawValue }.joined(separator: ", "))")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+
+                if let error = browserAutomation.lastError {
+                    Text("Last error: \(error.localizedDescription)")
+                        .font(.caption2)
+                        .foregroundColor(.red)
+                }
+            }
+            .padding()
+            .background(Color(NSColor.controlBackgroundColor))
+            .cornerRadius(8)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

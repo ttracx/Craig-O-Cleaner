@@ -461,7 +461,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = K36LFHM32T;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_FILE_ACCESS_DOWNLOADS_FOLDER = readwrite;
@@ -487,7 +487,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 7;
+				MARKETING_VERSION = 8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.craigoclean.app;
 				PRODUCT_NAME = "Craig-O-Clean";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -693,7 +693,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = K36LFHM32T;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_FILE_ACCESS_DOWNLOADS_FOLDER = readwrite;
@@ -721,7 +721,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 7;
+				MARKETING_VERSION = 8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.craigoclean.app;
 				PRODUCT_NAME = "Craig-O-Clean";
 				PROVISIONING_PROFILE_SPECIFIER = "";

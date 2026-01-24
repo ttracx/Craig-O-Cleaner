@@ -248,12 +248,16 @@ final class BrowserAutomationService: ObservableObject {
         isLoading = true
         lastError = nil
         updateRunningBrowsers()
-        
+
+        logger.info("Starting to fetch tabs from \(self.runningBrowsers.count) running browsers")
+
         var newTabs: [SupportedBrowser: [BrowserWindow]] = [:]
-        
+
         for browser in runningBrowsers where browser.supportsTabScripting {
+            logger.info("Fetching tabs for \(browser.rawValue)")
             do {
                 let windows = try await fetchTabs(for: browser)
+                logger.info("Successfully fetched \(windows.count) windows with \(windows.reduce(0) { $0 + $1.tabs.count }) total tabs for \(browser.rawValue)")
                 newTabs[browser] = windows
                 permissionStatus[browser] = true
             } catch let error as BrowserAutomationError {
@@ -266,8 +270,10 @@ final class BrowserAutomationService: ObservableObject {
                 logger.error("Unexpected error fetching tabs for \(browser.rawValue): \(error.localizedDescription)")
             }
         }
-        
+
         browserTabs = newTabs
+        let totalTabs = allTabs.count
+        logger.info("Fetch complete. Total tabs: \(totalTabs)")
         isLoading = false
     }
     
@@ -427,15 +433,17 @@ final class BrowserAutomationService: ObservableObject {
     
     private func executeAppleScript(_ script: String) async throws -> String {
         return try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async {
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
                 var error: NSDictionary?
                 let appleScript = NSAppleScript(source: script)
                 let output = appleScript?.executeAndReturnError(&error)
-                
+
                 if let error = error {
                     let errorMessage = error[NSAppleScript.errorMessage] as? String ?? "Unknown AppleScript error"
                     let errorNumber = error[NSAppleScript.errorNumber] as? Int ?? 0
-                    
+
+                    self?.logger.error("AppleScript error \(errorNumber): \(errorMessage)")
+
                     // Error -1743 is "Not authorized to send Apple events"
                     if errorNumber == -1743 {
                         continuation.resume(throwing: BrowserAutomationError.automationPermissionDenied(.safari))
@@ -444,8 +452,9 @@ final class BrowserAutomationService: ObservableObject {
                     }
                     return
                 }
-                
+
                 let result = output?.stringValue ?? ""
+                self?.logger.debug("AppleScript output: \(result.prefix(200))...")
                 continuation.resume(returning: result)
             }
         }

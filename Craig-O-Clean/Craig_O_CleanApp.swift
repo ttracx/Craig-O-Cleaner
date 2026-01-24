@@ -507,11 +507,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // Add each running app
         for app in runningApps {
             guard let appName = app.localizedName else { continue }
-            
+
             let menuItem = NSMenuItem(title: appName, action: #selector(forceQuitSelectedApp(_:)), keyEquivalent: "")
             menuItem.target = self
             menuItem.representedObject = app.processIdentifier
-            
+            menuItem.isEnabled = true  // Explicitly enable the menu item
+
             // Add app icon
             if let icon = app.icon {
                 let resizedIcon = NSImage(size: NSSize(width: 16, height: 16))
@@ -520,12 +521,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 resizedIcon.unlockFocus()
                 menuItem.image = resizedIcon
             }
-            
+
             // Add memory usage info if available
             if let process = processManager?.processes.first(where: { $0.pid == app.processIdentifier }) {
                 menuItem.title = "\(appName) — \(process.formattedMemoryUsage)"
             }
-            
+
+            print("📋 Added menu item for \(appName) with PID \(app.processIdentifier)")
             submenu.addItem(menuItem)
         }
         
@@ -542,11 +544,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     @objc func forceQuitSelectedApp(_ sender: NSMenuItem) {
-        guard let pid = sender.representedObject as? Int32 else { return }
+        print("🔴 forceQuitSelectedApp called")
+        print("🔴 Sender: \(sender.title)")
+        print("🔴 RepresentedObject: \(String(describing: sender.representedObject))")
+
+        guard let pid = sender.representedObject as? Int32 else {
+            print("🔴 ERROR: Could not get PID from representedObject")
+            return
+        }
+
+        print("🔴 Got PID: \(pid)")
 
         // CRITICAL: Never allow force quitting ourselves
         let ownPID = Foundation.ProcessInfo.processInfo.processIdentifier
         guard pid != ownPID else {
+            print("🔴 Prevented self-termination attempt")
             showNotification(title: "Cannot Force Quit", body: "Craig-O-Clean cannot force quit itself.")
             return
         }
@@ -554,42 +566,56 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // Find the app
         if let app = NSWorkspace.shared.runningApplications.first(where: { $0.processIdentifier == pid }) {
             let appName = app.localizedName ?? "Unknown"
+            print("🔴 Found app: \(appName)")
 
             // Additional safety: check bundle ID
             if app.bundleIdentifier == Bundle.main.bundleIdentifier {
+                print("🔴 Prevented self-termination via bundle ID check")
                 showNotification(title: "Cannot Force Quit", body: "Craig-O-Clean cannot force quit itself.")
                 return
             }
 
             // Show confirmation alert
+            print("🔴 Showing confirmation alert for \(appName)")
             let alert = NSAlert()
             alert.messageText = "Force Quit \"\(appName)\"?"
             alert.informativeText = "Any unsaved changes will be lost."
             alert.alertStyle = .warning
             alert.addButton(withTitle: "Force Quit")
             alert.addButton(withTitle: "Cancel")
-            
+
             NSApp.activate(ignoringOtherApps: true)
-            
+
             if alert.runModal() == .alertFirstButtonReturn {
+                print("🔴 User confirmed force quit")
                 Task { @MainActor in
                     // Try force terminate
                     if app.forceTerminate() {
+                        print("🔴 Successfully force terminated \(appName)")
                         showNotification(title: "App Terminated", body: "\"\(appName)\" has been force quit.")
                     } else {
+                        print("🔴 forceTerminate() failed, trying ProcessManager")
                         // Try using ProcessManager's more aggressive methods
                         if let process = processManager?.processes.first(where: { $0.pid == pid }) {
                             let success = await processManager?.forceQuitProcess(process) ?? false
                             if success {
+                                print("🔴 ProcessManager successfully force quit \(appName)")
                                 showNotification(title: "App Terminated", body: "\"\(appName)\" has been force quit.")
                             } else {
+                                print("🔴 ProcessManager also failed")
                                 showNotification(title: "Force Quit Failed", body: "Unable to quit \"\(appName)\". It may require administrator privileges.")
                             }
+                        } else {
+                            print("🔴 Could not find process in ProcessManager")
                         }
                     }
                     processManager?.updateProcessList()
                 }
+            } else {
+                print("🔴 User cancelled force quit")
             }
+        } else {
+            print("🔴 ERROR: Could not find app with PID \(pid)")
         }
     }
     

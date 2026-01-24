@@ -189,10 +189,11 @@ final class PermissionsService: ObservableObject {
         Task {
             await checkAllPermissions()
 
-            // Auto-request permissions if this is first launch
-            if shouldShowPermissionsOnboarding {
-                await autoRequestPermissions()
-            }
+            // Note: Disabled auto-request to prevent System Settings from opening on launch
+            // User can manually grant permissions from the Settings view
+            // if shouldShowPermissionsOnboarding {
+            //     await autoRequestPermissions()
+            // }
         }
         
         // Start periodic checks for permission changes
@@ -345,8 +346,8 @@ final class PermissionsService: ObservableObject {
         let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
         AXIsProcessTrustedWithOptions(options as CFDictionary)
 
-        // Also open System Settings to the right place
-        openSystemSettings(for: .accessibility)
+        // Note: We don't auto-open System Settings here anymore
+        // User should click "Grant" button or "Open System Settings" explicitly
     }
 
     /// Check Full Disk Access permission
@@ -433,6 +434,7 @@ final class PermissionsService: ObservableObject {
     /// Request Full Disk Access permission (opens System Settings)
     func requestFullDiskAccessPermission() {
         // Can't programmatically request Full Disk Access, must guide user to System Settings
+        // Note: Only open when user explicitly clicks "Grant" button
         openSystemSettings(for: .fullDiskAccess)
     }
     
@@ -504,15 +506,15 @@ final class PermissionsService: ObservableObject {
             return name
         end tell
         """
-        
+
         DispatchQueue.global(qos: .userInitiated).async {
             var error: NSDictionary?
             let appleScript = NSAppleScript(source: script)
             appleScript?.executeAndReturnError(&error)
         }
-        
-        // Open System Settings to Automation
-        openSystemSettings(for: .automation)
+
+        // Note: We don't auto-open System Settings here anymore
+        // User should click "Request" button or "Open System Settings" explicitly
     }
     
     /// Open System Settings to a specific privacy section
