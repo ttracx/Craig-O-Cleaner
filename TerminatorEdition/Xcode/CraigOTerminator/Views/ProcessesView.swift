@@ -157,14 +157,19 @@ struct ProcessesView: View {
         }
     }
 
+    @MainActor
     private func refreshProcesses() async {
         isRefreshing = true
 
         let executor = CommandExecutor.shared
 
         // Get process list
-        if let result = try? await executor.execute("ps aux | tail -n +2") {
-            var newProcesses: [ProcessInfo] = []
+        let result = try? await executor.execute("ps aux | tail -n +2")
+
+        // Process the result off the main actor to avoid blocking
+        let newProcesses: [ProcessInfo] = await Task.detached {
+            guard let result = result else { return [] }
+            var processArray: [ProcessInfo] = []
 
             for line in result.output.components(separatedBy: "\n") {
                 let parts = line.split(separator: " ", omittingEmptySubsequences: true)
@@ -173,7 +178,6 @@ struct ProcessesView: View {
                 let user = String(parts[0])
                 let pid = Int32(parts[1]) ?? 0
                 let cpuPercent = Double(parts[2]) ?? 0
-                let memPercent = Double(parts[3]) ?? 0
                 let name = String(parts[10...].joined(separator: " ").split(separator: "/").last ?? "")
                     .trimmingCharacters(in: .whitespaces)
 
@@ -185,7 +189,7 @@ struct ProcessesView: View {
                               user.hasPrefix("_") ||
                               name.hasPrefix("com.apple")
 
-                newProcesses.append(ProcessInfo(
+                processArray.append(ProcessInfo(
                     id: pid,
                     name: name.isEmpty ? "Unknown" : name,
                     cpuPercent: cpuPercent,
@@ -195,9 +199,12 @@ struct ProcessesView: View {
                 ))
             }
 
-            processes = newProcesses
-        }
+            return processArray
+        }.value
 
+        // Update state on main actor with a small delay to prevent reentrancy
+        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 second
+        processes = newProcesses
         isRefreshing = false
     }
 }
@@ -319,18 +326,28 @@ struct ProcessDetailView: View {
         .frame(minWidth: 280)
     }
 
+    @MainActor
     private func terminateProcess() async {
         let executor = CommandExecutor.shared
         _ = try? await executor.execute("kill \(process.id)")
         try? await Task.sleep(nanoseconds: 500_000_000)
-        onAction()
+        // Defer the callback to avoid reentrancy
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 100_000_000)
+            onAction()
+        }
     }
 
+    @MainActor
     private func forceKillProcess() async {
         let executor = CommandExecutor.shared
         _ = try? await executor.execute("kill -9 \(process.id)")
         try? await Task.sleep(nanoseconds: 500_000_000)
-        onAction()
+        // Defer the callback to avoid reentrancy
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 100_000_000)
+            onAction()
+        }
     }
 
     private func openInActivityMonitor() async {

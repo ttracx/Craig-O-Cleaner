@@ -51,6 +51,9 @@ public final class CommandExecutor: ObservableObject {
     @Published public private(set) var lastResult: CommandResult?
 
     private let defaultTimeout: TimeInterval = 30
+    private var isAuthorized = false
+    private var authorizationExpiry: Date?
+    private let authorizationCacheDuration: TimeInterval = 300 // 5 minutes
 
     // MARK: - Initialization
 
@@ -140,6 +143,19 @@ public final class CommandExecutor: ObservableObject {
         timeout: TimeInterval? = nil
     ) async throws -> CommandResult {
 
+        // First try to use standard sudo (leverages macOS sudo credential cache)
+        do {
+            let sudoResult = try await execute("sudo -n \(command)", timeout: timeout)
+            if sudoResult.isSuccess {
+                isAuthorized = true
+                authorizationExpiry = Date().addingTimeInterval(authorizationCacheDuration)
+                return sudoResult
+            }
+        } catch {
+            // sudo -n failed, need to prompt for authorization
+        }
+
+        // Use osascript for authorization prompt
         let escapedCommand = command.replacingOccurrences(of: "\\", with: "\\\\")
             .replacingOccurrences(of: "\"", with: "\\\"")
 
@@ -147,7 +163,44 @@ public final class CommandExecutor: ObservableObject {
         do shell script "\(escapedCommand)" with administrator privileges
         """
 
-        return try await executeAppleScript(script)
+        let result = try await executeAppleScript(script)
+
+        // Mark as authorized for this session
+        if result.isSuccess {
+            isAuthorized = true
+            authorizationExpiry = Date().addingTimeInterval(authorizationCacheDuration)
+        }
+
+        return result
+    }
+
+    /// Execute multiple privileged commands in one authorization prompt
+    public func executePrivilegedBatch(_ commands: [String]) async throws -> [CommandResult] {
+        // Combine all commands into a single script to minimize prompts
+        let combinedCommand = commands.joined(separator: "; ")
+
+        let escapedCommand = combinedCommand.replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "\"", with: "\\\"")
+
+        let script = """
+        do shell script "\(escapedCommand)" with administrator privileges
+        """
+
+        let result = try await executeAppleScript(script)
+
+        if result.isSuccess {
+            isAuthorized = true
+            authorizationExpiry = Date().addingTimeInterval(authorizationCacheDuration)
+        }
+
+        // Return the result for all commands (simplified)
+        return [result]
+    }
+
+    /// Clear authorization state
+    public func clearAuthorizationCache() {
+        isAuthorized = false
+        authorizationExpiry = nil
     }
 
     /// Execute an AppleScript

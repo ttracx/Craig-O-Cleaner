@@ -2,12 +2,15 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var appState: AppState
+    @State private var columnVisibility: NavigationSplitViewVisibility = .all
 
     var body: some View {
-        NavigationSplitView {
+        NavigationSplitView(columnVisibility: $columnVisibility) {
             SidebarView()
+                .navigationSplitViewColumnWidth(min: 220, ideal: 250, max: 300)
         } detail: {
             DetailView()
+                .navigationSplitViewColumnWidth(min: 600, ideal: 800)
         }
         .navigationSplitViewStyle(.balanced)
         .overlay {
@@ -34,99 +37,104 @@ struct SidebarView: View {
     @EnvironmentObject var appState: AppState
 
     var body: some View {
-        List(selection: $appState.selectedTab) {
-            Section {
-                ForEach(AppState.TabSelection.allCases.prefix(5), id: \.self) { tab in
-                    NavigationLink(value: tab) {
-                        Label(tab.rawValue, systemImage: tab.icon)
+        VStack(spacing: 0) {
+            List(selection: $appState.selectedTab) {
+                Section {
+                    ForEach(AppState.TabSelection.allCases.prefix(5), id: \.self) { tab in
+                        NavigationLink(value: tab) {
+                            Label(tab.rawValue, systemImage: tab.icon)
+                        }
                     }
-                }
-            } header: {
-                HStack {
-                    Image("Logo")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 60)
-                    VStack(alignment: .leading) {
-                        Text("Craig-O")
-                            .font(.headline)
-                        Text("Terminator")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundStyle(
-                                LinearGradient(
-                                    colors: [.red, .orange],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
+                } header: {
+                    HStack {
+                        Image("AppLogo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 60)
+                        VStack(alignment: .leading) {
+                            Text("Craig-O")
+                                .font(.headline)
+                            Text("Terminator")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundStyle(
+                                    LinearGradient(
+                                        colors: [.red, .orange],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
                                 )
-                            )
+                        }
+                    }
+                    .padding(.bottom, 10)
+                }
+
+                Section("AI & Automation") {
+                    NavigationLink(value: AppState.TabSelection.agents) {
+                        Label("Agents", systemImage: "brain.head.profile")
                     }
                 }
-                .padding(.bottom, 10)
-            }
 
-            Section("AI & Automation") {
-                NavigationLink(value: AppState.TabSelection.agents) {
-                    Label("Agents", systemImage: "brain.head.profile")
+                Section("System") {
+                    NavigationLink(value: AppState.TabSelection.settings) {
+                        Label("Settings", systemImage: "gearshape.fill")
+                    }
                 }
             }
+            .listStyle(.sidebar)
 
-            Section("System") {
-                NavigationLink(value: AppState.TabSelection.settings) {
-                    Label("Settings", systemImage: "gearshape.fill")
+            Divider()
+
+            VStack(spacing: 8) {
+                // Quick action buttons
+                HStack(spacing: 8) {
+                    QuickActionButton(
+                        title: "Quick",
+                        icon: "bolt.fill",
+                        color: .blue
+                    ) {
+                        Task { await appState.performQuickCleanup() }
+                    }
+
+                    QuickActionButton(
+                        title: "Full",
+                        icon: "sparkles",
+                        color: .green
+                    ) {
+                        Task { await appState.performFullCleanup() }
+                    }
+
+                    QuickActionButton(
+                        title: "Emergency",
+                        icon: "exclamationmark.triangle.fill",
+                        color: .red
+                    ) {
+                        Task { await appState.performEmergencyCleanup() }
+                    }
                 }
-            }
-        }
-        .listStyle(.sidebar)
-        .frame(minWidth: 200)
+                .padding(.horizontal)
 
-        VStack(spacing: 8) {
-            // Quick action buttons
-            HStack(spacing: 8) {
-                QuickActionButton(
-                    title: "Quick",
-                    icon: "bolt.fill",
-                    color: .blue
-                ) {
-                    Task { await appState.performQuickCleanup() }
-                }
-
-                QuickActionButton(
-                    title: "Full",
-                    icon: "sparkles",
-                    color: .green
-                ) {
-                    Task { await appState.performFullCleanup() }
-                }
-
-                QuickActionButton(
-                    title: "Emergency",
-                    icon: "exclamationmark.triangle.fill",
-                    color: .red
-                ) {
-                    Task { await appState.performEmergencyCleanup() }
-                }
-            }
-            .padding(.horizontal)
-
-            // Health indicator
-            HStack {
-                Circle()
-                    .fill(healthColor)
-                    .frame(width: 10, height: 10)
-                Text("Health: \(appState.healthScore)/100")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Spacer()
-                if appState.isAIEnabled {
-                    Label("AI", systemImage: "brain")
+                // Health indicator
+                HStack {
+                    Circle()
+                        .fill(healthColor)
+                        .frame(width: 10, height: 10)
+                    Text("Health: \(appState.healthScore)/100")
                         .font(.caption)
-                        .foregroundStyle(.green)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    if appState.isAIEnabled {
+                        Label("AI", systemImage: "brain")
+                            .font(.caption)
+                            .foregroundStyle(.green)
+                    }
                 }
+                .padding(.horizontal)
+                .padding(.bottom, 8)
             }
-            .padding(.horizontal)
-            .padding(.bottom, 8)
+            .padding(.top, 8)
         }
+        .frame(minWidth: 220)
     }
 
     private var healthColor: Color {
@@ -198,7 +206,7 @@ struct LoadingOverlay: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 20) {
-                Image("Logo")
+                Image("AppLogo")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 100)

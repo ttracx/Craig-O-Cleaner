@@ -151,6 +151,14 @@ struct AISettingsView: View {
     @Binding var ollamaModel: String
     @State private var isTestingConnection = false
     @State private var connectionStatus: ConnectionStatus = .unknown
+    @State private var ollamaInstalled = false
+    @State private var isCheckingOllama = true
+    @State private var isInstallingOllama = false
+    @State private var availableModels: [String] = []
+    @State private var runningModels: [String] = []
+    @State private var isLoadingModels = false
+    @State private var isDownloadingModel = false
+    @State private var downloadProgress: String = ""
 
     enum ConnectionStatus {
         case unknown, connected, failed
@@ -170,17 +178,79 @@ struct AISettingsView: View {
                 Text("AI Integration")
             }
 
-            if ollamaEnabled {
+            // Ollama Installation Section
+            Section {
+                HStack {
+                    if isCheckingOllama {
+                        ProgressView()
+                            .scaleEffect(0.7)
+                        Text("Checking Ollama installation...")
+                            .foregroundStyle(.secondary)
+                    } else if ollamaInstalled {
+                        Label("Ollama Installed", systemImage: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                    } else {
+                        Label("Ollama Not Installed", systemImage: "xmark.circle.fill")
+                            .foregroundStyle(.orange)
+                    }
+                }
+
+                if !ollamaInstalled && !isCheckingOllama {
+                    Button {
+                        Task { await downloadAndInstallOllama() }
+                    } label: {
+                        HStack {
+                            if isInstallingOllama {
+                                ProgressView()
+                                    .scaleEffect(0.7)
+                                Text("Installing Ollama...")
+                            } else {
+                                Label("Download & Install Ollama", systemImage: "arrow.down.circle")
+                            }
+                        }
+                    }
+                    .disabled(isInstallingOllama)
+
+                    Text("This will download and install Ollama from ollama.ai")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            } header: {
+                Text("Ollama Setup")
+            }
+
+            if ollamaEnabled && ollamaInstalled {
                 Section {
                     TextField("Host", text: $ollamaHost)
                     TextField("Port", value: $ollamaPort, format: .number)
-                    TextField("Model", text: $ollamaModel)
+
+                    Picker("Model", selection: $ollamaModel) {
+                        if availableModels.isEmpty {
+                            Text("No models available").tag("")
+                        } else {
+                            ForEach(availableModels, id: \.self) { model in
+                                HStack {
+                                    Text(model)
+                                    if runningModels.contains(model) {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundStyle(.green)
+                                    }
+                                }
+                                .tag(model)
+                            }
+                        }
+                    }
 
                     HStack {
                         Button("Test Connection") {
                             Task { await testConnection() }
                         }
                         .disabled(isTestingConnection)
+
+                        Button("Refresh Models") {
+                            Task { await loadAvailableModels() }
+                        }
+                        .disabled(isLoadingModels)
 
                         Spacer()
 
@@ -200,12 +270,78 @@ struct AISettingsView: View {
                 } footer: {
                     Text("Make sure Ollama is running with the specified model installed.")
                 }
+
+                // Default Model Installation
+                Section {
+                    if !availableModels.contains("lfm2.5-thinking") {
+                        Button {
+                            Task { await downloadDefaultModel() }
+                        } label: {
+                            HStack {
+                                if isDownloadingModel {
+                                    ProgressView()
+                                        .scaleEffect(0.7)
+                                    VStack(alignment: .leading) {
+                                        Text("Downloading lfm2.5-thinking...")
+                                        if !downloadProgress.isEmpty {
+                                            Text(downloadProgress)
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                    }
+                                } else {
+                                    Label("Install Default Model (lfm2.5-thinking)", systemImage: "arrow.down.circle.fill")
+                                }
+                            }
+                        }
+                        .disabled(isDownloadingModel)
+
+                        Text("This is the recommended model for intelligent task coordination.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        HStack {
+                            Label("Default model installed", systemImage: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
+                            Spacer()
+                            if ollamaModel != "lfm2.5-thinking" {
+                                Button("Set as Active") {
+                                    ollamaModel = "lfm2.5-thinking"
+                                }
+                                .buttonStyle(.borderedProminent)
+                            }
+                        }
+                    }
+
+                    if !runningModels.isEmpty {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Running Models:")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            ForEach(runningModels, id: \.self) { model in
+                                Text("• \(model)")
+                                    .font(.caption)
+                                    .foregroundStyle(.green)
+                            }
+                        }
+                    }
+                } header: {
+                    Text("AI Models")
+                }
             }
         }
         .formStyle(.grouped)
         .padding()
+        .task {
+            await checkOllamaInstallation()
+            if ollamaInstalled {
+                await loadAvailableModels()
+                await checkRunningModels()
+            }
+        }
     }
 
+    @MainActor
     private func testConnection() async {
         isTestingConnection = true
         connectionStatus = .unknown
@@ -218,6 +354,149 @@ struct AISettingsView: View {
         }
 
         isTestingConnection = false
+    }
+
+    @MainActor
+    private func checkOllamaInstallation() async {
+        isCheckingOllama = true
+
+        let executor = CommandExecutor.shared
+        // Check if ollama command exists
+        if let result = try? await executor.execute("which ollama") {
+            ollamaInstalled = !result.output.isEmpty && result.isSuccess
+        } else {
+            ollamaInstalled = false
+        }
+
+        isCheckingOllama = false
+    }
+
+    @MainActor
+    private func downloadAndInstallOllama() async {
+        isInstallingOllama = true
+
+        let executor = CommandExecutor.shared
+
+        // Download Ollama installer
+        _ = try? await executor.execute("curl -fsSL https://ollama.ai/install.sh | sh")
+
+        // Wait a moment for installation to complete
+        try? await Task.sleep(nanoseconds: 2_000_000_000)
+
+        // Verify installation
+        await checkOllamaInstallation()
+
+        if ollamaInstalled {
+            // Start Ollama service
+            _ = try? await executor.execute("ollama serve > /dev/null 2>&1 &")
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+
+            // Load models after installation
+            await loadAvailableModels()
+
+            // Auto-install default model if not present
+            if !availableModels.contains("lfm2.5-thinking") {
+                await downloadDefaultModel()
+            }
+        }
+
+        isInstallingOllama = false
+    }
+
+    @MainActor
+    private func loadAvailableModels() async {
+        isLoadingModels = true
+
+        let executor = CommandExecutor.shared
+
+        // First ensure Ollama is running
+        _ = try? await executor.execute("pgrep -x ollama > /dev/null || ollama serve > /dev/null 2>&1 &")
+        try? await Task.sleep(nanoseconds: 1_000_000_000)
+
+        // Get list of installed models
+        if let result = try? await executor.execute("ollama list") {
+            let lines = result.output.components(separatedBy: "\n")
+            var models: [String] = []
+
+            for line in lines {
+                let parts = line.split(separator: " ", omittingEmptySubsequences: true)
+                if parts.count > 0 && !line.contains("NAME") {
+                    let modelName = String(parts[0]).components(separatedBy: ":").first ?? ""
+                    if !modelName.isEmpty && modelName != "NAME" {
+                        models.append(modelName)
+                    }
+                }
+            }
+
+            availableModels = models.sorted()
+
+            // If no model is selected and we have models, select the first one or lfm2.5-thinking
+            if ollamaModel.isEmpty && !models.isEmpty {
+                if models.contains("lfm2.5-thinking") {
+                    ollamaModel = "lfm2.5-thinking"
+                } else {
+                    ollamaModel = models.first ?? "llama3.2"
+                }
+            }
+        }
+
+        isLoadingModels = false
+    }
+
+    @MainActor
+    private func checkRunningModels() async {
+        let executor = CommandExecutor.shared
+
+        // Check which models are currently running
+        if let result = try? await executor.execute("ollama ps") {
+            let lines = result.output.components(separatedBy: "\n")
+            var running: [String] = []
+
+            for line in lines {
+                let parts = line.split(separator: " ", omittingEmptySubsequences: true)
+                if parts.count > 0 && !line.contains("NAME") {
+                    let modelName = String(parts[0]).components(separatedBy: ":").first ?? ""
+                    if !modelName.isEmpty && modelName != "NAME" {
+                        running.append(modelName)
+                    }
+                }
+            }
+
+            runningModels = running
+        }
+    }
+
+    @MainActor
+    private func downloadDefaultModel() async {
+        isDownloadingModel = true
+        downloadProgress = "Starting download..."
+
+        let executor = CommandExecutor.shared
+
+        // Ensure Ollama is running
+        _ = try? await executor.execute("pgrep -x ollama > /dev/null || ollama serve > /dev/null 2>&1 &")
+        try? await Task.sleep(nanoseconds: 2_000_000_000)
+
+        // Download and run the model (this will download if not present)
+        downloadProgress = "Downloading lfm2.5-thinking model... This may take a few minutes."
+
+        // Run in background and capture output
+        if let result = try? await executor.execute("ollama run lfm2.5-thinking 'Hello' || ollama pull lfm2.5-thinking", timeout: 600) {
+            if result.isSuccess {
+                downloadProgress = "Model downloaded successfully!"
+                ollamaModel = "lfm2.5-thinking"
+
+                // Reload available models
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                await loadAvailableModels()
+            } else {
+                downloadProgress = "Download failed. Please try manually: ollama run lfm2.5-thinking"
+            }
+        }
+
+        try? await Task.sleep(nanoseconds: 2_000_000_000)
+        downloadProgress = ""
+        isDownloadingModel = false
     }
 }
 

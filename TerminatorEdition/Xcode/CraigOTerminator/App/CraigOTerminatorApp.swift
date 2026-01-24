@@ -9,9 +9,10 @@ struct CraigOTerminatorApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(appState)
-                .frame(minWidth: 900, minHeight: 700)
+                .frame(minWidth: 1000, idealWidth: 1200, minHeight: 700, idealHeight: 800)
         }
         .windowStyle(.hiddenTitleBar)
+        .defaultSize(width: 1200, height: 800)
         .commands {
             CommandGroup(replacing: .appInfo) {
                 Button("About Craig-O Terminator") {

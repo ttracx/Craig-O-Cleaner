@@ -74,7 +74,7 @@ struct MenuBarView: View {
                 HStack {
                     ProgressView()
                         .scaleEffect(0.6)
-                    Text(appState.statusMessage)
+                    Text(appState.currentOperation)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -109,18 +109,20 @@ struct MenuBarView: View {
         return .green
     }
 
+    @MainActor
     private func purgeMemory() async {
         appState.isLoading = true
-        appState.statusMessage = "Purging memory..."
+        appState.currentOperation = "Purging memory..."
         let executor = CommandExecutor.shared
         _ = try? await executor.executePrivileged("purge")
         await appState.updateMetrics()
         appState.isLoading = false
     }
 
+    @MainActor
     private func flushDNS() async {
         appState.isLoading = true
-        appState.statusMessage = "Flushing DNS..."
+        appState.currentOperation = "Flushing DNS..."
         let executor = CommandExecutor.shared
         _ = try? await executor.executePrivileged("dscacheutil -flushcache && killall -HUP mDNSResponder")
         appState.isLoading = false

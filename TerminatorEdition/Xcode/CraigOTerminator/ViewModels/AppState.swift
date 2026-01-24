@@ -122,6 +122,7 @@ final class AppState: ObservableObject {
         }
     }
 
+    @MainActor
     func updateMetrics() async {
         // CPU Usage
         if let result = try? await executor.execute("top -l 1 -s 0 | grep 'CPU usage'") {
@@ -214,23 +215,27 @@ final class AppState: ObservableObject {
         var memoryFreed: UInt64 = 0
         var diskFreed: UInt64 = 0
 
-        // Purge memory
+        // Batch all privileged operations together to minimize prompts
         operationProgress = 0.2
-        currentOperation = "Purging memory..."
+        currentOperation = "Executing cleanup operations..."
+
         _ = try? await executor.execute("sync")
-        if let _ = try? await executor.executePrivileged("purge") {
+
+        // Execute all privileged commands in one authorization prompt
+        let privilegedCommands = [
+            "purge",
+            "dscacheutil -flushcache && killall -HUP mDNSResponder 2>/dev/null"
+        ]
+
+        operationProgress = 0.5
+        if let _ = try? await executor.executePrivilegedBatch(privilegedCommands) {
             memoryFreed = 500_000_000 // Estimated
         }
 
-        // Clear temp files
-        operationProgress = 0.5
+        // Clear temp files (non-privileged)
+        operationProgress = 0.8
         currentOperation = "Clearing temporary files..."
         _ = try? await executor.execute("rm -rf ~/Library/Caches/TemporaryItems/* 2>/dev/null")
-
-        // Flush DNS
-        operationProgress = 0.8
-        currentOperation = "Flushing DNS..."
-        _ = try? await executor.executePrivileged("dscacheutil -flushcache && killall -HUP mDNSResponder 2>/dev/null")
 
         operationProgress = 1.0
         currentOperation = "Complete"
@@ -265,39 +270,38 @@ final class AppState: ObservableObject {
         var diskFreed: UInt64 = 0
         var cachesCleared = 0
 
-        // Purge memory
+        // Sync filesystem first
         operationProgress = 0.1
-        currentOperation = "Purging memory..."
         _ = try? await executor.execute("sync")
-        if let _ = try? await executor.executePrivileged("purge") {
-            memoryFreed = 500_000_000
-        }
 
-        // Clear user caches
-        operationProgress = 0.3
+        // Clear user caches (non-privileged)
+        operationProgress = 0.2
         currentOperation = "Clearing user caches..."
-        _ = try? await executor.execute("rm -rf ~/Library/Caches/* 2>/dev/null")
+        _ = try? await executor.execute("rm -rf ~/Library/Caches/TemporaryItems/* 2>/dev/null")
         cachesCleared += 1
         diskFreed += 100_000_000
 
-        // Clear browser caches
-        operationProgress = 0.5
+        // Clear browser caches (non-privileged)
+        operationProgress = 0.4
         currentOperation = "Clearing browser caches..."
         _ = try? await executor.execute("rm -rf ~/Library/Caches/com.apple.Safari/* 2>/dev/null")
         _ = try? await executor.execute("rm -rf ~/Library/Caches/Google/Chrome/* 2>/dev/null")
         _ = try? await executor.execute("rm -rf ~/Library/Caches/Firefox/* 2>/dev/null")
         cachesCleared += 3
 
-        // Clear temp files
-        operationProgress = 0.7
-        currentOperation = "Clearing temporary files..."
-        _ = try? await executor.execute("rm -rf ~/Library/Caches/TemporaryItems/* 2>/dev/null")
-        _ = try? await executor.executePrivileged("rm -rf /private/var/tmp/* 2>/dev/null")
+        // Batch all privileged operations together
+        operationProgress = 0.6
+        currentOperation = "Executing privileged cleanup operations..."
 
-        // Flush DNS
-        operationProgress = 0.9
-        currentOperation = "Flushing DNS..."
-        _ = try? await executor.executePrivileged("dscacheutil -flushcache && killall -HUP mDNSResponder 2>/dev/null")
+        let privilegedCommands = [
+            "purge",
+            "rm -rf /private/var/tmp/* 2>/dev/null",
+            "dscacheutil -flushcache && killall -HUP mDNSResponder 2>/dev/null"
+        ]
+
+        if let _ = try? await executor.executePrivilegedBatch(privilegedCommands) {
+            memoryFreed = 500_000_000
+        }
 
         operationProgress = 1.0
         currentOperation = "Complete"
@@ -330,31 +334,33 @@ final class AppState: ObservableObject {
         let startTime = Date()
         var processesKilled = 0
 
-        // Kill heavy processes
+        // Kill heavy processes (non-privileged)
         operationProgress = 0.2
         currentOperation = "Terminating resource hogs..."
-
-        // Kill browser helpers using too much memory
         _ = try? await executor.execute("pkill -9 -f 'Chrome Helper' 2>/dev/null")
         _ = try? await executor.execute("pkill -9 -f 'Safari Web Content' 2>/dev/null")
         processesKilled += 2
 
-        // Purge memory aggressively
-        operationProgress = 0.4
-        currentOperation = "Aggressive memory purge..."
+        // Sync filesystem
+        operationProgress = 0.3
         _ = try? await executor.execute("sync")
-        _ = try? await executor.executePrivileged("purge")
 
-        // Clear all caches
-        operationProgress = 0.6
+        // Clear user caches (non-privileged)
+        operationProgress = 0.4
         currentOperation = "Emergency cache clear..."
         _ = try? await executor.execute("rm -rf ~/Library/Caches/* 2>/dev/null")
 
-        // Clear temp
-        operationProgress = 0.8
-        currentOperation = "Clearing all temp files..."
-        _ = try? await executor.executePrivileged("rm -rf /private/var/tmp/* 2>/dev/null")
-        _ = try? await executor.executePrivileged("rm -rf /private/var/folders/*/*/*/* 2>/dev/null")
+        // Batch all privileged operations together
+        operationProgress = 0.6
+        currentOperation = "Executing emergency privileged operations..."
+
+        let privilegedCommands = [
+            "purge",
+            "rm -rf /private/var/tmp/* 2>/dev/null",
+            "rm -rf /private/var/folders/*/*/*/* 2>/dev/null"
+        ]
+
+        _ = try? await executor.executePrivilegedBatch(privilegedCommands)
 
         operationProgress = 1.0
         currentOperation = "Emergency cleanup complete"
@@ -395,12 +401,13 @@ final class AppState: ObservableObject {
     // MARK: - Alerts
 
     func showAlertMessage(_ message: String) {
-        alertMessage = message
-        showAlert = true
+        Task { @MainActor in
+            alertMessage = message
+            showAlert = true
 
-        // Auto-dismiss after 3 seconds
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
-            self?.showAlert = false
+            // Auto-dismiss after 3 seconds
+            try? await Task.sleep(nanoseconds: 3_000_000_000)
+            showAlert = false
         }
     }
 }

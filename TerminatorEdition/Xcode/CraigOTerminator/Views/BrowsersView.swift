@@ -5,6 +5,7 @@ struct BrowsersView: View {
     @State private var browsers: [BrowserInfo] = []
     @State private var selectedBrowser: BrowserInfo?
     @State private var isRefreshing = false
+    @State private var refreshTimer: Timer?
 
     struct BrowserInfo: Identifiable, Hashable {
         let id = UUID()
@@ -77,10 +78,29 @@ struct BrowsersView: View {
         .navigationTitle("Browsers")
         .task {
             await refreshBrowsers()
+            startAutoRefresh()
+        }
+        .onDisappear {
+            stopAutoRefresh()
         }
     }
 
+    private func startAutoRefresh() {
+        refreshTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: true) { _ in
+            Task { @MainActor in
+                await refreshBrowsers()
+            }
+        }
+    }
+
+    private func stopAutoRefresh() {
+        refreshTimer?.invalidate()
+        refreshTimer = nil
+    }
+
+    @MainActor
     private func refreshBrowsers() async {
+        guard !isRefreshing else { return }
         isRefreshing = true
 
         let executor = CommandExecutor.shared
