@@ -138,19 +138,30 @@ enum BrowserAutomationError: LocalizedError {
         case .browserNotInstalled(let browser):
             return "\(browser.rawValue) is not installed on this Mac."
         case .browserNotRunning(let browser):
-            return "\(browser.rawValue) is not currently running."
+            return "\(browser.rawValue) is not currently running. Please open \(browser.rawValue) and try again."
         case .automationPermissionDenied(let browser):
-            return "Automation permission denied for \(browser.rawValue). Please grant access in System Settings → Privacy & Security → Automation."
+            return """
+            Automation permission required for \(browser.rawValue).
+
+            To fix this:
+            1. Open System Settings
+            2. Go to Privacy & Security → Automation
+            3. Find Craig-O-Clean and enable \(browser.rawValue)
+            4. Restart \(browser.rawValue) if needed
+            5. Click 'Refresh' in Browser Tabs view
+
+            Tip: Run './grant-safari-permission.sh' from the project folder for guided setup.
+            """
         case .scriptExecutionFailed(let message):
             return "Script execution failed: \(message)"
         case .parseError(let message):
             return "Failed to parse browser data: \(message)"
         case .unsupportedBrowser(let browser):
-            return "\(browser.rawValue) does not support tab automation."
+            return "\(browser.rawValue) does not support tab automation through AppleScript."
         case .tabNotFound:
-            return "The specified tab could not be found."
+            return "The specified tab could not be found. It may have been closed."
         case .windowNotFound:
-            return "The specified window could not be found."
+            return "The specified window could not be found. It may have been closed."
         }
     }
 }
@@ -191,10 +202,77 @@ final class BrowserAutomationService: ObservableObject {
     }
     
     // MARK: - Initialization
-    
+
     init() {
         logger.info("BrowserAutomationService initialized")
         detectInstalledBrowsers()
+
+        // Check if we should prompt for Safari permissions on first launch
+        Task { @MainActor in
+            await checkAndRequestSafariPermissionIfNeeded()
+        }
+    }
+
+    /// Proactively request Safari automation permission on first launch
+    func checkAndRequestSafariPermissionIfNeeded() async {
+        let hasRequestedKey = "hasRequestedSafariAutomation"
+
+        // Only do this once - don't spam the user
+        guard !UserDefaults.standard.bool(forKey: hasRequestedKey) else {
+            logger.info("Safari permission already requested previously")
+            return
+        }
+
+        // Check if Safari is installed
+        guard installedBrowsers.contains(.safari) else {
+            logger.info("Safari not installed, skipping permission request")
+            return
+        }
+
+        logger.info("First launch - will request Safari automation permission")
+
+        // Mark as requested (even if user denies, we don't want to keep prompting)
+        UserDefaults.standard.set(true, forKey: hasRequestedKey)
+
+        // Launch Safari if it's not running to ensure the permission prompt appears
+        let safariRunning = NSWorkspace.shared.runningApplications.contains {
+            $0.bundleIdentifier == "com.apple.Safari"
+        }
+
+        if !safariRunning {
+            logger.info("Launching Safari to trigger permission prompt")
+            // Launch Safari in the background using modern API
+            if let safariURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.Safari") {
+                let configuration = NSWorkspace.OpenConfiguration()
+                configuration.activates = false // Don't bring Safari to front
+                configuration.hides = false
+
+                try? await NSWorkspace.shared.openApplication(at: safariURL, configuration: configuration)
+                // Wait for Safari to launch
+                try? await Task.sleep(for: .seconds(2))
+            }
+        }
+
+        // Now trigger the permission prompt with a simple AppleScript
+        await triggerSafariPermissionPrompt()
+    }
+
+    /// Trigger the macOS permission prompt for Safari automation
+    func triggerSafariPermissionPrompt() async {
+        logger.info("Triggering Safari automation permission prompt")
+
+        let script = """
+        tell application "Safari"
+            get name
+        end tell
+        """
+
+        do {
+            _ = try await executeAppleScript(script)
+            logger.info("Safari permission prompt triggered successfully")
+        } catch {
+            logger.warning("Safari permission prompt failed (may be denied): \(error.localizedDescription)")
+        }
     }
     
     deinit {
@@ -444,8 +522,13 @@ final class BrowserAutomationService: ObservableObject {
 
                     self?.logger.error("AppleScript error \(errorNumber): \(errorMessage)")
 
-                    // Error -1743 is "Not authorized to send Apple events"
-                    if errorNumber == -1743 {
+                    // Handle various permission-related error codes
+                    // -1743 = "Not authorized to send Apple events"
+                    // -10004 = "A privilege violation occurred" (Safari-specific)
+                    // -1728 = "Can't get <object>" (often means permission denied)
+                    // -600 = "Application isn't running" or permission issue
+                    if errorNumber == -1743 || errorNumber == -10004 || errorNumber == -1728 {
+                        self?.logger.warning("Automation permission denied for Safari. User needs to grant permission in System Settings.")
                         continuation.resume(throwing: BrowserAutomationError.automationPermissionDenied(.safari))
                     } else {
                         continuation.resume(throwing: BrowserAutomationError.scriptExecutionFailed(errorMessage))

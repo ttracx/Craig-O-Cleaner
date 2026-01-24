@@ -23,6 +23,7 @@
 		2BC5E1B22F1FFFEC00093C17 /* PrivilegeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8F6221E6CFB4F658E745547 /* PrivilegeService.swift */; };
 		2BC5E1B32F1FFFEC00093C17 /* DebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D350B359D5421F816720F5 /* DebugLogger.swift */; };
 		2BC5E1B42F1FFFEC00093C17 /* LoggingExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7313236940042A799441B8A /* LoggingExtensions.swift */; };
+		2BD1F7C12F2482E80040EA8C /* Configuration.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 2BD1F7C02F2482E80040EA8C /* Configuration.storekit */; };
 		2FE223FFC5AB086E1F390837 /* SystemCPUMonitorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23FD6D8224281B502229F05E /* SystemCPUMonitorView.swift */; };
 		3134FABB77F435E86E6FED7 /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66FAA11487974A19801962C /* SnapshotHelper.swift */; };
 		320BA199692F2B0CE464C826 /* ClearMindUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3347C167919A7F97FE2CDE86 /* ClearMindUITests.swift */; };
@@ -85,6 +86,7 @@
 		253B9B7F0FD0202F49F06356 /* SettingsPermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPermissionsView.swift; sourceTree = "<group>"; };
 		2ACBCDA24FEC65C0692216ED /* AutoCleanupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoCleanupService.swift; sourceTree = "<group>"; };
 		2B3C4D5E6F7890ABCDEF0102 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
+		2BD1F7C02F2482E80040EA8C /* Configuration.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Configuration.storekit; sourceTree = "<group>"; };
 		3347C167919A7F97FE2CDE86 /* ClearMindUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClearMindUITests.swift; sourceTree = "<group>"; };
 		3776CD73A28435270067999F /* SystemMemoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMemoryManager.swift; sourceTree = "<group>"; };
 		3C4D5E6F7890ABCDEF010203 /* LocalUserStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalUserStore.swift; sourceTree = "<group>"; };
@@ -188,6 +190,7 @@
 		AAA8B2312C2FDE28DD3FAF8F /* Craig-O-Clean */ = {
 			isa = PBXGroup;
 			children = (
+				2BD1F7C02F2482E80040EA8C /* Configuration.storekit */,
 				44536121E1A03039EB5C837E /* Assets.xcassets */,
 				496C4A64B26A83B21DBF72D2 /* ContentView.swift */,
 				A963F27F151E1C97ACCFAE4B /* Craig_O_CleanApp.swift */,
@@ -341,6 +344,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F5F21EDE8F69891F6A77AD61 /* Assets.xcassets in Resources */,
+				2BD1F7C12F2482E80040EA8C /* Configuration.storekit in Resources */,
 				C1CF78B065B69217240721DE /* Craig-O-Cleaner-logo.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -461,7 +465,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = K36LFHM32T;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_FILE_ACCESS_DOWNLOADS_FOLDER = readwrite;
@@ -693,7 +697,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = K36LFHM32T;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_FILE_ACCESS_DOWNLOADS_FOLDER = readwrite;

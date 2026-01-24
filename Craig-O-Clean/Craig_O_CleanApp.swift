@@ -363,10 +363,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         // Update tooltip with current status
         if let memory = systemMetrics?.memoryMetrics {
+            let usedGB = Double(memory.usedRAM) / 1024 / 1024 / 1024
+            let totalGB = Double(memory.totalRAM) / 1024 / 1024 / 1024
             button.toolTip = String(format: "Craig-O-Clean\nMemory: %.0f%% used (%.1f GB / %.1f GB)",
                                     memory.usedPercentage,
-                                    memory.usedRAM,
-                                    memory.totalRAM)
+                                    usedGB,
+                                    totalGB)
         } else {
             button.toolTip = "Craig-O-Clean"
         }
@@ -408,6 +410,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         // Running Apps submenu (for force quit)
         let runningAppsMenu = NSMenu()
+        runningAppsMenu.delegate = self // Set delegate so menuWillOpen gets called for submenu
         let runningAppsItem = NSMenuItem(title: "Force Quit App", action: nil, keyEquivalent: "")
         runningAppsItem.submenu = runningAppsMenu
         runningAppsMenuItem = runningAppsItem
@@ -455,6 +458,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         updateRunningAppsMenu()
     }
 
+    func menuWillOpen(_ menu: NSMenu) {
+        // This is called right before a menu opens
+        // Update running apps if this is the submenu
+        if menu == runningAppsMenuItem?.submenu {
+            print("🔵 Force Quit submenu opening - updating apps list")
+            updateRunningAppsMenu()
+        }
+    }
+
     private func updateMemoryStatusItem(_ menu: NSMenu) {
         guard let memoryItem = menu.item(withTag: 100) else { return }
 
@@ -474,12 +486,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func updateRunningAppsMenu() {
-        guard let submenu = runningAppsMenuItem?.submenu else { return }
+        print("🟢 updateRunningAppsMenu called")
+
+        guard let submenu = runningAppsMenuItem?.submenu else {
+            print("🔴 ERROR: submenu is nil")
+            return
+        }
+
+        print("🟢 Submenu exists, removing all items")
         submenu.removeAllItems()
 
         // Get our own bundle ID and PID to exclude from the list
         let ownBundleID = Bundle.main.bundleIdentifier
         let ownPID = Foundation.ProcessInfo.processInfo.processIdentifier
+
+        print("🟢 Own bundle ID: \(ownBundleID ?? "nil"), PID: \(ownPID)")
 
         // Get running applications sorted by memory usage, excluding ourselves
         let runningApps = NSWorkspace.shared.runningApplications
@@ -490,20 +511,25 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 $0.processIdentifier != ownPID          // Exclude ourselves by PID
             }
             .sorted { ($0.localizedName ?? "") < ($1.localizedName ?? "") }
-        
+
+        print("🟢 Found \(runningApps.count) running apps")
+
         if runningApps.isEmpty {
             let noAppsItem = NSMenuItem(title: "No apps running", action: nil, keyEquivalent: "")
             noAppsItem.isEnabled = false
             submenu.addItem(noAppsItem)
+            print("🟡 No apps to show")
             return
         }
-        
+
         // Add header
         let headerItem = NSMenuItem(title: "Select app to force quit:", action: nil, keyEquivalent: "")
         headerItem.isEnabled = false
         submenu.addItem(headerItem)
         submenu.addItem(NSMenuItem.separator())
-        
+
+        print("🟢 Adding menu items for each app...")
+
         // Add each running app
         for app in runningApps {
             guard let appName = app.localizedName else { continue }
@@ -527,13 +553,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 menuItem.title = "\(appName) — \(process.formattedMemoryUsage)"
             }
 
-            print("📋 Added menu item for \(appName) with PID \(app.processIdentifier)")
+            print("📋 Added menu item for \(appName) with PID \(app.processIdentifier), action: \(menuItem.action?.description ?? "nil"), target: \(menuItem.target != nil ? "set" : "nil")")
             submenu.addItem(menuItem)
         }
-        
+
+        print("🟢 Finished adding \(runningApps.count) app menu items")
+
         // Add separator and "Force Quit All Non-Essential" option
         submenu.addItem(NSMenuItem.separator())
-        
+
         let forceQuitAllItem = NSMenuItem(
             title: "Force Quit All Background Apps",
             action: #selector(forceQuitAllBackground),
@@ -541,6 +569,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         )
         forceQuitAllItem.target = self
         submenu.addItem(forceQuitAllItem)
+
+        print("🟢 updateRunningAppsMenu complete")
     }
     
     @objc func forceQuitSelectedApp(_ sender: NSMenuItem) {

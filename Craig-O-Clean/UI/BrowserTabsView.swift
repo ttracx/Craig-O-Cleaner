@@ -17,6 +17,7 @@ struct BrowserTabsView: View {
     @State private var isRefreshing = false
     @State private var alertMessage = ""
     @State private var showingAlert = false
+    @State private var isRequestingPermission = false
     
     var filteredTabs: [BrowserTab] {
         var tabs = browserAutomation.allTabs
@@ -142,25 +143,25 @@ struct BrowserTabsView: View {
                 .frame(maxWidth: 400)
             
             VStack(alignment: .leading, spacing: 12) {
-                Text("How to enable:")
+                Text("Quick Setup:")
                     .font(.headline)
-                
+
                 HStack(alignment: .top, spacing: 8) {
                     Text("1.")
                         .fontWeight(.bold)
-                    Text("Open System Settings → Privacy & Security → Automation")
+                    Text("Click \"Request Permission\" below to automatically trigger the system prompt")
                 }
-                
+
                 HStack(alignment: .top, spacing: 8) {
                     Text("2.")
                         .fontWeight(.bold)
-                    Text("Find CraigOClean Control Center and enable access for your browsers")
+                    Text("When the dialog appears, click \"OK\" or \"Allow\"")
                 }
-                
+
                 HStack(alignment: .top, spacing: 8) {
                     Text("3.")
                         .fontWeight(.bold)
-                    Text("Click the refresh button above to try again")
+                    Text("If no dialog appears, use \"Open System Settings\" to grant permission manually")
                 }
             }
             .padding()
@@ -168,11 +169,35 @@ struct BrowserTabsView: View {
             .cornerRadius(12)
             
             HStack(spacing: 16) {
+                Button {
+                    Task {
+                        isRequestingPermission = true
+                        await browserAutomation.triggerSafariPermissionPrompt()
+                        // Refresh permissions after a delay to check if granted
+                        try? await Task.sleep(for: .seconds(1))
+                        await permissions.checkAllPermissions()
+                        isRequestingPermission = false
+                    }
+                } label: {
+                    if isRequestingPermission {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                                .controlSize(.small)
+                            Text("Requesting...")
+                        }
+                    } else {
+                        Text("Request Permission")
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(isRequestingPermission)
+                .help("Automatically trigger the system permission dialog for Safari")
+
                 Button("Open System Settings") {
                     permissions.openSystemSettings(for: .automation)
                 }
-                .buttonStyle(.borderedProminent)
-                
+                .buttonStyle(.bordered)
+
                 Button("Learn More") {
                     showingPermissionsHelp = true
                 }
@@ -762,13 +787,31 @@ struct PermissionsHelpSheet: View {
                     Divider()
                     
                     VStack(alignment: .leading, spacing: 8) {
+                        Text("Quick Tip")
+                            .font(.headline)
+
+                        Text("Click the \"Request Permission\" button and CraigOClean will automatically:")
+
+                        Text("• Launch Safari if it's not running")
+                        Text("• Trigger the macOS permission dialog")
+                        Text("• Show you exactly what to click")
+
+                        Text("\nThis is much easier than manually navigating System Settings!")
+                            .fontWeight(.semibold)
+                    }
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                    Divider()
+
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Troubleshooting")
                             .font(.headline)
-                        
-                        Text("• If CraigOClean isn't listed, try using the Browser Tabs feature first - this will trigger the permission prompt")
-                        
-                        Text("• Make sure the browser is running when you try to grant permission")
-                        
+
+                        Text("• If no dialog appears after clicking \"Request Permission\", the permission may have been previously denied. Use \"Open System Settings\" to change it.")
+
+                        Text("• Make sure Safari is installed on your Mac")
+
                         Text("• Some browsers may require a restart after granting permission")
                     }
                     .font(.caption)
