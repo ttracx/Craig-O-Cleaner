@@ -94,6 +94,11 @@ class BrowserTabService: ObservableObject {
 
         tabs = allTabs
         isLoading = false
+
+        print("BrowserTabService: Fetched \(tabs.count) total tabs from all browsers")
+        if tabs.isEmpty {
+            print("BrowserTabService: ⚠️ No tabs found. Check Automation permissions in System Settings → Privacy & Security → Automation")
+        }
     }
 
     private func fetchTabs(for browser: BrowserTab.BrowserType) async -> [BrowserTab] {
@@ -155,8 +160,16 @@ class BrowserTabService: ObservableObject {
                 if task.terminationStatus == 0 {
                     let data = pipe.fileHandleForReading.readDataToEndOfFile()
                     if let output = String(data: data, encoding: .utf8) {
+                        print("BrowserTabService: \(browser.rawValue) raw output: \(output.prefix(200))")
                         tabs = self.parseTabs(output: output, browser: browser)
+                        print("BrowserTabService: Fetched \(tabs.count) tabs from \(browser.rawValue)")
                     }
+                } else {
+                    let errorData = (task.standardError as! Pipe).fileHandleForReading.readDataToEndOfFile()
+                    if let errorOutput = String(data: errorData, encoding: .utf8) {
+                        print("BrowserTabService: \(browser.rawValue) error: \(errorOutput)")
+                    }
+                    print("BrowserTabService: \(browser.rawValue) failed with status \(task.terminationStatus)")
                 }
             } catch {
                 print("BrowserTabService: Failed to fetch \(browser.rawValue) tabs: \(error)")
@@ -203,6 +216,28 @@ class BrowserTabService: ObservableObject {
                     ))
                 }
                 currentTab = []
+            }
+        }
+
+        // Process last item if any
+        if !current.isEmpty && !current.trimmingCharacters(in: .whitespaces).isEmpty {
+            currentTab.append(current.trimmingCharacters(in: .whitespaces))
+        }
+
+        // Process final tab if complete
+        if currentTab.count == 4 {
+            if let windowIdx = Int(currentTab[0]),
+               let tabIdx = Int(currentTab[1]) {
+                let title = currentTab[2].replacingOccurrences(of: "\"", with: "")
+                let url = currentTab[3].replacingOccurrences(of: "\"", with: "")
+
+                tabs.append(BrowserTab(
+                    browser: browser,
+                    title: title,
+                    url: url,
+                    windowIndex: windowIdx,
+                    tabIndex: tabIdx
+                ))
             }
         }
 
