@@ -65,13 +65,9 @@ struct MenuBarView: View {
             // Additional delay to ensure app is fully initialized
             try? await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds
 
-            // Refresh data with error handling
-            do {
-                await refreshBrowserCount()
-                await refreshTopProcesses()
-            } catch {
-                print("MenuBarView: Failed to initialize: \(error)")
-            }
+            // Refresh data (errors are handled internally)
+            await refreshBrowserCount()
+            await refreshTopProcesses()
         }
     }
 
