@@ -100,32 +100,37 @@ final class ProcessMonitorService: ObservableObject {
         var totalCPU: Double = 0
         var totalMemory: Double = 0
 
-        // Use ps aux with sorting for better performance
-        let command = "ps aux --sort=-%mem | head -\(maxProcessCount)"
+        // Use ps aux (BSD-style, no --sort on macOS)
+        let command = "ps aux | head -\(maxProcessCount + 1)"
 
         let task = Process()
         task.launchPath = "/bin/sh"
         task.arguments = ["-c", command]
         let pipe = Pipe()
+        let errorPipe = Pipe()
         task.standardOutput = pipe
-        task.standardError = Pipe()
+        task.standardError = errorPipe
 
         do {
             try task.run()
             task.waitUntilExit()
 
-            guard task.terminationStatus == 0 else {
-                print("ProcessMonitorService: ps command failed")
+            if task.terminationStatus != 0 {
+                let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+                let errorOutput = String(data: errorData, encoding: .utf8) ?? "unknown error"
+                print("ProcessMonitorService: ps command failed with status \(task.terminationStatus): \(errorOutput)")
                 return ([], 0, 0)
             }
 
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
             guard let output = String(data: data, encoding: .utf8) else {
+                print("ProcessMonitorService: Failed to decode ps output")
                 return ([], 0, 0)
             }
 
             // Parse output
             let lines = output.components(separatedBy: "\n")
+            print("ProcessMonitorService: ps command returned \(lines.count) lines")
 
             for (index, line) in lines.enumerated() {
                 // Skip header line
