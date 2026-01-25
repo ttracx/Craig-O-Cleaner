@@ -195,9 +195,9 @@ struct ProcessRow: View {
 }
 
 struct ProcessDetailView: View {
-    let process: ProcessesView.ProcessInfo
-    let onAction: () -> Void
-    @State private var processDetails: String = ""
+    let process: ProcessMonitorService.ProcessInfo
+    @ObservedObject var processMonitor: ProcessMonitorService
+    @State private var isTerminating = false
 
     var body: some View {
         VStack(spacing: 20) {
@@ -211,7 +211,7 @@ struct ProcessDetailView: View {
                     .font(.title2)
                     .fontWeight(.bold)
 
-                Text("PID: \(process.id)")
+                Text("PID: \(process.pid)")
                     .font(.system(.body, design: .monospaced))
                     .foregroundStyle(.secondary)
             }
@@ -241,6 +241,7 @@ struct ProcessDetailView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
+                    .disabled(isTerminating)
 
                     Button {
                         Task { @MainActor in
@@ -252,6 +253,7 @@ struct ProcessDetailView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(.red)
+                    .disabled(isTerminating)
                 }
 
                 if !process.isSystemProcess {
@@ -288,24 +290,41 @@ struct ProcessDetailView: View {
     }
 
     private func terminateProcess() async {
-        let executor = CommandExecutor.shared
-        _ = try? await executor.execute("kill \(process.id)")
+        isTerminating = true
+        defer { isTerminating = false }
 
-        try? await Task.sleep(nanoseconds: 500_000_000)
-        onAction()
+        let result = await processMonitor.killProcess(pid: process.pid, force: false)
+
+        switch result {
+        case .success:
+            print("ProcessDetailView: Process \(process.pid) terminated successfully")
+        case .failure(let error):
+            print("ProcessDetailView: Failed to terminate process \(process.pid): \(error)")
+        }
     }
 
     private func forceKillProcess() async {
-        let executor = CommandExecutor.shared
-        _ = try? await executor.execute("kill -9 \(process.id)")
+        isTerminating = true
+        defer { isTerminating = false }
 
-        try? await Task.sleep(nanoseconds: 500_000_000)
-        onAction()
+        let result = await processMonitor.killProcess(pid: process.pid, force: true)
+
+        switch result {
+        case .success:
+            print("ProcessDetailView: Process \(process.pid) force killed successfully")
+        case .failure(let error):
+            print("ProcessDetailView: Failed to force kill process \(process.pid): \(error)")
+        }
     }
 
     private func openInActivityMonitor() async {
-        let executor = CommandExecutor.shared
-        _ = try? await executor.execute("open -a 'Activity Monitor'")
+        let task = Process()
+        task.launchPath = "/usr/bin/open"
+        task.arguments = ["-a", "Activity Monitor"]
+        task.standardOutput = Pipe()
+        task.standardError = Pipe()
+
+        try? task.run()
     }
 }
 
