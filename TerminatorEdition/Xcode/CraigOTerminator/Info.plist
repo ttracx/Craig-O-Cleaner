@@ -12,5 +12,7 @@
 	<true/>
 	<key>NSAppleScriptEnabled</key>
 	<true/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
