@@ -322,32 +322,44 @@ final class UserProfileService: ObservableObject {
     // MARK: - Sync Preferences
 
     func syncPreferencesFromAppStorage() async {
-        guard var profile = currentProfile else { return }
+        guard var profile = currentProfile else {
+            print("UserProfileService: No profile to sync")
+            return
+        }
+
+        print("UserProfileService: Syncing preferences from AppStorage to iCloud...")
 
         // Get current AppStorage values
         let userDefaults = UserDefaults.standard
 
         profile.preferences = UserProfile.UserPreferences(
-            autonomousMode: userDefaults.bool(forKey: "autonomousMode"),
-            memoryThreshold: userDefaults.double(forKey: "memoryThreshold"),
-            diskThreshold: userDefaults.double(forKey: "diskThreshold"),
-            checkInterval: userDefaults.double(forKey: "checkInterval"),
-            showNotifications: userDefaults.bool(forKey: "showNotifications"),
-            launchAtLogin: userDefaults.bool(forKey: "launchAtLogin"),
-            ollamaEnabled: userDefaults.bool(forKey: "ollamaEnabled"),
-            ollamaHost: userDefaults.string(forKey: "ollamaHost") ?? "localhost",
-            ollamaPort: userDefaults.integer(forKey: "ollamaPort"),
-            ollamaModel: userDefaults.string(forKey: "ollamaModel") ?? "llama3.2"
+            autonomousMode: userDefaults.object(forKey: "autonomousMode") != nil ? userDefaults.bool(forKey: "autonomousMode") : profile.preferences.autonomousMode,
+            memoryThreshold: userDefaults.object(forKey: "memoryThreshold") != nil ? userDefaults.double(forKey: "memoryThreshold") : profile.preferences.memoryThreshold,
+            diskThreshold: userDefaults.object(forKey: "diskThreshold") != nil ? userDefaults.double(forKey: "diskThreshold") : profile.preferences.diskThreshold,
+            checkInterval: userDefaults.object(forKey: "checkInterval") != nil ? userDefaults.double(forKey: "checkInterval") : profile.preferences.checkInterval,
+            showNotifications: userDefaults.object(forKey: "showNotifications") != nil ? userDefaults.bool(forKey: "showNotifications") : profile.preferences.showNotifications,
+            launchAtLogin: userDefaults.object(forKey: "launchAtLogin") != nil ? userDefaults.bool(forKey: "launchAtLogin") : profile.preferences.launchAtLogin,
+            ollamaEnabled: userDefaults.object(forKey: "ollamaEnabled") != nil ? userDefaults.bool(forKey: "ollamaEnabled") : profile.preferences.ollamaEnabled,
+            ollamaHost: userDefaults.string(forKey: "ollamaHost") ?? profile.preferences.ollamaHost,
+            ollamaPort: userDefaults.object(forKey: "ollamaPort") != nil ? userDefaults.integer(forKey: "ollamaPort") : profile.preferences.ollamaPort,
+            ollamaModel: userDefaults.string(forKey: "ollamaModel") ?? profile.preferences.ollamaModel
         )
 
         profile.updatedAt = Date()
         currentProfile = profile
 
         await saveProfile()
+
+        print("UserProfileService: Preferences synced successfully")
     }
 
     func applyPreferencesToAppStorage() {
-        guard let profile = currentProfile else { return }
+        guard let profile = currentProfile else {
+            print("UserProfileService: No profile to restore from")
+            return
+        }
+
+        print("UserProfileService: Restoring preferences from iCloud to AppStorage...")
 
         let userDefaults = UserDefaults.standard
 
@@ -363,6 +375,8 @@ final class UserProfileService: ObservableObject {
         userDefaults.set(profile.preferences.ollamaModel, forKey: "ollamaModel")
 
         userDefaults.synchronize()
+
+        print("UserProfileService: Preferences restored successfully")
     }
 
     // MARK: - Private

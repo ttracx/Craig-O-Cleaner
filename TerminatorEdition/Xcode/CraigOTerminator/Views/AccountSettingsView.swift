@@ -409,32 +409,64 @@ struct SignUpSheet: View {
 
 // MARK: - Image Picker
 
-struct ImagePicker: NSViewRepresentable {
+struct ImagePicker: View {
     @Binding var image: NSImage?
     @Environment(\.dismiss) private var dismiss
 
-    func makeNSView(context: Context) -> NSView {
-        let view = NSView()
+    var body: some View {
+        VStack {
+            Text("Select Profile Picture")
+                .font(.title2)
+                .padding()
 
+            Button("Choose Image") {
+                showImagePicker()
+            }
+            .buttonStyle(.borderedProminent)
+            .padding()
+
+            Button("Cancel") {
+                dismiss()
+            }
+            .padding()
+        }
+        .frame(width: 400, height: 300)
+        .onAppear {
+            // Small delay to ensure view is fully presented
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                showImagePicker()
+            }
+        }
+    }
+
+    private func showImagePicker() {
         let panel = NSOpenPanel()
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
         panel.canChooseFiles = true
         panel.allowedContentTypes = [.image]
+        panel.message = "Choose a profile picture"
+        panel.prompt = "Select"
+
+        // Make sure panel appears in front
+        panel.level = .modalPanel
 
         panel.begin { response in
             if response == .OK, let url = panel.url {
                 if let loadedImage = NSImage(contentsOf: url) {
-                    self.image = loadedImage
+                    DispatchQueue.main.async {
+                        self.image = loadedImage
+                        self.dismiss()
+                    }
+                }
+            } else {
+                // User cancelled
+                DispatchQueue.main.async {
+                    self.dismiss()
                 }
             }
-            dismiss()
         }
-
-        return view
     }
-
-    func updateNSView(_ nsView: NSView, context: Context) {}
 }
 
 // MARK: - Preview

@@ -65,64 +65,113 @@ struct MenuBarView: View {
 
     // MARK: - Helper Functions
 
-    @MainActor
     private func refreshBrowserCount() async {
-        let executor = CommandExecutor.shared
         var count = 0
 
         // Check Safari tabs
-        if let result = try? await executor.executeAppleScript("""
-            tell application "Safari"
-                if it is running then
-                    set tabCount to 0
-                    repeat with w in windows
-                        set tabCount to tabCount + (count of tabs of w)
-                    end repeat
-                    return tabCount
-                end if
-            end tell
-            """) {
-            count += Int(result.output.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+        let safariScript = """
+        tell application "Safari"
+            if it is running then
+                set tabCount to 0
+                repeat with w in windows
+                    set tabCount to tabCount + (count of tabs of w)
+                end repeat
+                return tabCount
+            end if
+        end tell
+        """
+
+        let safariTask = Process()
+        safariTask.launchPath = "/usr/bin/osascript"
+        safariTask.arguments = ["-e", safariScript]
+        let safariPipe = Pipe()
+        safariTask.standardOutput = safariPipe
+        safariTask.standardError = Pipe()
+
+        try? safariTask.run()
+        safariTask.waitUntilExit()
+
+        if safariTask.terminationStatus == 0 {
+            let data = safariPipe.fileHandleForReading.readDataToEndOfFile()
+            if let output = String(data: data, encoding: .utf8) {
+                count += Int(output.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+            }
         }
 
         // Check Chrome tabs
-        if let result = try? await executor.executeAppleScript("""
-            tell application "Google Chrome"
-                if it is running then
-                    set tabCount to 0
-                    repeat with w in windows
-                        set tabCount to tabCount + (count of tabs of w)
-                    end repeat
-                    return tabCount
-                end if
-            end tell
-            """) {
-            count += Int(result.output.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+        let chromeScript = """
+        tell application "Google Chrome"
+            if it is running then
+                set tabCount to 0
+                repeat with w in windows
+                    set tabCount to tabCount + (count of tabs of w)
+                end repeat
+                return tabCount
+            end if
+        end tell
+        """
+
+        let chromeTask = Process()
+        chromeTask.launchPath = "/usr/bin/osascript"
+        chromeTask.arguments = ["-e", chromeScript]
+        let chromePipe = Pipe()
+        chromeTask.standardOutput = chromePipe
+        chromeTask.standardError = Pipe()
+
+        try? chromeTask.run()
+        chromeTask.waitUntilExit()
+
+        if chromeTask.terminationStatus == 0 {
+            let data = chromePipe.fileHandleForReading.readDataToEndOfFile()
+            if let output = String(data: data, encoding: .utf8) {
+                count += Int(output.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+            }
         }
 
-        browserCount = count
+        await MainActor.run {
+            browserCount = count
+        }
     }
 
-    @MainActor
     private func refreshTopProcesses() async {
-        let executor = CommandExecutor.shared
+        let task = Process()
+        task.launchPath = "/bin/ps"
+        task.arguments = ["aux"]
+        let pipe = Pipe()
+        task.standardOutput = pipe
+        task.standardError = Pipe()
 
-        if let result = try? await executor.execute("ps aux | tail -n +2 | sort -nrk 3 | head -5") {
-            var processes: [(String, Double)] = []
+        try? task.run()
+        task.waitUntilExit()
 
-            for line in result.output.components(separatedBy: "\n").prefix(5) {
-                let parts = line.split(separator: " ", omittingEmptySubsequences: true)
-                guard parts.count >= 11 else { continue }
+        guard task.terminationStatus == 0 else { return }
 
-                let cpuPercent = Double(parts[2]) ?? 0
-                let name = String(parts[10...].joined(separator: " ").split(separator: "/").last ?? "")
-                    .trimmingCharacters(in: .whitespaces)
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        guard let output = String(data: data, encoding: .utf8) else { return }
 
-                if !name.isEmpty && cpuPercent > 0 {
-                    processes.append((name, cpuPercent))
-                }
+        var processes: [(String, Double)] = []
+
+        // Skip header line and sort by CPU
+        let lines = output.components(separatedBy: "\n").dropFirst()
+        var cpuProcesses: [(String, Double)] = []
+
+        for line in lines {
+            let parts = line.split(separator: " ", omittingEmptySubsequences: true)
+            guard parts.count >= 11 else { continue }
+
+            let cpuPercent = Double(parts[2]) ?? 0
+            let name = String(parts[10...].joined(separator: " ").split(separator: "/").last ?? "")
+                .trimmingCharacters(in: .whitespaces)
+
+            if !name.isEmpty && cpuPercent > 0 {
+                cpuProcesses.append((name, cpuPercent))
             }
+        }
 
+        // Sort by CPU and take top 5
+        processes = cpuProcesses.sorted { $0.1 > $1.1 }.prefix(5).map { $0 }
+
+        await MainActor.run {
             topProcesses = processes
         }
     }
@@ -335,30 +384,42 @@ struct MenuBarBrowserSection: View {
         .padding(.vertical, 4)
     }
 
-    @MainActor
     private func closeInactiveTabs() async {
-        let executor = CommandExecutor.shared
-        _ = try? await executor.executeAppleScript("""
-            tell application "Safari"
-                repeat with w in windows
-                    set urlList to {}
-                    repeat with t in tabs of w
-                        set tabURL to URL of t
-                        if urlList contains tabURL then
-                            close t
-                        else
-                            set end of urlList to tabURL
-                        end if
-                    end repeat
+        let script = """
+        tell application "Safari"
+            repeat with w in windows
+                set urlList to {}
+                repeat with t in tabs of w
+                    set tabURL to URL of t
+                    if urlList contains tabURL then
+                        close t
+                    else
+                        set end of urlList to tabURL
+                    end if
                 end repeat
-            end tell
-            """)
+            end repeat
+        end tell
+        """
+
+        let task = Process()
+        task.launchPath = "/usr/bin/osascript"
+        task.arguments = ["-e", script]
+        task.standardOutput = Pipe()
+        task.standardError = Pipe()
+
+        try? task.run()
+        task.waitUntilExit()
     }
 
-    @MainActor
     private func clearAllBrowserCaches() async {
-        let executor = CommandExecutor.shared
-        _ = try? await executor.execute("rm -rf ~/Library/Caches/com.apple.Safari/* ~/Library/Caches/Google/Chrome/* ~/Library/Caches/Firefox/* 2>/dev/null")
+        let task = Process()
+        task.launchPath = "/bin/sh"
+        task.arguments = ["-c", "rm -rf ~/Library/Caches/com.apple.Safari/* ~/Library/Caches/Google/Chrome/* ~/Library/Caches/Firefox/* 2>/dev/null"]
+        task.standardOutput = Pipe()
+        task.standardError = Pipe()
+
+        try? task.run()
+        task.waitUntilExit()
     }
 }
 
@@ -410,11 +471,26 @@ struct MenuBarProcessSection: View {
         .padding(.vertical, 4)
     }
 
-    @MainActor
     private func killHeavyProcesses() async {
-        let executor = CommandExecutor.shared
-        _ = try? await executor.execute("pkill -9 -f 'Chrome Helper' 2>/dev/null")
-        _ = try? await executor.execute("pkill -9 -f 'Safari Web Content' 2>/dev/null")
+        // Kill Chrome Helper processes
+        let chromeTask = Process()
+        chromeTask.launchPath = "/usr/bin/pkill"
+        chromeTask.arguments = ["-9", "-f", "Chrome Helper"]
+        chromeTask.standardOutput = Pipe()
+        chromeTask.standardError = Pipe()
+
+        try? chromeTask.run()
+        chromeTask.waitUntilExit()
+
+        // Kill Safari Web Content processes
+        let safariTask = Process()
+        safariTask.launchPath = "/usr/bin/pkill"
+        safariTask.arguments = ["-9", "-f", "Safari Web Content"]
+        safariTask.standardOutput = Pipe()
+        safariTask.standardError = Pipe()
+
+        try? safariTask.run()
+        safariTask.waitUntilExit()
     }
 }
 
@@ -491,23 +567,45 @@ struct MenuBarUtilitiesSection: View {
         .padding(.vertical, 4)
     }
 
-    @MainActor
     private func purgeMemory() async {
-        let executor = CommandExecutor.shared
-        _ = try? await executor.executePrivileged("purge")
+        // Note: purge requires sudo, so we use osascript to prompt for privileges
+        let script = "do shell script \"purge\" with administrator privileges"
+
+        let task = Process()
+        task.launchPath = "/usr/bin/osascript"
+        task.arguments = ["-e", script]
+        task.standardOutput = Pipe()
+        task.standardError = Pipe()
+
+        try? task.run()
+        task.waitUntilExit()
+
         await AppState.shared.updateMetrics()
     }
 
-    @MainActor
     private func flushDNS() async {
-        let executor = CommandExecutor.shared
-        _ = try? await executor.executePrivileged("dscacheutil -flushcache && killall -HUP mDNSResponder")
+        // DNS flush requires sudo
+        let script = "do shell script \"dscacheutil -flushcache && killall -HUP mDNSResponder\" with administrator privileges"
+
+        let task = Process()
+        task.launchPath = "/usr/bin/osascript"
+        task.arguments = ["-e", script]
+        task.standardOutput = Pipe()
+        task.standardError = Pipe()
+
+        try? task.run()
+        task.waitUntilExit()
     }
 
-    @MainActor
     private func rebuildLaunchServices() async {
-        let executor = CommandExecutor.shared
-        _ = try? await executor.execute("/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user")
+        let task = Process()
+        task.launchPath = "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+        task.arguments = ["-kill", "-r", "-domain", "local", "-domain", "system", "-domain", "user"]
+        task.standardOutput = Pipe()
+        task.standardError = Pipe()
+
+        try? task.run()
+        task.waitUntilExit()
     }
 }
 
@@ -515,18 +613,60 @@ struct MenuBarUtilitiesSection: View {
 
 struct MenuBarAppControls: View {
     let appState: AppState
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         VStack(spacing: 2) {
-            MenuBarButton(title: "Open Main Window", icon: "macwindow", shortcut: "⌘O") {
-                NSApp.activate(ignoringOtherApps: true)
-                NSApp.windows.first?.makeKeyAndOrderFront(nil)
+            Button {
+                // Activate app and bring main window to front
+                DispatchQueue.main.async {
+                    NSApp.activate(ignoringOtherApps: true)
+                    if let mainWindow = NSApp.windows.first(where: { $0.isVisible && $0.title == "" || $0.title == "Craig-O-Terminator" }) {
+                        mainWindow.makeKeyAndOrderFront(nil)
+                    } else {
+                        // If no main window, try opening a new one
+                        NSApp.windows.first?.makeKeyAndOrderFront(nil)
+                    }
+                }
+            } label: {
+                HStack {
+                    Image(systemName: "macwindow")
+                        .foregroundStyle(.blue)
+                        .frame(width: 20)
+                    Text("Open Main Window")
+                        .font(.caption)
+                    Spacer()
+                    Text("⌘O")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
             }
+            .buttonStyle(.plain)
 
-            MenuBarButton(title: "Settings...", icon: "gear", shortcut: "⌘,") {
-                NSApp.activate(ignoringOtherApps: true)
-                NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+            Button {
+                // Use proper Settings opening
+                DispatchQueue.main.async {
+                    NSApp.activate(ignoringOtherApps: true)
+                    openSettings()
+                }
+            } label: {
+                HStack {
+                    Image(systemName: "gear")
+                        .foregroundStyle(.blue)
+                        .frame(width: 20)
+                    Text("Settings...")
+                        .font(.caption)
+                    Spacer()
+                    Text("⌘,")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
             }
+            .buttonStyle(.plain)
 
             Divider()
                 .padding(.horizontal, 12)
@@ -590,7 +730,12 @@ struct MenuBarButton: View {
     @State private var isHovered = false
 
     var body: some View {
-        Button(action: action) {
+        Button {
+            // Make sure app is active before performing action
+            DispatchQueue.main.async {
+                action()
+            }
+        } label: {
             HStack {
                 Image(systemName: icon)
                     .foregroundStyle(.blue)

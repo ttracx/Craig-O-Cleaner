@@ -243,6 +243,10 @@ struct AISettingsView: View {
                                 }
                                 .tag(model)
                             }
+                            // Add tag for current selection if not in available models
+                            if !availableModels.contains(ollamaModel) && !ollamaModel.isEmpty {
+                                Text(ollamaModel + " (not installed)").tag(ollamaModel)
+                            }
                         }
                     }
 
@@ -338,11 +342,14 @@ struct AISettingsView: View {
         .formStyle(.grouped)
         .padding()
         .task {
-            await checkOllamaInstallation()
-            if ollamaInstalled {
-                await loadAvailableModels()
-                await checkRunningModels()
-            }
+            // Run initialization in a separate task to avoid state updates during view rendering
+            await Task { @MainActor in
+                await checkOllamaInstallation()
+                if ollamaInstalled {
+                    await loadAvailableModels()
+                    await checkRunningModels()
+                }
+            }.value
         }
     }
 
@@ -352,13 +359,18 @@ struct AISettingsView: View {
         connectionStatus = .unknown
 
         let executor = CommandExecutor.shared
+        let status: ConnectionStatus
         if let result = try? await executor.execute("curl -s http://\(ollamaHost):\(ollamaPort)/api/tags") {
-            connectionStatus = result.output.contains("models") ? .connected : .failed
+            status = result.output.contains("models") ? .connected : .failed
         } else {
-            connectionStatus = .failed
+            status = .failed
         }
 
-        isTestingConnection = false
+        // Update state outside of view update cycle
+        Task { @MainActor in
+            self.connectionStatus = status
+            self.isTestingConnection = false
+        }
     }
 
     @MainActor
@@ -367,18 +379,25 @@ struct AISettingsView: View {
 
         let executor = CommandExecutor.shared
         // Check if ollama command exists
+        let installed: Bool
         if let result = try? await executor.execute("which ollama") {
-            ollamaInstalled = !result.output.isEmpty && result.isSuccess
+            installed = !result.output.isEmpty && result.isSuccess
         } else {
-            ollamaInstalled = false
+            installed = false
         }
 
-        isCheckingOllama = false
+        // Update state outside of view update cycle
+        Task { @MainActor in
+            self.ollamaInstalled = installed
+            self.isCheckingOllama = false
+        }
     }
 
     @MainActor
     private func downloadAndInstallOllama() async {
-        isInstallingOllama = true
+        Task { @MainActor in
+            self.isInstallingOllama = true
+        }
 
         let executor = CommandExecutor.shared
 
@@ -405,7 +424,9 @@ struct AISettingsView: View {
             }
         }
 
-        isInstallingOllama = false
+        Task { @MainActor in
+            self.isInstallingOllama = false
+        }
     }
 
     @MainActor
@@ -435,16 +456,16 @@ struct AISettingsView: View {
 
             let sortedModels = models.sorted()
 
-            // Defer state updates to avoid publishing during view update
-            await MainActor.run {
-                availableModels = sortedModels
+            // Update state outside of view update cycle
+            Task { @MainActor in
+                self.availableModels = sortedModels
 
                 // If no model is selected and we have models, select the first one or lfm2.5-thinking
-                if ollamaModel.isEmpty && !sortedModels.isEmpty {
+                if self.ollamaModel.isEmpty && !sortedModels.isEmpty {
                     if sortedModels.contains("lfm2.5-thinking") {
-                        ollamaModel = "lfm2.5-thinking"
-                    } else {
-                        ollamaModel = sortedModels.first ?? "llama3.2"
+                        self.ollamaModel = "lfm2.5-thinking"
+                    } else if let firstModel = sortedModels.first {
+                        self.ollamaModel = firstModel
                     }
                 }
             }
@@ -472,14 +493,19 @@ struct AISettingsView: View {
                 }
             }
 
-            runningModels = running
+            // Update state outside of view update cycle
+            Task { @MainActor in
+                self.runningModels = running
+            }
         }
     }
 
     @MainActor
     private func downloadDefaultModel() async {
-        isDownloadingModel = true
-        downloadProgress = "Starting download..."
+        Task { @MainActor in
+            self.isDownloadingModel = true
+            self.downloadProgress = "Starting download..."
+        }
 
         let executor = CommandExecutor.shared
 
@@ -488,25 +514,33 @@ struct AISettingsView: View {
         try? await Task.sleep(nanoseconds: 2_000_000_000)
 
         // Download and run the model (this will download if not present)
-        downloadProgress = "Downloading lfm2.5-thinking model... This may take a few minutes."
+        Task { @MainActor in
+            self.downloadProgress = "Downloading lfm2.5-thinking model... This may take a few minutes."
+        }
 
         // Run in background and capture output
         if let result = try? await executor.execute("ollama run lfm2.5-thinking 'Hello' || ollama pull lfm2.5-thinking", timeout: 600) {
             if result.isSuccess {
-                downloadProgress = "Model downloaded successfully!"
-                ollamaModel = "lfm2.5-thinking"
+                Task { @MainActor in
+                    self.downloadProgress = "Model downloaded successfully!"
+                    self.ollamaModel = "lfm2.5-thinking"
+                }
 
                 // Reload available models
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
                 await loadAvailableModels()
             } else {
-                downloadProgress = "Download failed. Please try manually: ollama run lfm2.5-thinking"
+                Task { @MainActor in
+                    self.downloadProgress = "Download failed. Please try manually: ollama run lfm2.5-thinking"
+                }
             }
         }
 
         try? await Task.sleep(nanoseconds: 2_000_000_000)
-        downloadProgress = ""
-        isDownloadingModel = false
+        Task { @MainActor in
+            self.downloadProgress = ""
+            self.isDownloadingModel = false
+        }
     }
 }
 
