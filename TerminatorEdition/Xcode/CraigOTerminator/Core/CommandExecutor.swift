@@ -83,6 +83,12 @@ public final class CommandExecutor: ObservableObject {
             let outputPipe = Pipe()
             let errorPipe = Pipe()
 
+            // Ensure pipes are closed to prevent leaks
+            defer {
+                try? outputPipe.fileHandleForReading.close()
+                try? errorPipe.fileHandleForReading.close()
+            }
+
             process.executableURL = URL(fileURLWithPath: "/bin/zsh")
             process.arguments = ["-c", command]
             process.standardOutput = outputPipe
@@ -220,6 +226,12 @@ public final class CommandExecutor: ObservableObject {
             let process = Process()
             let outputPipe = Pipe()
             let errorPipe = Pipe()
+
+            // Ensure pipes are closed to prevent leaks
+            defer {
+                try? outputPipe.fileHandleForReading.close()
+                try? errorPipe.fileHandleForReading.close()
+            }
 
             process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
             process.arguments = ["-e", script]

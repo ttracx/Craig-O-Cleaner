@@ -112,12 +112,12 @@ final class PermissionsManager: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            guard let self = self else { return }
-
             // Only re-check if we've already shown the permissions sheet
-            if self.hasCheckedPermissions {
-                print("PermissionsManager: App became active, re-checking permissions...")
-                Task { @MainActor in
+            Task { @MainActor [weak self] in
+                guard let self = self else { return }
+
+                if self.hasCheckedPermissions {
+                    print("PermissionsManager: App became active, re-checking permissions...")
                     await self.checkAllPermissions()
                 }
             }
@@ -126,19 +126,20 @@ final class PermissionsManager: ObservableObject {
 
     // MARK: - First Launch Check
 
-    func checkFirstLaunch() {
+    func checkFirstLaunch() async {
         let hasLaunched = userDefaults.bool(forKey: hasLaunchedKey)
 
         if !hasLaunched {
+            // Yield to ensure we're outside any view update cycle
+            await Task.yield()
+
             // First launch - show permissions sheet
             showPermissionsSheet = true
             userDefaults.set(true, forKey: hasLaunchedKey)
         }
 
         // Always check current permission statuses
-        Task {
-            await checkAllPermissions()
-        }
+        await checkAllPermissions()
     }
 
     // MARK: - Permission Checks
@@ -149,9 +150,10 @@ final class PermissionsManager: ObservableObject {
         await checkFullDiskAccess()
         await checkAutomation()
 
-        await MainActor.run {
-            hasCheckedPermissions = true
-        }
+        // Yield to ensure we're outside any view update cycle
+        await Task.yield()
+
+        hasCheckedPermissions = true
 
         print("PermissionsManager: Permission check complete")
         print("  - Accessibility: \(permissionStatuses[.accessibility]?.statusText ?? "Unknown")")
@@ -161,9 +163,11 @@ final class PermissionsManager: ObservableObject {
 
     private func checkAccessibility() async {
         let trusted = AXIsProcessTrusted()
-        await MainActor.run {
-            permissionStatuses[.accessibility] = trusted ? .granted : .denied
-        }
+
+        // Yield to ensure we're outside any view update cycle before updating @Published property
+        await Task.yield()
+
+        permissionStatuses[.accessibility] = trusted ? .granted : .denied
     }
 
     private func checkFullDiskAccess() async {
@@ -171,9 +175,10 @@ final class PermissionsManager: ObservableObject {
         let testPath = NSHomeDirectory() + "/Library/Safari/CloudTabs.db"
         let hasAccess = FileManager.default.isReadableFile(atPath: testPath)
 
-        await MainActor.run {
-            permissionStatuses[.fullDiskAccess] = hasAccess ? .granted : .denied
-        }
+        // Yield to ensure we're outside any view update cycle before updating @Published property
+        await Task.yield()
+
+        permissionStatuses[.fullDiskAccess] = hasAccess ? .granted : .denied
     }
 
     private func checkAutomation() async {
@@ -192,18 +197,33 @@ final class PermissionsManager: ObservableObject {
         task.standardOutput = pipe
         task.standardError = pipe
 
+        defer {
+            // Close pipe file handles to prevent leaks
+            try? pipe.fileHandleForReading.close()
+        }
+
         do {
             try task.run()
-            task.waitUntilExit()
+
+            // Wait asynchronously instead of blocking
+            await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                DispatchQueue.global(qos: .userInitiated).async {
+                    task.waitUntilExit()
+                    continuation.resume()
+                }
+            }
 
             let hasPermission = task.terminationStatus == 0
-            await MainActor.run {
-                permissionStatuses[.automation] = hasPermission ? .granted : .denied
-            }
+
+            // Yield to ensure we're outside any view update cycle before updating @Published property
+            await Task.yield()
+
+            permissionStatuses[.automation] = hasPermission ? .granted : .denied
         } catch {
-            await MainActor.run {
-                permissionStatuses[.automation] = .denied
-            }
+            // Yield to ensure we're outside any view update cycle before updating @Published property
+            await Task.yield()
+
+            permissionStatuses[.automation] = .denied
         }
     }
 

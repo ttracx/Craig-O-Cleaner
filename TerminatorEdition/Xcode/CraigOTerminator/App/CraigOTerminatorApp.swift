@@ -67,7 +67,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Check permissions first
         Task { @MainActor in
-            PermissionsManager.shared.checkFirstLaunch()
+            await PermissionsManager.shared.checkFirstLaunch()
         }
 
         // Initialize the Terminator Engine

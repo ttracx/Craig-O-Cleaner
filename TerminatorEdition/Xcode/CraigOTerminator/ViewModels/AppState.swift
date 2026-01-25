@@ -81,6 +81,7 @@ final class AppState: ObservableObject {
     // MARK: - Private Properties
 
     private var metricsTimer: Timer?
+    private let executor = CommandExecutor.shared
 
     // MARK: - Initialization
 
@@ -127,93 +128,46 @@ final class AppState: ObservableObject {
         var newMemoryUsage: Double = 0
         var newDiskUsage: Double = 0
 
-        // CPU Usage
-        let topTask = Process()
-        topTask.launchPath = "/usr/bin/top"
-        topTask.arguments = ["-l", "1", "-s", "0"]
-        let topPipe = Pipe()
-        topTask.standardOutput = topPipe
-        topTask.standardError = Pipe()
+        // CPU Usage - use CommandExecutor to avoid blocking main thread
+        if let result = try? await executor.execute("top -l 1 -s 0 | grep 'CPU usage'") {
+            if let match = result.output.range(of: #"(\d+\.?\d*)% user"#, options: .regularExpression) {
+                let userStr = String(result.output[match]).replacingOccurrences(of: "% user", with: "")
+                newCpuUsage = Double(userStr) ?? 0
 
-        try? topTask.run()
-        topTask.waitUntilExit()
-
-        if topTask.terminationStatus == 0 {
-            let data = topPipe.fileHandleForReading.readDataToEndOfFile()
-            if let output = String(data: data, encoding: .utf8),
-               let cpuLine = output.components(separatedBy: "\n").first(where: { $0.contains("CPU usage") }) {
-                if let match = cpuLine.range(of: #"(\d+\.?\d*)% user"#, options: .regularExpression) {
-                    let userStr = String(cpuLine[match]).replacingOccurrences(of: "% user", with: "")
-                    newCpuUsage = Double(userStr) ?? 0
-
-                    if let sysMatch = cpuLine.range(of: #"(\d+\.?\d*)% sys"#, options: .regularExpression) {
-                        let sysStr = String(cpuLine[sysMatch]).replacingOccurrences(of: "% sys", with: "")
-                        newCpuUsage += Double(sysStr) ?? 0
-                    }
-                }
-
-                // Memory Usage
-                if let memLine = output.components(separatedBy: "\n").first(where: { $0.contains("PhysMem") }) {
-                    if let usedMatch = memLine.range(of: #"(\d+)([GM]) used"#, options: .regularExpression) {
-                        let usedStr = String(memLine[usedMatch])
-
-                        // Get total memory
-                        let sysTask = Process()
-                        sysTask.launchPath = "/usr/sbin/sysctl"
-                        sysTask.arguments = ["-n", "hw.memsize"]
-                        let sysPipe = Pipe()
-                        sysTask.standardOutput = sysPipe
-                        sysTask.standardError = Pipe()
-
-                        try? sysTask.run()
-                        sysTask.waitUntilExit()
-
-                        if sysTask.terminationStatus == 0 {
-                            let sysData = sysPipe.fileHandleForReading.readDataToEndOfFile()
-                            if let totalStr = String(data: sysData, encoding: .utf8) {
-                                let totalBytes = Double(totalStr.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
-
-                                var usedBytes: Double = 0
-                                if usedStr.contains("G") {
-                                    if let num = Double(usedStr.replacingOccurrences(of: "G used", with: "").trimmingCharacters(in: .whitespaces)) {
-                                        usedBytes = num * 1_073_741_824
-                                    }
-                                } else if usedStr.contains("M") {
-                                    if let num = Double(usedStr.replacingOccurrences(of: "M used", with: "").trimmingCharacters(in: .whitespaces)) {
-                                        usedBytes = num * 1_048_576
-                                    }
-                                }
-
-                                if totalBytes > 0 {
-                                    newMemoryUsage = (usedBytes / totalBytes) * 100
-                                }
-                            }
-                        }
-                    }
+                if let sysMatch = result.output.range(of: #"(\d+\.?\d*)% sys"#, options: .regularExpression) {
+                    let sysStr = String(result.output[sysMatch]).replacingOccurrences(of: "% sys", with: "")
+                    newCpuUsage += Double(sysStr) ?? 0
                 }
             }
         }
 
-        // Disk Usage
-        let dfTask = Process()
-        dfTask.launchPath = "/bin/df"
-        dfTask.arguments = ["-h", "/"]
-        let dfPipe = Pipe()
-        dfTask.standardOutput = dfPipe
-        dfTask.standardError = Pipe()
+        // Memory Usage - use CommandExecutor
+        if let result = try? await executor.execute("top -l 1 -s 0 | grep PhysMem") {
+            if let usedMatch = result.output.range(of: #"(\d+)([GM]) used"#, options: .regularExpression),
+               let totalResult = try? await executor.execute("sysctl -n hw.memsize") {
+                let usedStr = String(result.output[usedMatch])
+                let totalBytes = Double(totalResult.output) ?? 0
 
-        try? dfTask.run()
-        dfTask.waitUntilExit()
+                var usedBytes: Double = 0
+                if usedStr.contains("G") {
+                    if let num = Double(usedStr.replacingOccurrences(of: "G used", with: "").trimmingCharacters(in: .whitespaces)) {
+                        usedBytes = num * 1_073_741_824
+                    }
+                } else if usedStr.contains("M") {
+                    if let num = Double(usedStr.replacingOccurrences(of: "M used", with: "").trimmingCharacters(in: .whitespaces)) {
+                        usedBytes = num * 1_048_576
+                    }
+                }
 
-        if dfTask.terminationStatus == 0 {
-            let data = dfPipe.fileHandleForReading.readDataToEndOfFile()
-            if let output = String(data: data, encoding: .utf8),
-               let lastLine = output.components(separatedBy: "\n").last(where: { !$0.contains("Filesystem") && !$0.isEmpty }) {
-                let parts = lastLine.split(separator: " ", omittingEmptySubsequences: true)
-                if parts.count >= 5 {
-                    newDiskUsage = Double(String(parts[4]).replacingOccurrences(of: "%", with: "")) ?? 0
+                if totalBytes > 0 {
+                    newMemoryUsage = (usedBytes / totalBytes) * 100
                 }
             }
+        }
+
+        // Disk Usage - use CommandExecutor
+        if let result = try? await executor.execute("df -h / | tail -1 | awk '{print $5}'") {
+            newDiskUsage = Double(result.output.replacingOccurrences(of: "%", with: "")) ?? 0
         }
 
         // Batch all published property updates together
