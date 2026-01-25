@@ -3,12 +3,11 @@ import Foundation
 // MARK: - Command Executor
 /// Core component for executing shell commands safely and efficiently
 
-@MainActor
 public final class CommandExecutor: ObservableObject {
 
     // MARK: - Singleton
 
-    public static let shared = CommandExecutor()
+    nonisolated(unsafe) public static let shared = CommandExecutor()
 
     // MARK: - Types
 
@@ -69,10 +68,16 @@ public final class CommandExecutor: ObservableObject {
         workingDirectory: String? = nil
     ) async throws -> CommandResult {
 
-        isExecuting = true
-        lastCommand = command
+        await MainActor.run {
+            isExecuting = true
+            lastCommand = command
+        }
 
-        defer { isExecuting = false }
+        defer {
+            Task { @MainActor in
+                isExecuting = false
+            }
+        }
 
         let startTime = Date()
         let effectiveTimeout = timeout ?? defaultTimeout
@@ -161,8 +166,10 @@ public final class CommandExecutor: ObservableObject {
         do {
             let sudoResult = try await execute("sudo -n \(command)", timeout: timeout)
             if sudoResult.isSuccess {
-                isAuthorized = true
-                authorizationExpiry = Date().addingTimeInterval(authorizationCacheDuration)
+                await MainActor.run {
+                    isAuthorized = true
+                    authorizationExpiry = Date().addingTimeInterval(authorizationCacheDuration)
+                }
                 return sudoResult
             }
         } catch {
@@ -181,8 +188,10 @@ public final class CommandExecutor: ObservableObject {
 
         // Mark as authorized for this session
         if result.isSuccess {
-            isAuthorized = true
-            authorizationExpiry = Date().addingTimeInterval(authorizationCacheDuration)
+            await MainActor.run {
+                isAuthorized = true
+                authorizationExpiry = Date().addingTimeInterval(authorizationCacheDuration)
+            }
         }
 
         return result
@@ -203,8 +212,10 @@ public final class CommandExecutor: ObservableObject {
         let result = try await executeAppleScript(script)
 
         if result.isSuccess {
-            isAuthorized = true
-            authorizationExpiry = Date().addingTimeInterval(authorizationCacheDuration)
+            await MainActor.run {
+                isAuthorized = true
+                authorizationExpiry = Date().addingTimeInterval(authorizationCacheDuration)
+            }
         }
 
         // Return the result for all commands (simplified)
@@ -213,8 +224,10 @@ public final class CommandExecutor: ObservableObject {
 
     /// Clear authorization state
     public func clearAuthorizationCache() {
-        isAuthorized = false
-        authorizationExpiry = nil
+        Task { @MainActor in
+            isAuthorized = false
+            authorizationExpiry = nil
+        }
     }
 
     /// Execute an AppleScript

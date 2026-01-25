@@ -70,6 +70,29 @@
 
 ---
 
+### 5. Swift 6 Concurrency Errors Fixed
+**Issue**: `CommandExecutor.shared` couldn't be accessed from outside main actor in `ProcessesView` and `DiagnosticsView`.
+
+**Root Cause**: `CommandExecutor` was marked as `@MainActor` but was being accessed from `Task.detached` blocks which run outside the main actor.
+
+**Fix**:
+- Removed `@MainActor` isolation from `CommandExecutor` class
+- Made `shared` singleton `nonisolated(unsafe)` for global access
+- Wrapped all `@Published` property updates in `MainActor.run` blocks to ensure thread safety
+- Updated methods:
+  - `execute()` - wraps `isExecuting` and `lastCommand` updates
+  - `executePrivileged()` - wraps `isAuthorized` updates
+  - `executePrivilegedBatch()` - wraps `isAuthorized` updates
+  - `clearAuthorizationCache()` - wraps property clears
+
+**Files Modified**: `Xcode/CraigOTerminator/Core/CommandExecutor.swift`
+
+**Errors Fixed**:
+- `ProcessesView.swift:208:44` - Main actor-isolated static property 'shared' cannot be accessed
+- `DiagnosticsView.swift:174:44` - Main actor-isolated static property 'shared' cannot be accessed
+
+---
+
 ## Technical Details
 
 ### Why Task.yield() Works Better Than Task.sleep()
