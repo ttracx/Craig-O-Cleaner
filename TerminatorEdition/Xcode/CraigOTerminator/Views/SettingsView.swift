@@ -351,6 +351,9 @@ struct AISettingsView: View {
         .formStyle(.grouped)
         .padding()
         .task {
+            // Defer initialization to avoid publishing changes during view updates
+            await Task.yield()
+
             // Run initialization asynchronously to avoid state updates during view rendering
             await checkOllamaInstallation()
 
@@ -401,18 +404,24 @@ struct AISettingsView: View {
             isCheckingOllama = true
         }
 
-        // Check if ollama command exists
-        let task = Process()
-        task.launchPath = "/usr/bin/which"
-        task.arguments = ["ollama"]
-        let pipe = Pipe()
-        task.standardOutput = pipe
-        task.standardError = Pipe()
+        // Check if ollama exists at the standard installation path
+        let fileManager = FileManager.default
+        var installed = fileManager.fileExists(atPath: "/usr/local/bin/ollama")
 
-        try? task.run()
-        task.waitUntilExit()
+        // If not found in /usr/local/bin, try using which as fallback
+        if !installed {
+            let task = Process()
+            task.launchPath = "/usr/bin/which"
+            task.arguments = ["ollama"]
+            let pipe = Pipe()
+            task.standardOutput = pipe
+            task.standardError = Pipe()
 
-        let installed = task.terminationStatus == 0
+            try? task.run()
+            task.waitUntilExit()
+
+            installed = task.terminationStatus == 0
+        }
 
         await MainActor.run {
             ollamaInstalled = installed

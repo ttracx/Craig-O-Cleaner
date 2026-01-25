@@ -185,92 +185,95 @@ struct ProcessesView: View {
         }
         .navigationTitle("Processes")
         .task {
-            await refreshProcesses()
+            // Detached task with delay to ensure completely outside view update cycle
+            Task.detached {
+                try? await Task.sleep(nanoseconds: 100_000_000)
+                await refreshProcesses()
+            }
         }
     }
 
     private func refreshProcesses() async {
-        guard !isRefreshing else {
+        // Check isRefreshing without touching @State
+        let alreadyRefreshing = await MainActor.run { isRefreshing }
+        guard !alreadyRefreshing else {
             print("ProcessesView: Already refreshing, skipping")
             return
         }
 
         print("ProcessesView: Starting refresh...")
 
-        // Delay to ensure we're completely outside any view update cycle
-        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+        // Collect data off main actor
+        let processArray = await Task.detached {
+            let executor = CommandExecutor.shared
 
-        // Collect data WITHOUT updating any @State
-        let executor = CommandExecutor.shared
+            // Execute ps command to get process list
+            guard let result = try? await executor.execute("ps aux") else {
+                print("ProcessesView: Failed to execute ps command")
+                return [ProcessInfo]()
+            }
 
-        // Execute ps command to get process list
-        guard let result = try? await executor.execute("ps aux") else {
-            print("ProcessesView: Failed to execute ps command")
+            guard result.isSuccess else {
+                print("ProcessesView: ps command failed")
+                return [ProcessInfo]()
+            }
 
-            // Delay before updating @State
-            try? await Task.sleep(nanoseconds: 100_000_000)
+            print("ProcessesView: Got output, processing \(result.output.components(separatedBy: "\n").count) lines")
+
+            // Process the result
+            var array: [ProcessInfo] = []
+            let lines = result.output.components(separatedBy: "\n")
+
+            for (index, line) in lines.enumerated() {
+                // Skip header line
+                if index == 0 { continue }
+
+                let parts = line.split(separator: " ", omittingEmptySubsequences: true)
+                guard parts.count >= 11 else { continue }
+
+                let user = String(parts[0])
+                let pid = Int32(parts[1]) ?? 0
+                let cpuPercent = Double(parts[2]) ?? 0
+                let name = String(parts[10...].joined(separator: " ").split(separator: "/").last ?? "")
+                    .trimmingCharacters(in: .whitespaces)
+
+                // Calculate memory in MB (RSS is in KB on macOS)
+                let memoryMB = (Double(parts[5]) ?? 0) / 1024
+
+                let isSystem = user == "root" ||
+                              user == "_windowserver" ||
+                              user.hasPrefix("_") ||
+                              name.hasPrefix("com.apple")
+
+                array.append(ProcessInfo(
+                    id: pid,
+                    name: name.isEmpty ? "Unknown" : name,
+                    cpuPercent: cpuPercent,
+                    memoryMB: memoryMB,
+                    user: user,
+                    isSystemProcess: isSystem
+                ))
+            }
+
+            print("ProcessesView: Processed \(array.count) processes")
+            return array
+        }.value
+
+        // Delay before any @State updates
+        try? await Task.sleep(nanoseconds: 100_000_000)
+
+        // Update ALL @State on main actor in one batch
+        await MainActor.run {
+            isRefreshing = true
+            processes = processArray
+        }
+
+        // Delay before final update
+        try? await Task.sleep(nanoseconds: 50_000_000)
+
+        await MainActor.run {
             isRefreshing = false
-            return
         }
-
-        guard result.isSuccess else {
-            print("ProcessesView: ps command failed")
-
-            // Delay before updating @State
-            try? await Task.sleep(nanoseconds: 100_000_000)
-            isRefreshing = false
-            return
-        }
-
-        print("ProcessesView: Got output, processing \(result.output.components(separatedBy: "\n").count) lines")
-
-        // Process the result WITHOUT touching @State
-        var processArray: [ProcessInfo] = []
-        let lines = result.output.components(separatedBy: "\n")
-
-        for (index, line) in lines.enumerated() {
-            // Skip header line
-            if index == 0 { continue }
-
-            let parts = line.split(separator: " ", omittingEmptySubsequences: true)
-            guard parts.count >= 11 else { continue }
-
-            let user = String(parts[0])
-            let pid = Int32(parts[1]) ?? 0
-            let cpuPercent = Double(parts[2]) ?? 0
-            let name = String(parts[10...].joined(separator: " ").split(separator: "/").last ?? "")
-                .trimmingCharacters(in: .whitespaces)
-
-            // Calculate memory in MB (RSS is in KB on macOS)
-            let memoryMB = (Double(parts[5]) ?? 0) / 1024
-
-            let isSystem = user == "root" ||
-                          user == "_windowserver" ||
-                          user.hasPrefix("_") ||
-                          name.hasPrefix("com.apple")
-
-            processArray.append(ProcessInfo(
-                id: pid,
-                name: name.isEmpty ? "Unknown" : name,
-                cpuPercent: cpuPercent,
-                memoryMB: memoryMB,
-                user: user,
-                isSystemProcess: isSystem
-            ))
-        }
-
-        print("ProcessesView: Processed \(processArray.count) processes")
-
-        // Another delay before batch updating all @State properties
-        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
-
-        // NOW update all @State in one batch
-        isRefreshing = true
-        processes = processArray
-
-        // Final delay before marking complete
-        try? await Task.sleep(nanoseconds: 50_000_000) // 0.05 seconds
-        isRefreshing = false
 
         print("ProcessesView: Refresh complete")
     }

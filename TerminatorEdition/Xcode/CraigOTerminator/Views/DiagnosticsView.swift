@@ -148,7 +148,11 @@ struct DiagnosticsView: View {
         }
         .navigationTitle("Diagnostics")
         .task {
-            await runFullDiagnostics()
+            // Detached task with delay to ensure completely outside view update cycle
+            Task.detached {
+                try? await Task.sleep(nanoseconds: 100_000_000)
+                await runFullDiagnostics()
+            }
         }
     }
 
@@ -164,22 +168,18 @@ struct DiagnosticsView: View {
     }
 
     private func runFullDiagnostics() async {
-        // Delay to ensure we're completely outside any view update cycle
-        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+        // Collect data off main actor
+        let report = await Task.detached {
+            var reportData = DiagnosticReport()
+            let executor = CommandExecutor.shared
 
-        isRunningDiagnostics = true
-
-        var report = DiagnosticReport()
-
-        let executor = CommandExecutor.shared
-
-        // Helper function to run command via CommandExecutor
-        func runCommand(_ command: String) async -> String {
-            guard let result = try? await executor.execute(command) else {
-                return ""
+            // Helper function to run command via CommandExecutor
+            func runCommand(_ command: String) async -> String {
+                guard let result = try? await executor.execute(command) else {
+                    return ""
+                }
+                return result.isSuccess ? result.output.trimmingCharacters(in: .whitespacesAndNewlines) : ""
             }
-            return result.isSuccess ? result.output.trimmingCharacters(in: .whitespacesAndNewlines) : ""
-        }
 
         let hostname = await runCommand("hostname")
         let model = await runCommand("sysctl -n hw.model")
@@ -192,13 +192,13 @@ struct DiagnosticsView: View {
             uptime = String(uptimeOutput[range]).replacingOccurrences(of: "up ", with: "").replacingOccurrences(of: ",", with: "")
         }
 
-        report.systemInfo = DiagnosticReport.SystemInfo(
-            hostname: hostname.isEmpty ? "Unknown" : hostname,
-            model: model.isEmpty ? "Unknown" : model,
-            osVersion: osVersion.isEmpty ? "Unknown" : osVersion,
-            kernel: kernel.isEmpty ? "Unknown" : kernel,
-            uptime: uptime
-        )
+            reportData.systemInfo = DiagnosticReport.SystemInfo(
+                hostname: hostname.isEmpty ? "Unknown" : hostname,
+                model: model.isEmpty ? "Unknown" : model,
+                osVersion: osVersion.isEmpty ? "Unknown" : osVersion,
+                kernel: kernel.isEmpty ? "Unknown" : kernel,
+                uptime: uptime
+            )
 
         // CPU Info
         let cpuModel = await runCommand("sysctl -n machdep.cpu.brand_string")
@@ -213,11 +213,11 @@ struct DiagnosticsView: View {
             cpuUsage = Double(cpuLine[percentRange]) ?? 0.0
         }
 
-        report.cpuInfo = DiagnosticReport.CPUInfo(
-            model: cpuModel.isEmpty ? "Unknown" : cpuModel,
-            cores: cores,
-            usage: cpuUsage
-        )
+            reportData.cpuInfo = DiagnosticReport.CPUInfo(
+                model: cpuModel.isEmpty ? "Unknown" : cpuModel,
+                cores: cores,
+                usage: cpuUsage
+            )
 
         // Memory Info
         let memSizeBytes = await runCommand("sysctl -n hw.memsize")
@@ -243,12 +243,12 @@ struct DiagnosticsView: View {
             }
         }
 
-        report.memoryInfo = DiagnosticReport.MemoryInfo(
-            total: memTotal,
-            used: memUsed,
-            free: memFree,
-            pressure: memPressure
-        )
+            reportData.memoryInfo = DiagnosticReport.MemoryInfo(
+                total: memTotal,
+                used: memUsed,
+                free: memFree,
+                pressure: memPressure
+            )
 
         // Disk Info
         let dfOutput = await runCommand("df -h /")
@@ -256,7 +256,7 @@ struct DiagnosticsView: View {
            !lastLine.contains("Filesystem") {
             let parts = lastLine.split(separator: " ", omittingEmptySubsequences: true)
             if parts.count >= 5 {
-                report.diskInfo = DiagnosticReport.DiskInfo(
+                reportData.diskInfo = DiagnosticReport.DiskInfo(
                     total: String(parts[1]),
                     used: String(parts[2]),
                     available: String(parts[3]),
@@ -298,12 +298,12 @@ struct DiagnosticsView: View {
         let pingResult = try? await executor.execute("ping -c 1 -W 2 8.8.8.8")
         let isConnected = pingResult?.isSuccess ?? false
 
-        report.networkInfo = DiagnosticReport.NetworkInfo(
-            activeInterface: activeInterface,
-            ipAddress: ipAddr,
-            wifiSSID: wifiSSID,
-            isConnected: isConnected
-        )
+            reportData.networkInfo = DiagnosticReport.NetworkInfo(
+                activeInterface: activeInterface,
+                ipAddress: ipAddr,
+                wifiSSID: wifiSSID,
+                isConnected: isConnected
+            )
 
         // Battery Info
         let batteryOutput = await runCommand("pmset -g batt")
@@ -323,7 +323,7 @@ struct DiagnosticsView: View {
                 status = "Charged"
             }
 
-            report.batteryInfo = DiagnosticReport.BatteryInfo(
+            reportData.batteryInfo = DiagnosticReport.BatteryInfo(
                 charge: charge,
                 status: status,
                 cycleCount: nil,
@@ -331,12 +331,24 @@ struct DiagnosticsView: View {
             )
         }
 
-        // Delay before batch updating all @State properties
-        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+            return reportData
+        }.value
 
-        // Batch update all @State
-        diagnosticReport = report
-        isRunningDiagnostics = false
+        // Delay before any @State updates
+        try? await Task.sleep(nanoseconds: 100_000_000)
+
+        // Update ALL @State on main actor in one batch
+        await MainActor.run {
+            isRunningDiagnostics = true
+            diagnosticReport = report
+        }
+
+        // Delay before final update
+        try? await Task.sleep(nanoseconds: 50_000_000)
+
+        await MainActor.run {
+            isRunningDiagnostics = false
+        }
     }
 }
 

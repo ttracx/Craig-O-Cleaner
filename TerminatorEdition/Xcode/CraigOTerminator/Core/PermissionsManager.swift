@@ -113,11 +113,14 @@ final class PermissionsManager: ObservableObject {
             queue: .main
         ) { [weak self] _ in
             // Only re-check if we've already shown the permissions sheet
-            Task { @MainActor [weak self] in
+            // Use detached task to break out of notification context
+            Task.detached { [weak self] in
                 guard let self = self else { return }
 
-                if self.hasCheckedPermissions {
+                let shouldCheck = await MainActor.run { self.hasCheckedPermissions }
+                if shouldCheck {
                     print("PermissionsManager: App became active, re-checking permissions...")
+                    try? await Task.sleep(nanoseconds: 100_000_000) // 0.1s delay
                     await self.checkAllPermissions()
                 }
             }
