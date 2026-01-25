@@ -41,7 +41,9 @@ struct BrowsersView: View {
 
                 HStack {
                     Button {
-                        Task { await refreshBrowsers() }
+                        Task { @MainActor in
+                            await refreshBrowsers()
+                        }
                     } label: {
                         Image(systemName: "arrow.clockwise")
                     }
@@ -105,10 +107,12 @@ struct BrowsersView: View {
     private func refreshBrowsers() async {
         guard !isRefreshing else { return }
 
-        await MainActor.run {
-            isRefreshing = true
-        }
+        // Small delay before updating @Published to ensure we're outside view update cycle
+        try? await Task.sleep(nanoseconds: 50_000_000) // 0.05 seconds
 
+        isRefreshing = true
+
+        let executor = CommandExecutor.shared
         var updatedBrowsers: [BrowserInfo] = []
 
         let browserConfigs: [(name: String, bundleId: String, icon: String)] = [
@@ -121,21 +125,10 @@ struct BrowsersView: View {
         ]
 
         for config in browserConfigs {
-            // Check if browser is running using pgrep
+            // Check if browser is running using pgrep (via CommandExecutor)
             var isRunning = false
-            let pgrepTask = Process()
-            pgrepTask.launchPath = "/usr/bin/pgrep"
-            pgrepTask.arguments = ["-i", config.name]
-            let pgrepPipe = Pipe()
-            pgrepTask.standardOutput = pgrepPipe
-            pgrepTask.standardError = Pipe()
-
-            try? pgrepTask.run()
-            pgrepTask.waitUntilExit()
-
-            if pgrepTask.terminationStatus == 0 {
-                let data = pgrepPipe.fileHandleForReading.readDataToEndOfFile()
-                if let output = String(data: data, encoding: .utf8), !output.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            if let result = try? await executor.execute("pgrep -i '\(config.name)'") {
+                if result.isSuccess && !result.output.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     isRunning = true
                 }
             }
@@ -144,7 +137,7 @@ struct BrowsersView: View {
             var memoryUsage: Double = 0
 
             if isRunning {
-                // Get tab count via AppleScript
+                // Get tab count via AppleScript (via CommandExecutor)
                 if config.name == "Safari" || config.name == "Google Chrome" {
                     let script = """
                     tell application "\(config.name)"
@@ -156,40 +149,18 @@ struct BrowsersView: View {
                     end tell
                     """
 
-                    let asTask = Process()
-                    asTask.launchPath = "/usr/bin/osascript"
-                    asTask.arguments = ["-e", script]
-                    let asPipe = Pipe()
-                    asTask.standardOutput = asPipe
-                    asTask.standardError = Pipe()
-
-                    try? asTask.run()
-                    asTask.waitUntilExit()
-
-                    if asTask.terminationStatus == 0 {
-                        let data = asPipe.fileHandleForReading.readDataToEndOfFile()
-                        if let output = String(data: data, encoding: .utf8) {
-                            tabCount = Int(output.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+                    if let result = try? await executor.executeAppleScript(script) {
+                        if result.isSuccess {
+                            tabCount = Int(result.output.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
                         }
                     }
                 }
 
-                // Get memory usage
-                let memTask = Process()
-                memTask.launchPath = "/bin/ps"
-                memTask.arguments = ["aux"]
-                let memPipe = Pipe()
-                memTask.standardOutput = memPipe
-                memTask.standardError = Pipe()
-
-                try? memTask.run()
-                memTask.waitUntilExit()
-
-                let data = memPipe.fileHandleForReading.readDataToEndOfFile()
-                if let output = String(data: data, encoding: .utf8) {
+                // Get memory usage (via CommandExecutor)
+                if let result = try? await executor.execute("ps aux | grep -i '\(config.name)' | grep -v grep") {
                     var totalMem: Double = 0
-                    for line in output.components(separatedBy: "\n") {
-                        if line.range(of: config.name, options: .caseInsensitive) != nil {
+                    for line in result.output.components(separatedBy: "\n") {
+                        if !line.isEmpty {
                             let parts = line.split(separator: " ", omittingEmptySubsequences: true)
                             if parts.count >= 6, let mem = Double(parts[5]) {
                                 totalMem += mem
@@ -210,11 +181,12 @@ struct BrowsersView: View {
             ))
         }
 
-        // Update state on main actor
-        await MainActor.run {
-            browsers = updatedBrowsers
-            isRefreshing = false
-        }
+        // Small delay before updating @Published properties
+        try? await Task.sleep(nanoseconds: 50_000_000) // 0.05 seconds
+
+        // Update state
+        browsers = updatedBrowsers
+        isRefreshing = false
     }
 }
 
@@ -292,7 +264,9 @@ struct BrowserDetailView: View {
                             icon: "xmark.circle",
                             color: .orange
                         ) {
-                            Task { await closeHeavyTabs() }
+                            Task { @MainActor in
+                                await closeHeavyTabs()
+                            }
                         }
 
                         ActionButton(
@@ -300,7 +274,9 @@ struct BrowserDetailView: View {
                             icon: "trash",
                             color: .red
                         ) {
-                            Task { await clearCache() }
+                            Task { @MainActor in
+                                await clearCache()
+                            }
                         }
                     }
 
@@ -310,7 +286,9 @@ struct BrowserDetailView: View {
                             icon: "xmark.square",
                             color: .red
                         ) {
-                            Task { await closeAllTabs() }
+                            Task { @MainActor in
+                                await closeAllTabs()
+                            }
                         }
 
                         ActionButton(
@@ -318,7 +296,9 @@ struct BrowserDetailView: View {
                             icon: "power",
                             color: .red
                         ) {
-                            Task { await forceQuit() }
+                            Task { @MainActor in
+                                await forceQuit()
+                            }
                         }
                     }
                 }
@@ -329,7 +309,9 @@ struct BrowserDetailView: View {
                         .foregroundStyle(.secondary)
 
                     Button("Launch \(browser.name)") {
-                        Task { await launchBrowser() }
+                        Task { @MainActor in
+                            await launchBrowser()
+                        }
                     }
                     .buttonStyle(.borderedProminent)
                 }
@@ -341,6 +323,8 @@ struct BrowserDetailView: View {
     }
 
     private func closeHeavyTabs() async {
+        let executor = CommandExecutor.shared
+
         if browser.name == "Safari" {
             let script = """
             tell application "Safari"
@@ -359,11 +343,7 @@ struct BrowserDetailView: View {
             end tell
             """
 
-            let task = Process()
-            task.launchPath = "/usr/bin/osascript"
-            task.arguments = ["-e", script]
-            try? task.run()
-            task.waitUntilExit()
+            _ = try? await executor.executeAppleScript(script)
         }
 
         onAction()
@@ -389,17 +369,15 @@ struct BrowserDetailView: View {
             return
         }
 
-        let expandedPath = (cachePath as NSString).expandingTildeInPath
-        let task = Process()
-        task.launchPath = "/bin/rm"
-        task.arguments = ["-rf", expandedPath + "/*"]
-        try? task.run()
-        task.waitUntilExit()
+        let executor = CommandExecutor.shared
+        _ = try? await executor.execute("rm -rf \(cachePath)/*")
 
         onAction()
     }
 
     private func closeAllTabs() async {
+        let executor = CommandExecutor.shared
+
         if browser.name == "Safari" || browser.name == "Google Chrome" {
             let script = """
             tell application "\(browser.name)"
@@ -409,32 +387,22 @@ struct BrowserDetailView: View {
             end tell
             """
 
-            let task = Process()
-            task.launchPath = "/usr/bin/osascript"
-            task.arguments = ["-e", script]
-            try? task.run()
-            task.waitUntilExit()
+            _ = try? await executor.executeAppleScript(script)
         }
 
         onAction()
     }
 
     private func forceQuit() async {
-        let task = Process()
-        task.launchPath = "/usr/bin/pkill"
-        task.arguments = ["-9", "-f", browser.name]
-        try? task.run()
-        task.waitUntilExit()
+        let executor = CommandExecutor.shared
+        _ = try? await executor.execute("pkill -9 -f '\(browser.name)'")
 
         onAction()
     }
 
     private func launchBrowser() async {
-        let task = Process()
-        task.launchPath = "/usr/bin/open"
-        task.arguments = ["-a", browser.name]
-        try? task.run()
-        task.waitUntilExit()
+        let executor = CommandExecutor.shared
+        _ = try? await executor.execute("open -a '\(browser.name)'")
 
         try? await Task.sleep(nanoseconds: 1_000_000_000)
         onAction()

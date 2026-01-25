@@ -130,8 +130,8 @@ final class PermissionsManager: ObservableObject {
         let hasLaunched = userDefaults.bool(forKey: hasLaunchedKey)
 
         if !hasLaunched {
-            // Yield to ensure we're outside any view update cycle
-            await Task.yield()
+            // Small delay to ensure we're completely outside any view update cycle
+            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
 
             // First launch - show permissions sheet
             showPermissionsSheet = true
@@ -146,13 +146,27 @@ final class PermissionsManager: ObservableObject {
 
     func checkAllPermissions() async {
         print("PermissionsManager: Checking all permissions...")
-        await checkAccessibility()
-        await checkFullDiskAccess()
-        await checkAutomation()
 
-        // Yield to ensure we're outside any view update cycle
-        await Task.yield()
+        // Run all checks in parallel off the main actor to collect results
+        let results = await withTaskGroup(of: (PermissionType, PermissionStatus).self) { group in
+            group.addTask { await (PermissionType.accessibility, self.checkAccessibilityInternal()) }
+            group.addTask { await (PermissionType.fullDiskAccess, self.checkFullDiskAccessInternal()) }
+            group.addTask { await (PermissionType.automation, self.checkAutomationInternal()) }
 
+            var collected: [(PermissionType, PermissionStatus)] = []
+            for await result in group {
+                collected.append(result)
+            }
+            return collected
+        }
+
+        // Small delay to ensure we're completely outside any view update cycle
+        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+
+        // Now update all @Published properties in one batch on the main actor
+        for (type, status) in results {
+            permissionStatuses[type] = status
+        }
         hasCheckedPermissions = true
 
         print("PermissionsManager: Permission check complete")
@@ -161,27 +175,19 @@ final class PermissionsManager: ObservableObject {
         print("  - Automation: \(permissionStatuses[.automation]?.statusText ?? "Unknown")")
     }
 
-    private func checkAccessibility() async {
+    private func checkAccessibilityInternal() async -> PermissionStatus {
         let trusted = AXIsProcessTrusted()
-
-        // Yield to ensure we're outside any view update cycle before updating @Published property
-        await Task.yield()
-
-        permissionStatuses[.accessibility] = trusted ? .granted : .denied
+        return trusted ? .granted : .denied
     }
 
-    private func checkFullDiskAccess() async {
+    private func checkFullDiskAccessInternal() async -> PermissionStatus {
         // Try to access a protected file to test Full Disk Access
         let testPath = NSHomeDirectory() + "/Library/Safari/CloudTabs.db"
         let hasAccess = FileManager.default.isReadableFile(atPath: testPath)
-
-        // Yield to ensure we're outside any view update cycle before updating @Published property
-        await Task.yield()
-
-        permissionStatuses[.fullDiskAccess] = hasAccess ? .granted : .denied
+        return hasAccess ? .granted : .denied
     }
 
-    private func checkAutomation() async {
+    private func checkAutomationInternal() async -> PermissionStatus {
         // Check automation by testing AppleScript execution
         let script = """
         tell application "System Events"
@@ -214,16 +220,9 @@ final class PermissionsManager: ObservableObject {
             }
 
             let hasPermission = task.terminationStatus == 0
-
-            // Yield to ensure we're outside any view update cycle before updating @Published property
-            await Task.yield()
-
-            permissionStatuses[.automation] = hasPermission ? .granted : .denied
+            return hasPermission ? .granted : .denied
         } catch {
-            // Yield to ensure we're outside any view update cycle before updating @Published property
-            await Task.yield()
-
-            permissionStatuses[.automation] = .denied
+            return .denied
         }
     }
 
@@ -237,7 +236,7 @@ final class PermissionsManager: ObservableObject {
         // Check again after a delay
         Task {
             try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
-            await checkAccessibility()
+            await checkAllPermissions()
         }
     }
 
