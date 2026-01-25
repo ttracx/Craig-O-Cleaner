@@ -110,8 +110,9 @@ struct BrowsersView: View {
     private func refreshBrowsers() async {
         guard !isRefreshing else { return }
 
-        // Small delay before updating @Published to ensure we're outside view update cycle
-        try? await Task.sleep(nanoseconds: 50_000_000) // 0.05 seconds
+        // Defer state updates to avoid "Publishing changes" warning
+        await Task.yield()
+        await Task.yield()
 
         isRefreshing = true
 

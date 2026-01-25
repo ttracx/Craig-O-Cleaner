@@ -149,6 +149,10 @@ struct MenuBarView: View {
             return total
         }.value
 
+        // Defer state update to avoid "Publishing changes" warning
+        await Task.yield()
+        await Task.yield()
+
         await MainActor.run {
             browserCount = count
         }
@@ -202,6 +206,10 @@ struct MenuBarView: View {
                 return [(String, Double)]()
             }
         }.value
+
+        // Defer state update to avoid "Publishing changes" warning
+        await Task.yield()
+        await Task.yield()
 
         await MainActor.run {
             topProcesses = processes
@@ -667,6 +675,22 @@ struct MenuBarAppControls: View {
     let appState: AppState
     @Environment(\.openSettings) private var openSettings
 
+    private func openHealthCheck() {
+        NSApp.activate(ignoringOtherApps: true)
+
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 800, height: 600),
+            styleMask: [.titled, .closable, .resizable, .miniaturizable],
+            backing: .buffered,
+            defer: false
+        )
+        window.title = "System Health Check"
+        window.center()
+        window.contentView = NSHostingView(rootView: HealthCheckWindow())
+        window.makeKeyAndOrderFront(nil)
+        window.isReleasedWhenClosed = false
+    }
+
     var body: some View {
         VStack(spacing: 2) {
             Button {
@@ -712,6 +736,25 @@ struct MenuBarAppControls: View {
                         .font(.caption)
                     Spacer()
                     Text("⌘,")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                openHealthCheck()
+            } label: {
+                HStack {
+                    Image(systemName: "heart.text.square")
+                        .foregroundStyle(.red)
+                        .frame(width: 20)
+                    Text("Run Health Check...")
+                        .font(.caption)
+                    Spacer()
+                    Text("⌘⇧H")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
