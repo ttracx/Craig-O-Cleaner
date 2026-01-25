@@ -63,7 +63,7 @@ struct AboutView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-                Text("© 2024 Craig-O-Clean. All rights reserved.")
+                Text("© 2026 Craig-O-Clean. All rights reserved.")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
