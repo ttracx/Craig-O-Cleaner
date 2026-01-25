@@ -120,7 +120,9 @@ final class PermissionsManager: ObservableObject {
                 let shouldCheck = await MainActor.run { self.hasCheckedPermissions }
                 if shouldCheck {
                     print("PermissionsManager: App became active, re-checking permissions...")
-                    try? await Task.sleep(nanoseconds: 100_000_000) // 0.1s delay
+                    // Use Task.yield() instead of sleep for better deferral
+                    await Task.yield()
+                    await Task.yield() // Double yield for extra safety
                     await self.checkAllPermissions()
                 }
             }
@@ -133,8 +135,9 @@ final class PermissionsManager: ObservableObject {
         let hasLaunched = userDefaults.bool(forKey: hasLaunchedKey)
 
         if !hasLaunched {
-            // Small delay to ensure we're completely outside any view update cycle
-            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+            // Use Task.yield() to defer state updates and break out of any view update cycle
+            await Task.yield()
+            await Task.yield() // Double yield for extra safety
 
             // First launch - show permissions sheet
             showPermissionsSheet = true
@@ -163,8 +166,9 @@ final class PermissionsManager: ObservableObject {
             return collected
         }
 
-        // Small delay to ensure we're completely outside any view update cycle
-        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+        // Use Task.yield() to defer state updates and break out of any view update cycle
+        await Task.yield()
+        await Task.yield() // Double yield for extra safety
 
         // Now update all @Published properties in one batch on the main actor
         for (type, status) in results {

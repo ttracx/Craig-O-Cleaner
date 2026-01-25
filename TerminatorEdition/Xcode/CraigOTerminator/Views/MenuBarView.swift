@@ -58,6 +58,9 @@ struct MenuBarView: View {
         }
         .frame(width: 320)
         .task {
+            // Defer to avoid publishing changes during view updates
+            await Task.yield()
+
             await refreshBrowserCount()
             await refreshTopProcesses()
         }
@@ -568,33 +571,53 @@ struct MenuBarUtilitiesSection: View {
     }
 
     private func purgeMemory() async {
-        // Note: purge requires sudo, so we use osascript to prompt for privileges
-        let script = "do shell script \"purge\" with administrator privileges"
+        // Run privileged operation in detached task to avoid blocking main thread
+        Task.detached {
+            // Note: purge requires sudo, so we use osascript to prompt for privileges
+            let script = "do shell script \"purge\" with administrator privileges"
 
-        let task = Process()
-        task.launchPath = "/usr/bin/osascript"
-        task.arguments = ["-e", script]
-        task.standardOutput = Pipe()
-        task.standardError = Pipe()
+            let task = Process()
+            task.launchPath = "/usr/bin/osascript"
+            task.arguments = ["-e", script]
+            task.standardOutput = Pipe()
+            task.standardError = Pipe()
 
-        try? task.run()
-        task.waitUntilExit()
+            try? task.run()
+            task.waitUntilExit()
 
-        await AppState.shared.updateMetrics()
+            // Small delay before updating metrics to ensure process completes
+            try? await Task.sleep(nanoseconds: 500_000_000)
+
+            // Update metrics on main actor
+            await AppState.shared.updateMetrics()
+
+            // Show success message
+            await MainActor.run {
+                AppState.shared.showAlertMessage("Memory purged successfully")
+            }
+        }
     }
 
     private func flushDNS() async {
-        // DNS flush requires sudo
-        let script = "do shell script \"dscacheutil -flushcache && killall -HUP mDNSResponder\" with administrator privileges"
+        // Run privileged operation in detached task to avoid blocking main thread
+        Task.detached {
+            // DNS flush requires sudo
+            let script = "do shell script \"dscacheutil -flushcache && killall -HUP mDNSResponder\" with administrator privileges"
 
-        let task = Process()
-        task.launchPath = "/usr/bin/osascript"
-        task.arguments = ["-e", script]
-        task.standardOutput = Pipe()
-        task.standardError = Pipe()
+            let task = Process()
+            task.launchPath = "/usr/bin/osascript"
+            task.arguments = ["-e", script]
+            task.standardOutput = Pipe()
+            task.standardError = Pipe()
 
-        try? task.run()
-        task.waitUntilExit()
+            try? task.run()
+            task.waitUntilExit()
+
+            // Show success message
+            await MainActor.run {
+                AppState.shared.showAlertMessage("DNS cache flushed successfully")
+            }
+        }
     }
 
     private func rebuildLaunchServices() async {

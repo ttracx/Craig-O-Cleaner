@@ -79,6 +79,9 @@ struct BrowsersView: View {
         }
         .navigationTitle("Browsers")
         .task {
+            // Defer to avoid publishing changes during view updates
+            await Task.yield()
+
             await refreshBrowsers()
             startAutoRefresh()
         }
