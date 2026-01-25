@@ -16,6 +16,7 @@ final class ProcessMonitorService: ObservableObject {
     private var monitorTimer: Timer?
     private let updateInterval: TimeInterval = 3.0 // Update every 3 seconds
     private let maxProcessCount = 200 // Limit stored processes
+    private var isFetching = false // Prevent concurrent fetches
 
     struct ProcessInfo: Identifiable, Hashable {
         let id = UUID()
@@ -86,7 +87,14 @@ final class ProcessMonitorService: ObservableObject {
     // MARK: - Process Fetching
 
     func fetchProcesses() async {
+        // Prevent concurrent fetches
+        if isFetching {
+            print("ProcessMonitorService: Already fetching, skipping...")
+            return
+        }
+
         print("ProcessMonitorService: fetchProcesses() called")
+        isFetching = true
 
         // Run in detached task to avoid blocking
         let data = await Task.detached {
@@ -104,6 +112,7 @@ final class ProcessMonitorService: ObservableObject {
         cpuUsageTotal = data.totalCPU
         memoryUsageTotal = data.totalMemory
         lastUpdateTime = Date()
+        isFetching = false
 
         print("ProcessMonitorService: Updated \(processes.count) processes")
     }
@@ -119,31 +128,49 @@ final class ProcessMonitorService: ObservableObject {
         print("ProcessMonitorService: Running command: \(command)")
 
         let task = Process()
-        task.launchPath = "/bin/sh"
-        task.arguments = ["-c", command]
+        task.executableURL = URL(fileURLWithPath: "/bin/ps")
+        task.arguments = ["aux"]
         let pipe = Pipe()
         let errorPipe = Pipe()
         task.standardOutput = pipe
         task.standardError = errorPipe
 
         do {
+            print("ProcessMonitorService: Launching ps process...")
             try task.run()
-            task.waitUntilExit()
+
+            print("ProcessMonitorService: Waiting for ps to complete...")
+
+            // Wait with timeout
+            let timeout = 2.0 // 2 second timeout
+            let startTime = Date()
+            while task.isRunning {
+                if Date().timeIntervalSince(startTime) > timeout {
+                    print("ProcessMonitorService: ps command timed out, terminating...")
+                    task.terminate()
+                    return ([], 0, 0)
+                }
+                try? await Task.sleep(nanoseconds: 10_000_000) // 10ms
+            }
+
+            print("ProcessMonitorService: ps completed with status \(task.terminationStatus)")
 
             if task.terminationStatus != 0 {
                 let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
                 let errorOutput = String(data: errorData, encoding: .utf8) ?? "unknown error"
-                print("ProcessMonitorService: ps command failed with status \(task.terminationStatus): \(errorOutput)")
+                print("ProcessMonitorService: ps command failed: \(errorOutput)")
                 return ([], 0, 0)
             }
 
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            print("ProcessMonitorService: Read \(data.count) bytes from ps")
+
             guard let output = String(data: data, encoding: .utf8) else {
                 print("ProcessMonitorService: Failed to decode ps output")
                 return ([], 0, 0)
             }
 
-            // Parse output
+            // Parse output - limit to maxProcessCount
             let lines = output.components(separatedBy: "\n")
             print("ProcessMonitorService: ps command returned \(lines.count) lines")
 
@@ -151,6 +178,11 @@ final class ProcessMonitorService: ObservableObject {
                 // Skip header line
                 if index == 0 { continue }
                 guard !line.isEmpty else { continue }
+
+                // Limit to maxProcessCount
+                if processList.count >= maxProcessCount {
+                    break
+                }
 
                 let parts = line.split(separator: " ", omittingEmptySubsequences: true)
                 guard parts.count >= 11 else { continue }
