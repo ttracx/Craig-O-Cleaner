@@ -13,6 +13,7 @@ final class PermissionsManager: ObservableObject {
 
     private let userDefaults = UserDefaults.standard
     private let hasLaunchedKey = "has_launched_before"
+    private var appActivationObserver: NSObjectProtocol?
 
     enum PermissionType: String, CaseIterable {
         case accessibility = "Accessibility"
@@ -92,7 +93,36 @@ final class PermissionsManager: ObservableObject {
         }
     }
 
-    private init() {}
+    private init() {
+        setupAppLifecycleObserver()
+    }
+
+    deinit {
+        if let observer = appActivationObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+
+    // MARK: - App Lifecycle
+
+    private func setupAppLifecycleObserver() {
+        // Monitor when app becomes active (e.g., returning from System Settings)
+        appActivationObserver = NotificationCenter.default.addObserver(
+            forName: NSApplication.didBecomeActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self = self else { return }
+
+            // Only re-check if we've already shown the permissions sheet
+            if self.hasCheckedPermissions {
+                print("PermissionsManager: App became active, re-checking permissions...")
+                Task { @MainActor in
+                    await self.checkAllPermissions()
+                }
+            }
+        }
+    }
 
     // MARK: - First Launch Check
 
@@ -114,10 +144,19 @@ final class PermissionsManager: ObservableObject {
     // MARK: - Permission Checks
 
     func checkAllPermissions() async {
+        print("PermissionsManager: Checking all permissions...")
         await checkAccessibility()
         await checkFullDiskAccess()
         await checkAutomation()
-        hasCheckedPermissions = true
+
+        await MainActor.run {
+            hasCheckedPermissions = true
+        }
+
+        print("PermissionsManager: Permission check complete")
+        print("  - Accessibility: \(permissionStatuses[.accessibility]?.statusText ?? "Unknown")")
+        print("  - Full Disk Access: \(permissionStatuses[.fullDiskAccess]?.statusText ?? "Unknown")")
+        print("  - Automation: \(permissionStatuses[.automation]?.statusText ?? "Unknown")")
     }
 
     private func checkAccessibility() async {

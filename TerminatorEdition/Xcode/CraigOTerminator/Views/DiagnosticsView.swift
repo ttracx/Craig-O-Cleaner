@@ -160,67 +160,102 @@ struct DiagnosticsView: View {
     }
 
     private func runFullDiagnostics() async {
-        isRunningDiagnostics = true
-        let executor = CommandExecutor.shared
+        await MainActor.run {
+            isRunningDiagnostics = true
+        }
 
         var report = DiagnosticReport()
 
         // System Info
-        async let hostname = try? await executor.execute("hostname").output.trimmingCharacters(in: .whitespacesAndNewlines)
-        async let model = try? await executor.execute("sysctl -n hw.model").output.trimmingCharacters(in: .whitespacesAndNewlines)
-        async let osVersion = try? await executor.execute("sw_vers -productVersion").output.trimmingCharacters(in: .whitespacesAndNewlines)
-        async let kernel = try? await executor.execute("uname -r").output.trimmingCharacters(in: .whitespacesAndNewlines)
-        async let uptime = try? await executor.execute("uptime | awk -F'up ' '{print $2}' | awk -F',' '{print $1}'").output.trimmingCharacters(in: .whitespacesAndNewlines)
+        func runCommand(_ path: String, _ args: [String]) -> String {
+            let task = Process()
+            task.launchPath = path
+            task.arguments = args
+            let pipe = Pipe()
+            task.standardOutput = pipe
+            task.standardError = Pipe()
 
-        let (h, m, o, k, u) = await (hostname, model, osVersion, kernel, uptime)
+            try? task.run()
+            task.waitUntilExit()
+
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            return String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        }
+
+        let hostname = runCommand("/bin/hostname", [])
+        let model = runCommand("/usr/sbin/sysctl", ["-n", "hw.model"])
+        let osVersion = runCommand("/usr/bin/sw_vers", ["-productVersion"])
+        let kernel = runCommand("/usr/bin/uname", ["-r"])
+        let uptimeOutput = runCommand("/usr/bin/uptime", [])
+
+        var uptime = "Unknown"
+        if let range = uptimeOutput.range(of: #"up\s+(.+?),"#, options: .regularExpression) {
+            uptime = String(uptimeOutput[range]).replacingOccurrences(of: "up ", with: "").replacingOccurrences(of: ",", with: "")
+        }
+
         report.systemInfo = DiagnosticReport.SystemInfo(
-            hostname: h ?? "Unknown",
-            model: m ?? "Unknown",
-            osVersion: o ?? "Unknown",
-            kernel: k ?? "Unknown",
-            uptime: u ?? "Unknown"
+            hostname: hostname.isEmpty ? "Unknown" : hostname,
+            model: model.isEmpty ? "Unknown" : model,
+            osVersion: osVersion.isEmpty ? "Unknown" : osVersion,
+            kernel: kernel.isEmpty ? "Unknown" : kernel,
+            uptime: uptime
         )
 
         // CPU Info
-        async let cpuModel = try? await executor.execute("sysctl -n machdep.cpu.brand_string").output.trimmingCharacters(in: .whitespacesAndNewlines)
-        async let cores = try? await executor.execute("echo \"$(sysctl -n hw.physicalcpu) physical, $(sysctl -n hw.logicalcpu) logical\"").output.trimmingCharacters(in: .whitespacesAndNewlines)
-        async let cpuUsage = try? await executor.execute("top -l 1 -s 0 | grep 'CPU usage' | awk '{print $3}' | tr -d '%'").output.trimmingCharacters(in: .whitespacesAndNewlines)
+        let cpuModel = runCommand("/usr/sbin/sysctl", ["-n", "machdep.cpu.brand_string"])
+        let physicalCPU = runCommand("/usr/sbin/sysctl", ["-n", "hw.physicalcpu"])
+        let logicalCPU = runCommand("/usr/sbin/sysctl", ["-n", "hw.logicalcpu"])
+        let cores = "\(physicalCPU) physical, \(logicalCPU) logical"
 
-        let (cm, co, cu) = await (cpuModel, cores, cpuUsage)
+        let topOutput = runCommand("/usr/bin/top", ["-l", "1", "-s", "0"])
+        var cpuUsage = 0.0
+        if let cpuLine = topOutput.components(separatedBy: "\n").first(where: { $0.contains("CPU usage") }),
+           let percentRange = cpuLine.range(of: #"\d+\.\d+"#, options: .regularExpression) {
+            cpuUsage = Double(cpuLine[percentRange]) ?? 0.0
+        }
+
         report.cpuInfo = DiagnosticReport.CPUInfo(
-            model: cm ?? "Unknown",
-            cores: co ?? "Unknown",
-            usage: Double(cu ?? "0") ?? 0
+            model: cpuModel.isEmpty ? "Unknown" : cpuModel,
+            cores: cores,
+            usage: cpuUsage
         )
 
         // Memory Info
-        async let memTotal = try? await executor.execute("sysctl -n hw.memsize | awk '{printf \"%.0f GB\", $0/1073741824}'").output.trimmingCharacters(in: .whitespacesAndNewlines)
-        async let memPressure = try? await executor.execute("memory_pressure | head -1 | awk -F': ' '{print $2}'").output.trimmingCharacters(in: .whitespacesAndNewlines)
-        async let memStats = try? await executor.execute("top -l 1 -s 0 | grep PhysMem").output.trimmingCharacters(in: .whitespacesAndNewlines)
+        let memSizeBytes = runCommand("/usr/sbin/sysctl", ["-n", "hw.memsize"])
+        let memGB = (Double(memSizeBytes) ?? 0) / 1073741824.0
+        let memTotal = String(format: "%.0f GB", memGB)
 
-        let (mt, mp, ms) = await (memTotal, memPressure, memStats)
+        let memPressureOutput = runCommand("/usr/bin/memory_pressure", [])
+        var memPressure = "Unknown"
+        if let firstLine = memPressureOutput.components(separatedBy: "\n").first,
+           let colonIndex = firstLine.range(of: ": ") {
+            memPressure = String(firstLine[colonIndex.upperBound...])
+        }
 
+        let topMemOutput = runCommand("/usr/bin/top", ["-l", "1", "-s", "0"])
         var memUsed = "Unknown"
         var memFree = "Unknown"
-        if let stats = ms {
-            if let usedMatch = stats.range(of: #"(\d+[A-Z]) used"#, options: .regularExpression) {
-                memUsed = String(stats[usedMatch]).replacingOccurrences(of: " used", with: "")
+        if let memLine = topMemOutput.components(separatedBy: "\n").first(where: { $0.contains("PhysMem") }) {
+            if let usedRange = memLine.range(of: #"\d+[KMGT](?= used)"#, options: .regularExpression) {
+                memUsed = String(memLine[usedRange])
             }
-            if let freeMatch = stats.range(of: #"(\d+[A-Z]) unused"#, options: .regularExpression) {
-                memFree = String(stats[freeMatch]).replacingOccurrences(of: " unused", with: "")
+            if let freeRange = memLine.range(of: #"\d+[KMGT](?= unused)"#, options: .regularExpression) {
+                memFree = String(memLine[freeRange])
             }
         }
 
         report.memoryInfo = DiagnosticReport.MemoryInfo(
-            total: mt ?? "Unknown",
+            total: memTotal,
             used: memUsed,
             free: memFree,
-            pressure: mp ?? "Unknown"
+            pressure: memPressure
         )
 
         // Disk Info
-        if let diskResult = try? await executor.execute("df -h / | tail -1") {
-            let parts = diskResult.output.split(separator: " ", omittingEmptySubsequences: true)
+        let dfOutput = runCommand("/bin/df", ["-h", "/"])
+        if let lastLine = dfOutput.components(separatedBy: "\n").last,
+           !lastLine.contains("Filesystem") {
+            let parts = lastLine.split(separator: " ", omittingEmptySubsequences: true)
             if parts.count >= 5 {
                 report.diskInfo = DiagnosticReport.DiskInfo(
                     total: String(parts[1]),
@@ -232,56 +267,80 @@ struct DiagnosticsView: View {
         }
 
         // Network Info
-        async let activeIf = try? await executor.execute("route get default 2>/dev/null | grep interface | awk '{print $2}'").output.trimmingCharacters(in: .whitespacesAndNewlines)
-        async let wifiSSID = try? await executor.execute("/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I 2>/dev/null | grep ' SSID' | awk '{print $2}'").output.trimmingCharacters(in: .whitespacesAndNewlines)
-        async let pingResult = try? await executor.execute("ping -c 1 -W 2 8.8.8.8 &>/dev/null && echo 'connected' || echo 'disconnected'").output.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        let (ai, ws, pr) = await (activeIf, wifiSSID, pingResult)
+        let routeOutput = runCommand("/sbin/route", ["get", "default"])
+        var activeInterface = "None"
+        if let interfaceLine = routeOutput.components(separatedBy: "\n").first(where: { $0.contains("interface:") }),
+           let colonIndex = interfaceLine.range(of: ": ") {
+            activeInterface = String(interfaceLine[colonIndex.upperBound...]).trimmingCharacters(in: .whitespaces)
+        }
 
         var ipAddr = "Unknown"
-        if let interface = ai, !interface.isEmpty {
-            if let ipResult = try? await executor.execute("ifconfig \(interface) 2>/dev/null | grep 'inet ' | awk '{print $2}'") {
-                ipAddr = ipResult.output.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !activeInterface.isEmpty && activeInterface != "None" {
+            let ifconfigOutput = runCommand("/sbin/ifconfig", [activeInterface])
+            if let inetLine = ifconfigOutput.components(separatedBy: "\n").first(where: { $0.contains("inet ") && !$0.contains("inet6") }) {
+                let parts = inetLine.split(separator: " ", omittingEmptySubsequences: true)
+                if parts.count >= 2 {
+                    ipAddr = String(parts[1])
+                }
             }
         }
 
+        let airportOutput = runCommand("/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport", ["-I"])
+        var wifiSSID: String? = nil
+        if let ssidLine = airportOutput.components(separatedBy: "\n").first(where: { $0.contains(" SSID:") }),
+           let colonIndex = ssidLine.range(of: ": ") {
+            let ssid = String(ssidLine[colonIndex.upperBound...]).trimmingCharacters(in: .whitespaces)
+            if !ssid.isEmpty {
+                wifiSSID = ssid
+            }
+        }
+
+        let pingTask = Process()
+        pingTask.launchPath = "/sbin/ping"
+        pingTask.arguments = ["-c", "1", "-W", "2", "8.8.8.8"]
+        pingTask.standardOutput = Pipe()
+        pingTask.standardError = Pipe()
+        try? pingTask.run()
+        pingTask.waitUntilExit()
+        let isConnected = pingTask.terminationStatus == 0
+
         report.networkInfo = DiagnosticReport.NetworkInfo(
-            activeInterface: ai ?? "None",
+            activeInterface: activeInterface,
             ipAddress: ipAddr,
-            wifiSSID: ws?.isEmpty == false ? ws : nil,
-            isConnected: pr?.contains("connected") ?? false
+            wifiSSID: wifiSSID,
+            isConnected: isConnected
         )
 
         // Battery Info
-        if let batteryResult = try? await executor.execute("pmset -g batt 2>/dev/null") {
-            let output = batteryResult.output
-            if output.contains("Battery") {
-                var charge = 0
-                var status = "AC Power"
+        let batteryOutput = runCommand("/usr/bin/pmset", ["-g", "batt"])
+        if batteryOutput.contains("Battery") {
+            var charge = 0
+            var status = "AC Power"
 
-                if let percentMatch = output.range(of: #"\d+%"#, options: .regularExpression) {
-                    charge = Int(output[percentMatch].replacingOccurrences(of: "%", with: "")) ?? 0
-                }
-
-                if output.contains("discharging") {
-                    status = "Discharging"
-                } else if output.contains("charging") {
-                    status = "Charging"
-                } else if output.contains("charged") {
-                    status = "Charged"
-                }
-
-                report.batteryInfo = DiagnosticReport.BatteryInfo(
-                    charge: charge,
-                    status: status,
-                    cycleCount: nil,
-                    condition: nil
-                )
+            if let percentMatch = batteryOutput.range(of: #"\d+%"#, options: .regularExpression) {
+                charge = Int(batteryOutput[percentMatch].replacingOccurrences(of: "%", with: "")) ?? 0
             }
+
+            if batteryOutput.contains("discharging") {
+                status = "Discharging"
+            } else if batteryOutput.contains("charging") {
+                status = "Charging"
+            } else if batteryOutput.contains("charged") {
+                status = "Charged"
+            }
+
+            report.batteryInfo = DiagnosticReport.BatteryInfo(
+                charge: charge,
+                status: status,
+                cycleCount: nil,
+                condition: nil
+            )
         }
 
-        diagnosticReport = report
-        isRunningDiagnostics = false
+        await MainActor.run {
+            diagnosticReport = report
+            isRunningDiagnostics = false
+        }
     }
 }
 

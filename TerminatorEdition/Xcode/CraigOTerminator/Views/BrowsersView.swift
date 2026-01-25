@@ -86,16 +86,20 @@ struct BrowsersView: View {
     }
 
     private func startAutoRefresh() {
-        refreshTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: true) { _ in
-            Task { @MainActor in
-                await refreshBrowsers()
+        Task { @MainActor in
+            refreshTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: true) { _ in
+                Task { @MainActor in
+                    await refreshBrowsers()
+                }
             }
         }
     }
 
     private func stopAutoRefresh() {
-        refreshTimer?.invalidate()
-        refreshTimer = nil
+        Task { @MainActor in
+            refreshTimer?.invalidate()
+            refreshTimer = nil
+        }
     }
 
     private func refreshBrowsers() async {

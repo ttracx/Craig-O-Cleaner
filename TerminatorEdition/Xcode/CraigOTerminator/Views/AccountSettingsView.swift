@@ -254,24 +254,40 @@ struct SignedInView: View {
 
         Section {
             Button {
-                Task {
+                Task { @MainActor in
+                    print("AccountSettings: User clicked Sync to iCloud")
                     await profileService.syncPreferencesFromAppStorage()
                 }
             } label: {
                 HStack {
-                    Image(systemName: "arrow.clockwise.icloud")
+                    if profileService.isLoading {
+                        ProgressView()
+                            .scaleEffect(0.7)
+                    } else {
+                        Image(systemName: "arrow.clockwise.icloud")
+                    }
                     Text("Sync Settings to iCloud")
                 }
             }
+            .disabled(profileService.isLoading)
 
             Button {
-                profileService.applyPreferencesToAppStorage()
+                Task { @MainActor in
+                    print("AccountSettings: User clicked Restore from iCloud")
+                    profileService.applyPreferencesToAppStorage()
+                }
             } label: {
                 HStack {
-                    Image(systemName: "arrow.down.to.line.circle")
+                    if profileService.isLoading {
+                        ProgressView()
+                            .scaleEffect(0.7)
+                    } else {
+                        Image(systemName: "arrow.down.to.line.circle")
+                    }
                     Text("Restore Settings from iCloud")
                 }
             }
+            .disabled(profileService.isLoading)
         } header: {
             Text("Settings Sync")
         } footer: {

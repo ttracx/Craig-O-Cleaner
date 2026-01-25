@@ -130,7 +130,16 @@ struct AutomationSettingsView: View {
                     Slider(value: $diskThreshold, in: 60...95, step: 5)
                 }
 
-                Picker("Check interval", selection: $checkInterval) {
+                Picker("Check interval", selection: Binding(
+                    get: {
+                        // Ensure the value is valid, default to 300.0 (5 minutes) if not
+                        let validValues: [Double] = [60.0, 300.0, 900.0, 1800.0, 3600.0]
+                        return validValues.contains(checkInterval) ? checkInterval : 300.0
+                    },
+                    set: { newValue in
+                        checkInterval = newValue
+                    }
+                )) {
                     Text("1 minute").tag(60.0)
                     Text("5 minutes").tag(300.0)
                     Text("15 minutes").tag(900.0)
@@ -142,10 +151,10 @@ struct AutomationSettingsView: View {
             } footer: {
                 Text("Cleanup will be triggered when memory or disk usage exceeds these thresholds.")
             }
+            .disabled(!autonomousMode)
         }
         .formStyle(.grouped)
         .padding()
-        .disabled(!autonomousMode)
     }
 }
 
@@ -342,67 +351,89 @@ struct AISettingsView: View {
         .formStyle(.grouped)
         .padding()
         .task {
-            // Run initialization in a separate task to avoid state updates during view rendering
-            await Task { @MainActor in
-                await checkOllamaInstallation()
-                if ollamaInstalled {
-                    await loadAvailableModels()
-                    await checkRunningModels()
-                }
-            }.value
+            // Run initialization asynchronously to avoid state updates during view rendering
+            await checkOllamaInstallation()
+
+            let installed = await MainActor.run { ollamaInstalled }
+            if installed {
+                await loadAvailableModels()
+                await checkRunningModels()
+            }
         }
     }
 
-    @MainActor
     private func testConnection() async {
-        isTestingConnection = true
-        connectionStatus = .unknown
+        await MainActor.run {
+            isTestingConnection = true
+            connectionStatus = .unknown
+        }
 
-        let executor = CommandExecutor.shared
+        let task = Process()
+        task.launchPath = "/usr/bin/curl"
+        task.arguments = ["-s", "http://\(ollamaHost):\(ollamaPort)/api/tags"]
+        let pipe = Pipe()
+        task.standardOutput = pipe
+        task.standardError = Pipe()
+
+        try? task.run()
+        task.waitUntilExit()
+
         let status: ConnectionStatus
-        if let result = try? await executor.execute("curl -s http://\(ollamaHost):\(ollamaPort)/api/tags") {
-            status = result.output.contains("models") ? .connected : .failed
+        if task.terminationStatus == 0 {
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            if let output = String(data: data, encoding: .utf8) {
+                status = output.contains("models") ? .connected : .failed
+            } else {
+                status = .failed
+            }
         } else {
             status = .failed
         }
 
-        // Update state outside of view update cycle
-        Task { @MainActor in
-            self.connectionStatus = status
-            self.isTestingConnection = false
+        await MainActor.run {
+            connectionStatus = status
+            isTestingConnection = false
         }
     }
 
-    @MainActor
     private func checkOllamaInstallation() async {
-        isCheckingOllama = true
-
-        let executor = CommandExecutor.shared
-        // Check if ollama command exists
-        let installed: Bool
-        if let result = try? await executor.execute("which ollama") {
-            installed = !result.output.isEmpty && result.isSuccess
-        } else {
-            installed = false
+        await MainActor.run {
+            isCheckingOllama = true
         }
 
-        // Update state outside of view update cycle
-        Task { @MainActor in
-            self.ollamaInstalled = installed
-            self.isCheckingOllama = false
+        // Check if ollama command exists
+        let task = Process()
+        task.launchPath = "/usr/bin/which"
+        task.arguments = ["ollama"]
+        let pipe = Pipe()
+        task.standardOutput = pipe
+        task.standardError = Pipe()
+
+        try? task.run()
+        task.waitUntilExit()
+
+        let installed = task.terminationStatus == 0
+
+        await MainActor.run {
+            ollamaInstalled = installed
+            isCheckingOllama = false
         }
     }
 
-    @MainActor
     private func downloadAndInstallOllama() async {
-        Task { @MainActor in
-            self.isInstallingOllama = true
+        await MainActor.run {
+            isInstallingOllama = true
         }
-
-        let executor = CommandExecutor.shared
 
         // Download Ollama installer
-        _ = try? await executor.execute("curl -fsSL https://ollama.ai/install.sh | sh")
+        let installTask = Process()
+        installTask.launchPath = "/bin/sh"
+        installTask.arguments = ["-c", "curl -fsSL https://ollama.ai/install.sh | sh"]
+        installTask.standardOutput = Pipe()
+        installTask.standardError = Pipe()
+
+        try? installTask.run()
+        installTask.waitUntilExit()
 
         // Wait a moment for installation to complete
         try? await Task.sleep(nanoseconds: 2_000_000_000)
@@ -410,136 +441,183 @@ struct AISettingsView: View {
         // Verify installation
         await checkOllamaInstallation()
 
-        if ollamaInstalled {
+        let installed = await MainActor.run { ollamaInstalled }
+        if installed {
             // Start Ollama service
-            _ = try? await executor.execute("ollama serve > /dev/null 2>&1 &")
+            let serveTask = Process()
+            serveTask.launchPath = "/bin/sh"
+            serveTask.arguments = ["-c", "ollama serve > /dev/null 2>&1 &"]
+            serveTask.standardOutput = Pipe()
+            serveTask.standardError = Pipe()
+
+            try? serveTask.run()
             try? await Task.sleep(nanoseconds: 2_000_000_000)
 
             // Load models after installation
             await loadAvailableModels()
 
             // Auto-install default model if not present
-            if !availableModels.contains("lfm2.5-thinking") {
+            let models = await MainActor.run { availableModels }
+            if !models.contains("lfm2.5-thinking") {
                 await downloadDefaultModel()
             }
         }
 
-        Task { @MainActor in
-            self.isInstallingOllama = false
+        await MainActor.run {
+            isInstallingOllama = false
         }
     }
 
-    @MainActor
     private func loadAvailableModels() async {
-        isLoadingModels = true
-
-        let executor = CommandExecutor.shared
+        await MainActor.run {
+            isLoadingModels = true
+        }
 
         // First ensure Ollama is running
-        _ = try? await executor.execute("pgrep -x ollama > /dev/null || ollama serve > /dev/null 2>&1 &")
+        let checkTask = Process()
+        checkTask.launchPath = "/bin/sh"
+        checkTask.arguments = ["-c", "pgrep -x ollama > /dev/null || ollama serve > /dev/null 2>&1 &"]
+        checkTask.standardOutput = Pipe()
+        checkTask.standardError = Pipe()
+
+        try? checkTask.run()
+        checkTask.waitUntilExit()
         try? await Task.sleep(nanoseconds: 1_000_000_000)
 
         // Get list of installed models
-        if let result = try? await executor.execute("ollama list") {
-            let lines = result.output.components(separatedBy: "\n")
-            var models: Set<String> = [] // Use Set to avoid duplicates
+        let listTask = Process()
+        listTask.launchPath = "/usr/local/bin/ollama"
+        listTask.arguments = ["list"]
+        let pipe = Pipe()
+        listTask.standardOutput = pipe
+        listTask.standardError = Pipe()
 
-            for line in lines {
-                let parts = line.split(separator: " ", omittingEmptySubsequences: true)
-                if parts.count > 0 && !line.contains("NAME") {
-                    let modelName = String(parts[0]).components(separatedBy: ":").first ?? ""
-                    if !modelName.isEmpty && modelName != "NAME" {
-                        models.insert(modelName)
+        try? listTask.run()
+        listTask.waitUntilExit()
+
+        if listTask.terminationStatus == 0 {
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            if let output = String(data: data, encoding: .utf8) {
+                let lines = output.components(separatedBy: "\n")
+                var models: Set<String> = []
+
+                for line in lines {
+                    let parts = line.split(separator: " ", omittingEmptySubsequences: true)
+                    if parts.count > 0 && !line.contains("NAME") {
+                        let modelName = String(parts[0]).components(separatedBy: ":").first ?? ""
+                        if !modelName.isEmpty && modelName != "NAME" {
+                            models.insert(modelName)
+                        }
                     }
                 }
-            }
 
-            let sortedModels = models.sorted()
+                let sortedModels = models.sorted()
 
-            // Update state outside of view update cycle
-            Task { @MainActor in
-                self.availableModels = sortedModels
+                await MainActor.run {
+                    availableModels = sortedModels
 
-                // If no model is selected and we have models, select the first one or lfm2.5-thinking
-                if self.ollamaModel.isEmpty && !sortedModels.isEmpty {
-                    if sortedModels.contains("lfm2.5-thinking") {
-                        self.ollamaModel = "lfm2.5-thinking"
-                    } else if let firstModel = sortedModels.first {
-                        self.ollamaModel = firstModel
+                    // If no model is selected and we have models, select the first one or lfm2.5-thinking
+                    if ollamaModel.isEmpty && !sortedModels.isEmpty {
+                        if sortedModels.contains("lfm2.5-thinking") {
+                            ollamaModel = "lfm2.5-thinking"
+                        } else if let firstModel = sortedModels.first {
+                            ollamaModel = firstModel
+                        }
                     }
                 }
             }
         }
 
-        isLoadingModels = false
+        await MainActor.run {
+            isLoadingModels = false
+        }
     }
 
-    @MainActor
     private func checkRunningModels() async {
-        let executor = CommandExecutor.shared
-
         // Check which models are currently running
-        if let result = try? await executor.execute("ollama ps") {
-            let lines = result.output.components(separatedBy: "\n")
-            var running: [String] = []
+        let task = Process()
+        task.launchPath = "/usr/local/bin/ollama"
+        task.arguments = ["ps"]
+        let pipe = Pipe()
+        task.standardOutput = pipe
+        task.standardError = Pipe()
 
-            for line in lines {
-                let parts = line.split(separator: " ", omittingEmptySubsequences: true)
-                if parts.count > 0 && !line.contains("NAME") {
-                    let modelName = String(parts[0]).components(separatedBy: ":").first ?? ""
-                    if !modelName.isEmpty && modelName != "NAME" {
-                        running.append(modelName)
+        try? task.run()
+        task.waitUntilExit()
+
+        if task.terminationStatus == 0 {
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            if let output = String(data: data, encoding: .utf8) {
+                let lines = output.components(separatedBy: "\n")
+                var running: [String] = []
+
+                for line in lines {
+                    let parts = line.split(separator: " ", omittingEmptySubsequences: true)
+                    if parts.count > 0 && !line.contains("NAME") {
+                        let modelName = String(parts[0]).components(separatedBy: ":").first ?? ""
+                        if !modelName.isEmpty && modelName != "NAME" {
+                            running.append(modelName)
+                        }
                     }
                 }
-            }
 
-            // Update state outside of view update cycle
-            Task { @MainActor in
-                self.runningModels = running
+                await MainActor.run {
+                    runningModels = running
+                }
             }
         }
     }
 
-    @MainActor
     private func downloadDefaultModel() async {
-        Task { @MainActor in
-            self.isDownloadingModel = true
-            self.downloadProgress = "Starting download..."
+        await MainActor.run {
+            isDownloadingModel = true
+            downloadProgress = "Starting download..."
         }
-
-        let executor = CommandExecutor.shared
 
         // Ensure Ollama is running
-        _ = try? await executor.execute("pgrep -x ollama > /dev/null || ollama serve > /dev/null 2>&1 &")
+        let checkTask = Process()
+        checkTask.launchPath = "/bin/sh"
+        checkTask.arguments = ["-c", "pgrep -x ollama > /dev/null || ollama serve > /dev/null 2>&1 &"]
+        checkTask.standardOutput = Pipe()
+        checkTask.standardError = Pipe()
+
+        try? checkTask.run()
+        checkTask.waitUntilExit()
         try? await Task.sleep(nanoseconds: 2_000_000_000)
 
-        // Download and run the model (this will download if not present)
-        Task { @MainActor in
-            self.downloadProgress = "Downloading lfm2.5-thinking model... This may take a few minutes."
+        await MainActor.run {
+            downloadProgress = "Downloading lfm2.5-thinking model... This may take a few minutes."
         }
 
-        // Run in background and capture output
-        if let result = try? await executor.execute("ollama run lfm2.5-thinking 'Hello' || ollama pull lfm2.5-thinking", timeout: 600) {
-            if result.isSuccess {
-                Task { @MainActor in
-                    self.downloadProgress = "Model downloaded successfully!"
-                    self.ollamaModel = "lfm2.5-thinking"
-                }
+        // Download the model
+        let pullTask = Process()
+        pullTask.launchPath = "/usr/local/bin/ollama"
+        pullTask.arguments = ["pull", "lfm2.5-thinking"]
+        pullTask.standardOutput = Pipe()
+        pullTask.standardError = Pipe()
 
-                // Reload available models
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
-                await loadAvailableModels()
-            } else {
-                Task { @MainActor in
-                    self.downloadProgress = "Download failed. Please try manually: ollama run lfm2.5-thinking"
-                }
+        try? pullTask.run()
+        pullTask.waitUntilExit()
+
+        if pullTask.terminationStatus == 0 {
+            await MainActor.run {
+                downloadProgress = "Model downloaded successfully!"
+                ollamaModel = "lfm2.5-thinking"
+            }
+
+            // Reload available models
+            try? await Task.sleep(nanoseconds: 1_000_000_000)
+            await loadAvailableModels()
+        } else {
+            await MainActor.run {
+                downloadProgress = "Download failed. Please try manually: ollama pull lfm2.5-thinking"
             }
         }
 
         try? await Task.sleep(nanoseconds: 2_000_000_000)
-        Task { @MainActor in
-            self.downloadProgress = ""
-            self.isDownloadingModel = false
+        await MainActor.run {
+            downloadProgress = ""
+            isDownloadingModel = false
         }
     }
 }
@@ -595,8 +673,14 @@ struct AdvancedSettingsView: View {
     }
 
     private func clearAppCache() async {
-        let executor = CommandExecutor.shared
-        _ = try? await executor.execute("rm -rf ~/Library/Caches/com.craigtracey.CraigOTerminator/* 2>/dev/null")
+        let task = Process()
+        task.launchPath = "/bin/sh"
+        task.arguments = ["-c", "rm -rf ~/Library/Caches/com.vibecaas.CraigOTerminator/* 2>/dev/null"]
+        task.standardOutput = Pipe()
+        task.standardError = Pipe()
+
+        try? task.run()
+        task.waitUntilExit()
     }
 
     private func resetAllSettings() {

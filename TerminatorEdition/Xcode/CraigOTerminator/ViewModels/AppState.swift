@@ -81,7 +81,6 @@ final class AppState: ObservableObject {
     // MARK: - Private Properties
 
     private var metricsTimer: Timer?
-    private let executor = CommandExecutor.shared
 
     // MARK: - Initialization
 
@@ -129,46 +128,92 @@ final class AppState: ObservableObject {
         var newDiskUsage: Double = 0
 
         // CPU Usage
-        if let result = try? await executor.execute("top -l 1 -s 0 | grep 'CPU usage'") {
-            if let match = result.output.range(of: #"(\d+\.?\d*)% user"#, options: .regularExpression) {
-                let userStr = String(result.output[match]).replacingOccurrences(of: "% user", with: "")
-                newCpuUsage = Double(userStr) ?? 0
+        let topTask = Process()
+        topTask.launchPath = "/usr/bin/top"
+        topTask.arguments = ["-l", "1", "-s", "0"]
+        let topPipe = Pipe()
+        topTask.standardOutput = topPipe
+        topTask.standardError = Pipe()
 
-                if let sysMatch = result.output.range(of: #"(\d+\.?\d*)% sys"#, options: .regularExpression) {
-                    let sysStr = String(result.output[sysMatch]).replacingOccurrences(of: "% sys", with: "")
-                    newCpuUsage += Double(sysStr) ?? 0
-                }
-            }
-        }
+        try? topTask.run()
+        topTask.waitUntilExit()
 
-        // Memory Usage
-        if let result = try? await executor.execute("top -l 1 -s 0 | grep PhysMem") {
-            // Parse memory usage
-            if let usedMatch = result.output.range(of: #"(\d+)([GM]) used"#, options: .regularExpression),
-               let totalResult = try? await executor.execute("sysctl -n hw.memsize") {
-                let usedStr = String(result.output[usedMatch])
-                let totalBytes = Double(totalResult.output) ?? 0
+        if topTask.terminationStatus == 0 {
+            let data = topPipe.fileHandleForReading.readDataToEndOfFile()
+            if let output = String(data: data, encoding: .utf8),
+               let cpuLine = output.components(separatedBy: "\n").first(where: { $0.contains("CPU usage") }) {
+                if let match = cpuLine.range(of: #"(\d+\.?\d*)% user"#, options: .regularExpression) {
+                    let userStr = String(cpuLine[match]).replacingOccurrences(of: "% user", with: "")
+                    newCpuUsage = Double(userStr) ?? 0
 
-                var usedBytes: Double = 0
-                if usedStr.contains("G") {
-                    if let num = Double(usedStr.replacingOccurrences(of: "G used", with: "").trimmingCharacters(in: .whitespaces)) {
-                        usedBytes = num * 1_073_741_824
-                    }
-                } else if usedStr.contains("M") {
-                    if let num = Double(usedStr.replacingOccurrences(of: "M used", with: "").trimmingCharacters(in: .whitespaces)) {
-                        usedBytes = num * 1_048_576
+                    if let sysMatch = cpuLine.range(of: #"(\d+\.?\d*)% sys"#, options: .regularExpression) {
+                        let sysStr = String(cpuLine[sysMatch]).replacingOccurrences(of: "% sys", with: "")
+                        newCpuUsage += Double(sysStr) ?? 0
                     }
                 }
 
-                if totalBytes > 0 {
-                    newMemoryUsage = (usedBytes / totalBytes) * 100
+                // Memory Usage
+                if let memLine = output.components(separatedBy: "\n").first(where: { $0.contains("PhysMem") }) {
+                    if let usedMatch = memLine.range(of: #"(\d+)([GM]) used"#, options: .regularExpression) {
+                        let usedStr = String(memLine[usedMatch])
+
+                        // Get total memory
+                        let sysTask = Process()
+                        sysTask.launchPath = "/usr/sbin/sysctl"
+                        sysTask.arguments = ["-n", "hw.memsize"]
+                        let sysPipe = Pipe()
+                        sysTask.standardOutput = sysPipe
+                        sysTask.standardError = Pipe()
+
+                        try? sysTask.run()
+                        sysTask.waitUntilExit()
+
+                        if sysTask.terminationStatus == 0 {
+                            let sysData = sysPipe.fileHandleForReading.readDataToEndOfFile()
+                            if let totalStr = String(data: sysData, encoding: .utf8) {
+                                let totalBytes = Double(totalStr.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+
+                                var usedBytes: Double = 0
+                                if usedStr.contains("G") {
+                                    if let num = Double(usedStr.replacingOccurrences(of: "G used", with: "").trimmingCharacters(in: .whitespaces)) {
+                                        usedBytes = num * 1_073_741_824
+                                    }
+                                } else if usedStr.contains("M") {
+                                    if let num = Double(usedStr.replacingOccurrences(of: "M used", with: "").trimmingCharacters(in: .whitespaces)) {
+                                        usedBytes = num * 1_048_576
+                                    }
+                                }
+
+                                if totalBytes > 0 {
+                                    newMemoryUsage = (usedBytes / totalBytes) * 100
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
 
         // Disk Usage
-        if let result = try? await executor.execute("df -h / | tail -1 | awk '{print $5}'") {
-            newDiskUsage = Double(result.output.replacingOccurrences(of: "%", with: "")) ?? 0
+        let dfTask = Process()
+        dfTask.launchPath = "/bin/df"
+        dfTask.arguments = ["-h", "/"]
+        let dfPipe = Pipe()
+        dfTask.standardOutput = dfPipe
+        dfTask.standardError = Pipe()
+
+        try? dfTask.run()
+        dfTask.waitUntilExit()
+
+        if dfTask.terminationStatus == 0 {
+            let data = dfPipe.fileHandleForReading.readDataToEndOfFile()
+            if let output = String(data: data, encoding: .utf8),
+               let lastLine = output.components(separatedBy: "\n").last(where: { !$0.contains("Filesystem") && !$0.isEmpty }) {
+                let parts = lastLine.split(separator: " ", omittingEmptySubsequences: true)
+                if parts.count >= 5 {
+                    newDiskUsage = Double(String(parts[4]).replacingOccurrences(of: "%", with: "")) ?? 0
+                }
+            }
         }
 
         // Batch all published property updates together
@@ -204,73 +249,133 @@ final class AppState: ObservableObject {
 
     private func checkOllamaAvailability() async {
         // Check if Ollama is running
-        if let result = try? await executor.execute("curl -s http://localhost:11434/api/tags 2>/dev/null") {
-            isAIEnabled = result.isSuccess && !result.output.isEmpty
-        } else {
-            isAIEnabled = false
+        let task = Process()
+        task.launchPath = "/usr/bin/curl"
+        task.arguments = ["-s", "http://localhost:11434/api/tags"]
+        let pipe = Pipe()
+        task.standardOutput = pipe
+        task.standardError = Pipe()
+
+        try? task.run()
+        task.waitUntilExit()
+
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        let output = String(data: data, encoding: .utf8) ?? ""
+
+        await MainActor.run {
+            isAIEnabled = task.terminationStatus == 0 && !output.isEmpty
         }
     }
 
     // MARK: - Cleanup Operations
 
     func performQuickCleanup() async {
-        isLoading = true
-        currentOperation = "Performing quick cleanup..."
-        operationProgress = 0
+        await MainActor.run {
+            isLoading = true
+            currentOperation = "Performing quick cleanup..."
+            operationProgress = 0
+        }
 
         let startTime = Date()
         var memoryFreed: UInt64 = 0
         let diskFreed: UInt64 = 0
 
         // Batch all privileged operations together to minimize prompts
-        operationProgress = 0.2
-        currentOperation = "Executing cleanup operations..."
+        await MainActor.run {
+            operationProgress = 0.2
+            currentOperation = "Executing cleanup operations..."
+        }
 
-        _ = try? await executor.execute("sync")
+        // Sync filesystem
+        let syncTask = Process()
+        syncTask.launchPath = "/bin/sync"
+        syncTask.standardOutput = Pipe()
+        syncTask.standardError = Pipe()
+        try? syncTask.run()
+        syncTask.waitUntilExit()
 
-        // Execute all privileged commands in one authorization prompt
-        let privilegedCommands = [
-            "purge",
-            "dscacheutil -flushcache && killall -HUP mDNSResponder 2>/dev/null"
-        ]
+        await MainActor.run {
+            operationProgress = 0.5
+            currentOperation = "Purging memory..."
+        }
 
-        operationProgress = 0.5
-        if let _ = try? await executor.executePrivilegedBatch(privilegedCommands) {
+        // Run purge with osascript for admin privileges
+        let purgeScript = """
+        do shell script "purge" with administrator privileges
+        """
+        let purgeTask = Process()
+        purgeTask.launchPath = "/usr/bin/osascript"
+        purgeTask.arguments = ["-e", purgeScript]
+        purgeTask.standardOutput = Pipe()
+        purgeTask.standardError = Pipe()
+        try? purgeTask.run()
+        purgeTask.waitUntilExit()
+
+        if purgeTask.terminationStatus == 0 {
             memoryFreed = 500_000_000 // Estimated
         }
 
-        // Clear temp files (non-privileged)
-        operationProgress = 0.8
-        currentOperation = "Clearing temporary files..."
-        _ = try? await executor.execute("rm -rf ~/Library/Caches/TemporaryItems/* 2>/dev/null")
+        // Flush DNS cache
+        let dnsScript = """
+        do shell script "dscacheutil -flushcache && killall -HUP mDNSResponder 2>/dev/null" with administrator privileges
+        """
+        let dnsTask = Process()
+        dnsTask.launchPath = "/usr/bin/osascript"
+        dnsTask.arguments = ["-e", dnsScript]
+        dnsTask.standardOutput = Pipe()
+        dnsTask.standardError = Pipe()
+        try? dnsTask.run()
+        dnsTask.waitUntilExit()
 
-        operationProgress = 1.0
-        currentOperation = "Complete"
+        // Clear temp files (non-privileged)
+        await MainActor.run {
+            operationProgress = 0.8
+            currentOperation = "Clearing temporary files..."
+        }
+
+        let rmTask = Process()
+        rmTask.launchPath = "/bin/sh"
+        rmTask.arguments = ["-c", "rm -rf ~/Library/Caches/TemporaryItems/* 2>/dev/null"]
+        rmTask.standardOutput = Pipe()
+        rmTask.standardError = Pipe()
+        try? rmTask.run()
+        rmTask.waitUntilExit()
+
+        await MainActor.run {
+            operationProgress = 1.0
+            currentOperation = "Complete"
+        }
 
         let duration = Date().timeIntervalSince(startTime)
 
-        lastCleanupResult = CleanupResult(
-            memoryFreed: memoryFreed,
-            diskSpaceFreed: diskFreed,
-            processesTerminated: 0,
-            tabsClosed: 0,
-            cachesCleared: 1,
-            duration: duration,
-            timestamp: Date()
-        )
+        await MainActor.run {
+            lastCleanupResult = CleanupResult(
+                memoryFreed: memoryFreed,
+                diskSpaceFreed: diskFreed,
+                processesTerminated: 0,
+                tabsClosed: 0,
+                cachesCleared: 1,
+                duration: duration,
+                timestamp: Date()
+            )
+        }
 
         await updateMetrics()
 
-        isLoading = false
-        currentOperation = ""
+        await MainActor.run {
+            isLoading = false
+            currentOperation = ""
+        }
 
         showAlertMessage("Quick cleanup completed in \(String(format: "%.1f", duration))s")
     }
 
     func performFullCleanup() async {
-        isLoading = true
-        currentOperation = "Performing full cleanup..."
-        operationProgress = 0
+        await MainActor.run {
+            isLoading = true
+            currentOperation = "Performing full cleanup..."
+            operationProgress = 0
+        }
 
         let startTime = Date()
         var memoryFreed: UInt64 = 0
@@ -278,116 +383,217 @@ final class AppState: ObservableObject {
         var cachesCleared = 0
 
         // Sync filesystem first
-        operationProgress = 0.1
-        _ = try? await executor.execute("sync")
+        await MainActor.run {
+            operationProgress = 0.1
+        }
+        let syncTask = Process()
+        syncTask.launchPath = "/bin/sync"
+        syncTask.standardOutput = Pipe()
+        syncTask.standardError = Pipe()
+        try? syncTask.run()
+        syncTask.waitUntilExit()
 
         // Clear user caches (non-privileged)
-        operationProgress = 0.2
-        currentOperation = "Clearing user caches..."
-        _ = try? await executor.execute("rm -rf ~/Library/Caches/TemporaryItems/* 2>/dev/null")
+        await MainActor.run {
+            operationProgress = 0.2
+            currentOperation = "Clearing user caches..."
+        }
+
+        let tempTask = Process()
+        tempTask.launchPath = "/bin/sh"
+        tempTask.arguments = ["-c", "rm -rf ~/Library/Caches/TemporaryItems/* 2>/dev/null"]
+        tempTask.standardOutput = Pipe()
+        tempTask.standardError = Pipe()
+        try? tempTask.run()
+        tempTask.waitUntilExit()
         cachesCleared += 1
         diskFreed += 100_000_000
 
         // Clear browser caches (non-privileged)
-        operationProgress = 0.4
-        currentOperation = "Clearing browser caches..."
-        _ = try? await executor.execute("rm -rf ~/Library/Caches/com.apple.Safari/* 2>/dev/null")
-        _ = try? await executor.execute("rm -rf ~/Library/Caches/Google/Chrome/* 2>/dev/null")
-        _ = try? await executor.execute("rm -rf ~/Library/Caches/Firefox/* 2>/dev/null")
+        await MainActor.run {
+            operationProgress = 0.4
+            currentOperation = "Clearing browser caches..."
+        }
+
+        let safariTask = Process()
+        safariTask.launchPath = "/bin/sh"
+        safariTask.arguments = ["-c", "rm -rf ~/Library/Caches/com.apple.Safari/* 2>/dev/null"]
+        safariTask.standardOutput = Pipe()
+        safariTask.standardError = Pipe()
+        try? safariTask.run()
+        safariTask.waitUntilExit()
+
+        let chromeTask = Process()
+        chromeTask.launchPath = "/bin/sh"
+        chromeTask.arguments = ["-c", "rm -rf ~/Library/Caches/Google/Chrome/* 2>/dev/null"]
+        chromeTask.standardOutput = Pipe()
+        chromeTask.standardError = Pipe()
+        try? chromeTask.run()
+        chromeTask.waitUntilExit()
+
+        let firefoxTask = Process()
+        firefoxTask.launchPath = "/bin/sh"
+        firefoxTask.arguments = ["-c", "rm -rf ~/Library/Caches/Firefox/* 2>/dev/null"]
+        firefoxTask.standardOutput = Pipe()
+        firefoxTask.standardError = Pipe()
+        try? firefoxTask.run()
+        firefoxTask.waitUntilExit()
+
         cachesCleared += 3
 
         // Batch all privileged operations together
-        operationProgress = 0.6
-        currentOperation = "Executing privileged cleanup operations..."
+        await MainActor.run {
+            operationProgress = 0.6
+            currentOperation = "Executing privileged cleanup operations..."
+        }
 
-        let privilegedCommands = [
-            "purge",
-            "rm -rf /private/var/tmp/* 2>/dev/null",
-            "dscacheutil -flushcache && killall -HUP mDNSResponder 2>/dev/null"
-        ]
+        // Run privileged commands with osascript
+        let privilegedScript = """
+        do shell script "purge; rm -rf /private/var/tmp/* 2>/dev/null; dscacheutil -flushcache && killall -HUP mDNSResponder 2>/dev/null" with administrator privileges
+        """
+        let privilegedTask = Process()
+        privilegedTask.launchPath = "/usr/bin/osascript"
+        privilegedTask.arguments = ["-e", privilegedScript]
+        privilegedTask.standardOutput = Pipe()
+        privilegedTask.standardError = Pipe()
+        try? privilegedTask.run()
+        privilegedTask.waitUntilExit()
 
-        if let _ = try? await executor.executePrivilegedBatch(privilegedCommands) {
+        if privilegedTask.terminationStatus == 0 {
             memoryFreed = 500_000_000
         }
 
-        operationProgress = 1.0
-        currentOperation = "Complete"
+        await MainActor.run {
+            operationProgress = 1.0
+            currentOperation = "Complete"
+        }
 
         let duration = Date().timeIntervalSince(startTime)
 
-        lastCleanupResult = CleanupResult(
-            memoryFreed: memoryFreed,
-            diskSpaceFreed: diskFreed,
-            processesTerminated: 0,
-            tabsClosed: 0,
-            cachesCleared: cachesCleared,
-            duration: duration,
-            timestamp: Date()
-        )
+        await MainActor.run {
+            lastCleanupResult = CleanupResult(
+                memoryFreed: memoryFreed,
+                diskSpaceFreed: diskFreed,
+                processesTerminated: 0,
+                tabsClosed: 0,
+                cachesCleared: cachesCleared,
+                duration: duration,
+                timestamp: Date()
+            )
+        }
 
         await updateMetrics()
 
-        isLoading = false
-        currentOperation = ""
+        await MainActor.run {
+            isLoading = false
+            currentOperation = ""
+        }
 
         showAlertMessage("Full cleanup completed in \(String(format: "%.1f", duration))s")
     }
 
     func performEmergencyCleanup() async {
-        isLoading = true
-        currentOperation = "EMERGENCY MODE ACTIVATED..."
-        operationProgress = 0
+        await MainActor.run {
+            isLoading = true
+            currentOperation = "EMERGENCY MODE ACTIVATED..."
+            operationProgress = 0
+        }
 
         let startTime = Date()
         var processesKilled = 0
 
         // Kill heavy processes (non-privileged)
-        operationProgress = 0.2
-        currentOperation = "Terminating resource hogs..."
-        _ = try? await executor.execute("pkill -9 -f 'Chrome Helper' 2>/dev/null")
-        _ = try? await executor.execute("pkill -9 -f 'Safari Web Content' 2>/dev/null")
+        await MainActor.run {
+            operationProgress = 0.2
+            currentOperation = "Terminating resource hogs..."
+        }
+
+        let chromePkillTask = Process()
+        chromePkillTask.launchPath = "/usr/bin/pkill"
+        chromePkillTask.arguments = ["-9", "-f", "Chrome Helper"]
+        chromePkillTask.standardOutput = Pipe()
+        chromePkillTask.standardError = Pipe()
+        try? chromePkillTask.run()
+        chromePkillTask.waitUntilExit()
+
+        let safariPkillTask = Process()
+        safariPkillTask.launchPath = "/usr/bin/pkill"
+        safariPkillTask.arguments = ["-9", "-f", "Safari Web Content"]
+        safariPkillTask.standardOutput = Pipe()
+        safariPkillTask.standardError = Pipe()
+        try? safariPkillTask.run()
+        safariPkillTask.waitUntilExit()
+
         processesKilled += 2
 
         // Sync filesystem
-        operationProgress = 0.3
-        _ = try? await executor.execute("sync")
+        await MainActor.run {
+            operationProgress = 0.3
+        }
+
+        let syncTask = Process()
+        syncTask.launchPath = "/bin/sync"
+        syncTask.standardOutput = Pipe()
+        syncTask.standardError = Pipe()
+        try? syncTask.run()
+        syncTask.waitUntilExit()
 
         // Clear user caches (non-privileged)
-        operationProgress = 0.4
-        currentOperation = "Emergency cache clear..."
-        _ = try? await executor.execute("rm -rf ~/Library/Caches/* 2>/dev/null")
+        await MainActor.run {
+            operationProgress = 0.4
+            currentOperation = "Emergency cache clear..."
+        }
+
+        let cacheTask = Process()
+        cacheTask.launchPath = "/bin/sh"
+        cacheTask.arguments = ["-c", "rm -rf ~/Library/Caches/* 2>/dev/null"]
+        cacheTask.standardOutput = Pipe()
+        cacheTask.standardError = Pipe()
+        try? cacheTask.run()
+        cacheTask.waitUntilExit()
 
         // Batch all privileged operations together
-        operationProgress = 0.6
-        currentOperation = "Executing emergency privileged operations..."
+        await MainActor.run {
+            operationProgress = 0.6
+            currentOperation = "Executing emergency privileged operations..."
+        }
 
-        let privilegedCommands = [
-            "purge",
-            "rm -rf /private/var/tmp/* 2>/dev/null",
-            "rm -rf /private/var/folders/*/*/*/* 2>/dev/null"
-        ]
+        let privilegedScript = """
+        do shell script "purge; rm -rf /private/var/tmp/* 2>/dev/null; rm -rf /private/var/folders/*/*/*/* 2>/dev/null" with administrator privileges
+        """
+        let privilegedTask = Process()
+        privilegedTask.launchPath = "/usr/bin/osascript"
+        privilegedTask.arguments = ["-e", privilegedScript]
+        privilegedTask.standardOutput = Pipe()
+        privilegedTask.standardError = Pipe()
+        try? privilegedTask.run()
+        privilegedTask.waitUntilExit()
 
-        _ = try? await executor.executePrivilegedBatch(privilegedCommands)
-
-        operationProgress = 1.0
-        currentOperation = "Emergency cleanup complete"
+        await MainActor.run {
+            operationProgress = 1.0
+            currentOperation = "Emergency cleanup complete"
+        }
 
         let duration = Date().timeIntervalSince(startTime)
 
-        lastCleanupResult = CleanupResult(
-            memoryFreed: 1_000_000_000,
-            diskSpaceFreed: 500_000_000,
-            processesTerminated: processesKilled,
-            tabsClosed: 0,
-            cachesCleared: 5,
-            duration: duration,
-            timestamp: Date()
-        )
+        await MainActor.run {
+            lastCleanupResult = CleanupResult(
+                memoryFreed: 1_000_000_000,
+                diskSpaceFreed: 500_000_000,
+                processesTerminated: processesKilled,
+                tabsClosed: 0,
+                cachesCleared: 5,
+                duration: duration,
+                timestamp: Date()
+            )
+        }
 
         await updateMetrics()
 
-        isLoading = false
-        currentOperation = ""
+        await MainActor.run {
+            isLoading = false
+            currentOperation = ""
+        }
 
         showAlertMessage("Emergency cleanup completed in \(String(format: "%.1f", duration))s")
     }
