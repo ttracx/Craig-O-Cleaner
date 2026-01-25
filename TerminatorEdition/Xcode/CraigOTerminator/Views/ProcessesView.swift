@@ -2,11 +2,10 @@ import SwiftUI
 
 struct ProcessesView: View {
     @EnvironmentObject var appState: AppState
-    @State private var processes: [ProcessInfo] = []
-    @State private var selectedProcess: ProcessInfo?
+    @StateObject private var processMonitor = ProcessMonitorService.shared
+    @State private var selectedProcess: ProcessMonitorService.ProcessInfo?
     @State private var sortOrder: SortOrder = .memory
     @State private var searchText = ""
-    @State private var isRefreshing = false
     @State private var showSystemProcesses = false
 
     enum SortOrder: String, CaseIterable {
@@ -16,25 +15,8 @@ struct ProcessesView: View {
         case pid = "PID"
     }
 
-    struct ProcessInfo: Identifiable, Hashable {
-        let id: Int32  // PID
-        let name: String
-        let cpuPercent: Double
-        let memoryMB: Double
-        let user: String
-        let isSystemProcess: Bool
-
-        func hash(into hasher: inout Hasher) {
-            hasher.combine(id)
-        }
-
-        static func == (lhs: ProcessInfo, rhs: ProcessInfo) -> Bool {
-            lhs.id == rhs.id
-        }
-    }
-
-    var filteredProcesses: [ProcessInfo] {
-        var result = processes
+    var filteredProcesses: [ProcessMonitorService.ProcessInfo] {
+        var result = processMonitor.processes
 
         if !showSystemProcesses {
             result = result.filter { !$0.isSystemProcess }
@@ -52,7 +34,7 @@ struct ProcessesView: View {
         case .name:
             result.sort { $0.name.lowercased() < $1.name.lowercased() }
         case .pid:
-            result.sort { $0.id < $1.id }
+            result.sort { $0.pid < $1.pid }
         }
 
         return result
@@ -83,12 +65,12 @@ struct ProcessesView: View {
 
                     Button {
                         Task { @MainActor in
-                            await refreshProcesses()
+                            await processMonitor.fetchProcesses()
                         }
                     } label: {
                         Image(systemName: "arrow.clockwise")
                     }
-                    .disabled(isRefreshing)
+                    .disabled(!processMonitor.isMonitoring)
                 }
                 .padding()
 
@@ -112,7 +94,7 @@ struct ProcessesView: View {
                 Divider()
 
                 // Process list
-                if isRefreshing && processes.isEmpty {
+                if processMonitor.processes.isEmpty {
                     VStack {
                         ProgressView()
                             .controlSize(.large)
@@ -120,22 +102,6 @@ struct ProcessesView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .padding()
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if processes.isEmpty {
-                    VStack {
-                        Image(systemName: "gearshape.2")
-                            .font(.system(size: 48))
-                            .foregroundStyle(.secondary)
-                        Text("No processes found")
-                            .font(.headline)
-                            .foregroundStyle(.secondary)
-                        Button("Refresh") {
-                            Task { @MainActor in
-                                await refreshProcesses()
-                            }
-                        }
-                        .padding(.top)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
@@ -154,11 +120,15 @@ struct ProcessesView: View {
 
                     Spacer()
 
-                    let totalCPU = processes.reduce(0) { $0 + $1.cpuPercent }
-                    let totalMem = processes.reduce(0) { $0 + $1.memoryMB }
-                    Text("Total: \(String(format: "%.1f", totalCPU))% CPU, \(String(format: "%.0f", totalMem)) MB")
+                    Text("Total: \(String(format: "%.1f", processMonitor.cpuUsageTotal))% CPU, \(String(format: "%.1f", processMonitor.memoryUsageTotal))% Memory")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+
+                    if let lastUpdate = processMonitor.lastUpdateTime {
+                        Text("• Updated \(timeAgo(lastUpdate))")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
                 }
                 .padding()
             }
@@ -166,11 +136,7 @@ struct ProcessesView: View {
 
             // Process details
             if let process = selectedProcess {
-                ProcessDetailView(process: process) {
-                    Task { @MainActor in
-                        await refreshProcesses()
-                    }
-                }
+                ProcessDetailView(process: process, processMonitor: processMonitor)
             } else {
                 VStack {
                     Image(systemName: "gearshape.2")
@@ -186,97 +152,20 @@ struct ProcessesView: View {
         .navigationTitle("Processes")
     }
 
-    // Removed refreshProcesses() - now handled by ProcessMonitorService
-
-    private func killProcess(_ process: ProcessInfo) async {
-        // Check isRefreshing without touching @State
-        let alreadyRefreshing = await MainActor.run { isRefreshing }
-        guard !alreadyRefreshing else {
-            print("ProcessesView: Already refreshing, skipping")
-            return
+    private func timeAgo(_ date: Date) -> String {
+        let interval = Date().timeIntervalSince(date)
+        if interval < 60 {
+            return "\(Int(interval))s ago"
+        } else if interval < 3600 {
+            return "\(Int(interval / 60))m ago"
+        } else {
+            return "\(Int(interval / 3600))h ago"
         }
-
-        print("ProcessesView: Starting refresh...")
-
-        // Collect data off main actor
-        let processArray = await Task.detached {
-            let executor = CommandExecutor.shared
-
-            // Execute ps command to get process list
-            guard let result = try? await executor.execute("ps aux") else {
-                print("ProcessesView: Failed to execute ps command")
-                return [ProcessInfo]()
-            }
-
-            guard result.isSuccess else {
-                print("ProcessesView: ps command failed")
-                return [ProcessInfo]()
-            }
-
-            print("ProcessesView: Got output, processing \(result.output.components(separatedBy: "\n").count) lines")
-
-            // Process the result
-            var array: [ProcessInfo] = []
-            let lines = result.output.components(separatedBy: "\n")
-
-            for (index, line) in lines.enumerated() {
-                // Skip header line
-                if index == 0 { continue }
-
-                let parts = line.split(separator: " ", omittingEmptySubsequences: true)
-                guard parts.count >= 11 else { continue }
-
-                let user = String(parts[0])
-                let pid = Int32(parts[1]) ?? 0
-                let cpuPercent = Double(parts[2]) ?? 0
-                let name = String(parts[10...].joined(separator: " ").split(separator: "/").last ?? "")
-                    .trimmingCharacters(in: .whitespaces)
-
-                // Calculate memory in MB (RSS is in KB on macOS)
-                let memoryMB = (Double(parts[5]) ?? 0) / 1024
-
-                let isSystem = user == "root" ||
-                              user == "_windowserver" ||
-                              user.hasPrefix("_") ||
-                              name.hasPrefix("com.apple")
-
-                array.append(ProcessInfo(
-                    id: pid,
-                    name: name.isEmpty ? "Unknown" : name,
-                    cpuPercent: cpuPercent,
-                    memoryMB: memoryMB,
-                    user: user,
-                    isSystemProcess: isSystem
-                ))
-            }
-
-            print("ProcessesView: Processed \(array.count) processes")
-            return array
-        }.value
-
-        // Use yield for proper deferral before state updates
-        await Task.yield()
-        await Task.yield()
-
-        // Update ALL @State on main actor in one batch
-        await MainActor.run {
-            isRefreshing = true
-            processes = processArray
-        }
-
-        // Yield before final update
-        await Task.yield()
-
-        await MainActor.run {
-            isRefreshing = false
-        }
-
-        print("ProcessesView: Refresh complete")
     }
 }
 
 struct ProcessRow: View {
-    let process: ProcessesView.ProcessInfo
+    let process: ProcessMonitorService.ProcessInfo
 
     var body: some View {
         HStack {
@@ -284,7 +173,7 @@ struct ProcessRow: View {
                 .lineLimit(1)
                 .frame(width: 180, alignment: .leading)
 
-            Text("\(process.id)")
+            Text("\(process.pid)")
                 .font(.system(.body, design: .monospaced))
                 .frame(width: 60)
 
