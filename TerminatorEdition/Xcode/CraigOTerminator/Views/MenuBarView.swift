@@ -58,78 +58,100 @@ struct MenuBarView: View {
         }
         .frame(width: 320)
         .task {
-            // Defer to avoid publishing changes during view updates
+            // Defer to avoid publishing changes during view updates and race conditions
+            await Task.yield()
             await Task.yield()
 
-            await refreshBrowserCount()
-            await refreshTopProcesses()
+            // Additional delay to ensure app is fully initialized
+            try? await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds
+
+            // Refresh data with error handling
+            do {
+                await refreshBrowserCount()
+                await refreshTopProcesses()
+            } catch {
+                print("MenuBarView: Failed to initialize: \(error)")
+            }
         }
     }
 
     // MARK: - Helper Functions
 
     private func refreshBrowserCount() async {
-        var count = 0
+        // Run in detached task to avoid blocking and handle errors gracefully
+        let count = await Task.detached {
+            var total = 0
 
-        // Check Safari tabs
-        let safariScript = """
-        tell application "Safari"
-            if it is running then
-                set tabCount to 0
-                repeat with w in windows
-                    set tabCount to tabCount + (count of tabs of w)
-                end repeat
-                return tabCount
-            end if
-        end tell
-        """
+            // Check Safari tabs
+            let safariScript = """
+            tell application "Safari"
+                if it is running then
+                    set tabCount to 0
+                    repeat with w in windows
+                        set tabCount to tabCount + (count of tabs of w)
+                    end repeat
+                    return tabCount
+                end if
+            end tell
+            """
 
-        let safariTask = Process()
-        safariTask.launchPath = "/usr/bin/osascript"
-        safariTask.arguments = ["-e", safariScript]
-        let safariPipe = Pipe()
-        safariTask.standardOutput = safariPipe
-        safariTask.standardError = Pipe()
+            do {
+                let safariTask = Process()
+                safariTask.launchPath = "/usr/bin/osascript"
+                safariTask.arguments = ["-e", safariScript]
+                let safariPipe = Pipe()
+                safariTask.standardOutput = safariPipe
+                safariTask.standardError = Pipe()
 
-        try? safariTask.run()
-        safariTask.waitUntilExit()
+                try safariTask.run()
+                safariTask.waitUntilExit()
 
-        if safariTask.terminationStatus == 0 {
-            let data = safariPipe.fileHandleForReading.readDataToEndOfFile()
-            if let output = String(data: data, encoding: .utf8) {
-                count += Int(output.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+                if safariTask.terminationStatus == 0 {
+                    let data = safariPipe.fileHandleForReading.readDataToEndOfFile()
+                    if let output = String(data: data, encoding: .utf8) {
+                        total += Int(output.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+                    }
+                }
+            } catch {
+                print("MenuBarView: Safari tab count failed: \(error)")
             }
-        }
 
-        // Check Chrome tabs
-        let chromeScript = """
-        tell application "Google Chrome"
-            if it is running then
-                set tabCount to 0
-                repeat with w in windows
-                    set tabCount to tabCount + (count of tabs of w)
-                end repeat
-                return tabCount
-            end if
-        end tell
-        """
+            // Check Chrome tabs
+            let chromeScript = """
+            tell application "Google Chrome"
+                if it is running then
+                    set tabCount to 0
+                    repeat with w in windows
+                        set tabCount to tabCount + (count of tabs of w)
+                    end repeat
+                    return tabCount
+                end if
+            end tell
+            """
 
-        let chromeTask = Process()
-        chromeTask.launchPath = "/usr/bin/osascript"
-        chromeTask.arguments = ["-e", chromeScript]
-        let chromePipe = Pipe()
-        chromeTask.standardOutput = chromePipe
-        chromeTask.standardError = Pipe()
+            do {
+                let chromeTask = Process()
+                chromeTask.launchPath = "/usr/bin/osascript"
+                chromeTask.arguments = ["-e", chromeScript]
+                let chromePipe = Pipe()
+                chromeTask.standardOutput = chromePipe
+                chromeTask.standardError = Pipe()
 
-        try? chromeTask.run()
-        chromeTask.waitUntilExit()
+                try chromeTask.run()
+                chromeTask.waitUntilExit()
 
-        if chromeTask.terminationStatus == 0 {
-            let data = chromePipe.fileHandleForReading.readDataToEndOfFile()
-            if let output = String(data: data, encoding: .utf8) {
-                count += Int(output.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+                if chromeTask.terminationStatus == 0 {
+                    let data = chromePipe.fileHandleForReading.readDataToEndOfFile()
+                    if let output = String(data: data, encoding: .utf8) {
+                        total += Int(output.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+                    }
+                }
+            } catch {
+                print("MenuBarView: Chrome tab count failed: \(error)")
             }
-        }
+
+            return total
+        }.value
 
         await MainActor.run {
             browserCount = count
@@ -137,42 +159,53 @@ struct MenuBarView: View {
     }
 
     private func refreshTopProcesses() async {
-        let task = Process()
-        task.launchPath = "/bin/ps"
-        task.arguments = ["aux"]
-        let pipe = Pipe()
-        task.standardOutput = pipe
-        task.standardError = Pipe()
+        // Run in detached task to avoid blocking and handle errors gracefully
+        let processes = await Task.detached {
+            do {
+                let task = Process()
+                task.launchPath = "/bin/ps"
+                task.arguments = ["aux"]
+                let pipe = Pipe()
+                task.standardOutput = pipe
+                task.standardError = Pipe()
 
-        try? task.run()
-        task.waitUntilExit()
+                try task.run()
+                task.waitUntilExit()
 
-        guard task.terminationStatus == 0 else { return }
+                guard task.terminationStatus == 0 else {
+                    print("MenuBarView: ps command failed")
+                    return [(String, Double)]()
+                }
 
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        guard let output = String(data: data, encoding: .utf8) else { return }
+                let data = pipe.fileHandleForReading.readDataToEndOfFile()
+                guard let output = String(data: data, encoding: .utf8) else {
+                    return [(String, Double)]()
+                }
 
-        var processes: [(String, Double)] = []
+                // Skip header line and sort by CPU
+                let lines = output.components(separatedBy: "\n").dropFirst()
+                var cpuProcesses: [(String, Double)] = []
 
-        // Skip header line and sort by CPU
-        let lines = output.components(separatedBy: "\n").dropFirst()
-        var cpuProcesses: [(String, Double)] = []
+                for line in lines {
+                    let parts = line.split(separator: " ", omittingEmptySubsequences: true)
+                    guard parts.count >= 11 else { continue }
 
-        for line in lines {
-            let parts = line.split(separator: " ", omittingEmptySubsequences: true)
-            guard parts.count >= 11 else { continue }
+                    let cpuPercent = Double(parts[2]) ?? 0
+                    let name = String(parts[10...].joined(separator: " ").split(separator: "/").last ?? "")
+                        .trimmingCharacters(in: .whitespaces)
 
-            let cpuPercent = Double(parts[2]) ?? 0
-            let name = String(parts[10...].joined(separator: " ").split(separator: "/").last ?? "")
-                .trimmingCharacters(in: .whitespaces)
+                    if !name.isEmpty && cpuPercent > 0 {
+                        cpuProcesses.append((name, cpuPercent))
+                    }
+                }
 
-            if !name.isEmpty && cpuPercent > 0 {
-                cpuProcesses.append((name, cpuPercent))
+                // Sort by CPU and take top 5
+                return cpuProcesses.sorted { $0.1 > $1.1 }.prefix(5).map { $0 }
+            } catch {
+                print("MenuBarView: Process refresh failed: \(error)")
+                return [(String, Double)]()
             }
-        }
-
-        // Sort by CPU and take top 5
-        processes = cpuProcesses.sorted { $0.1 > $1.1 }.prefix(5).map { $0 }
+        }.value
 
         await MainActor.run {
             topProcesses = processes

@@ -65,14 +65,16 @@ struct CraigOTerminatorApp: App {
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Check permissions first
+        // Defer initialization to avoid race conditions with menu bar scene creation
         Task { @MainActor in
-            await PermissionsManager.shared.checkFirstLaunch()
-        }
+            // Small delay to ensure app is fully initialized
+            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
 
-        // Initialize the Terminator Engine
-        Task { @MainActor in
+            // Initialize the Terminator Engine first
             await AppState.shared.initialize()
+
+            // Then check permissions
+            await PermissionsManager.shared.checkFirstLaunch()
         }
     }
 
