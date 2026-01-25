@@ -29,6 +29,8 @@
 		A1000014 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000014 /* Assets.xcassets */; };
 		A1000015 /* PermissionMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000017 /* PermissionMonitor.swift */; };
 		A1000016 /* ProcessMonitorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000018 /* ProcessMonitorService.swift */; };
+		A1000017 /* BrowserTabListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000019 /* BrowserTabListView.swift */; };
+		A1000018 /* BrowserTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000020 /* BrowserTab.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -56,6 +58,8 @@
 		A2000016 /* CraigOTerminator.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CraigOTerminator.entitlements; sourceTree = "<group>"; };
 		A2000017 /* PermissionMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionMonitor.swift; sourceTree = "<group>"; };
 		A2000018 /* ProcessMonitorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessMonitorService.swift; sourceTree = "<group>"; };
+		A2000019 /* BrowserTabListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabListView.swift; sourceTree = "<group>"; };
+		A2000020 /* BrowserTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTab.swift; sourceTree = "<group>"; };
 		A3000001 /* CraigOTerminator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CraigOTerminator.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -82,6 +86,7 @@
 			isa = PBXGroup;
 			children = (
 				2B36F9A42F25875B0064518A /* UserProfile.swift */,
+				A2000020 /* BrowserTab.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -144,6 +149,7 @@
 				A2000004 /* DashboardView.swift */,
 				A2000005 /* CleanupView.swift */,
 				A2000006 /* BrowsersView.swift */,
+				A2000019 /* BrowserTabListView.swift */,
 				A2000007 /* ProcessesView.swift */,
 				A2000008 /* DiagnosticsView.swift */,
 				A2000009 /* AgentsView.swift */,
@@ -262,6 +268,8 @@
 				A1000013 /* CommandExecutor.swift in Sources */,
 				A1000015 /* PermissionMonitor.swift in Sources */,
 				A1000016 /* ProcessMonitorService.swift in Sources */,
+				A1000017 /* BrowserTabListView.swift in Sources */,
+				A1000018 /* BrowserTab.swift in Sources */,
 				2B36F9A12F25873D0064518A /* AuthenticationService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
