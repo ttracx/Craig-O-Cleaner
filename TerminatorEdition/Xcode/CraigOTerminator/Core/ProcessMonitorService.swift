@@ -123,108 +123,131 @@ final class ProcessMonitorService: ObservableObject {
         var totalCPU: Double = 0
         var totalMemory: Double = 0
 
-        // Use ps aux (BSD-style, no --sort on macOS)
-        let command = "ps aux | head -\(maxProcessCount + 1)"
-        print("ProcessMonitorService: Running command: \(command)")
-
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/bin/ps")
         task.arguments = ["aux"]
+
         let pipe = Pipe()
-        let errorPipe = Pipe()
         task.standardOutput = pipe
-        task.standardError = errorPipe
+        task.standardError = Pipe()
+        task.standardInput = Pipe() // Close stdin to prevent hanging
+
+        var output = ""
 
         do {
             print("ProcessMonitorService: Launching ps process...")
+
+            // Read output asynchronously
+            let outputHandle = pipe.fileHandleForReading
+
             try task.run()
 
-            print("ProcessMonitorService: Waiting for ps to complete...")
-
-            // Wait with timeout
-            let timeout = 2.0 // 2 second timeout
-            let startTime = Date()
-            while task.isRunning {
-                if Date().timeIntervalSince(startTime) > timeout {
-                    print("ProcessMonitorService: ps command timed out, terminating...")
-                    task.terminate()
-                    return ([], 0, 0)
-                }
-                try? await Task.sleep(nanoseconds: 10_000_000) // 10ms
+            // Close stdin immediately so ps doesn't wait for input
+            if let stdinPipe = task.standardInput as? Pipe {
+                try? stdinPipe.fileHandleForWriting.close()
             }
 
-            print("ProcessMonitorService: ps completed with status \(task.terminationStatus)")
+            print("ProcessMonitorService: Reading output...")
 
-            if task.terminationStatus != 0 {
-                let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
-                let errorOutput = String(data: errorData, encoding: .utf8) ?? "unknown error"
-                print("ProcessMonitorService: ps command failed: \(errorOutput)")
+            // Read with timeout using async
+            let readTask = Task<Data, Error> {
+                return outputHandle.readDataToEndOfFile()
+            }
+
+            // Wait for both task completion and data with timeout
+            let timeoutTask = Task<Void, Error> {
+                try await Task.sleep(nanoseconds: 3_000_000_000) // 3 seconds
+                throw NSError(domain: "Timeout", code: -1)
+            }
+
+            let dataResult: Data
+            do {
+                dataResult = try await withThrowingTaskGroup(of: Data.self) { group in
+                    group.addTask { try await readTask.value }
+
+                    // Race between read and timeout
+                    if let result = try await group.next() {
+                        timeoutTask.cancel()
+                        return result
+                    }
+                    throw NSError(domain: "Timeout", code: -1)
+                }
+            } catch {
+                print("ProcessMonitorService: Read timed out, terminating process...")
+                task.terminate()
+                readTask.cancel()
+                timeoutTask.cancel()
                 return ([], 0, 0)
             }
 
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            print("ProcessMonitorService: Read \(data.count) bytes from ps")
+            task.waitUntilExit()
 
-            guard let output = String(data: data, encoding: .utf8) else {
+            print("ProcessMonitorService: ps completed with status \(task.terminationStatus)")
+            print("ProcessMonitorService: Read \(dataResult.count) bytes")
+
+            guard let decodedOutput = String(data: dataResult, encoding: .utf8) else {
                 print("ProcessMonitorService: Failed to decode ps output")
                 return ([], 0, 0)
             }
 
-            // Parse output - limit to maxProcessCount
-            let lines = output.components(separatedBy: "\n")
-            print("ProcessMonitorService: ps command returned \(lines.count) lines")
-
-            for (index, line) in lines.enumerated() {
-                // Skip header line
-                if index == 0 { continue }
-                guard !line.isEmpty else { continue }
-
-                // Limit to maxProcessCount
-                if processList.count >= maxProcessCount {
-                    break
-                }
-
-                let parts = line.split(separator: " ", omittingEmptySubsequences: true)
-                guard parts.count >= 11 else { continue }
-
-                // Parse fields
-                let user = String(parts[0])
-                guard let pid = Int(parts[1]) else { continue }
-                guard let cpu = Double(parts[2]) else { continue }
-                guard let mem = Double(parts[3]) else { continue }
-
-                // VSZ and RSS (virtual and resident memory)
-                _ = Int(parts[4]) ?? 0 // VSZ (virtual size) - not currently used
-                let rss = Int(parts[5]) ?? 0
-                let memoryMB = Double(rss) / 1024.0 // Convert KB to MB
-
-                // Command (everything after the first 10 fields)
-                let commandParts = parts[10...]
-                let fullCommand = commandParts.joined(separator: " ")
-                let name = String(fullCommand.split(separator: "/").last ?? "")
-                    .trimmingCharacters(in: .whitespaces)
-
-                if !name.isEmpty {
-                    processList.append(ProcessInfo(
-                        pid: pid,
-                        name: name,
-                        user: user,
-                        cpuPercent: cpu,
-                        memoryPercent: mem,
-                        memoryMB: memoryMB,
-                        command: fullCommand
-                    ))
-
-                    totalCPU += cpu
-                    totalMemory += mem
-                }
-            }
-
-            print("ProcessMonitorService: Fetched \(processList.count) processes")
+            output = decodedOutput
 
         } catch {
-            print("ProcessMonitorService: Error fetching processes: \(error)")
+            print("ProcessMonitorService: Failed to run ps: \(error)")
+            return ([], 0, 0)
         }
+
+        // Parse output - limit to maxProcessCount
+        let lines = output.components(separatedBy: "\n")
+        print("ProcessMonitorService: ps command returned \(lines.count) lines")
+
+        for (index, line) in lines.enumerated() {
+            // Skip header line
+            if index == 0 { continue }
+            guard !line.isEmpty else { continue }
+
+            // Limit to maxProcessCount
+            if processList.count >= maxProcessCount {
+                break
+            }
+
+            let parts = line.split(separator: " ", omittingEmptySubsequences: true)
+            guard parts.count >= 11 else { continue }
+
+            // Parse fields
+            let user = String(parts[0])
+            guard let pid = Int(parts[1]) else { continue }
+            guard let cpu = Double(parts[2]) else { continue }
+            guard let mem = Double(parts[3]) else { continue }
+
+            // VSZ and RSS (virtual and resident memory)
+            _ = Int(parts[4]) ?? 0 // VSZ (virtual size) - not currently used
+            let rss = Int(parts[5]) ?? 0
+            let memoryMB = Double(rss) / 1024.0 // Convert KB to MB
+
+            // Command (everything after the first 10 fields)
+            let commandParts = parts[10...]
+            let fullCommand = commandParts.joined(separator: " ")
+            let name = String(fullCommand.split(separator: "/").last ?? "")
+                .trimmingCharacters(in: .whitespaces)
+
+            if !name.isEmpty {
+                processList.append(ProcessInfo(
+                    pid: pid,
+                    name: name,
+                    user: user,
+                    cpuPercent: cpu,
+                    memoryPercent: mem,
+                    memoryMB: memoryMB,
+                    command: fullCommand
+                ))
+
+                totalCPU += cpu
+                totalMemory += mem
+            }
+        }
+
+        print("ProcessMonitorService: Fetched \(processList.count) processes")
 
         return (processList, totalCPU, totalMemory)
     }
