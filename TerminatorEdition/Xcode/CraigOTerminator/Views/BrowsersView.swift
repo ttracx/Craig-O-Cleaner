@@ -226,8 +226,39 @@ struct BrowserDetailView: View {
     let browser: BrowsersView.BrowserInfo
     let onAction: () -> Void
     @State private var isClosingTabs = false
+    @State private var selectedDetailTab: DetailTab = .overview
+
+    enum DetailTab: String, CaseIterable {
+        case overview = "Overview"
+        case tabs = "Tabs"
+    }
 
     var body: some View {
+        VStack(spacing: 0) {
+            // Tab selector
+            Picker("View", selection: $selectedDetailTab) {
+                ForEach(DetailTab.allCases, id: \.self) { tab in
+                    Text(tab.rawValue).tag(tab)
+                }
+            }
+            .pickerStyle(.segmented)
+            .padding()
+
+            Divider()
+
+            // Content based on selected tab
+            Group {
+                switch selectedDetailTab {
+                case .overview:
+                    overviewView
+                case .tabs:
+                    BrowserTabListView(browser: browser)
+                }
+            }
+        }
+    }
+
+    private var overviewView: some View {
         VStack(spacing: 24) {
             // Header
             VStack(spacing: 8) {

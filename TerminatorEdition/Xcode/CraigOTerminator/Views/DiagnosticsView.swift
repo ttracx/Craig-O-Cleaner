@@ -148,9 +148,13 @@ struct DiagnosticsView: View {
         }
         .navigationTitle("Diagnostics")
         .task {
-            // Detached task with delay to ensure completely outside view update cycle
+            // Use yield to defer completely outside view update cycle
+            await Task.yield()
+            await Task.yield()
+            await Task.yield() // Triple yield for extra safety with diagnostics
+
+            // Run diagnostics in detached task
             Task.detached {
-                try? await Task.sleep(nanoseconds: 100_000_000)
                 await runFullDiagnostics()
             }
         }
@@ -334,8 +338,9 @@ struct DiagnosticsView: View {
             return reportData
         }.value
 
-        // Delay before any @State updates
-        try? await Task.sleep(nanoseconds: 100_000_000)
+        // Use yield instead of sleep for proper deferral
+        await Task.yield()
+        await Task.yield()
 
         // Update ALL @State on main actor in one batch
         await MainActor.run {
@@ -343,8 +348,8 @@ struct DiagnosticsView: View {
             diagnosticReport = report
         }
 
-        // Delay before final update
-        try? await Task.sleep(nanoseconds: 50_000_000)
+        // Yield before final update
+        await Task.yield()
 
         await MainActor.run {
             isRunningDiagnostics = false

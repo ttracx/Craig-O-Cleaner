@@ -5,12 +5,14 @@ struct CraigOTerminatorApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var appState = AppState.shared
     @StateObject private var permissionsManager = PermissionsManager.shared
+    @StateObject private var permissionMonitor = PermissionMonitor.shared
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(appState)
                 .environmentObject(permissionsManager)
+                .environmentObject(permissionMonitor)
                 .frame(minWidth: 1000, idealWidth: 1200, minHeight: 700, idealHeight: 800)
                 .sheet(isPresented: $permissionsManager.showPermissionsSheet) {
                     PermissionsSheet(
@@ -75,12 +77,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
             // Then check permissions
             await PermissionsManager.shared.checkFirstLaunch()
+
+            // Start background permission monitoring
+            PermissionMonitor.shared.startMonitoring()
         }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
         // Cleanup on exit
         Task { @MainActor in
+            PermissionMonitor.shared.stopMonitoring()
             AppState.shared.shutdown()
         }
     }

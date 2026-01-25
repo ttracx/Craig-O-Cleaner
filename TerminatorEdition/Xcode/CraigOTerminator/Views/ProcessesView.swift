@@ -185,9 +185,13 @@ struct ProcessesView: View {
         }
         .navigationTitle("Processes")
         .task {
-            // Detached task with delay to ensure completely outside view update cycle
+            // Use yield to defer completely outside view update cycle
+            await Task.yield()
+            await Task.yield()
+            await Task.yield() // Triple yield for extra safety with processes
+
+            // Refresh processes in detached task
             Task.detached {
-                try? await Task.sleep(nanoseconds: 100_000_000)
                 await refreshProcesses()
             }
         }
@@ -259,8 +263,9 @@ struct ProcessesView: View {
             return array
         }.value
 
-        // Delay before any @State updates
-        try? await Task.sleep(nanoseconds: 100_000_000)
+        // Use yield for proper deferral before state updates
+        await Task.yield()
+        await Task.yield()
 
         // Update ALL @State on main actor in one batch
         await MainActor.run {
@@ -268,8 +273,8 @@ struct ProcessesView: View {
             processes = processArray
         }
 
-        // Delay before final update
-        try? await Task.sleep(nanoseconds: 50_000_000)
+        // Yield before final update
+        await Task.yield()
 
         await MainActor.run {
             isRefreshing = false
