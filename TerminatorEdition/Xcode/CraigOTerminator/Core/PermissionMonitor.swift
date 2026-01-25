@@ -1,5 +1,6 @@
 import Foundation
 import AppKit
+import UserNotifications
 
 /// Background monitor that checks permissions and prompts user when needed
 @MainActor
@@ -14,7 +15,14 @@ final class PermissionMonitor: ObservableObject {
     private var lastPromptTime: [PermissionsManager.PermissionType: Date] = [:]
     private let promptCooldown: TimeInterval = 300.0 // Don't prompt more than once per 5 minutes for same permission
 
-    private init() {}
+    private init() {
+        // Request notification permissions
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
+            if let error = error {
+                print("PermissionMonitor: Failed to request notification permission: \(error)")
+            }
+        }
+    }
 
     // MARK: - Monitoring Control
 
@@ -144,23 +152,41 @@ final class PermissionMonitor: ObservableObject {
     // MARK: - User Notifications
 
     private func showFollowUpNotification(for permission: PermissionsManager.PermissionType) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            let notification = NSUserNotification()
-            notification.title = "Grant \(permission.rawValue)"
-            notification.informativeText = "Please enable \(permission.rawValue) for Craig-O Terminator in System Settings, then return to the app."
-            notification.soundName = NSUserNotificationDefaultSoundName
+        let content = UNMutableNotificationContent()
+        content.title = "Grant \(permission.rawValue)"
+        content.body = "Please enable \(permission.rawValue) for Craig-O Terminator in System Settings, then return to the app."
+        content.sound = .default
 
-            NSUserNotificationCenter.default.deliver(notification)
+        let request = UNNotificationRequest(
+            identifier: "permission-followup-\(permission.rawValue)",
+            content: content,
+            trigger: UNTimeIntervalNotificationTrigger(timeInterval: 1.0, repeats: false)
+        )
+
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("PermissionMonitor: Failed to show notification: \(error)")
+            }
         }
     }
 
     private func showPermissionGrantedNotification(for permission: PermissionsManager.PermissionType) {
-        let notification = NSUserNotification()
-        notification.title = "Permission Granted"
-        notification.informativeText = "\(permission.rawValue) has been enabled. Craig-O Terminator now has full functionality."
-        notification.soundName = NSUserNotificationDefaultSoundName
+        let content = UNMutableNotificationContent()
+        content.title = "Permission Granted"
+        content.body = "\(permission.rawValue) has been enabled. Craig-O Terminator now has full functionality."
+        content.sound = .default
 
-        NSUserNotificationCenter.default.deliver(notification)
+        let request = UNNotificationRequest(
+            identifier: "permission-granted-\(permission.rawValue)",
+            content: content,
+            trigger: nil // Deliver immediately
+        )
+
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("PermissionMonitor: Failed to show notification: \(error)")
+            }
+        }
     }
 
     // MARK: - Manual Permission Request
