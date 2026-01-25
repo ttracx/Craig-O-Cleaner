@@ -132,7 +132,9 @@ struct CleanupView: View {
                 // Action buttons
                 VStack(spacing: 12) {
                     Button {
-                        Task { await analyzeSystem() }
+                        Task { @MainActor in
+                            await analyzeSystem()
+                        }
                     } label: {
                         HStack {
                             if isAnalyzing {
@@ -150,7 +152,9 @@ struct CleanupView: View {
                     .disabled(isAnalyzing)
 
                     Button {
-                        Task { await performCleanup() }
+                        Task { @MainActor in
+                            await performCleanup()
+                        }
                     } label: {
                         HStack {
                             Image(systemName: "trash.fill")

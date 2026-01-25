@@ -30,7 +30,9 @@ struct DashboardView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
-                    Task { await appState.updateMetrics() }
+                    Task { @MainActor in
+                        await appState.updateMetrics()
+                    }
                 } label: {
                     Image(systemName: "arrow.clockwise")
                 }
@@ -223,7 +225,9 @@ struct DashboardView: View {
                     icon: "bolt.fill",
                     gradient: [.blue, .cyan]
                 ) {
-                    Task { await appState.performQuickCleanup() }
+                    Task { @MainActor in
+                        await appState.performQuickCleanup()
+                    }
                 }
 
                 ActionCard(
@@ -232,7 +236,9 @@ struct DashboardView: View {
                     icon: "sparkles",
                     gradient: [.green, .mint]
                 ) {
-                    Task { await appState.performFullCleanup() }
+                    Task { @MainActor in
+                        await appState.performFullCleanup()
+                    }
                 }
 
                 ActionCard(
@@ -241,7 +247,9 @@ struct DashboardView: View {
                     icon: "exclamationmark.triangle.fill",
                     gradient: [.red, .orange]
                 ) {
-                    Task { await appState.performEmergencyCleanup() }
+                    Task { @MainActor in
+                        await appState.performEmergencyCleanup()
+                    }
                 }
             }
         }
