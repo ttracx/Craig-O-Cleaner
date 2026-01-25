@@ -49,22 +49,31 @@ final class ProcessMonitorService: ObservableObject {
     // MARK: - Monitoring Control
 
     func startMonitoring() {
-        guard !isMonitoring else { return }
+        guard !isMonitoring else {
+            print("ProcessMonitorService: Already monitoring, skipping")
+            return
+        }
 
-        print("ProcessMonitorService: Starting background monitoring...")
+        print("ProcessMonitorService: ===== STARTING BACKGROUND MONITORING =====")
         isMonitoring = true
 
+        print("ProcessMonitorService: Creating initial fetch task...")
         // Initial fetch
         Task {
+            print("ProcessMonitorService: Inside initial fetch Task")
             await fetchProcesses()
+            print("ProcessMonitorService: Initial fetch completed")
         }
 
         // Set up periodic updates
+        print("ProcessMonitorService: Setting up timer with interval \(updateInterval)s...")
         monitorTimer = Timer.scheduledTimer(withTimeInterval: updateInterval, repeats: true) { [weak self] _ in
+            print("ProcessMonitorService: Timer fired, creating fetch task...")
             Task { @MainActor [weak self] in
                 await self?.fetchProcesses()
             }
         }
+        print("ProcessMonitorService: Timer setup complete, monitoring active")
     }
 
     func stopMonitoring() {
@@ -77,10 +86,14 @@ final class ProcessMonitorService: ObservableObject {
     // MARK: - Process Fetching
 
     func fetchProcesses() async {
+        print("ProcessMonitorService: fetchProcesses() called")
+
         // Run in detached task to avoid blocking
         let data = await Task.detached {
             await self.fetchProcessData()
         }.value
+
+        print("ProcessMonitorService: fetchProcessData returned \(data.processes.count) processes, CPU: \(data.totalCPU), Mem: \(data.totalMemory)")
 
         // Defer before updating @Published properties
         await Task.yield()
@@ -96,12 +109,14 @@ final class ProcessMonitorService: ObservableObject {
     }
 
     private func fetchProcessData() async -> (processes: [ProcessInfo], totalCPU: Double, totalMemory: Double) {
+        print("ProcessMonitorService: fetchProcessData() starting...")
         var processList: [ProcessInfo] = []
         var totalCPU: Double = 0
         var totalMemory: Double = 0
 
         // Use ps aux (BSD-style, no --sort on macOS)
         let command = "ps aux | head -\(maxProcessCount + 1)"
+        print("ProcessMonitorService: Running command: \(command)")
 
         let task = Process()
         task.launchPath = "/bin/sh"
