@@ -142,7 +142,7 @@ final class ProcessMonitorService: ObservableObject {
                 guard let mem = Double(parts[3]) else { continue }
 
                 // VSZ and RSS (virtual and resident memory)
-                let vsz = Int(parts[4]) ?? 0
+                _ = Int(parts[4]) ?? 0 // VSZ (virtual size) - not currently used
                 let rss = Int(parts[5]) ?? 0
                 let memoryMB = Double(rss) / 1024.0 // Convert KB to MB
 
