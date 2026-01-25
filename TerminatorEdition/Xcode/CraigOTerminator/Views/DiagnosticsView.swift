@@ -83,7 +83,9 @@ struct DiagnosticsView: View {
                 Spacer()
 
                 Button {
-                    Task { await runFullDiagnostics() }
+                    Task { @MainActor in
+                        await runFullDiagnostics()
+                    }
                 } label: {
                     HStack {
                         if isRunningDiagnostics {
@@ -131,7 +133,9 @@ struct DiagnosticsView: View {
                                 .foregroundStyle(.secondary)
 
                             Button("Run Diagnostics") {
-                                Task { await runFullDiagnostics() }
+                                Task { @MainActor in
+                                    await runFullDiagnostics()
+                                }
                             }
                             .buttonStyle(.borderedProminent)
                         }
@@ -160,33 +164,28 @@ struct DiagnosticsView: View {
     }
 
     private func runFullDiagnostics() async {
-        await MainActor.run {
-            isRunningDiagnostics = true
-        }
+        // Delay to ensure we're completely outside any view update cycle
+        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+
+        isRunningDiagnostics = true
 
         var report = DiagnosticReport()
 
-        // System Info
-        func runCommand(_ path: String, _ args: [String]) -> String {
-            let task = Process()
-            task.launchPath = path
-            task.arguments = args
-            let pipe = Pipe()
-            task.standardOutput = pipe
-            task.standardError = Pipe()
+        let executor = CommandExecutor.shared
 
-            try? task.run()
-            task.waitUntilExit()
-
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            return String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        // Helper function to run command via CommandExecutor
+        func runCommand(_ command: String) async -> String {
+            guard let result = try? await executor.execute(command) else {
+                return ""
+            }
+            return result.isSuccess ? result.output.trimmingCharacters(in: .whitespacesAndNewlines) : ""
         }
 
-        let hostname = runCommand("/bin/hostname", [])
-        let model = runCommand("/usr/sbin/sysctl", ["-n", "hw.model"])
-        let osVersion = runCommand("/usr/bin/sw_vers", ["-productVersion"])
-        let kernel = runCommand("/usr/bin/uname", ["-r"])
-        let uptimeOutput = runCommand("/usr/bin/uptime", [])
+        let hostname = await runCommand("hostname")
+        let model = await runCommand("sysctl -n hw.model")
+        let osVersion = await runCommand("sw_vers -productVersion")
+        let kernel = await runCommand("uname -r")
+        let uptimeOutput = await runCommand("uptime")
 
         var uptime = "Unknown"
         if let range = uptimeOutput.range(of: #"up\s+(.+?),"#, options: .regularExpression) {
@@ -202,12 +201,12 @@ struct DiagnosticsView: View {
         )
 
         // CPU Info
-        let cpuModel = runCommand("/usr/sbin/sysctl", ["-n", "machdep.cpu.brand_string"])
-        let physicalCPU = runCommand("/usr/sbin/sysctl", ["-n", "hw.physicalcpu"])
-        let logicalCPU = runCommand("/usr/sbin/sysctl", ["-n", "hw.logicalcpu"])
+        let cpuModel = await runCommand("sysctl -n machdep.cpu.brand_string")
+        let physicalCPU = await runCommand("sysctl -n hw.physicalcpu")
+        let logicalCPU = await runCommand("sysctl -n hw.logicalcpu")
         let cores = "\(physicalCPU) physical, \(logicalCPU) logical"
 
-        let topOutput = runCommand("/usr/bin/top", ["-l", "1", "-s", "0"])
+        let topOutput = await runCommand("top -l 1 -s 0")
         var cpuUsage = 0.0
         if let cpuLine = topOutput.components(separatedBy: "\n").first(where: { $0.contains("CPU usage") }),
            let percentRange = cpuLine.range(of: #"\d+\.\d+"#, options: .regularExpression) {
@@ -221,18 +220,18 @@ struct DiagnosticsView: View {
         )
 
         // Memory Info
-        let memSizeBytes = runCommand("/usr/sbin/sysctl", ["-n", "hw.memsize"])
+        let memSizeBytes = await runCommand("sysctl -n hw.memsize")
         let memGB = (Double(memSizeBytes) ?? 0) / 1073741824.0
         let memTotal = String(format: "%.0f GB", memGB)
 
-        let memPressureOutput = runCommand("/usr/bin/memory_pressure", [])
+        let memPressureOutput = await runCommand("memory_pressure")
         var memPressure = "Unknown"
         if let firstLine = memPressureOutput.components(separatedBy: "\n").first,
            let colonIndex = firstLine.range(of: ": ") {
             memPressure = String(firstLine[colonIndex.upperBound...])
         }
 
-        let topMemOutput = runCommand("/usr/bin/top", ["-l", "1", "-s", "0"])
+        let topMemOutput = await runCommand("top -l 1 -s 0")
         var memUsed = "Unknown"
         var memFree = "Unknown"
         if let memLine = topMemOutput.components(separatedBy: "\n").first(where: { $0.contains("PhysMem") }) {
@@ -252,7 +251,7 @@ struct DiagnosticsView: View {
         )
 
         // Disk Info
-        let dfOutput = runCommand("/bin/df", ["-h", "/"])
+        let dfOutput = await runCommand("df -h /")
         if let lastLine = dfOutput.components(separatedBy: "\n").last,
            !lastLine.contains("Filesystem") {
             let parts = lastLine.split(separator: " ", omittingEmptySubsequences: true)
@@ -267,7 +266,7 @@ struct DiagnosticsView: View {
         }
 
         // Network Info
-        let routeOutput = runCommand("/sbin/route", ["get", "default"])
+        let routeOutput = await runCommand("route get default")
         var activeInterface = "None"
         if let interfaceLine = routeOutput.components(separatedBy: "\n").first(where: { $0.contains("interface:") }),
            let colonIndex = interfaceLine.range(of: ": ") {
@@ -276,7 +275,7 @@ struct DiagnosticsView: View {
 
         var ipAddr = "Unknown"
         if !activeInterface.isEmpty && activeInterface != "None" {
-            let ifconfigOutput = runCommand("/sbin/ifconfig", [activeInterface])
+            let ifconfigOutput = await runCommand("ifconfig \(activeInterface)")
             if let inetLine = ifconfigOutput.components(separatedBy: "\n").first(where: { $0.contains("inet ") && !$0.contains("inet6") }) {
                 let parts = inetLine.split(separator: " ", omittingEmptySubsequences: true)
                 if parts.count >= 2 {
@@ -285,7 +284,7 @@ struct DiagnosticsView: View {
             }
         }
 
-        let airportOutput = runCommand("/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport", ["-I"])
+        let airportOutput = await runCommand("/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I")
         var wifiSSID: String? = nil
         if let ssidLine = airportOutput.components(separatedBy: "\n").first(where: { $0.contains(" SSID:") }),
            let colonIndex = ssidLine.range(of: ": ") {
@@ -295,14 +294,9 @@ struct DiagnosticsView: View {
             }
         }
 
-        let pingTask = Process()
-        pingTask.launchPath = "/sbin/ping"
-        pingTask.arguments = ["-c", "1", "-W", "2", "8.8.8.8"]
-        pingTask.standardOutput = Pipe()
-        pingTask.standardError = Pipe()
-        try? pingTask.run()
-        pingTask.waitUntilExit()
-        let isConnected = pingTask.terminationStatus == 0
+        // Test internet connectivity
+        let pingResult = try? await executor.execute("ping -c 1 -W 2 8.8.8.8")
+        let isConnected = pingResult?.isSuccess ?? false
 
         report.networkInfo = DiagnosticReport.NetworkInfo(
             activeInterface: activeInterface,
@@ -312,7 +306,7 @@ struct DiagnosticsView: View {
         )
 
         // Battery Info
-        let batteryOutput = runCommand("/usr/bin/pmset", ["-g", "batt"])
+        let batteryOutput = await runCommand("pmset -g batt")
         if batteryOutput.contains("Battery") {
             var charge = 0
             var status = "AC Power"
@@ -337,10 +331,12 @@ struct DiagnosticsView: View {
             )
         }
 
-        await MainActor.run {
-            diagnosticReport = report
-            isRunningDiagnostics = false
-        }
+        // Delay before batch updating all @State properties
+        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+
+        // Batch update all @State
+        diagnosticReport = report
+        isRunningDiagnostics = false
     }
 }
 

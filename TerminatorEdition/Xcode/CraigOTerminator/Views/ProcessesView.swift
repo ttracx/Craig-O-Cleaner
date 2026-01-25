@@ -197,19 +197,18 @@ struct ProcessesView: View {
 
         print("ProcessesView: Starting refresh...")
 
-        // Small delay before updating @Published to ensure we're outside view update cycle
-        try? await Task.sleep(nanoseconds: 50_000_000) // 0.05 seconds
+        // Delay to ensure we're completely outside any view update cycle
+        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
 
-        isRefreshing = true
-
+        // Collect data WITHOUT updating any @State
         let executor = CommandExecutor.shared
 
         // Execute ps command to get process list
         guard let result = try? await executor.execute("ps aux") else {
             print("ProcessesView: Failed to execute ps command")
 
-            // Small delay before updating @Published
-            try? await Task.sleep(nanoseconds: 50_000_000)
+            // Delay before updating @State
+            try? await Task.sleep(nanoseconds: 100_000_000)
             isRefreshing = false
             return
         }
@@ -217,15 +216,15 @@ struct ProcessesView: View {
         guard result.isSuccess else {
             print("ProcessesView: ps command failed")
 
-            // Small delay before updating @Published
-            try? await Task.sleep(nanoseconds: 50_000_000)
+            // Delay before updating @State
+            try? await Task.sleep(nanoseconds: 100_000_000)
             isRefreshing = false
             return
         }
 
         print("ProcessesView: Got output, processing \(result.output.components(separatedBy: "\n").count) lines")
 
-        // Process the result
+        // Process the result WITHOUT touching @State
         var processArray: [ProcessInfo] = []
         let lines = result.output.components(separatedBy: "\n")
 
@@ -262,11 +261,15 @@ struct ProcessesView: View {
 
         print("ProcessesView: Processed \(processArray.count) processes")
 
-        // Small delay before updating @Published properties
-        try? await Task.sleep(nanoseconds: 50_000_000) // 0.05 seconds
+        // Another delay before batch updating all @State properties
+        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
 
-        // Update state
+        // NOW update all @State in one batch
+        isRefreshing = true
         processes = processArray
+
+        // Final delay before marking complete
+        try? await Task.sleep(nanoseconds: 50_000_000) // 0.05 seconds
         isRefreshing = false
 
         print("ProcessesView: Refresh complete")
