@@ -184,20 +184,11 @@ struct ProcessesView: View {
             }
         }
         .navigationTitle("Processes")
-        .task {
-            // Use yield to defer completely outside view update cycle
-            await Task.yield()
-            await Task.yield()
-            await Task.yield() // Triple yield for extra safety with processes
-
-            // Refresh processes in detached task
-            Task.detached {
-                await refreshProcesses()
-            }
-        }
     }
 
-    private func refreshProcesses() async {
+    // Removed refreshProcesses() - now handled by ProcessMonitorService
+
+    private func killProcess(_ process: ProcessInfo) async {
         // Check isRefreshing without touching @State
         let alreadyRefreshing = await MainActor.run { isRefreshing }
         guard !alreadyRefreshing else {

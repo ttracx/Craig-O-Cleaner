@@ -78,8 +78,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             // Then check permissions
             await PermissionsManager.shared.checkFirstLaunch()
 
-            // Start background permission monitoring
+            // Start background services
             PermissionMonitor.shared.startMonitoring()
+            ProcessMonitorService.shared.startMonitoring()
         }
     }
 
@@ -87,6 +88,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Cleanup on exit
         Task { @MainActor in
             PermissionMonitor.shared.stopMonitoring()
+            ProcessMonitorService.shared.stopMonitoring()
             AppState.shared.shutdown()
         }
     }
