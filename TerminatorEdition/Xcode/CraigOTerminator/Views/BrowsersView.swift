@@ -181,8 +181,8 @@ struct BrowsersView: View {
                 try? memTask.run()
                 memTask.waitUntilExit()
 
-                if let data = try? memPipe.fileHandleForReading.readDataToEndOfFile(),
-                   let output = String(data: data, encoding: .utf8) {
+                let data = memPipe.fileHandleForReading.readDataToEndOfFile()
+                if let output = String(data: data, encoding: .utf8) {
                     var totalMem: Double = 0
                     for line in output.components(separatedBy: "\n") {
                         if line.range(of: config.name, options: .caseInsensitive) != nil {
