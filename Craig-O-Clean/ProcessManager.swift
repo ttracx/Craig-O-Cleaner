@@ -571,48 +571,82 @@ class ProcessManager: ObservableObject {
         // Method 1: Try NSRunningApplication.forceTerminate() (works for user apps within sandbox)
         if let app = NSWorkspace.shared.runningApplications.first(where: { $0.processIdentifier == process.pid }) {
             logger.info("Found NSRunningApplication for \(process.name), attempting forceTerminate()")
-            let success = app.forceTerminate()
 
-            if success {
-                logger.info("Successfully force quit \(process.name) via NSRunningApplication.forceTerminate()")
-                await cleanupProcessHistory(for: process.pid)
+            // forceTerminate() returns true if the termination SIGNAL was sent, not if app actually quit
+            // So we need to verify the app actually terminates
+            let messageSent = app.forceTerminate()
 
-                // Give the system a moment to update
-                try? await Task.sleep(for: .milliseconds(500))
-                return true
+            if messageSent {
+                logger.info("Force terminate signal sent to \(process.name), waiting for termination...")
+
+                // Wait up to 2 seconds for the app to quit
+                for attempt in 1...10 {
+                    try? await Task.sleep(for: .milliseconds(200))
+
+                    // Check if the app is still running
+                    let stillRunning = NSWorkspace.shared.runningApplications.contains {
+                        $0.processIdentifier == process.pid
+                    }
+
+                    if !stillRunning {
+                        logger.info("Successfully force quit \(process.name) after \(attempt * 200)ms")
+                        await cleanupProcessHistory(for: process.pid)
+                        return true
+                    }
+                }
+
+                logger.warning("\(process.name) did not terminate after forceTerminate() call")
             } else {
-                logger.warning("NSRunningApplication.forceTerminate() returned false for \(process.name)")
+                logger.warning("NSRunningApplication.forceTerminate() returned false for \(process.name) - termination signal was not sent")
             }
         } else {
             logger.warning("Could not find NSRunningApplication for PID \(process.pid) (\(process.name))")
         }
 
-        // Method 2: Try AppleScript force quit (works for some apps within sandbox)
-        if process.isUserProcess, let bundleId = process.bundleIdentifier {
-            logger.info("Attempting AppleScript force quit for bundle: \(bundleId)")
-            let success = await runAppleScriptForceQuit(bundleId: bundleId)
+        // Method 2: Try direct termination via process signal
+        // For processes that don't have an NSRunningApplication (like helper processes)
+        logger.info("Attempting direct process termination for PID \(process.pid)")
 
-            if success {
-                logger.info("Successfully force quit \(process.name) via AppleScript")
-                await cleanupProcessHistory(for: process.pid)
+        // Send SIGTERM first (graceful), then SIGKILL if needed
+        let termResult = kill(process.pid, SIGTERM)
+        if termResult == 0 {
+            logger.info("Sent SIGTERM to PID \(process.pid), waiting...")
 
-                // Give the system a moment to update
+            // Wait up to 1 second for graceful termination
+            for _ in 1...5 {
+                try? await Task.sleep(for: .milliseconds(200))
+
+                // Check if process still exists
+                let stillRunning = kill(process.pid, 0) == 0
+                if !stillRunning {
+                    logger.info("Successfully terminated \(process.name) via SIGTERM")
+                    await cleanupProcessHistory(for: process.pid)
+                    return true
+                }
+            }
+
+            // Still running, send SIGKILL (force)
+            logger.info("Process still running, sending SIGKILL to PID \(process.pid)")
+            let killResult = kill(process.pid, SIGKILL)
+
+            if killResult == 0 {
                 try? await Task.sleep(for: .milliseconds(500))
-                return true
+
+                let stillRunning = kill(process.pid, 0) == 0
+                if !stillRunning {
+                    logger.info("Successfully force killed \(process.name) via SIGKILL")
+                    await cleanupProcessHistory(for: process.pid)
+                    return true
+                }
             } else {
-                logger.warning("AppleScript force quit failed for \(bundleId)")
+                logger.error("SIGKILL failed for PID \(process.pid): \(String(cString: strerror(errno)))")
             }
         } else {
-            if !process.isUserProcess {
-                logger.warning("Process \(process.name) is a system process - may require admin privileges")
-            } else if process.bundleIdentifier == nil {
-                logger.warning("Process \(process.name) has no bundle identifier - cannot use AppleScript")
-            }
+            logger.error("SIGTERM failed for PID \(process.pid): \(String(cString: strerror(errno)))")
         }
 
-        // Shell commands (killall, pkill, kill) are blocked by App Sandbox
-        // If the above methods fail, the process requires admin privileges
-        logger.error("Failed to force quit \(process.name) - all methods exhausted")
+        // If we get here, force quit failed
+        logger.error("Failed to force quit \(process.name) - process may require admin privileges or be protected")
         return false
     }
     
@@ -719,30 +753,45 @@ class ProcessManager: ObservableObject {
     /// Force quit via AppleScript using bundle identifier
     private func runAppleScriptForceQuit(bundleId: String) async -> Bool {
         return await withCheckedContinuation { continuation in
-            // Use 'kill' command for force quit, not graceful 'quit'
+            // Use AppleScript within sandbox constraints
+            // Cannot use shell commands (kill -9, killall) due to app sandbox
+            // Instead, use System Events to send quit signal repeatedly
             let script = """
             tell application "System Events"
                 set appProcesses to every process whose bundle identifier is "\(bundleId)"
-                repeat with appProcess in appProcesses
-                    try
-                        -- Get the unix id (PID) and kill the process
-                        set processPID to unix id of appProcess
-                        do shell script "kill -9 " & processPID
-                    on error errMsg
-                        -- If shell script fails (sandbox restriction), try force quit via GUI
+                if (count of appProcesses) > 0 then
+                    repeat with appProcess in appProcesses
                         try
-                            -- This simulates Force Quit from Activity Monitor
-                            set processName to name of appProcess
-                            do shell script "killall -9 " & quoted form of processName
+                            -- First try normal quit
+                            tell appProcess to quit
+
+                            -- Wait briefly to see if it quits
+                            delay 0.2
+
+                            -- Check if still running and force if needed
+                            set stillRunning to exists appProcess
+                            if stillRunning then
+                                -- Use key combination Command+Option+Escape to open Force Quit dialog
+                                -- This is the macOS-approved way to force quit within sandbox
+                                key code 53 using {command down, option down}
+                                delay 0.3
+                                key code 36 -- Press Return to force quit selected app
+                            end if
+                        on error errMsg
+                            -- Process may have already quit or access denied
+                            log "Error quitting process: " & errMsg
                         end try
-                    end try
-                end repeat
+                    end repeat
+                    return true
+                else
+                    return false
+                end if
             end tell
             """
 
             var error: NSDictionary?
             if let scriptObject = NSAppleScript(source: script) {
-                scriptObject.executeAndReturnError(&error)
+                let result = scriptObject.executeAndReturnError(&error)
 
                 // Log the result for debugging
                 if let error = error {
@@ -751,8 +800,13 @@ class ProcessManager: ObservableObject {
                     logger.error("AppleScript force quit failed with error \(errorCode): \(errorMessage)")
                     continuation.resume(returning: false)
                 } else {
-                    logger.info("AppleScript force quit succeeded for bundle: \(bundleId)")
-                    continuation.resume(returning: true)
+                    let success = result?.boolValue ?? false
+                    if success {
+                        logger.info("AppleScript force quit succeeded for bundle: \(bundleId)")
+                    } else {
+                        logger.warning("AppleScript completed but process may not have quit: \(bundleId)")
+                    }
+                    continuation.resume(returning: success)
                 }
             } else {
                 logger.error("Failed to create AppleScript for force quit")

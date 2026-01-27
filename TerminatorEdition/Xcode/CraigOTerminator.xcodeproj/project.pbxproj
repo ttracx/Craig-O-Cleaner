@@ -24,6 +24,7 @@
 		406F89DFEAC526E6B1DEFD48 /* Capability.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8CD280168A0CF727792FCF8 /* Capability.swift */; };
 		43F1679A9E659AB455D7EBCD /* OutputParsers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2540AEB61785EDD004DC4DB0 /* OutputParsers.swift */; };
 		521EC96E1AC365579F8066B3 /* HelperProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1638846095B3A82AC1EA3 /* HelperProtocol.swift */; };
+		545AF1E9BD3E7BAD6D4B3D05 /* WorkflowExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6473163B088A92F3B22EE413 /* WorkflowExecutor.swift */; };
 		6AF176C503DEDA737885BC95 /* MenuBarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 511646081918B43EE53D707C /* MenuBarContentView.swift */; };
 		7A1BEB6E5798839926573E9B /* BrowserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AAE1BF3351B94ED881B8808 /* BrowserController.swift */; };
 		8292977ED2F424131DF264E6 /* HelperInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC32FF1AA15675F4CE0B207B /* HelperInstaller.swift */; };
@@ -89,6 +90,7 @@
 		511646081918B43EE53D707C /* MenuBarContentView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
 		528355FB809492CDFD663B7C /* ChromiumController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChromiumController.swift; sourceTree = "<group>"; };
 		59499F32AAC7FF3996649A3A /* BrowserOperationsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowserOperationsView.swift; sourceTree = "<group>"; };
+		6473163B088A92F3B22EE413 /* WorkflowExecutor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorkflowExecutor.swift; sourceTree = "<group>"; };
 		65AE35A693D2D87AB4894067 /* ExecutionExample.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExecutionExample.swift; sourceTree = "<group>"; };
 		73D042E4259677B663D59091 /* ElevatedExecutor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ElevatedExecutor.swift; sourceTree = "<group>"; };
 		755DD5C65E7FDA61AE049102 /* PreflightEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PreflightEngine.swift; sourceTree = "<group>"; };
@@ -218,6 +220,7 @@
 			children = (
 				88E6D229F173F1E5A44A2BDC /* Agents */,
 				890BC47C184715144F922DEB /* OllamaClient.swift */,
+				6473163B088A92F3B22EE413 /* WorkflowExecutor.swift */,
 			);
 			name = AI;
 			path = AI;
@@ -501,6 +504,7 @@
 				8292977ED2F424131DF264E6 /* HelperInstaller.swift in Sources */,
 				521EC96E1AC365579F8066B3 /* HelperProtocol.swift in Sources */,
 				912B953067083B73C657D204 /* HelperInstallView.swift in Sources */,
+				545AF1E9BD3E7BAD6D4B3D05 /* WorkflowExecutor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
