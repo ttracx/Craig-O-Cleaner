@@ -7,12 +7,16 @@ struct CraigOTerminatorApp: App {
     @StateObject private var permissionsManager = PermissionsManager.shared
     @StateObject private var permissionMonitor = PermissionMonitor.shared
 
+    // Capability catalog (new architecture)
+    @State private var catalog = CapabilityCatalog.shared
+
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(appState)
                 .environmentObject(permissionsManager)
                 .environmentObject(permissionMonitor)
+                .environment(catalog)
                 .frame(minWidth: 1000, idealWidth: 1200, minHeight: 700, idealHeight: 800)
                 .sheet(isPresented: $permissionsManager.showPermissionsSheet) {
                     PermissionsSheet(
@@ -51,13 +55,22 @@ struct CraigOTerminatorApp: App {
         Settings {
             SettingsView()
                 .environmentObject(appState)
+                .environment(catalog)
         }
 
         MenuBarExtra {
-            MenuBarView()
+            MenuBarContentView()
                 .environmentObject(appState)
+                .environment(catalog)
         } label: {
-            Image(systemName: "bolt.circle.fill")
+            Image(systemName: "paintbrush.pointed.fill")
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [Color.vibePrimary, Color.vibeSecondary],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
         }
         .menuBarExtraStyle(.window)
     }
