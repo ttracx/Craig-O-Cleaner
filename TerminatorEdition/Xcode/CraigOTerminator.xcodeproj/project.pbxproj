@@ -12,6 +12,7 @@
 		0F3F1EBE7BF03A28F3C363EA /* SafariController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46F900C3CEC2BCD3464F7B79 /* SafariController.swift */; };
 		1A21283FA2964E0E0E3DF512 /* PermissionCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E2A0667416BE2FEF2D2CAC /* PermissionCenter.swift */; };
 		1A82FB33604A46A5B488C80D /* RemediationSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 301C4C5E80590F2F558EC9DD /* RemediationSheet.swift */; };
+		22708F43F649F24C30D8B3F4 /* AISettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58289F69B139B6414E29D5ED /* AISettingsView.swift */; };
 		277B12A90FDD1407402C60FC /* OllamaClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 890BC47C184715144F922DEB /* OllamaClient.swift */; };
 		2B36F9A12F25873D0064518A /* AuthenticationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B36F99F2F25873D0064518A /* AuthenticationService.swift */; };
 		2B36F9A32F25874B0064518A /* AccountSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B36F9A22F25874B0064518A /* AccountSettingsView.swift */; };
@@ -25,6 +26,7 @@
 		43F1679A9E659AB455D7EBCD /* OutputParsers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2540AEB61785EDD004DC4DB0 /* OutputParsers.swift */; };
 		521EC96E1AC365579F8066B3 /* HelperProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1638846095B3A82AC1EA3 /* HelperProtocol.swift */; };
 		545AF1E9BD3E7BAD6D4B3D05 /* WorkflowExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6473163B088A92F3B22EE413 /* WorkflowExecutor.swift */; };
+		5DF5A8FD14FCB24E62D7B7AC /* WorkflowApprovalSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66C4B0241E15C2C4C92200C /* WorkflowApprovalSheet.swift */; };
 		6AF176C503DEDA737885BC95 /* MenuBarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 511646081918B43EE53D707C /* MenuBarContentView.swift */; };
 		7A1BEB6E5798839926573E9B /* BrowserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AAE1BF3351B94ED881B8808 /* BrowserController.swift */; };
 		8292977ED2F424131DF264E6 /* HelperInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC32FF1AA15675F4CE0B207B /* HelperInstaller.swift */; };
@@ -63,6 +65,7 @@
 		BE6F20217BB1034A56136E11 /* PreflightEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 755DD5C65E7FDA61AE049102 /* PreflightEngine.swift */; };
 		C67225B212A818ACAF0E40CB /* ProcessRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = E036ADBFF320AF4122ED188E /* ProcessRunner.swift */; };
 		E4D514878EAB63B6CDED32B5 /* CapabilityCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39976B0C295F0722374D4359 /* CapabilityCatalog.swift */; };
+		EECF1F195DD36F30B42E8622 /* AIChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370207D71592AAA94380AB59 /* AIChatView.swift */; };
 		F6D1050F1DA8296DBE3AD3CE /* FirefoxController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 777BA177EF1408051FF5CFCD /* FirefoxController.swift */; };
 		FAD608AD34106879E2798812 /* PlannerAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DD265ABF43D8A06ABCD77CB /* PlannerAgent.swift */; };
 		FCBB1338EB27CE8069B51ADB /* PermissionStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75874698C29C1CF92D7CCCA4 /* PermissionStatusView.swift */; };
@@ -83,12 +86,14 @@
 		2B71CC312F25955200AF867B /* PermissionsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsManager.swift; sourceTree = "<group>"; };
 		301C4C5E80590F2F558EC9DD /* RemediationSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemediationSheet.swift; sourceTree = "<group>"; };
 		3642860FD44D1FB8490D2972 /* EdgeController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EdgeController.swift; sourceTree = "<group>"; };
+		370207D71592AAA94380AB59 /* AIChatView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIChatView.swift; sourceTree = "<group>"; };
 		39976B0C295F0722374D4359 /* CapabilityCatalog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CapabilityCatalog.swift; sourceTree = "<group>"; };
 		3DD265ABF43D8A06ABCD77CB /* PlannerAgent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlannerAgent.swift; sourceTree = "<group>"; };
 		4446322FC4FAD7913E4AB641 /* AutomationChecker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AutomationChecker.swift; sourceTree = "<group>"; };
 		46F900C3CEC2BCD3464F7B79 /* SafariController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SafariController.swift; sourceTree = "<group>"; };
 		511646081918B43EE53D707C /* MenuBarContentView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
 		528355FB809492CDFD663B7C /* ChromiumController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChromiumController.swift; sourceTree = "<group>"; };
+		58289F69B139B6414E29D5ED /* AISettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AISettingsView.swift; sourceTree = "<group>"; };
 		59499F32AAC7FF3996649A3A /* BrowserOperationsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowserOperationsView.swift; sourceTree = "<group>"; };
 		6473163B088A92F3B22EE413 /* WorkflowExecutor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorkflowExecutor.swift; sourceTree = "<group>"; };
 		65AE35A693D2D87AB4894067 /* ExecutionExample.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExecutionExample.swift; sourceTree = "<group>"; };
@@ -133,6 +138,7 @@
 		E882293745A2206CEC09CF41 /* RunRecord.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RunRecord.swift; sourceTree = "<group>"; };
 		EC32FF1AA15675F4CE0B207B /* HelperInstaller.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HelperInstaller.swift; sourceTree = "<group>"; };
 		F54E1BC6F4D89A5519D84588 /* ChromeController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChromeController.swift; sourceTree = "<group>"; };
+		F66C4B0241E15C2C4C92200C /* WorkflowApprovalSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorkflowApprovalSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -226,6 +232,17 @@
 			path = AI;
 			sourceTree = "<group>";
 		};
+		3C6F03EC1DD7885A7323EB82 /* AI */ = {
+			isa = PBXGroup;
+			children = (
+				370207D71592AAA94380AB59 /* AIChatView.swift */,
+				58289F69B139B6414E29D5ED /* AISettingsView.swift */,
+				F66C4B0241E15C2C4C92200C /* WorkflowApprovalSheet.swift */,
+			);
+			name = AI;
+			path = AI;
+			sourceTree = "<group>";
+		};
 		436DBFA22957B410D51A97E2 /* Permissions */ = {
 			isa = PBXGroup;
 			children = (
@@ -269,6 +286,7 @@
 				436DBFA22957B410D51A97E2 /* Permissions */,
 				0DFD32B7F0DC7E97E3640B33 /* Browser */,
 				1F854624529C51301CC8A0AD /* Helper */,
+				3C6F03EC1DD7885A7323EB82 /* AI */,
 			);
 			name = Features;
 			path = Features;
@@ -505,6 +523,9 @@
 				521EC96E1AC365579F8066B3 /* HelperProtocol.swift in Sources */,
 				912B953067083B73C657D204 /* HelperInstallView.swift in Sources */,
 				545AF1E9BD3E7BAD6D4B3D05 /* WorkflowExecutor.swift in Sources */,
+				EECF1F195DD36F30B42E8622 /* AIChatView.swift in Sources */,
+				22708F43F649F24C30D8B3F4 /* AISettingsView.swift in Sources */,
+				5DF5A8FD14FCB24E62D7B7AC /* WorkflowApprovalSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

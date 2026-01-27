@@ -1,5 +1,6 @@
 import Foundation
 import AppKit
+import os.log
 
 // Constants
 private let PROC_PIDPATHINFO_MAXSIZE: Int = 1024 * 4
@@ -124,6 +125,7 @@ class ProcessManager: ObservableObject {
     private let maxHistoryPoints = 60 // Keep 60 data points (1 minute at 1 second intervals)
     private var previousSystemCPU: host_cpu_load_info?
     private var previousSystemTime: Date?
+    private let logger = Logger(subsystem: "com.CraigOClean", category: "ProcessManager")
 
     // Privilege service for admin operations
     private lazy var privilegeService: PrivilegeService = PrivilegeService()
@@ -750,71 +752,12 @@ class ProcessManager: ObservableObject {
         }
     }
 
-    /// Force quit via AppleScript using bundle identifier
-    private func runAppleScriptForceQuit(bundleId: String) async -> Bool {
-        return await withCheckedContinuation { continuation in
-            // Use AppleScript within sandbox constraints
-            // Cannot use shell commands (kill -9, killall) due to app sandbox
-            // Instead, use System Events to send quit signal repeatedly
-            let script = """
-            tell application "System Events"
-                set appProcesses to every process whose bundle identifier is "\(bundleId)"
-                if (count of appProcesses) > 0 then
-                    repeat with appProcess in appProcesses
-                        try
-                            -- First try normal quit
-                            tell appProcess to quit
+    // NOTE: runAppleScriptForceQuit() was removed because:
+    // 1. It opened the Force Quit dialog which is too intrusive
+    // 2. It cannot use shell commands due to app sandbox
+    // 3. POSIX kill() signals (SIGTERM/SIGKILL) are more reliable and work within sandbox
+    // See forceQuitProcess() for the current implementation using NSRunningApplication + kill()
 
-                            -- Wait briefly to see if it quits
-                            delay 0.2
-
-                            -- Check if still running and force if needed
-                            set stillRunning to exists appProcess
-                            if stillRunning then
-                                -- Use key combination Command+Option+Escape to open Force Quit dialog
-                                -- This is the macOS-approved way to force quit within sandbox
-                                key code 53 using {command down, option down}
-                                delay 0.3
-                                key code 36 -- Press Return to force quit selected app
-                            end if
-                        on error errMsg
-                            -- Process may have already quit or access denied
-                            log "Error quitting process: " & errMsg
-                        end try
-                    end repeat
-                    return true
-                else
-                    return false
-                end if
-            end tell
-            """
-
-            var error: NSDictionary?
-            if let scriptObject = NSAppleScript(source: script) {
-                let result = scriptObject.executeAndReturnError(&error)
-
-                // Log the result for debugging
-                if let error = error {
-                    let errorCode = error[NSAppleScript.errorNumber] as? Int ?? 0
-                    let errorMessage = error[NSAppleScript.errorMessage] as? String ?? "Unknown error"
-                    logger.error("AppleScript force quit failed with error \(errorCode): \(errorMessage)")
-                    continuation.resume(returning: false)
-                } else {
-                    let success = result?.boolValue ?? false
-                    if success {
-                        logger.info("AppleScript force quit succeeded for bundle: \(bundleId)")
-                    } else {
-                        logger.warning("AppleScript completed but process may not have quit: \(bundleId)")
-                    }
-                    continuation.resume(returning: success)
-                }
-            } else {
-                logger.error("Failed to create AppleScript for force quit")
-                continuation.resume(returning: false)
-            }
-        }
-    }
-    
     /// Clean up CPU and tick history for a terminated process
     private func cleanupProcessHistory(for pid: Int32) async {
         await MainActor.run {

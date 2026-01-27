@@ -140,11 +140,14 @@ final class PermissionsService: ObservableObject {
     @Published var shouldShowPermissionsOnboarding: Bool = false
     
     // MARK: - Private Properties
-    
+
     private let logger = Logger(subsystem: "com.craigoclean.app", category: "Permissions")
     private var checkTimer: Timer?
     private var appActivationObserver: NSObjectProtocol?
     private let hasShownOnboarding = "hasShownPermissionsOnboarding"
+
+    // Permission manager for auto-enablement
+    let permissionManager = BrowserPermissionManager()
     
     // MARK: - Computed Properties
     
@@ -271,7 +274,22 @@ final class PermissionsService: ObservableObject {
 
         // Check automation for each target
         for i in automationTargets.indices {
-            automationTargets[i].status = await checkAutomationPermission(for: automationTargets[i])
+            let previousStatus = automationTargets[i].status
+            let newStatus = await checkAutomationPermission(for: automationTargets[i])
+            automationTargets[i].status = newStatus
+
+            // Report status changes to permission manager
+            let isGranted = newStatus == .granted
+            permissionManager.updatePermissionState(
+                bundleIdentifier: automationTargets[i].bundleIdentifier,
+                browserName: automationTargets[i].name,
+                isGranted: isGranted
+            )
+
+            // Log status changes
+            if previousStatus != newStatus {
+                logger.info("Permission status changed for \(self.automationTargets[i].name): \(previousStatus.rawValue) → \(newStatus.rawValue)")
+            }
         }
 
         lastCheckTime = Date()
@@ -468,7 +486,7 @@ final class PermissionsService: ObservableObject {
     func checkAutomationPermission(for target: AutomationTarget) async -> PermissionStatus {
         // We can't directly check automation permission without triggering a prompt
         // So we attempt a minimal AppleScript operation and check the result
-        
+
         let script: String
         switch target.bundleIdentifier {
         case "com.apple.Safari":
@@ -492,23 +510,29 @@ final class PermissionsService: ObservableObject {
         default:
             return .notDetermined
         }
-        
+
         // Only test if the app is running to avoid launching it
         let isRunning = NSWorkspace.shared.runningApplications.contains {
             $0.bundleIdentifier == target.bundleIdentifier
         }
-        
+
         // Special case for System Events - always try
         guard isRunning || target.bundleIdentifier == "com.apple.systemevents" else {
+            // If browser isn't running, check persisted permission state
+            if permissionManager.hasGrantedPermission(bundleIdentifier: target.bundleIdentifier) {
+                logger.debug("\(target.name) not running, using persisted permission state: granted")
+                return .granted
+            }
+            logger.debug("\(target.name) not running, no persisted state available")
             return .notDetermined
         }
-        
+
         return await withCheckedContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 var error: NSDictionary?
                 let appleScript = NSAppleScript(source: script)
                 appleScript?.executeAndReturnError(&error)
-                
+
                 if let error = error {
                     let errorNumber = error[NSAppleScript.errorNumber] as? Int ?? 0
                     // -1743 is "Not authorized to send Apple events"
@@ -537,11 +561,9 @@ final class PermissionsService: ObservableObject {
             logger.info("\(target.name) is not running - attempting to launch for permission request")
             // Try to launch the app to ensure it's available for the permission request
             if let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: target.bundleIdentifier) {
-                try? NSWorkspace.shared.launchApplication(
-                    at: appURL,
-                    options: [.withoutActivation],
-                    configuration: [:]
-                )
+                let configuration = NSWorkspace.OpenConfiguration()
+                configuration.activates = false
+                _ = try? NSWorkspace.shared.openApplication(at: appURL, configuration: configuration)
                 // Give the app a moment to launch
                 Thread.sleep(forTimeInterval: 1.0)
             }

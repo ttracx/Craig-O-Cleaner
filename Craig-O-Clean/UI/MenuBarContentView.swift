@@ -37,6 +37,7 @@ struct MenuBarContentView: View {
     @StateObject private var processManager = ProcessManager()
     @StateObject private var memoryOptimizer = MemoryOptimizerService()
     @StateObject private var browserAutomation = BrowserAutomationService()
+    @StateObject private var permissions = PermissionsService()
     @StateObject private var autoCleanupHolder = AutoCleanupHolder()
 
     @EnvironmentObject var auth: AuthManager
@@ -49,23 +50,29 @@ struct MenuBarContentView: View {
     @State private var selectedTab: MenuBarTab = .dashboard
     @State private var isRefreshing = false
     @State private var showingPaywall = false
+    @State private var hasSetupPermissionIntegration = false
     @Namespace private var tabAnimation
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Gradient Header
-            headerSection
+        ZStack {
+            VStack(spacing: 0) {
+                // Permission notifications (displayed at top)
+                PermissionNotificationBanner(permissionManager: permissions.permissionManager)
 
-            // Modern Tab Bar
-            modernTabBar
+                // Gradient Header
+                headerSection
 
-            // Tab Content
-            tabContent
+                // Modern Tab Bar
+                modernTabBar
+
+                // Tab Content
+                tabContent
+            }
+            .frame(width: 380)
+            .background(
+                VisualEffectBlur(material: .popover, blendingMode: .behindWindow)
+            )
         }
-        .frame(width: 380)
-        .background(
-            VisualEffectBlur(material: .popover, blendingMode: .behindWindow)
-        )
         .onAppear {
             systemMetrics.startMonitoring()
             processManager.updateProcessList()
@@ -78,8 +85,15 @@ struct MenuBarContentView: View {
                 )
             }
 
+            // Setup permission auto-enablement integration (only once)
+            if !hasSetupPermissionIntegration {
+                browserAutomation.setupPermissionAutoEnablement(permissionService: permissions)
+                hasSetupPermissionIntegration = true
+            }
+
             Task {
                 await memoryOptimizer.analyzeMemoryUsage()
+                await permissions.checkAllPermissions()
                 await browserAutomation.fetchAllTabs()
             }
         }

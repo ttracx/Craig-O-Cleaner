@@ -213,6 +213,29 @@ final class BrowserAutomationService: ObservableObject {
         }
     }
 
+    /// Setup integration with PermissionsService for auto-enablement
+    func setupPermissionAutoEnablement(permissionService: PermissionsService) {
+        logger.info("Setting up permission auto-enablement integration")
+
+        // Register callback for when permissions are granted
+        permissionService.permissionManager.onPermissionGranted { [weak self] bundleIdentifier in
+            guard let self = self else { return }
+
+            Task { @MainActor in
+                self.logger.info("🎉 Permission granted for \(bundleIdentifier) - auto-enabling browser features")
+
+                // Auto-fetch tabs for the newly enabled browser
+                await self.fetchAllTabs()
+
+                // Start auto-refresh if not already running
+                if self.refreshTimer == nil {
+                    self.logger.info("Starting auto-refresh timer after permission grant")
+                    // Auto-refresh could be enabled here if desired
+                }
+            }
+        }
+    }
+
     /// Proactively request Safari automation permission on first launch
     func checkAndRequestSafariPermissionIfNeeded() async {
         let hasRequestedKey = "hasRequestedSafariAutomation"

@@ -198,7 +198,7 @@ enum BrowserControllerError: LocalizedError {
 
 // MARK: - Concrete Controllers
 
-final class SafariController: AppleScriptBrowserController {
+final class SafariController: AppleScriptBrowserController, @unchecked Sendable {
     override init(name: String, bundleId: String) {
         super.init(name: name, bundleId: bundleId)
     }
@@ -208,7 +208,7 @@ final class SafariController: AppleScriptBrowserController {
     }
 }
 
-final class ChromeController: AppleScriptBrowserController {
+final class ChromeController: AppleScriptBrowserController, @unchecked Sendable {
     override init(name: String, bundleId: String) {
         super.init(name: name, bundleId: bundleId)
     }
@@ -218,7 +218,7 @@ final class ChromeController: AppleScriptBrowserController {
     }
 }
 
-final class EdgeController: AppleScriptBrowserController {
+final class EdgeController: AppleScriptBrowserController, @unchecked Sendable {
     override init(name: String, bundleId: String) {
         super.init(name: name, bundleId: bundleId)
     }
@@ -228,7 +228,7 @@ final class EdgeController: AppleScriptBrowserController {
     }
 }
 
-final class BraveController: AppleScriptBrowserController {
+final class BraveController: AppleScriptBrowserController, @unchecked Sendable {
     override init(name: String, bundleId: String) {
         super.init(name: name, bundleId: bundleId)
     }
@@ -238,7 +238,7 @@ final class BraveController: AppleScriptBrowserController {
     }
 }
 
-final class ArcController: AppleScriptBrowserController {
+final class ArcController: AppleScriptBrowserController, @unchecked Sendable {
     override init(name: String, bundleId: String) {
         super.init(name: name, bundleId: bundleId)
     }
