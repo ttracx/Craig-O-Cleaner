@@ -74,6 +74,26 @@ extension Color {
             endPoint: .trailing
         )
     }
+
+    // MARK: - Semantic Colors (Risk-Based)
+
+    /// Safe operations
+    static let vibeSafe = Color(red: 16/255, green: 185/255, blue: 129/255)
+
+    /// Moderate risk operations
+    static let vibeModerate = Color(red: 245/255, green: 158/255, blue: 11/255)
+
+    /// Destructive operations
+    static let vibeDestructive = Color(red: 239/255, green: 68/255, blue: 68/255)
+
+    /// Success state
+    static let vibeSuccess = vibeSafe
+
+    /// Warning state
+    static let vibeWarning = vibeModerate
+
+    /// Error state
+    static let vibeError = vibeDestructive
 }
 
 // MARK: - Usage Examples
