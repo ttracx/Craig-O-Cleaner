@@ -13,20 +13,25 @@ struct BrowserTabsView: View {
     @State private var searchText = ""
     @State private var selectedTabs: Set<BrowserTab> = []
     @State private var showingCloseConfirmation = false
+    @State private var showingForceQuitConfirmation = false
+    @State private var showingCloseHeavyConfirmation = false
+    @State private var showingClosePatternConfirmation = false
     @State private var showingPermissionsHelp = false
     @State private var isRefreshing = false
     @State private var alertMessage = ""
     @State private var showingAlert = false
     @State private var isRequestingPermission = false
+    @State private var patternText = ""
+    @State private var sortByHeavy = false
     
     var filteredTabs: [BrowserTab] {
         var tabs = browserAutomation.allTabs
-        
+
         // Filter by browser
         if let browser = selectedBrowser {
             tabs = tabs.filter { $0.browser == browser }
         }
-        
+
         // Filter by search
         if !searchText.isEmpty {
             tabs = tabs.filter {
@@ -35,8 +40,17 @@ struct BrowserTabsView: View {
                 $0.domain.localizedCaseInsensitiveContains(searchText)
             }
         }
-        
+
+        // Sort heavy tabs first if enabled
+        if sortByHeavy {
+            tabs.sort { $0.isEstimatedHeavy && !$1.isEstimatedHeavy }
+        }
+
         return tabs
+    }
+
+    var heavyTabCount: Int {
+        filteredTabs.filter { $0.isEstimatedHeavy }.count
     }
     
     var body: some View {
@@ -116,6 +130,46 @@ struct BrowserTabsView: View {
             Button("OK") { }
         } message: {
             Text(alertMessage)
+        }
+        .alert("Force Quit Browser", isPresented: $showingForceQuitConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Force Quit", role: .destructive) {
+                guard let browser = selectedBrowser else { return }
+                Task {
+                    try? await browserAutomation.forceQuitBrowser(browser)
+                    alertMessage = "\(browser.rawValue) has been force quit."
+                    showingAlert = true
+                }
+            }
+        } message: {
+            Text("This will immediately terminate \(selectedBrowser?.rawValue ?? "the browser"). All unsaved data will be lost.")
+        }
+        .alert("Close Heavy Tabs", isPresented: $showingCloseHeavyConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Close \(heavyTabCount) Heavy Tabs", role: .destructive) {
+                Task {
+                    let count = try? await browserAutomation.closeHeavyTabs(in: selectedBrowser)
+                    alertMessage = "Closed \(count ?? 0) heavy tabs."
+                    showingAlert = true
+                }
+            }
+        } message: {
+            Text("This will close \(heavyTabCount) tabs from resource-intensive sites (YouTube, Facebook, Twitter, etc.).")
+        }
+        .alert("Close Tabs by Pattern", isPresented: $showingClosePatternConfirmation) {
+            TextField("URL pattern", text: $patternText)
+            Button("Cancel", role: .cancel) { patternText = "" }
+            Button("Close Matching", role: .destructive) {
+                let pattern = patternText
+                patternText = ""
+                Task {
+                    let count = try? await browserAutomation.closeTabsByPattern(pattern, in: selectedBrowser)
+                    alertMessage = "Closed \(count ?? 0) tabs matching \"\(pattern)\"."
+                    showingAlert = true
+                }
+            }
+        } message: {
+            Text("Enter a URL pattern to close matching tabs.")
         }
         .sheet(isPresented: $showingPermissionsHelp) {
             PermissionsHelpSheet()
@@ -361,21 +415,70 @@ struct BrowserTabsView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                
+
+                Button("Select All") {
+                    selectedTabs = Set(filteredTabs)
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .frame(maxWidth: .infinity)
+
+                Button("Deselect All") {
+                    selectedTabs.removeAll()
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .frame(maxWidth: .infinity)
+                .disabled(selectedTabs.isEmpty)
+
+                Divider().padding(.vertical, 2)
+
                 Button("Close Duplicate Tabs") {
                     closeDuplicateTabs()
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
                 .frame(maxWidth: .infinity)
-                
+
                 Button("Consolidate Tabs") {
                     consolidateDomainTabs()
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
                 .frame(maxWidth: .infinity)
-                .help("Close excess tabs from domains with more than 3 tabs (keeps 3 per domain)")
+                .help("Close excess tabs from domains with more than 3 tabs")
+
+                Button("Close Heavy Tabs (\(heavyTabCount))") {
+                    showingCloseHeavyConfirmation = true
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .frame(maxWidth: .infinity)
+                .disabled(heavyTabCount == 0)
+
+                Button("Close by Pattern...") {
+                    showingClosePatternConfirmation = true
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .frame(maxWidth: .infinity)
+
+                Toggle("Sort by Memory", isOn: $sortByHeavy)
+                    .font(.caption)
+                    .toggleStyle(.switch)
+                    .controlSize(.mini)
+
+                Divider().padding(.vertical, 2)
+
+                if selectedBrowser != nil {
+                    Button("Force Quit Browser") {
+                        showingForceQuitConfirmation = true
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                    .frame(maxWidth: .infinity)
+                    .foregroundColor(.red)
+                }
             }
             .padding()
         }
@@ -666,9 +769,20 @@ struct TabRowItem: View {
             
             // Tab info
             VStack(alignment: .leading, spacing: 2) {
-                Text(tab.title.isEmpty ? "Untitled" : tab.title)
-                    .lineLimit(1)
-                
+                HStack(spacing: 4) {
+                    Text(tab.title.isEmpty ? "Untitled" : tab.title)
+                        .lineLimit(1)
+                    if tab.isEstimatedHeavy {
+                        Text("HEAVY")
+                            .font(.system(size: 8, weight: .bold))
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 1)
+                            .background(Color.red.opacity(0.2))
+                            .foregroundColor(.red)
+                            .cornerRadius(3)
+                    }
+                }
+
                 Text(tab.url)
                     .font(.caption)
                     .foregroundColor(.secondary)

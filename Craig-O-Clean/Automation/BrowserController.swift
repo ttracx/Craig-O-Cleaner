@@ -8,12 +8,32 @@ import os.log
 
 // MARK: - Browser Tab Model
 
-struct BrowserTab: Identifiable {
-    let id = UUID()
+struct BrowserTab: Identifiable, Hashable {
+    let id: String
     let windowIndex: Int
     let tabIndex: Int
     let title: String
     let url: String
+    let browserApp: String
+
+    init(windowIndex: Int, tabIndex: Int, title: String, url: String, browserApp: String = "") {
+        self.id = "\(browserApp)-\(windowIndex)-\(tabIndex)"
+        self.windowIndex = windowIndex
+        self.tabIndex = tabIndex
+        self.title = title
+        self.url = url
+        self.browserApp = browserApp
+    }
+
+    /// Heuristic: tabs from known heavy sites are flagged
+    var isEstimatedHeavy: Bool {
+        let heavyPatterns = ["youtube.com", "facebook.com", "twitter.com", "twitch.tv",
+                            "netflix.com", "reddit.com", "instagram.com", "tiktok.com"]
+        return heavyPatterns.contains { url.localizedCaseInsensitiveContains($0) }
+    }
+
+    func hash(into hasher: inout Hasher) { hasher.combine(id) }
+    static func == (lhs: BrowserTab, rhs: BrowserTab) -> Bool { lhs.id == rhs.id }
 }
 
 // MARK: - Browser Controller Protocol
@@ -23,10 +43,14 @@ protocol BrowserController {
     var bundleIdentifier: String { get }
 
     func isRunning() -> Bool
+    func isAutomationPermissionGranted() async -> Bool
     func getAllTabs() async throws -> [BrowserTab]
+    func getTabCount() async throws -> Int
+    func closeTab(windowIndex: Int, tabIndex: Int) async throws
     func closeTabs(matching pattern: String) async throws -> Int
-    func closeAllTabs() async throws -> Int
-    func tabCount() async throws -> Int
+    func closeAllTabs(except whitelist: [String]) async throws -> Int
+    func quit() async throws
+    func forceQuit() async throws
 }
 
 // MARK: - AppleScript Browser Controller Base
@@ -45,6 +69,20 @@ class AppleScriptBrowserController: BrowserController {
     func isRunning() -> Bool {
         NSWorkspace.shared.runningApplications.contains {
             $0.bundleIdentifier == bundleIdentifier
+        }
+    }
+
+    func isAutomationPermissionGranted() async -> Bool {
+        let script = """
+        tell application "\(browserName)"
+            return name
+        end tell
+        """
+        do {
+            _ = try await runAppleScript(script)
+            return true
+        } catch {
+            return false
         }
     }
 
@@ -75,50 +113,7 @@ class AppleScriptBrowserController: BrowserController {
         return parseTabOutput(result)
     }
 
-    func closeTabs(matching pattern: String) async throws -> Int {
-        guard isRunning() else { return 0 }
-
-        let script = """
-        tell application "\(browserName)"
-            set closed to 0
-            repeat with w in windows
-                set tabList to tabs of w
-                repeat with t in tabList
-                    try
-                        if URL of t contains "\(pattern)" then
-                            close t
-                            set closed to closed + 1
-                        end if
-                    end try
-                end repeat
-            end repeat
-            return closed
-        end tell
-        """
-
-        let result = try await runAppleScript(script)
-        return Int(result.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
-    }
-
-    func closeAllTabs() async throws -> Int {
-        guard isRunning() else { return 0 }
-        let count = try await tabCount()
-
-        let script = """
-        tell application "\(browserName)"
-            repeat with w in windows
-                try
-                    close tabs of w
-                end try
-            end repeat
-        end tell
-        """
-
-        _ = try await runAppleScript(script)
-        return count
-    }
-
-    func tabCount() async throws -> Int {
+    func getTabCount() async throws -> Int {
         guard isRunning() else { return 0 }
 
         let script = """
@@ -133,6 +128,106 @@ class AppleScriptBrowserController: BrowserController {
 
         let result = try await runAppleScript(script)
         return Int(result.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+    }
+
+    func closeTab(windowIndex: Int, tabIndex: Int) async throws {
+        guard isRunning() else { throw BrowserControllerError.notRunning(browserName) }
+
+        let script = """
+        tell application "\(browserName)"
+            tell window \(windowIndex)
+                close tab \(tabIndex)
+            end tell
+        end tell
+        """
+
+        _ = try await runAppleScript(script)
+        logger.info("Closed tab \(tabIndex) in window \(windowIndex) of \(self.browserName)")
+    }
+
+    func closeTabs(matching pattern: String) async throws -> Int {
+        guard isRunning() else { return 0 }
+
+        let escapedPattern = pattern.replacingOccurrences(of: "\"", with: "\\\"")
+        let script = """
+        tell application "\(browserName)"
+            set closed to 0
+            repeat with w in windows
+                set tabList to tabs of w
+                repeat with t in tabList
+                    try
+                        if URL of t contains "\(escapedPattern)" then
+                            close t
+                            set closed to closed + 1
+                        end if
+                    end try
+                end repeat
+            end repeat
+            return closed
+        end tell
+        """
+
+        let result = try await runAppleScript(script)
+        return Int(result.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+    }
+
+    func closeAllTabs(except whitelist: [String] = []) async throws -> Int {
+        guard isRunning() else { return 0 }
+        let count = try await getTabCount()
+
+        if whitelist.isEmpty {
+            let script = """
+            tell application "\(browserName)"
+                repeat with w in windows
+                    try
+                        close tabs of w
+                    end try
+                end repeat
+            end tell
+            """
+            _ = try await runAppleScript(script)
+        } else {
+            // Close tabs not matching whitelist patterns
+            let tabs = try await getAllTabs()
+            var closed = 0
+            for tab in tabs.reversed() {
+                let isWhitelisted = whitelist.contains { pattern in
+                    tab.url.localizedCaseInsensitiveContains(pattern)
+                }
+                if !isWhitelisted {
+                    try await closeTab(windowIndex: tab.windowIndex, tabIndex: tab.tabIndex)
+                    closed += 1
+                }
+            }
+            return closed
+        }
+
+        return count
+    }
+
+    func quit() async throws {
+        guard isRunning() else { return }
+
+        let script = """
+        tell application "\(browserName)"
+            quit
+        end tell
+        """
+
+        _ = try await runAppleScript(script)
+        logger.info("Quit \(self.browserName)")
+    }
+
+    func forceQuit() async throws {
+        guard isRunning() else { return }
+
+        // Use killall for immediate termination
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/killall")
+        process.arguments = ["-9", browserName]
+        try process.run()
+        process.waitUntilExit()
+        logger.info("Force quit \(self.browserName)")
     }
 
     // MARK: - Helpers
@@ -168,7 +263,8 @@ class AppleScriptBrowserController: BrowserController {
                     windowIndex: wIdx,
                     tabIndex: tIdx,
                     title: parts[2],
-                    url: parts[3]
+                    url: parts[3],
+                    browserApp: self.browserName
                 )
             }
     }
@@ -218,6 +314,32 @@ final class ArcController: AppleScriptBrowserController {
     init() { super.init(name: "Arc", bundleId: "company.thebrowser.Browser") }
 }
 
+/// Firefox has limited AppleScript support; tab listing is not supported
+final class FirefoxController: AppleScriptBrowserController {
+    init() { super.init(name: "Firefox", bundleId: "org.mozilla.firefox") }
+
+    override func getAllTabs() async throws -> [BrowserTab] {
+        // Firefox does not expose tabs via AppleScript
+        return []
+    }
+
+    override func getTabCount() async throws -> Int {
+        return 0
+    }
+
+    override func closeTab(windowIndex: Int, tabIndex: Int) async throws {
+        throw BrowserControllerError.appleScriptError(code: -1, message: "Firefox does not support AppleScript tab management")
+    }
+
+    override func closeTabs(matching pattern: String) async throws -> Int {
+        return 0
+    }
+
+    override func closeAllTabs(except whitelist: [String]) async throws -> Int {
+        return 0
+    }
+}
+
 // MARK: - Browser Controller Registry
 
 @MainActor
@@ -229,7 +351,8 @@ final class BrowserControllerRegistry: ObservableObject {
         ChromeController(),
         EdgeController(),
         BraveController(),
-        ArcController()
+        ArcController(),
+        FirefoxController()
     ]
 
     func controller(for name: String) -> BrowserController? {

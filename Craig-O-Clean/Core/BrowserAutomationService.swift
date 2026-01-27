@@ -89,7 +89,7 @@ struct BrowserTab: Identifiable, Hashable {
         }
         return host
     }
-    
+
     var faviconURL: URL? {
         guard let url = URL(string: url),
               let scheme = url.scheme,
@@ -97,6 +97,14 @@ struct BrowserTab: Identifiable, Hashable {
             return nil
         }
         return URL(string: "\(scheme)://\(host)/favicon.ico")
+    }
+
+    /// Heuristic: tabs from known heavy/resource-intensive sites
+    var isEstimatedHeavy: Bool {
+        let heavyPatterns = ["youtube.com", "facebook.com", "twitter.com", "twitch.tv",
+                            "netflix.com", "reddit.com", "instagram.com", "tiktok.com",
+                            "discord.com", "figma.com", "canva.com"]
+        return heavyPatterns.contains { domain.contains($0) || url.localizedCaseInsensitiveContains($0) }
     }
     
     func hash(into hasher: inout Hasher) {
@@ -473,6 +481,65 @@ final class BrowserAutomationService: ObservableObject {
         logger.info("Closed \(inactiveTabs.count) inactive tabs in window \(windowIndex) of \(browser.rawValue)")
     }
     
+    /// Gracefully quit a browser
+    func quitBrowser(_ browser: SupportedBrowser) async throws {
+        let appName = getAppleScriptAppName(for: browser)
+        let script = """
+        tell application "\(appName)"
+            quit
+        end tell
+        """
+        _ = try await executeAppleScript(script)
+        logger.info("Quit \(browser.rawValue)")
+        updateRunningBrowsers()
+    }
+
+    /// Force quit a browser immediately (kills process)
+    func forceQuitBrowser(_ browser: SupportedBrowser) async throws {
+        let running = NSWorkspace.shared.runningApplications
+        for bundleId in browser.allBundleIdentifiers {
+            if let app = running.first(where: { $0.bundleIdentifier == bundleId }) {
+                app.forceTerminate()
+                logger.info("Force quit \(browser.rawValue) (pid \(app.processIdentifier))")
+            }
+        }
+        updateRunningBrowsers()
+        browserTabs.removeValue(forKey: browser)
+    }
+
+    /// Close all tabs matching heavy-site heuristics
+    func closeHeavyTabs(in browser: SupportedBrowser? = nil) async throws -> Int {
+        let heavyTabs = allTabs.filter { tab in
+            let browserMatch = browser == nil || tab.browser == browser
+            return tab.isEstimatedHeavy && browserMatch
+        }
+
+        for tab in heavyTabs.reversed() {
+            try await closeTab(tab)
+        }
+
+        logger.info("Closed \(heavyTabs.count) heavy tabs")
+        return heavyTabs.count
+    }
+
+    /// Close tabs matching a URL pattern
+    func closeTabsByPattern(_ pattern: String, in browser: SupportedBrowser? = nil) async throws -> Int {
+        let matchingTabs = allTabs.filter { tab in
+            let browserMatch = browser == nil || tab.browser == browser
+            let patternMatch = tab.url.localizedCaseInsensitiveContains(pattern) ||
+                               tab.title.localizedCaseInsensitiveContains(pattern) ||
+                               tab.domain.localizedCaseInsensitiveContains(pattern)
+            return patternMatch && browserMatch
+        }
+
+        for tab in matchingTabs.reversed() {
+            try await closeTab(tab)
+        }
+
+        logger.info("Closed \(matchingTabs.count) tabs matching '\(pattern)'")
+        return matchingTabs.count
+    }
+
     /// Get heavy tabs (high memory consumers)
     func getHeavyTabs(limit: Int = 10) -> [BrowserTab] {
         // Since we can't directly measure tab memory via AppleScript,
