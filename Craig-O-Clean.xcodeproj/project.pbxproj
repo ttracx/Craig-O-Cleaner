@@ -17,6 +17,52 @@
 		1BB559C2F26B4D2398D62009 /* DebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D350B359D5421F816720F5 /* DebugLogger.swift */; };
 		245906DA80EE0DEC93EF4CDE /* AutoCleanupSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C600236D643D1053BD64CC3 /* AutoCleanupSettingsView.swift */; };
 		2A25D8B619D2FCFD6DA92D5E /* BrowserAutomationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D4847DB072B4F05BF47CF1B /* BrowserAutomationService.swift */; };
+		2B12F1742F29554000C7CE84 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1722F29554000C7CE84 /* AppEnvironment.swift */; };
+		2B12F1752F29554000C7CE84 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1722F29554000C7CE84 /* AppEnvironment.swift */; };
+		2B12F1762F29554000C7CE84 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1722F29554000C7CE84 /* AppEnvironment.swift */; };
+		2B12F1792F29555400C7CE84 /* BrowserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1772F29555400C7CE84 /* BrowserController.swift */; };
+		2B12F17A2F29555400C7CE84 /* BrowserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1772F29555400C7CE84 /* BrowserController.swift */; };
+		2B12F17B2F29555400C7CE84 /* BrowserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1772F29555400C7CE84 /* BrowserController.swift */; };
+		2B12F18A2F29556F00C7CE84 /* RunRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1872F29556F00C7CE84 /* RunRecord.swift */; };
+		2B12F18B2F29556F00C7CE84 /* ElevatedExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1822F29556F00C7CE84 /* ElevatedExecutor.swift */; };
+		2B12F18C2F29556F00C7CE84 /* SQLiteLogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1882F29556F00C7CE84 /* SQLiteLogStore.swift */; };
+		2B12F18D2F29556F00C7CE84 /* Capability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F17E2F29556F00C7CE84 /* Capability.swift */; };
+		2B12F18E2F29556F00C7CE84 /* ProcessRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1832F29556F00C7CE84 /* ProcessRunner.swift */; };
+		2B12F18F2F29556F00C7CE84 /* CapabilityCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F17F2F29556F00C7CE84 /* CapabilityCatalog.swift */; };
+		2B12F1902F29556F00C7CE84 /* CommandExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1812F29556F00C7CE84 /* CommandExecutor.swift */; };
+		2B12F1912F29556F00C7CE84 /* UserExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1842F29556F00C7CE84 /* UserExecutor.swift */; };
+		2B12F1922F29556F00C7CE84 /* LogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1862F29556F00C7CE84 /* LogStore.swift */; };
+		2B12F1932F29556F00C7CE84 /* RunRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1872F29556F00C7CE84 /* RunRecord.swift */; };
+		2B12F1942F29556F00C7CE84 /* ElevatedExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1822F29556F00C7CE84 /* ElevatedExecutor.swift */; };
+		2B12F1952F29556F00C7CE84 /* SQLiteLogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1882F29556F00C7CE84 /* SQLiteLogStore.swift */; };
+		2B12F1962F29556F00C7CE84 /* Capability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F17E2F29556F00C7CE84 /* Capability.swift */; };
+		2B12F1972F29556F00C7CE84 /* ProcessRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1832F29556F00C7CE84 /* ProcessRunner.swift */; };
+		2B12F1982F29556F00C7CE84 /* CapabilityCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F17F2F29556F00C7CE84 /* CapabilityCatalog.swift */; };
+		2B12F1992F29556F00C7CE84 /* CommandExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1812F29556F00C7CE84 /* CommandExecutor.swift */; };
+		2B12F19A2F29556F00C7CE84 /* UserExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1842F29556F00C7CE84 /* UserExecutor.swift */; };
+		2B12F19B2F29556F00C7CE84 /* LogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1862F29556F00C7CE84 /* LogStore.swift */; };
+		2B12F19C2F29556F00C7CE84 /* catalog.json in Resources */ = {isa = PBXBuildFile; fileRef = 2B12F17C2F29556F00C7CE84 /* catalog.json */; };
+		2B12F19D2F29556F00C7CE84 /* RunRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1872F29556F00C7CE84 /* RunRecord.swift */; };
+		2B12F19E2F29556F00C7CE84 /* ElevatedExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1822F29556F00C7CE84 /* ElevatedExecutor.swift */; };
+		2B12F19F2F29556F00C7CE84 /* SQLiteLogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1882F29556F00C7CE84 /* SQLiteLogStore.swift */; };
+		2B12F1A02F29556F00C7CE84 /* Capability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F17E2F29556F00C7CE84 /* Capability.swift */; };
+		2B12F1A12F29556F00C7CE84 /* ProcessRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1832F29556F00C7CE84 /* ProcessRunner.swift */; };
+		2B12F1A22F29556F00C7CE84 /* CapabilityCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F17F2F29556F00C7CE84 /* CapabilityCatalog.swift */; };
+		2B12F1A32F29556F00C7CE84 /* CommandExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1812F29556F00C7CE84 /* CommandExecutor.swift */; };
+		2B12F1A42F29556F00C7CE84 /* UserExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1842F29556F00C7CE84 /* UserExecutor.swift */; };
+		2B12F1A52F29556F00C7CE84 /* LogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1862F29556F00C7CE84 /* LogStore.swift */; };
+		2B12F1AF2F29558000C7CE84 /* PermissionStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1AC2F29558000C7CE84 /* PermissionStatusView.swift */; };
+		2B12F1B02F29558000C7CE84 /* ActivityLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1A62F29558000C7CE84 /* ActivityLogView.swift */; };
+		2B12F1B12F29558000C7CE84 /* CapabilityMenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1AA2F29558000C7CE84 /* CapabilityMenuBarView.swift */; };
+		2B12F1B22F29558000C7CE84 /* ConfirmationDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1A82F29558000C7CE84 /* ConfirmationDialog.swift */; };
+		2B12F1B32F29558000C7CE84 /* PermissionStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1AC2F29558000C7CE84 /* PermissionStatusView.swift */; };
+		2B12F1B42F29558000C7CE84 /* ActivityLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1A62F29558000C7CE84 /* ActivityLogView.swift */; };
+		2B12F1B52F29558000C7CE84 /* CapabilityMenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1AA2F29558000C7CE84 /* CapabilityMenuBarView.swift */; };
+		2B12F1B62F29558000C7CE84 /* ConfirmationDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1A82F29558000C7CE84 /* ConfirmationDialog.swift */; };
+		2B12F1B72F29558000C7CE84 /* PermissionStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1AC2F29558000C7CE84 /* PermissionStatusView.swift */; };
+		2B12F1B82F29558000C7CE84 /* ActivityLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1A62F29558000C7CE84 /* ActivityLogView.swift */; };
+		2B12F1B92F29558000C7CE84 /* CapabilityMenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1AA2F29558000C7CE84 /* CapabilityMenuBarView.swift */; };
+		2B12F1BA2F29558000C7CE84 /* ConfirmationDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B12F1A82F29558000C7CE84 /* ConfirmationDialog.swift */; };
 		2BC5E1AF2F1FFFEC00093C17 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0BFC84511241D18B26E6FC /* PaywallView.swift */; };
 		2BC5E1B02F1FFFEC00093C17 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D01515630B409EA1310EF4 /* AppLogger.swift */; };
 		2BC5E1B12F1FFFEC00093C17 /* TrialManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3FDB3A7AE0E43668008F6EB /* TrialManager.swift */; };
@@ -25,7 +71,6 @@
 		2BC5E1B42F1FFFEC00093C17 /* LoggingExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7313236940042A799441B8A /* LoggingExtensions.swift */; };
 		2BD1F7C12F2482E80040EA8C /* Configuration.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 2BD1F7C02F2482E80040EA8C /* Configuration.storekit */; };
 		2FE223FFC5AB086E1F390837 /* SystemCPUMonitorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23FD6D8224281B502229F05E /* SystemCPUMonitorView.swift */; };
-		3134FABB77F435E86E6FED7 /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66FAA11487974A19801962C /* SnapshotHelper.swift */; };
 		320BA199692F2B0CE464C826 /* ClearMindUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3347C167919A7F97FE2CDE86 /* ClearMindUITests.swift */; };
 		324625357741BF0140A7A9FA /* MemoryOptimizerServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDE6E7BF2B81B73B7F577407 /* MemoryOptimizerServiceTests.swift */; };
 		329F8E7152478A41EE5C939F /* SystemMetricsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF233DB0FFB9F908AA51D49 /* SystemMetricsService.swift */; };
@@ -85,6 +130,22 @@
 		23FD6D8224281B502229F05E /* SystemCPUMonitorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemCPUMonitorView.swift; sourceTree = "<group>"; };
 		253B9B7F0FD0202F49F06356 /* SettingsPermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPermissionsView.swift; sourceTree = "<group>"; };
 		2ACBCDA24FEC65C0692216ED /* AutoCleanupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoCleanupService.swift; sourceTree = "<group>"; };
+		2B12F1722F29554000C7CE84 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
+		2B12F1772F29555400C7CE84 /* BrowserController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserController.swift; sourceTree = "<group>"; };
+		2B12F17C2F29556F00C7CE84 /* catalog.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = catalog.json; sourceTree = "<group>"; };
+		2B12F17E2F29556F00C7CE84 /* Capability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Capability.swift; sourceTree = "<group>"; };
+		2B12F17F2F29556F00C7CE84 /* CapabilityCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapabilityCatalog.swift; sourceTree = "<group>"; };
+		2B12F1812F29556F00C7CE84 /* CommandExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandExecutor.swift; sourceTree = "<group>"; };
+		2B12F1822F29556F00C7CE84 /* ElevatedExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElevatedExecutor.swift; sourceTree = "<group>"; };
+		2B12F1832F29556F00C7CE84 /* ProcessRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessRunner.swift; sourceTree = "<group>"; };
+		2B12F1842F29556F00C7CE84 /* UserExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserExecutor.swift; sourceTree = "<group>"; };
+		2B12F1862F29556F00C7CE84 /* LogStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogStore.swift; sourceTree = "<group>"; };
+		2B12F1872F29556F00C7CE84 /* RunRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunRecord.swift; sourceTree = "<group>"; };
+		2B12F1882F29556F00C7CE84 /* SQLiteLogStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLiteLogStore.swift; sourceTree = "<group>"; };
+		2B12F1A62F29558000C7CE84 /* ActivityLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityLogView.swift; sourceTree = "<group>"; };
+		2B12F1A82F29558000C7CE84 /* ConfirmationDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmationDialog.swift; sourceTree = "<group>"; };
+		2B12F1AA2F29558000C7CE84 /* CapabilityMenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapabilityMenuBarView.swift; sourceTree = "<group>"; };
+		2B12F1AC2F29558000C7CE84 /* PermissionStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionStatusView.swift; sourceTree = "<group>"; };
 		2B3C4D5E6F7890ABCDEF0102 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		2BD1F7C02F2482E80040EA8C /* Configuration.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Configuration.storekit; sourceTree = "<group>"; };
 		3347C167919A7F97FE2CDE86 /* ClearMindUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClearMindUITests.swift; sourceTree = "<group>"; };
@@ -101,7 +162,6 @@
 		5D0E02E94D7795EFC0334B3F /* Craig-O-CleanTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Craig-O-CleanTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5E6F7890ABCDEF0102030405 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		6275418776631AC59FE3F4B0 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
-		66FAA11487974A19801962C /* SnapshotHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotHelper.swift; sourceTree = "<group>"; };
 		68B2DE05F77C4B544BE495A3 /* ProcessDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessDetailsView.swift; sourceTree = "<group>"; };
 		6A95705D710AB1609EBE0FFA /* Craig-O-Cleaner-logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Craig-O-Cleaner-logo.png"; sourceTree = "<group>"; };
 		6D4847DB072B4F05BF47CF1B /* BrowserAutomationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserAutomationService.swift; sourceTree = "<group>"; };
@@ -140,6 +200,104 @@
 			path = Tests;
 			sourceTree = "<group>";
 		};
+		2B12F1732F29554000C7CE84 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				2B12F1722F29554000C7CE84 /* AppEnvironment.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		2B12F1782F29555400C7CE84 /* Automation */ = {
+			isa = PBXGroup;
+			children = (
+				2B12F1772F29555400C7CE84 /* BrowserController.swift */,
+			);
+			path = Automation;
+			sourceTree = "<group>";
+		};
+		2B12F17D2F29556F00C7CE84 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				2B12F17C2F29556F00C7CE84 /* catalog.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		2B12F1802F29556F00C7CE84 /* Capabilities */ = {
+			isa = PBXGroup;
+			children = (
+				2B12F17D2F29556F00C7CE84 /* Resources */,
+				2B12F17E2F29556F00C7CE84 /* Capability.swift */,
+				2B12F17F2F29556F00C7CE84 /* CapabilityCatalog.swift */,
+			);
+			path = Capabilities;
+			sourceTree = "<group>";
+		};
+		2B12F1852F29556F00C7CE84 /* Execution */ = {
+			isa = PBXGroup;
+			children = (
+				2B12F1812F29556F00C7CE84 /* CommandExecutor.swift */,
+				2B12F1822F29556F00C7CE84 /* ElevatedExecutor.swift */,
+				2B12F1832F29556F00C7CE84 /* ProcessRunner.swift */,
+				2B12F1842F29556F00C7CE84 /* UserExecutor.swift */,
+			);
+			path = Execution;
+			sourceTree = "<group>";
+		};
+		2B12F1892F29556F00C7CE84 /* Logging */ = {
+			isa = PBXGroup;
+			children = (
+				2B12F1862F29556F00C7CE84 /* LogStore.swift */,
+				2B12F1872F29556F00C7CE84 /* RunRecord.swift */,
+				2B12F1882F29556F00C7CE84 /* SQLiteLogStore.swift */,
+			);
+			path = Logging;
+			sourceTree = "<group>";
+		};
+		2B12F1A72F29558000C7CE84 /* ActivityLog */ = {
+			isa = PBXGroup;
+			children = (
+				2B12F1A62F29558000C7CE84 /* ActivityLogView.swift */,
+			);
+			path = ActivityLog;
+			sourceTree = "<group>";
+		};
+		2B12F1A92F29558000C7CE84 /* Confirmation */ = {
+			isa = PBXGroup;
+			children = (
+				2B12F1A82F29558000C7CE84 /* ConfirmationDialog.swift */,
+			);
+			path = Confirmation;
+			sourceTree = "<group>";
+		};
+		2B12F1AB2F29558000C7CE84 /* MenuBar */ = {
+			isa = PBXGroup;
+			children = (
+				2B12F1AA2F29558000C7CE84 /* CapabilityMenuBarView.swift */,
+			);
+			path = MenuBar;
+			sourceTree = "<group>";
+		};
+		2B12F1AD2F29558000C7CE84 /* Permissions */ = {
+			isa = PBXGroup;
+			children = (
+				2B12F1AC2F29558000C7CE84 /* PermissionStatusView.swift */,
+			);
+			path = Permissions;
+			sourceTree = "<group>";
+		};
+		2B12F1AE2F29558000C7CE84 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				2B12F1A72F29558000C7CE84 /* ActivityLog */,
+				2B12F1A92F29558000C7CE84 /* Confirmation */,
+				2B12F1AB2F29558000C7CE84 /* MenuBar */,
+				2B12F1AD2F29558000C7CE84 /* Permissions */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
 		36274E6A08DF275509E4E474 /* UI */ = {
 			isa = PBXGroup;
 			children = (
@@ -167,6 +325,9 @@
 		5CB23B38D6DD33656D6F1EE6 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				2B12F1802F29556F00C7CE84 /* Capabilities */,
+				2B12F1852F29556F00C7CE84 /* Execution */,
+				2B12F1892F29556F00C7CE84 /* Logging */,
 				19D01515630B409EA1310EF4 /* AppLogger.swift */,
 				B3FDB3A7AE0E43668008F6EB /* TrialManager.swift */,
 				F8F6221E6CFB4F658E745547 /* PrivilegeService.swift */,
@@ -190,6 +351,9 @@
 		AAA8B2312C2FDE28DD3FAF8F /* Craig-O-Clean */ = {
 			isa = PBXGroup;
 			children = (
+				2B12F1AE2F29558000C7CE84 /* Features */,
+				2B12F1782F29555400C7CE84 /* Automation */,
+				2B12F1732F29554000C7CE84 /* App */,
 				2BD1F7C02F2482E80040EA8C /* Configuration.storekit */,
 				44536121E1A03039EB5C837E /* Assets.xcassets */,
 				496C4A64B26A83B21DBF72D2 /* ContentView.swift */,
@@ -216,7 +380,6 @@
 		B8A61F36CA41840EEF5A959F /* ClearMindUITests */ = {
 			isa = PBXGroup;
 			children = (
-				66FAA11487974A19801962C /* SnapshotHelper.swift */,
 				3347C167919A7F97FE2CDE86 /* ClearMindUITests.swift */,
 			);
 			path = ClearMindUITests;
@@ -258,8 +421,6 @@
 			dependencies = (
 			);
 			name = "Craig-O-Clean";
-			packageProductDependencies = (
-			);
 			productName = "Craig-O-Clean";
 			productReference = FB5748E37851D981C3F01925 /* Craig-O-Clean.app */;
 			productType = "com.apple.product-type.application";
@@ -276,8 +437,6 @@
 				3D05836F3C0D90E9DD43755F /* PBXTargetDependency */,
 			);
 			name = "Craig-O-CleanTests";
-			packageProductDependencies = (
-			);
 			productName = "Craig-O-CleanTests";
 			productReference = 5D0E02E94D7795EFC0334B3F /* Craig-O-CleanTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -294,8 +453,6 @@
 				31A7E757C1AEA70F7A6853CB /* PBXTargetDependency */,
 			);
 			name = "Craig-O-CleanUITests";
-			packageProductDependencies = (
-			);
 			productName = "Craig-O-CleanUITests";
 			productReference = 3DA0C997E4BE59EFD9C1A412 /* Craig-O-CleanUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -328,6 +485,7 @@
 			);
 			mainGroup = 493A27514B97910FE382BF8B;
 			minimizedProjectReferenceProxies = 1;
+			productRefGroup = E593D80C629AC472168D6BBF /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -346,6 +504,7 @@
 				F5F21EDE8F69891F6A77AD61 /* Assets.xcassets in Resources */,
 				2BD1F7C12F2482E80040EA8C /* Configuration.storekit in Resources */,
 				C1CF78B065B69217240721DE /* Craig-O-Cleaner-logo.png in Resources */,
+				2B12F19C2F29556F00C7CE84 /* catalog.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -356,8 +515,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2B12F18A2F29556F00C7CE84 /* RunRecord.swift in Sources */,
+				2B12F18B2F29556F00C7CE84 /* ElevatedExecutor.swift in Sources */,
+				2B12F18C2F29556F00C7CE84 /* SQLiteLogStore.swift in Sources */,
+				2B12F18D2F29556F00C7CE84 /* Capability.swift in Sources */,
+				2B12F1B72F29558000C7CE84 /* PermissionStatusView.swift in Sources */,
+				2B12F1B82F29558000C7CE84 /* ActivityLogView.swift in Sources */,
+				2B12F1B92F29558000C7CE84 /* CapabilityMenuBarView.swift in Sources */,
+				2B12F1BA2F29558000C7CE84 /* ConfirmationDialog.swift in Sources */,
+				2B12F18E2F29556F00C7CE84 /* ProcessRunner.swift in Sources */,
+				2B12F18F2F29556F00C7CE84 /* CapabilityCatalog.swift in Sources */,
+				2B12F1902F29556F00C7CE84 /* CommandExecutor.swift in Sources */,
+				2B12F1912F29556F00C7CE84 /* UserExecutor.swift in Sources */,
+				2B12F1922F29556F00C7CE84 /* LogStore.swift in Sources */,
 				2BC5E1AF2F1FFFEC00093C17 /* PaywallView.swift in Sources */,
 				2BC5E1B02F1FFFEC00093C17 /* AppLogger.swift in Sources */,
+				2B12F1752F29554000C7CE84 /* AppEnvironment.swift in Sources */,
+				2B12F17B2F29555400C7CE84 /* BrowserController.swift in Sources */,
 				2BC5E1B12F1FFFEC00093C17 /* TrialManager.swift in Sources */,
 				2BC5E1B22F1FFFEC00093C17 /* PrivilegeService.swift in Sources */,
 				2BC5E1B32F1FFFEC00093C17 /* DebugLogger.swift in Sources */,
@@ -373,6 +547,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2B12F1AF2F29558000C7CE84 /* PermissionStatusView.swift in Sources */,
+				2B12F1B02F29558000C7CE84 /* ActivityLogView.swift in Sources */,
+				2B12F1B12F29558000C7CE84 /* CapabilityMenuBarView.swift in Sources */,
+				2B12F1B22F29558000C7CE84 /* ConfirmationDialog.swift in Sources */,
 				A1B2C3D4E5F67890ABCDEF01 /* AuthManager.swift in Sources */,
 				0835CC7B734975BC761C3801 /* AutoCleanupService.swift in Sources */,
 				245906DA80EE0DEC93EF4CDE /* AutoCleanupSettingsView.swift in Sources */,
@@ -389,6 +567,7 @@
 				F541442A3FE6B7F6A73BFFD7 /* MemoryOptimizerService.swift in Sources */,
 				9494BC4E8B0AA61CD9DC21D9 /* MenuBarContentView.swift in Sources */,
 				4448E560834F1714EA0C69D1 /* MenuBarView.swift in Sources */,
+				2B12F1742F29554000C7CE84 /* AppEnvironment.swift in Sources */,
 				87335D2F7C44B47F4FD9D493 /* PermissionsService.swift in Sources */,
 				C4715D919A5DBEF825CE493A /* ProcessDetailsView.swift in Sources */,
 				C72688306B4BEE5732CCBB8A /* ProcessManager.swift in Sources */,
@@ -402,10 +581,20 @@
 				67890ABCDEF01020304050607 /* SystemMemoryMonitorView.swift in Sources */,
 				329F8E7152478A41EE5C939F /* SystemMetricsService.swift in Sources */,
 				F67890ABCDEF010203040506 /* UserProfile.swift in Sources */,
+				2B12F1792F29555400C7CE84 /* BrowserController.swift in Sources */,
 				9C95320DF11F602202AD0D02 /* VibeCaaSColors.swift in Sources */,
 				01C6C128BF2C4D1785807C48 /* TrialManager.swift in Sources */,
 				37081B9A81AC4AAD89014AB2 /* PrivilegeService.swift in Sources */,
 				C8779F97192645DCBD6D9584 /* AppLogger.swift in Sources */,
+				2B12F19D2F29556F00C7CE84 /* RunRecord.swift in Sources */,
+				2B12F19E2F29556F00C7CE84 /* ElevatedExecutor.swift in Sources */,
+				2B12F19F2F29556F00C7CE84 /* SQLiteLogStore.swift in Sources */,
+				2B12F1A02F29556F00C7CE84 /* Capability.swift in Sources */,
+				2B12F1A12F29556F00C7CE84 /* ProcessRunner.swift in Sources */,
+				2B12F1A22F29556F00C7CE84 /* CapabilityCatalog.swift in Sources */,
+				2B12F1A32F29556F00C7CE84 /* CommandExecutor.swift in Sources */,
+				2B12F1A42F29556F00C7CE84 /* UserExecutor.swift in Sources */,
+				2B12F1A52F29556F00C7CE84 /* LogStore.swift in Sources */,
 				1BB559C2F26B4D2398D62009 /* DebugLogger.swift in Sources */,
 				C5E0BF15781E4F6CB83CF8D8 /* LoggingExtensions.swift in Sources */,
 				127FE76D306047399C129BD1 /* PaywallView.swift in Sources */,
@@ -417,7 +606,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				320BA199692F2B0CE464C826 /* ClearMindUITests.swift in Sources */,
-				3134FABB77F435E86E6FED7 /* SnapshotHelper.swift in Sources */,
+				2B12F1932F29556F00C7CE84 /* RunRecord.swift in Sources */,
+				2B12F1942F29556F00C7CE84 /* ElevatedExecutor.swift in Sources */,
+				2B12F1952F29556F00C7CE84 /* SQLiteLogStore.swift in Sources */,
+				2B12F1962F29556F00C7CE84 /* Capability.swift in Sources */,
+				2B12F1972F29556F00C7CE84 /* ProcessRunner.swift in Sources */,
+				2B12F1982F29556F00C7CE84 /* CapabilityCatalog.swift in Sources */,
+				2B12F1992F29556F00C7CE84 /* CommandExecutor.swift in Sources */,
+				2B12F19A2F29556F00C7CE84 /* UserExecutor.swift in Sources */,
+				2B12F19B2F29556F00C7CE84 /* LogStore.swift in Sources */,
+				2B12F17A2F29555400C7CE84 /* BrowserController.swift in Sources */,
+				2B12F1B32F29558000C7CE84 /* PermissionStatusView.swift in Sources */,
+				2B12F1B42F29558000C7CE84 /* ActivityLogView.swift in Sources */,
+				2B12F1B52F29558000C7CE84 /* CapabilityMenuBarView.swift in Sources */,
+				2B12F1B62F29558000C7CE84 /* ConfirmationDialog.swift in Sources */,
+				2B12F1762F29554000C7CE84 /* AppEnvironment.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -465,7 +668,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = K36LFHM32T;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_FILE_ACCESS_DOWNLOADS_FOLDER = readwrite;
@@ -491,7 +694,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 8;
+				MARKETING_VERSION = 9;
 				PRODUCT_BUNDLE_IDENTIFIER = com.craigoclean.app;
 				PRODUCT_NAME = "Craig-O-Clean";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -697,7 +900,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = K36LFHM32T;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_FILE_ACCESS_DOWNLOADS_FOLDER = readwrite;
@@ -725,7 +928,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 8;
+				MARKETING_VERSION = 9;
 				PRODUCT_BUNDLE_IDENTIFIER = com.craigoclean.app;
 				PRODUCT_NAME = "Craig-O-Clean";
 				PROVISIONING_PROFILE_SPECIFIER = "";

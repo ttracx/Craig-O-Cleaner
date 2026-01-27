@@ -37,6 +37,7 @@ struct ExecutionResultWithOutput {
 enum UserExecutorError: LocalizedError {
     case notUserLevel(String)
     case preflightCheckFailed(String)
+    case preflightValidationFailed(PreflightResult)
     case argumentInterpolationFailed(String)
     case executionFailed(String)
     case parsingFailed(String)
@@ -47,6 +48,8 @@ enum UserExecutorError: LocalizedError {
             return "Not a user-level capability: \(message)"
         case .preflightCheckFailed(let message):
             return "Preflight check failed: \(message)"
+        case .preflightValidationFailed(let result):
+            return "Preflight validation failed:\n\(result.summary)"
         case .argumentInterpolationFailed(let message):
             return "Failed to interpolate arguments: \(message)"
         case .executionFailed(let message):
@@ -66,6 +69,7 @@ final class UserExecutor: CommandExecutor {
     // MARK: - Dependencies
     private let processRunner: ProcessRunner
     private let logStore: SQLiteLogStore
+    private let preflightEngine: PreflightEngine
     private let logger = Logger(subsystem: "com.neuralquantum.craigoclean", category: "UserExecutor")
 
     // MARK: - Observable State
@@ -77,10 +81,12 @@ final class UserExecutor: CommandExecutor {
 
     init(
         processRunner: ProcessRunner = ProcessRunner(),
-        logStore: SQLiteLogStore = .shared
+        logStore: SQLiteLogStore = .shared,
+        preflightEngine: PreflightEngine = PreflightEngine()
     ) {
         self.processRunner = processRunner
         self.logStore = logStore
+        self.preflightEngine = preflightEngine
     }
 
     // MARK: - Command Executor Protocol
@@ -109,8 +115,14 @@ final class UserExecutor: CommandExecutor {
             currentCapability = nil
         }
 
-        // Run preflight checks
-        try await runPreflightChecks(capability)
+        // Run preflight validation with PreflightEngine
+        let preflightResult = await preflightEngine.validate(capability)
+        guard preflightResult.canExecute else {
+            logger.error("Preflight validation failed: \(preflightResult.summary)")
+            throw UserExecutorError.preflightValidationFailed(preflightResult)
+        }
+
+        logger.debug("Preflight validation passed for \(capability.id)")
 
         // Interpolate command template with arguments
         let (command, commandArgs) = try interpolateCommand(capability, arguments: arguments)

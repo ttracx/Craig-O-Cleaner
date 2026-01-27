@@ -56,7 +56,7 @@ final class ProcessRunner: @unchecked Sendable {
         }
 
         // Set clean environment
-        var env = ProcessInfo.processInfo.environment
+        var env = Foundation.ProcessInfo.processInfo.environment
         env["PATH"] = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin"
         process.environment = env
 

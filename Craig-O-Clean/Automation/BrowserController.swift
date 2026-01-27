@@ -6,9 +6,9 @@ import Foundation
 import AppKit
 import os.log
 
-// MARK: - Browser Tab Model
+// MARK: - Browser Tab Model (Legacy - for BrowserController protocol)
 
-struct BrowserTab: Identifiable {
+struct ControllerBrowserTab: Identifiable {
     let id = UUID()
     let windowIndex: Int
     let tabIndex: Int
@@ -23,7 +23,7 @@ protocol BrowserController {
     var bundleIdentifier: String { get }
 
     func isRunning() -> Bool
-    func getAllTabs() async throws -> [BrowserTab]
+    func getAllTabs() async throws -> [ControllerBrowserTab]
     func closeTabs(matching pattern: String) async throws -> Int
     func closeAllTabs() async throws -> Int
     func tabCount() async throws -> Int
@@ -48,7 +48,7 @@ class AppleScriptBrowserController: BrowserController {
         }
     }
 
-    func getAllTabs() async throws -> [BrowserTab] {
+    func getAllTabs() async throws -> [ControllerBrowserTab] {
         guard isRunning() else { return [] }
 
         let script = """
@@ -156,7 +156,7 @@ class AppleScriptBrowserController: BrowserController {
         }
     }
 
-    private func parseTabOutput(_ output: String) -> [BrowserTab] {
+    private func parseTabOutput(_ output: String) -> [ControllerBrowserTab] {
         output.components(separatedBy: "\n")
             .filter { !$0.isEmpty }
             .compactMap { line in
@@ -164,7 +164,7 @@ class AppleScriptBrowserController: BrowserController {
                 guard parts.count >= 4,
                       let wIdx = Int(parts[0]),
                       let tIdx = Int(parts[1]) else { return nil }
-                return BrowserTab(
+                return ControllerBrowserTab(
                     windowIndex: wIdx,
                     tabIndex: tIdx,
                     title: parts[2],

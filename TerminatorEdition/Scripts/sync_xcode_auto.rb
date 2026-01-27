@@ -1,25 +1,64 @@
 #!/usr/bin/env ruby
-# Xcode Project File Adder - Fixed Version
-# Adds missing Swift files to the Xcode project using xcodeproj gem
+# Automated Xcode Project Sync - Non-Interactive Version
+# Automatically syncs Swift files to Xcode project without prompts
 
 require 'xcodeproj'
 require 'pathname'
 require 'set'
+require 'optparse'
 
 # Colors
 RED = "\e[31m"
 GREEN = "\e[32m"
 YELLOW = "\e[33m"
 BLUE = "\e[34m"
+CYAN = "\e[36m"
 RESET = "\e[0m"
 
-def find_swift_files(project_dir)
+# Options - Global constant
+OPTIONS = {
+  dry_run: false,
+  verbose: false,
+  exclude_tests: false
+}
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: sync_xcode_auto.rb [options]"
+
+  opts.on("-d", "--dry-run", "Show what would be added without making changes") do
+    OPTIONS[:dry_run] = true
+  end
+
+  opts.on("-v", "--verbose", "Show detailed output") do
+    OPTIONS[:verbose] = true
+  end
+
+  opts.on("-t", "--exclude-tests", "Exclude test files") do
+    OPTIONS[:exclude_tests] = true
+  end
+
+  opts.on("-h", "--help", "Show this help message") do
+    puts opts
+    exit 0
+  end
+end.parse!
+
+def log(message, color = RESET, prefix = "")
+  puts "#{color}#{prefix}#{message}#{RESET}"
+end
+
+def find_swift_files(project_dir, exclude_tests: false)
   swift_files = Set.new
 
   Dir.glob("#{project_dir}/**/*.swift").each do |file|
     # Skip build directories
     next if file.include?('/.build/') || file.include?('/build/') ||
             file.include?('/DerivedData/') || file.include?('/.git/')
+
+    # Skip test files if requested
+    if exclude_tests && file.include?('/Tests/')
+      next
+    end
 
     rel_path = Pathname.new(file).relative_path_from(Pathname.new(project_dir))
     swift_files.add(rel_path.to_s)
@@ -43,7 +82,7 @@ def determine_group_path(file_path)
   parts[0...-1] # All parts except the filename
 end
 
-def find_or_create_group(project, source_dir, group_parts)
+def find_or_create_group(project, source_dir, group_parts, dry_run: false)
   # Start from main group
   group = project.main_group
 
@@ -51,7 +90,7 @@ def find_or_create_group(project, source_dir, group_parts)
   craig_group = group.groups.find { |g| g.name == 'CraigOTerminator' || g.path == 'CraigOTerminator' }
 
   unless craig_group
-    puts "#{RED}Error: Could not find CraigOTerminator group#{RESET}"
+    log("Error: Could not find CraigOTerminator group", RED, "❌ ")
     exit 1
   end
 
@@ -68,7 +107,12 @@ def find_or_create_group(project, source_dir, group_parts)
       group = existing_group
     else
       # Create new group with proper path
-      group = group.new_group(part, part)
+      unless dry_run
+        group = group.new_group(part, part)
+        log("Created group: #{part}", CYAN, "  📁 ") if OPTIONS[:verbose]
+      else
+        log("Would create group: #{part}", YELLOW, "  📁 ")
+      end
     end
   end
 
@@ -84,28 +128,33 @@ def main
   source_dir = File.join(xcode_dir, 'CraigOTerminator')
 
   unless File.exist?(project_path)
-    puts "#{RED}Error: Xcode project not found at #{project_path}#{RESET}"
+    log("Error: Xcode project not found at #{project_path}", RED, "❌ ")
     exit 1
   end
 
-  puts "#{BLUE}🔍 Scanning for Swift files...#{RESET}"
+  log("🔄 Automated Xcode Project Sync", BLUE)
+  log("Mode: #{OPTIONS[:dry_run] ? 'DRY RUN' : 'LIVE'}", CYAN)
+  puts ""
+
+  log("Scanning for Swift files...", BLUE, "🔍 ")
 
   # Load project
   project = Xcodeproj::Project.open(project_path)
   target = project.targets.find { |t| t.name == 'CraigOTerminator' }
 
   unless target
-    puts "#{RED}Error: Could not find CraigOTerminator target#{RESET}"
+    log("Error: Could not find CraigOTerminator target", RED, "❌ ")
     exit 1
   end
 
   # Find all Swift files
-  all_swift_files = find_swift_files(source_dir)
-  puts "Found #{all_swift_files.size} Swift files in project directory"
+  all_swift_files = find_swift_files(source_dir, exclude_tests: OPTIONS[:exclude_tests])
+  log("Found #{all_swift_files.size} Swift files in project directory", GREEN)
 
   # Find files already in project
   files_in_project = find_files_in_project(project)
-  puts "Found #{files_in_project.size} Swift files in Xcode project"
+  log("Found #{files_in_project.size} Swift files in Xcode project", GREEN)
+  puts ""
 
   # Find missing files
   missing_files = all_swift_files.reject do |file|
@@ -115,26 +164,23 @@ def main
   end
 
   if missing_files.empty?
-    puts "\n#{GREEN}✅ All Swift files are already in the Xcode project!#{RESET}"
+    log("✅ All Swift files are already in the Xcode project!", GREEN)
     return 0
   end
 
-  puts "\n#{YELLOW}⚠️  Found #{missing_files.size} missing files:#{RESET}"
+  log("Found #{missing_files.size} missing files:", YELLOW, "📋 ")
   missing_files.sort.each do |file|
-    puts "  - #{file}"
+    log("#{file}", YELLOW, "  - ")
   end
+  puts ""
 
-  # Ask for confirmation
-  print "\n#{BLUE}Add these files to the Xcode project? (y/n): #{RESET}"
-  response = gets.strip.downcase
-
-  unless response == 'y'
-    puts "Aborted."
+  if OPTIONS[:dry_run]
+    log("DRY RUN: Would add these files (use without --dry-run to apply)", CYAN, "💡 ")
     return 0
   end
 
   # Add missing files
-  puts "\n#{BLUE}📝 Adding files to Xcode project...#{RESET}"
+  log("Adding files to Xcode project...", BLUE, "📝 ")
   added_count = 0
   failed_count = 0
 
@@ -148,32 +194,33 @@ def main
       filename = File.basename(file_path)
 
       # Add file reference with just the filename
-      # The group already knows its path, so we only need the filename
       file_ref = group.new_file(filename)
 
       # Add to target
       target.add_file_references([file_ref])
 
-      puts "#{GREEN}  ✓#{RESET} Added #{file_path}"
+      log("Added #{file_path}", GREEN, "  ✓ ")
       added_count += 1
     rescue StandardError => e
-      puts "#{RED}  ✗#{RESET} Failed to add #{file_path}: #{e.message}"
-      puts "#{RED}     #{e.backtrace.first}#{RESET}" if ENV['DEBUG']
+      log("Failed to add #{file_path}: #{e.message}", RED, "  ✗ ")
+      log("#{e.backtrace.first}", RED, "     ") if OPTIONS[:verbose]
       failed_count += 1
     end
   end
 
   # Save project
-  puts "\n#{BLUE}💾 Saving project...#{RESET}"
+  puts ""
+  log("Saving project...", BLUE, "💾 ")
   project.save
 
-  puts "\n#{GREEN}✅ Successfully added #{added_count} files#{RESET}"
+  puts ""
+  log("Successfully added #{added_count} files", GREEN, "✅ ")
   if failed_count > 0
-    puts "#{RED}❌ Failed to add #{failed_count} files#{RESET}"
+    log("Failed to add #{failed_count} files", RED, "❌ ")
     return 1
   end
 
-  puts "\n#{BLUE}💡 Project updated successfully. Open in Xcode to verify.#{RESET}"
+  log("Project updated successfully!", GREEN, "🎉 ")
   0
 end
 

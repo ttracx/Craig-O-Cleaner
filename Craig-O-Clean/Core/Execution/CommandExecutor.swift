@@ -3,6 +3,7 @@
 // Centralized execution with preflight checks, permission gating, and audit logging
 
 import Foundation
+import AppKit
 import os.log
 
 // MARK: - Command Executor Protocol
