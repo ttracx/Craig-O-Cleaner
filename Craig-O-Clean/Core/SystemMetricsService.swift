@@ -462,13 +462,19 @@ final class SystemMetricsService: ObservableObject {
             let now = Date()
             var bytesInPerSecond: Double = 0
             var bytesOutPerSecond: Double = 0
-            
+
             if let previous = self.previousNetworkBytes,
                let previousTime = self.previousNetworkTime {
                 let timeDelta = now.timeIntervalSince(previousTime)
                 if timeDelta > 0 {
-                    bytesInPerSecond = Double(totalBytesIn - previous.in) / timeDelta
-                    bytesOutPerSecond = Double(totalBytesOut - previous.out) / timeDelta
+                    // Handle counter resets (e.g., after sleep/wake or interface reset)
+                    // If current value is less than previous, counters were reset - skip rate calculation
+                    if totalBytesIn >= previous.in {
+                        bytesInPerSecond = Double(totalBytesIn - previous.in) / timeDelta
+                    }
+                    if totalBytesOut >= previous.out {
+                        bytesOutPerSecond = Double(totalBytesOut - previous.out) / timeDelta
+                    }
                 }
             }
             

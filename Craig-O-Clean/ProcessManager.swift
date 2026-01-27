@@ -566,26 +566,53 @@ class ProcessManager: ObservableObject {
     }
     
     func forceQuitProcess(_ process: ProcessInfo) async -> Bool {
+        logger.info("Attempting to force quit process: \(process.name) (PID: \(process.pid))")
+
         // Method 1: Try NSRunningApplication.forceTerminate() (works for user apps within sandbox)
         if let app = NSWorkspace.shared.runningApplications.first(where: { $0.processIdentifier == process.pid }) {
+            logger.info("Found NSRunningApplication for \(process.name), attempting forceTerminate()")
             let success = app.forceTerminate()
+
             if success {
+                logger.info("Successfully force quit \(process.name) via NSRunningApplication.forceTerminate()")
                 await cleanupProcessHistory(for: process.pid)
+
+                // Give the system a moment to update
+                try? await Task.sleep(for: .milliseconds(500))
                 return true
+            } else {
+                logger.warning("NSRunningApplication.forceTerminate() returned false for \(process.name)")
             }
+        } else {
+            logger.warning("Could not find NSRunningApplication for PID \(process.pid) (\(process.name))")
         }
 
         // Method 2: Try AppleScript force quit (works for some apps within sandbox)
         if process.isUserProcess, let bundleId = process.bundleIdentifier {
+            logger.info("Attempting AppleScript force quit for bundle: \(bundleId)")
             let success = await runAppleScriptForceQuit(bundleId: bundleId)
+
             if success {
+                logger.info("Successfully force quit \(process.name) via AppleScript")
                 await cleanupProcessHistory(for: process.pid)
+
+                // Give the system a moment to update
+                try? await Task.sleep(for: .milliseconds(500))
                 return true
+            } else {
+                logger.warning("AppleScript force quit failed for \(bundleId)")
+            }
+        } else {
+            if !process.isUserProcess {
+                logger.warning("Process \(process.name) is a system process - may require admin privileges")
+            } else if process.bundleIdentifier == nil {
+                logger.warning("Process \(process.name) has no bundle identifier - cannot use AppleScript")
             }
         }
 
         // Shell commands (killall, pkill, kill) are blocked by App Sandbox
         // If the above methods fail, the process requires admin privileges
+        logger.error("Failed to force quit \(process.name) - all methods exhausted")
         return false
     }
     
@@ -692,12 +719,22 @@ class ProcessManager: ObservableObject {
     /// Force quit via AppleScript using bundle identifier
     private func runAppleScriptForceQuit(bundleId: String) async -> Bool {
         return await withCheckedContinuation { continuation in
+            // Use 'kill' command for force quit, not graceful 'quit'
             let script = """
             tell application "System Events"
                 set appProcesses to every process whose bundle identifier is "\(bundleId)"
                 repeat with appProcess in appProcesses
                     try
-                        tell appProcess to quit
+                        -- Get the unix id (PID) and kill the process
+                        set processPID to unix id of appProcess
+                        do shell script "kill -9 " & processPID
+                    on error errMsg
+                        -- If shell script fails (sandbox restriction), try force quit via GUI
+                        try
+                            -- This simulates Force Quit from Activity Monitor
+                            set processName to name of appProcess
+                            do shell script "killall -9 " & quoted form of processName
+                        end try
                     end try
                 end repeat
             end tell
@@ -706,8 +743,19 @@ class ProcessManager: ObservableObject {
             var error: NSDictionary?
             if let scriptObject = NSAppleScript(source: script) {
                 scriptObject.executeAndReturnError(&error)
-                continuation.resume(returning: error == nil)
+
+                // Log the result for debugging
+                if let error = error {
+                    let errorCode = error[NSAppleScript.errorNumber] as? Int ?? 0
+                    let errorMessage = error[NSAppleScript.errorMessage] as? String ?? "Unknown error"
+                    logger.error("AppleScript force quit failed with error \(errorCode): \(errorMessage)")
+                    continuation.resume(returning: false)
+                } else {
+                    logger.info("AppleScript force quit succeeded for bundle: \(bundleId)")
+                    continuation.resume(returning: true)
+                }
             } else {
+                logger.error("Failed to create AppleScript for force quit")
                 continuation.resume(returning: false)
             }
         }

@@ -247,7 +247,7 @@ final class BrowserAutomationService: ObservableObject {
                 configuration.activates = false // Don't bring Safari to front
                 configuration.hides = false
 
-                try? await NSWorkspace.shared.openApplication(at: safariURL, configuration: configuration)
+                _ = try? await NSWorkspace.shared.openApplication(at: safariURL, configuration: configuration)
                 // Wait for Safari to launch
                 try? await Task.sleep(for: .seconds(2))
             }

@@ -31,7 +31,7 @@ protocol BrowserController {
 
 // MARK: - AppleScript Browser Controller Base
 
-class AppleScriptBrowserController: BrowserController {
+class AppleScriptBrowserController: BrowserController, @unchecked Sendable {
     let browserName: String
     let bundleIdentifier: String
     private let logger: Logger
@@ -199,23 +199,53 @@ enum BrowserControllerError: LocalizedError {
 // MARK: - Concrete Controllers
 
 final class SafariController: AppleScriptBrowserController {
-    init() { super.init(name: "Safari", bundleId: "com.apple.Safari") }
+    override init(name: String, bundleId: String) {
+        super.init(name: name, bundleId: bundleId)
+    }
+
+    convenience init() {
+        self.init(name: "Safari", bundleId: "com.apple.Safari")
+    }
 }
 
 final class ChromeController: AppleScriptBrowserController {
-    init() { super.init(name: "Google Chrome", bundleId: "com.google.Chrome") }
+    override init(name: String, bundleId: String) {
+        super.init(name: name, bundleId: bundleId)
+    }
+
+    convenience init() {
+        self.init(name: "Google Chrome", bundleId: "com.google.Chrome")
+    }
 }
 
 final class EdgeController: AppleScriptBrowserController {
-    init() { super.init(name: "Microsoft Edge", bundleId: "com.microsoft.edgemac") }
+    override init(name: String, bundleId: String) {
+        super.init(name: name, bundleId: bundleId)
+    }
+
+    convenience init() {
+        self.init(name: "Microsoft Edge", bundleId: "com.microsoft.edgemac")
+    }
 }
 
 final class BraveController: AppleScriptBrowserController {
-    init() { super.init(name: "Brave Browser", bundleId: "com.brave.Browser") }
+    override init(name: String, bundleId: String) {
+        super.init(name: name, bundleId: bundleId)
+    }
+
+    convenience init() {
+        self.init(name: "Brave Browser", bundleId: "com.brave.Browser")
+    }
 }
 
 final class ArcController: AppleScriptBrowserController {
-    init() { super.init(name: "Arc", bundleId: "company.thebrowser.Browser") }
+    override init(name: String, bundleId: String) {
+        super.init(name: name, bundleId: bundleId)
+    }
+
+    convenience init() {
+        self.init(name: "Arc", bundleId: "company.thebrowser.Browser")
+    }
 }
 
 // MARK: - Browser Controller Registry

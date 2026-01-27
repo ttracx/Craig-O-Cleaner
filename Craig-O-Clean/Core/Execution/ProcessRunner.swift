@@ -65,14 +65,33 @@ final class ProcessRunner: @unchecked Sendable {
         process.standardOutput = stdoutPipe
         process.standardError = stderrPipe
 
-        var stdoutData = Data()
-        var stderrData = Data()
+        // Use actor-isolated storage for concurrent data mutations
+        actor DataBuffer {
+            var stdout = Data()
+            var stderr = Data()
+
+            func appendStdout(_ data: Data) {
+                stdout.append(data)
+            }
+
+            func appendStderr(_ data: Data) {
+                stderr.append(data)
+            }
+
+            func getBuffers() -> (stdout: Data, stderr: Data) {
+                return (stdout, stderr)
+            }
+        }
+
+        let buffer = DataBuffer()
 
         // Stream stdout
         stdoutPipe.fileHandleForReading.readabilityHandler = { handle in
             let data = handle.availableData
             if !data.isEmpty {
-                stdoutData.append(data)
+                Task {
+                    await buffer.appendStdout(data)
+                }
                 if let str = String(data: data, encoding: .utf8) {
                     onStdout(str)
                 }
@@ -83,7 +102,9 @@ final class ProcessRunner: @unchecked Sendable {
         stderrPipe.fileHandleForReading.readabilityHandler = { handle in
             let data = handle.availableData
             if !data.isEmpty {
-                stderrData.append(data)
+                Task {
+                    await buffer.appendStderr(data)
+                }
                 if let str = String(data: data, encoding: .utf8) {
                     onStderr(str)
                 }
@@ -116,15 +137,20 @@ final class ProcessRunner: @unchecked Sendable {
                 // Read remaining data
                 let remainingStdout = stdoutPipe.fileHandleForReading.readDataToEndOfFile()
                 let remainingStderr = stderrPipe.fileHandleForReading.readDataToEndOfFile()
-                stdoutData.append(remainingStdout)
-                stderrData.append(remainingStderr)
 
-                let stdout = String(data: stdoutData, encoding: .utf8) ?? ""
-                let stderr = String(data: stderrData, encoding: .utf8) ?? ""
+                // Retrieve buffered data and combine with remaining data
+                Task {
+                    await buffer.appendStdout(remainingStdout)
+                    await buffer.appendStderr(remainingStderr)
 
-                self?.logger.debug("Process exited with code \(proc.terminationStatus)")
+                    let buffers = await buffer.getBuffers()
+                    let stdout = String(data: buffers.stdout, encoding: .utf8) ?? ""
+                    let stderr = String(data: buffers.stderr, encoding: .utf8) ?? ""
 
-                continuation.resume(returning: (proc.terminationStatus, stdout, stderr))
+                    self?.logger.debug("Process exited with code \(proc.terminationStatus)")
+
+                    continuation.resume(returning: (proc.terminationStatus, stdout, stderr))
+                }
             }
         }
     }

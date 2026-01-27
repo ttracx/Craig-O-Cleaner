@@ -343,11 +343,37 @@ final class PermissionsService: ObservableObject {
     
     /// Request accessibility permission (opens System Settings)
     func requestAccessibilityPermission() {
+        logger.info("Requesting Accessibility permission - will trigger system prompt and open Settings")
+
+        // First trigger the system prompt - this will add the app to the TCC database
         let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
         AXIsProcessTrustedWithOptions(options as CFDictionary)
 
-        // Note: We don't auto-open System Settings here anymore
-        // User should click "Grant" button or "Open System Settings" explicitly
+        // Force the system to register our app by attempting an actual accessibility API call
+        // This ensures the app appears in System Settings even if permission is denied
+        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            // Try to get the list of running applications using Accessibility API
+            // This will fail if permission is not granted, but it forces macOS to add us to the list
+            let systemWideElement = AXUIElementCreateSystemWide()
+            var value: CFTypeRef?
+            let result = AXUIElementCopyAttributeValue(
+                systemWideElement,
+                kAXFocusedApplicationAttribute as CFString,
+                &value
+            )
+
+            if result == .success {
+                self?.logger.info("Accessibility API call successful - app should appear in Settings")
+            } else {
+                self?.logger.info("Accessibility API call failed (expected if permission not granted) - app registered with system")
+            }
+
+            // Open System Settings to the Accessibility pane
+            // This ensures the user is taken directly to where they need to grant permission
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+                self?.openSystemSettings(for: .accessibility)
+            }
+        }
     }
 
     /// Check Full Disk Access permission
@@ -500,21 +526,64 @@ final class PermissionsService: ObservableObject {
     
     /// Request automation permission for a specific target
     func requestAutomationPermission(for target: AutomationTarget) {
+        logger.info("Requesting automation permission for \(target.name) - will add Craig-O-Clean to Automation list")
+
+        // Check if target app is running - if not, try to launch it briefly
+        let isRunning = NSWorkspace.shared.runningApplications.contains {
+            $0.bundleIdentifier == target.bundleIdentifier
+        }
+
+        if !isRunning {
+            logger.info("\(target.name) is not running - attempting to launch for permission request")
+            // Try to launch the app to ensure it's available for the permission request
+            if let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: target.bundleIdentifier) {
+                try? NSWorkspace.shared.launchApplication(
+                    at: appURL,
+                    options: [.withoutActivation],
+                    configuration: [:]
+                )
+                // Give the app a moment to launch
+                Thread.sleep(forTimeInterval: 1.0)
+            }
+        }
+
         // Trigger the permission prompt by attempting to use AppleScript
+        // This will automatically add Craig-O-Clean to the Automation permissions list
         let script = """
         tell application id "\(target.bundleIdentifier)"
-            return name
+            try
+                return name
+            on error errMsg
+                return "Permission request sent"
+            end try
         end tell
         """
 
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+
             var error: NSDictionary?
             let appleScript = NSAppleScript(source: script)
-            appleScript?.executeAndReturnError(&error)
-        }
+            let result = appleScript?.executeAndReturnError(&error)
 
-        // Note: We don't auto-open System Settings here anymore
-        // User should click "Request" button or "Open System Settings" explicitly
+            if let error = error {
+                let errorCode = error[NSAppleScript.errorNumber] as? Int ?? 0
+                if errorCode == -1743 {
+                    // -1743 means "not authorized" - this is expected and means the prompt was shown
+                    self.logger.info("Permission prompt triggered for \(target.name) - app added to Automation list")
+                } else {
+                    self.logger.warning("AppleScript error \(errorCode) for \(target.name): \(error[NSAppleScript.errorMessage] as? String ?? "unknown")")
+                }
+            } else if let result = result {
+                self.logger.info("AppleScript succeeded for \(target.name): \(result.stringValue ?? "no result")")
+            }
+
+            // After triggering the prompt, open System Settings to Automation pane
+            // User can now see Craig-O-Clean in the list and toggle it on
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                self?.openSystemSettings(for: .automation)
+            }
+        }
     }
     
     /// Open System Settings to a specific privacy section
