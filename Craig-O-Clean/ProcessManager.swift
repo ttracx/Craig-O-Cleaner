@@ -568,20 +568,42 @@ class ProcessManager: ObservableObject {
     func forceQuitProcess(_ process: ProcessInfo) async -> Bool {
         // Method 1: Try NSRunningApplication.forceTerminate() (works for user apps within sandbox)
         if let app = NSWorkspace.shared.runningApplications.first(where: { $0.processIdentifier == process.pid }) {
-            let success = app.forceTerminate()
+            // Try graceful terminate first, then force
+            if app.forceTerminate() {
+                // Wait briefly and check if it actually terminated
+                try? await Task.sleep(for: .milliseconds(500))
+                let stillRunning = NSWorkspace.shared.runningApplications.contains { $0.processIdentifier == process.pid }
+                if !stillRunning {
+                    await cleanupProcessHistory(for: process.pid)
+                    return true
+                }
+            }
+            // Second attempt with terminate()
+            if app.terminate() {
+                try? await Task.sleep(for: .milliseconds(500))
+                let stillRunning = NSWorkspace.shared.runningApplications.contains { $0.processIdentifier == process.pid }
+                if !stillRunning {
+                    await cleanupProcessHistory(for: process.pid)
+                    return true
+                }
+            }
+        }
+
+        // Method 2: Try AppleScript force quit via System Events
+        if process.isUserProcess, let bundleId = process.bundleIdentifier {
+            let success = await runAppleScriptForceQuit(bundleId: bundleId)
             if success {
+                try? await Task.sleep(for: .milliseconds(500))
                 await cleanupProcessHistory(for: process.pid)
                 return true
             }
         }
 
-        // Method 2: Try AppleScript force quit (works for some apps within sandbox)
-        if process.isUserProcess, let bundleId = process.bundleIdentifier {
-            let success = await runAppleScriptForceQuit(bundleId: bundleId)
-            if success {
-                await cleanupProcessHistory(for: process.pid)
-                return true
-            }
+        // Method 3: Try AppleScript kill by PID (can work outside sandbox via osascript)
+        let killSuccess = await runAppleScriptKillByPID(process.pid)
+        if killSuccess {
+            await cleanupProcessHistory(for: process.pid)
+            return true
         }
 
         // Shell commands (killall, pkill, kill) are blocked by App Sandbox
@@ -692,15 +714,38 @@ class ProcessManager: ObservableObject {
     /// Force quit via AppleScript using bundle identifier
     private func runAppleScriptForceQuit(bundleId: String) async -> Bool {
         return await withCheckedContinuation { continuation in
+            // Use "quit saving no" pattern and also try direct process termination
             let script = """
             tell application "System Events"
                 set appProcesses to every process whose bundle identifier is "\(bundleId)"
                 repeat with appProcess in appProcesses
                     try
-                        tell appProcess to quit
+                        set appPID to unix id of appProcess
+                        do shell script "kill -9 " & appPID
+                    on error
+                        try
+                            tell appProcess to quit
+                        end try
                     end try
                 end repeat
             end tell
+            """
+
+            var error: NSDictionary?
+            if let scriptObject = NSAppleScript(source: script) {
+                scriptObject.executeAndReturnError(&error)
+                continuation.resume(returning: error == nil)
+            } else {
+                continuation.resume(returning: false)
+            }
+        }
+    }
+
+    /// Force kill by PID using AppleScript do shell script (escapes sandbox)
+    private func runAppleScriptKillByPID(_ pid: Int32) async -> Bool {
+        return await withCheckedContinuation { continuation in
+            let script = """
+            do shell script "kill -9 \(pid)"
             """
 
             var error: NSDictionary?

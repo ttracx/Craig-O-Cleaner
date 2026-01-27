@@ -619,13 +619,22 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             if alert.runModal() == .alertFirstButtonReturn {
                 print("🔴 User confirmed force quit")
                 Task { @MainActor in
-                    // Try force terminate
-                    if app.forceTerminate() {
+                    // Try force terminate via NSRunningApplication
+                    let forceResult = app.forceTerminate()
+                    print("🔴 forceTerminate() returned: \(forceResult)")
+
+                    // Wait and check if it actually quit
+                    try? await Task.sleep(for: .milliseconds(500))
+                    let stillRunning = NSWorkspace.shared.runningApplications.contains { $0.processIdentifier == pid }
+
+                    if !stillRunning {
                         print("🔴 Successfully force terminated \(appName)")
                         showNotification(title: "App Terminated", body: "\"\(appName)\" has been force quit.")
                     } else {
-                        print("🔴 forceTerminate() failed, trying ProcessManager")
-                        // Try using ProcessManager's more aggressive methods
+                        print("🔴 forceTerminate() didn't work, trying ProcessManager")
+                        // Ensure process list is up to date
+                        processManager?.updateProcessList()
+
                         if let process = processManager?.processes.first(where: { $0.pid == pid }) {
                             let success = await processManager?.forceQuitProcess(process) ?? false
                             if success {
@@ -636,7 +645,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                                 showNotification(title: "Force Quit Failed", body: "Unable to quit \"\(appName)\". It may require administrator privileges.")
                             }
                         } else {
-                            print("🔴 Could not find process in ProcessManager")
+                            // Process not in ProcessManager — try AppleScript directly
+                            print("🔴 Not in ProcessManager, trying AppleScript kill")
+                            let script = "do shell script \"kill -9 \(pid)\""
+                            var error: NSDictionary?
+                            NSAppleScript(source: script)?.executeAndReturnError(&error)
+                            if error == nil {
+                                showNotification(title: "App Terminated", body: "\"\(appName)\" has been force quit.")
+                            } else {
+                                showNotification(title: "Force Quit Failed", body: "Unable to quit \"\(appName)\". It may require administrator privileges.")
+                            }
                         }
                     }
                     processManager?.updateProcessList()
