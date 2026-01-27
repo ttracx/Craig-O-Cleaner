@@ -563,7 +563,7 @@ final class PermissionsService: ObservableObject {
             if let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: target.bundleIdentifier) {
                 let configuration = NSWorkspace.OpenConfiguration()
                 configuration.activates = false
-                _ = try? NSWorkspace.shared.openApplication(at: appURL, configuration: configuration)
+                NSWorkspace.shared.open(appURL, configuration: configuration) { _, _ in }
                 // Give the app a moment to launch
                 Thread.sleep(forTimeInterval: 1.0)
             }

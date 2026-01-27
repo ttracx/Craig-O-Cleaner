@@ -51,6 +51,9 @@ struct MenuBarContentView: View {
     @State private var isRefreshing = false
     @State private var showingPaywall = false
     @State private var hasSetupPermissionIntegration = false
+    @State private var showingAlert = false
+    @State private var alertMessage = ""
+    @State private var alertTitle = ""
     @Namespace private var tabAnimation
 
     var body: some View {
@@ -101,6 +104,11 @@ struct MenuBarContentView: View {
             // Stop auto cleanup service to prevent memory leaks
             autoCleanupHolder.service?.disable()
             systemMetrics.stopMonitoring()
+        }
+        .alert(alertTitle, isPresented: $showingAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(alertMessage)
         }
     }
 
@@ -315,6 +323,9 @@ struct MenuBarDashboardTab: View {
     let onExpandClick: () -> Void
 
     @State private var animateGauges = false
+    @State private var showingAlert = false
+    @State private var alertMessage = ""
+    @State private var alertTitle = ""
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -340,6 +351,11 @@ struct MenuBarDashboardTab: View {
             withAnimation(.easeOut(duration: 0.8).delay(0.2)) {
                 animateGauges = true
             }
+        }
+        .alert(alertTitle, isPresented: $showingAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(alertMessage)
         }
     }
 
@@ -512,7 +528,18 @@ struct MenuBarDashboardTab: View {
         Task {
             let success = await processManager.forceQuitProcess(process)
             if success {
-                processManager.updateProcessList()
+                await MainActor.run {
+                    self.alertTitle = "Success"
+                    self.alertMessage = "'\(process.name)' was force quit successfully."
+                    self.showingAlert = true
+                    self.processManager.updateProcessList()
+                }
+            } else {
+                await MainActor.run {
+                    self.alertTitle = "Failed"
+                    self.alertMessage = "Failed to force quit '\(process.name)'. The process may require administrator privileges or be protected by the system."
+                    self.showingAlert = true
+                }
             }
         }
     }
