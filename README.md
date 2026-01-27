@@ -1,6 +1,6 @@
-# ClearMind Control Center
+# Craig-O-Clean
 
-A powerful, production-ready macOS system utility for Apple Silicon Macs. ClearMind provides comprehensive system monitoring, process management, memory optimization, and browser tab control—all in a beautiful, native SwiftUI interface.
+A production-grade macOS menu bar utility for Apple Silicon Macs that provides safe system cleanup, diagnostics, browser tab management, and memory optimization.
 
 ![macOS 14+](https://img.shields.io/badge/macOS-14%2B-blue)
 ![Swift 5.9+](https://img.shields.io/badge/Swift-5.9%2B-orange)
@@ -8,313 +8,224 @@ A powerful, production-ready macOS system utility for Apple Silicon Macs. ClearM
 
 ## Features
 
-### 📊 System Dashboard
-- **Real-time CPU monitoring** - Total usage, per-core breakdown, load averages
-- **Memory metrics** - Used/free RAM, active/inactive/wired/compressed memory, swap usage
-- **Memory pressure indicator** - Visual health status (Normal/Warning/Critical)
-- **Disk usage** - Total, used, and free space with percentage
-- **Network activity** - Download/upload speeds, total traffic
-- **Auto-refresh** with configurable intervals (1-10 seconds)
-
-### 📋 Process & App Manager
-- **Complete process list** - All running apps and system processes
-- **Rich information** - PID, CPU %, memory, threads, bundle ID
-- **Smart filtering** - User apps only, system processes, heavy apps (>100MB)
-- **Powerful search** - Find processes by name or bundle ID
-- **Multiple sort options** - Name, CPU, memory, PID
-- **Safe termination** - Graceful quit with confirmation dialogs
-- **Force quit** - For unresponsive processes (with warnings for critical processes)
-- **Export to CSV** - Save process lists for analysis
-- **Process details** - View arguments, path, creation time, and more
-
-### 🧹 Memory Cleanup & Optimization
-- **Intelligent analysis** - Identifies cleanup candidates by memory usage
-- **Category-based suggestions**:
-  - Heavy Memory Users (>500MB)
-  - Background Apps
-  - Inactive Apps
-  - Browser-related processes
-- **Quick actions**:
-  - Smart Cleanup (automatic best selection)
-  - Close Background Apps
-  - Close Top 3 Heavy Apps
-- **Multi-step workflow** - Review, deselect, then execute
-- **Safe operation** - Never terminates protected system processes
-- **Advanced purge** - Optional memory purge command (requires admin)
-
-### 🌐 Browser Tab Management
-- **Supported browsers**: Safari, Google Chrome, Microsoft Edge, Brave, Arc
-- **Complete tab listing** - Window index, tab index, title, URL, domain
-- **Bulk operations**:
-  - Close individual tabs
-  - Close all tabs in a window
-  - Close tabs by domain (e.g., all YouTube tabs)
-  - Close duplicate tabs
-- **Domain statistics** - See which domains have the most tabs
-- **Permission guidance** - Step-by-step instructions for enabling Automation
-
-### 🖥️ Menu Bar Mini-App
-- **Always accessible** - Brain icon in menu bar
-- **Quick stats** - CPU, memory, disk at a glance
-- **Memory pressure indicator** - Color-coded health status
-- **Quick actions** - Smart Cleanup, Close Background Apps
-- **Top processes** - See top 6 memory consumers
-- **Right-click menu** - Quick access to actions and settings
-
-### ⚙️ Settings & Permissions
-- **General settings** - Dock visibility, launch at login, notifications
-- **Monitoring config** - Refresh intervals, warning thresholds
-- **Permission management** - View and request Automation permissions
-- **Privacy-focused** - No data collection, all processing local
-- **Diagnostics** - View system info, export diagnostic reports
-
-## Screenshots
-
-<details>
-<summary>Click to view screenshots</summary>
-
-### Dashboard
-The main dashboard showing system health at a glance:
-- CPU usage gauge with per-core breakdown
-- Memory usage with detailed breakdown bar
-- Disk space visualization
-- Network throughput metrics
-
-### Process Manager
-Full process list with filtering and sorting:
-- Filter by user apps, system processes, or heavy apps
-- Search by name or bundle ID
-- Quick terminate and force quit buttons
-
-### Memory Cleanup
-Intelligent memory optimization:
-- Categorized cleanup candidates
-- Select/deselect individual apps
-- Potential memory savings estimate
-
-### Browser Tabs
-Cross-browser tab management:
-- All tabs from all browsers in one view
-- Close tabs individually or in bulk
-- Domain-based grouping
-
-</details>
-
-## Requirements
-
-- **macOS 14 (Sonoma)** or later
-- **Apple Silicon** Mac (M1, M2, M3, or later)
-- **Xcode 15+** for building from source
-
-## Installation
-
-### From Source
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/your-repo/clearmind-control-center.git
-   cd clearmind-control-center
-   ```
-
-2. **Open in Xcode**:
-   ```bash
-   open Craig-O-Clean.xcodeproj
-   ```
-
-3. **Select your team** in Signing & Capabilities
-
-4. **Build and run** (⌘R)
-
-### From Release
-
-1. Download the latest `.dmg` from Releases
-2. Drag ClearMind to Applications
-3. Launch and grant requested permissions
-
-## Development
-
-### Quick Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/your-repo/clearmind-control-center.git
-cd clearmind-control-center
-
-# Install dependencies and setup auto-sync
-make setup
-make setup-auto-sync
-```
-
-### Automatic Xcode Project Syncing
-
-This project uses **XcodeGen** to automatically keep the Xcode project in sync with source files. You never have to manually add files to Xcode!
-
-**Three ways to sync:**
-
-1. **Git Hooks (Automatic)** - Enabled after running `make setup-auto-sync`
-   - Auto-syncs after `git pull`, `git merge`, and `git checkout`
-   - Detects Swift file changes and syncs automatically
-
-2. **Manual Sync** - When you add files outside git:
-   ```bash
-   make sync
-   ```
-
-3. **File Watcher** - Real-time syncing during active development:
-   ```bash
-   make watch-sync
-   ```
-
-See [XCODE_SYNC.md](XCODE_SYNC.md) for complete documentation on automatic syncing.
-
-### Available Make Commands
-
-```bash
-make help              # Show all available commands
-make build             # Build debug configuration
-make test              # Run all tests
-make sync              # Sync Xcode project with source files
-make setup-auto-sync   # Configure automatic syncing
-make watch-sync        # Start file watcher for real-time syncing
-```
-
-## Permissions Required
-
-ClearMind requires certain permissions for full functionality:
-
-### Automation (Required for Browser Tab Management)
-Allows ClearMind to control Safari, Chrome, Edge, and other browsers to list and close tabs.
-
-**To enable:**
-1. Open System Settings → Privacy & Security → Automation
-2. Find ClearMind Control Center
-3. Enable access for each browser you want to manage
-
-### Accessibility (Optional)
-Enables advanced system interactions and window management.
-
-**To enable:**
-1. Open System Settings → Privacy & Security → Accessibility
-2. Click the lock to make changes
-3. Enable ClearMind Control Center
-
-## Usage
-
-### Menu Bar
-- **Left-click**: Open mini-dashboard popover
-- **Right-click**: Show context menu with quick actions
-
-### Main Window
-Access the full Control Center by:
-- Clicking "Open Full App" in the popover
-- Right-click → "Open Control Center"
-- Keyboard shortcut: ⌘O (when popover is open)
-
-### Keyboard Shortcuts
-| Action | Shortcut |
-|--------|----------|
-| Open Control Center | ⌘O |
-| Quit | ⌘Q |
-| Refresh | ⌘R (in main window) |
-
-## Project Structure
-
-```
-Craig-O-Clean/
-├── Core/                          # Core services
-│   ├── SystemMetricsService.swift # CPU, RAM, disk, network monitoring
-│   ├── BrowserAutomationService.swift # Browser tab management
-│   ├── MemoryOptimizerService.swift # Memory cleanup logic
-│   └── PermissionsService.swift   # Permission handling
-├── UI/                            # SwiftUI views
-│   ├── MainAppView.swift          # Main navigation container
-│   ├── DashboardView.swift        # System health dashboard
-│   ├── ProcessManagerView.swift   # Process list and management
-│   ├── MemoryCleanupView.swift    # Memory optimization UI
-│   ├── BrowserTabsView.swift      # Browser tab management UI
-│   ├── SettingsPermissionsView.swift # Settings and permissions
-│   └── MenuBarContentView.swift   # Menu bar popover
-├── Tests/
-│   ├── ClearMindTests/            # Unit tests
-│   └── ClearMindUITests/          # UI tests
-├── Craig_O_CleanApp.swift         # App entry point
-├── ProcessManager.swift           # Process management
-├── SystemMemoryManager.swift      # Legacy memory manager
-└── Assets.xcassets/               # App icons and assets
-```
-
-## Architecture
-
-ClearMind follows a clean, modular architecture:
-
-- **Services Layer**: Core business logic with Combine publishers
-- **UI Layer**: SwiftUI views with environment objects
-- **Integration Layer**: AppKit interop for menu bar and system APIs
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed documentation.
-
-## Security
-
-ClearMind is designed with security in mind:
-
-- **No network connections** - All processing happens locally
-- **No data collection** - Your data never leaves your Mac
-- **Hardened Runtime** - Signed and notarization-ready
-- **Safe process termination** - Protects critical system processes
-
-See [SECURITY_NOTES.md](SECURITY_NOTES.md) for security details.
-
-## Testing
-
-### Run Unit Tests
-```bash
-xcodebuild test -scheme Craig-O-Clean -destination 'platform=macOS'
-```
-
-### Run UI Tests
-```bash
-xcodebuild test -scheme Craig-O-Clean -destination 'platform=macOS' -only-testing:ClearMindUITests
-```
-
-## Building for Distribution
-
-1. **Archive**:
-   ```bash
-   xcodebuild archive -scheme Craig-O-Clean -archivePath build/ClearMind.xcarchive
-   ```
-
-2. **Export**:
-   ```bash
-   xcodebuild -exportArchive -archivePath build/ClearMind.xcarchive \
-     -exportPath build/ -exportOptionsPlist ExportOptions.plist
-   ```
-
-3. **Notarize** (requires Apple Developer account):
-   ```bash
-   xcrun notarytool submit build/ClearMind.app.zip --wait
-   ```
-
-## Contributing
-
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add/update tests as needed
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Built with SwiftUI and Combine
-- Uses native macOS system APIs
-- AppleScript integration for browser automation
-- SF Symbols for icons
+### System Dashboard
+- Real-time CPU monitoring with per-core breakdown and load averages
+- Memory metrics: used/free RAM, active/inactive/wired/compressed, swap usage
+- Memory pressure indicator (Normal/Warning/Critical)
+- Disk usage with percentage
+- Network activity with download/upload speeds
+
+### Process & App Manager
+- Complete process list with CPU and memory usage
+- Sort by CPU, memory, name, or PID
+- Force quit and graceful termination
+- Search and filter processes
+
+### Browser Tab Management
+- Safari, Chrome, Edge, Brave, Arc tab counting and listing
+- Close tabs by URL pattern (user-configurable)
+- Close all tabs (with confirmation)
+- Heavy tab heuristic (browser helper memory + tab count)
+
+### Memory Optimization
+- Safe memory purge via privileged helper
+- Cleanup candidate analysis
+- Background app detection
+
+### Capability-Driven Cleanup System
+- 60+ curated capabilities in a single catalog
+- Allowlist-only execution (no arbitrary commands)
+- Preflight permission and state checks
+- Dry-run/preview for destructive operations
+- Full audit trail with stdout/stderr capture
 
 ---
 
-Made with ❤️ for macOS
+## Architecture Overview
+
+Craig-O-Clean uses a **capability-driven architecture** where every operation is defined as a structured capability in `catalog.json`. This single source of truth powers both the UI and execution layer.
+
+### Core Components
+
+```
+Craig-O-Clean/
+├── Core/
+│   ├── CapabilityCatalog/         # Capability model, catalog.json, validator
+│   │   ├── Capability.swift       # Data model for all operations
+│   │   ├── CatalogStore.swift     # Loads/queries the catalog
+│   │   ├── CatalogValidator.swift # Schema validation
+│   │   └── catalog.json           # 60+ capabilities (single source of truth)
+│   ├── Execution/                 # Command execution layer
+│   │   ├── CommandExecutor.swift  # Allowlist-only execution entry point
+│   │   ├── ProcessRunner.swift    # Process-based execution with streaming
+│   │   └── OutputStreamer.swift   # Live stdout/stderr for UI
+│   ├── Preflight/                 # Permission & state checks
+│   │   └── PreflightEngine.swift  # Runs checks before every execution
+│   ├── Logging/                   # Audit trail
+│   │   ├── RunRecord.swift        # Structured execution record
+│   │   └── LogStore.swift         # Persistence + export
+│   └── (existing services)        # SystemMetrics, Memory, Browser, Permissions, etc.
+├── AI/                            # Optional local AI orchestration
+│   ├── OllamaClient.swift         # HTTP client for local Ollama
+│   ├── WorkflowSchema.swift       # Strict JSON schema validation
+│   └── Agents/
+│       └── PlannerAgent.swift     # Plan generation + safety gating
+├── UI/
+│   └── Views/
+│       ├── PermissionCenterView.swift  # Permission status + remediation
+│       └── CapabilityLogView.swift     # Run log viewer with filtering
+├── CraigOCleanHelper/            # Privileged XPC helper (SMJobBless)
+└── Tests/                        # Unit + integration tests
+```
+
+## Build & Run
+
+### Requirements
+- Xcode 15+
+- macOS 14.0+ (Sonoma)
+- Apple Silicon recommended (Intel compatible)
+
+### Steps
+1. Open `Craig-O-Clean.xcodeproj` in Xcode
+2. Select the `Craig-O-Clean` scheme
+3. Build and Run (Cmd+R)
+
+The app runs as a menu bar utility (no Dock icon). Look for the icon in the macOS menu bar.
+
+### Code Signing
+The app and helper must be signed with the same team ID. Update the signing settings in Xcode if building locally.
+
+## Permissions
+
+### Required
+- **Automation**: Control browser tabs via AppleScript. Enabled per-browser in System Settings > Privacy & Security > Automation.
+
+### Optional
+- **Accessibility**: Advanced window management. System Settings > Privacy & Security > Accessibility.
+- **Full Disk Access**: Read system logs and protected directories. System Settings > Privacy & Security > Full Disk Access.
+
+### Privileged Helper
+Elevated operations (memory purge, DNS flush, system maintenance) use a privileged helper installed via SMJobBless. The helper:
+- Communicates via XPC with the main app
+- Validates caller signature before executing
+- Only accepts capability IDs from the allowlist
+- Logs all operations for audit
+
+## Capability System
+
+### How It Works
+1. All operations are defined in `catalog.json` with metadata (ID, risk class, permissions, preflight checks)
+2. `CatalogStore` loads and indexes capabilities at app launch
+3. `CommandExecutor` is the single execution entry point — it validates against the allowlist
+4. `PreflightEngine` checks permissions and system state before execution
+5. Every execution produces a `RunRecord` stored by `LogStore`
+
+### Adding New Capabilities
+
+1. Add the capability definition to `catalog.json`:
+```json
+{
+  "id": "category.action_name",
+  "title": "Human Readable Title",
+  "description": "What this does",
+  "category": "Diagnostics",
+  "executorType": "process",
+  "commandTemplate": "/usr/bin/command",
+  "args": ["arg1"],
+  "requiredPrivileges": "user",
+  "requiredPermissions": ["none"],
+  "riskClass": "safe",
+  "preflightChecks": [],
+  "dryRunSupport": false,
+  "outputParsing": "none",
+  "uiHints": {}
+}
+```
+
+2. Run `CatalogValidatorTests` to verify the schema
+3. The capability is now available via `CommandExecutor.execute(capabilityId:)`
+
+### Risk Classes
+- **safe**: No confirmation needed, no side effects
+- **moderate**: Confirmation dialog shown, reversible changes
+- **destructive**: Strong warning, irreversible changes (e.g., empty trash, delete archives)
+
+### Executor Types
+- **process**: Runs via Foundation.Process (non-privileged)
+- **appleEvents**: Runs via NSAppleScript (browser tab management)
+- **helperXpc**: Runs via privileged XPC helper (memory purge, DNS flush)
+
+## AI Orchestration (Optional)
+
+Craig-O-Clean supports local AI-assisted cleanup via [Ollama](https://ollama.ai):
+
+1. Install Ollama: `brew install ollama`
+2. Start the server: `ollama serve`
+3. Pull a model: `ollama pull llama3.2`
+
+The AI planner:
+- Generates structured JSON plans referencing capability IDs only
+- Cannot propose actions outside the catalog
+- Elevated/destructive steps require explicit user approval
+- Safety gating is enforced by `SafetyAgent` before execution
+
+## Security Model
+
+- **No arbitrary shell execution**: Only catalog capabilities can run
+- **Least privilege**: Standard user by default, per-operation escalation
+- **Destructive operations**: Require confirmation + dry-run preview when available
+- **XPC helper**: Validates caller signature, allowlisted commands only
+- **Audit trail**: Every execution logged with stdout/stderr capture
+
+## QA Checklist
+
+### First Run
+- [ ] App appears in menu bar (no Dock icon)
+- [ ] Status section shows memory pressure + disk free
+- [ ] No permission prompts appear until user initiates an action
+
+### Permission Handling
+- [ ] Running a browser tab action prompts for Automation permission on first use
+- [ ] Denied Automation shows "Fix" button linking to System Settings
+- [ ] Full Disk Access denial shows informational message (not blocking)
+- [ ] Accessibility denial shows informational message (not blocking)
+
+### Safe Operations
+- [ ] Quick diagnostics run without sudo prompt
+- [ ] Diagnostics produce visible output in the log viewer
+- [ ] "Quick Clean" never prompts for admin password
+- [ ] "Quick Clean" never silently fails
+
+### Elevated Operations
+- [ ] Memory purge shows confirmation dialog
+- [ ] DNS flush shows confirmation dialog
+- [ ] System maintenance shows confirmation dialog
+- [ ] Authorization failure shows clear error message
+
+### Browser Operations
+- [ ] Safari tab count works when Safari is running
+- [ ] Chrome tab close by pattern closes matching tabs only
+- [ ] Browser not running shows informative error
+- [ ] Automation denied shows remediation steps
+
+### Cleanup Safety
+- [ ] No cleanup action deletes files outside defined paths
+- [ ] Dry run/preview works for capabilities that support it
+- [ ] Trash empty shows strong warning before proceeding
+- [ ] Xcode archive deletion warns about App Store submissions
+
+### Logging
+- [ ] Every run produces a RunRecord visible in the log viewer
+- [ ] Failed runs show stderr and remediation hints
+- [ ] Log export creates a zip file
+- [ ] Logs can be filtered by category and success/failure
+
+### AI (if Ollama running)
+- [ ] AI plan only references valid capability IDs
+- [ ] Destructive steps show as "Awaiting Approval"
+- [ ] Rejected steps are skipped during execution
+- [ ] AI unavailable shows clear message (not a crash)
+
+## License
+
+Copyright 2026 CraigOClean.com powered by VibeCaaS.com, a division of NeuralQuantum.ai LLC. All rights reserved.

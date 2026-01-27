@@ -58,6 +58,25 @@
 		F541442A3FE6B7F6A73BFFD7 /* MemoryOptimizerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2EB8AA1C4FD005E3B8801FF /* MemoryOptimizerService.swift */; };
 		F5F21EDE8F69891F6A77AD61 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44536121E1A03039EB5C837E /* Assets.xcassets */; };
 		F67890ABCDEF010203040506 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F7890ABCDEF010203040506 /* UserProfile.swift */; };
+		A5B78B2B93BC2C91CF054384 /* Capability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63571AE7D7CC4E76669C24EF /* Capability.swift */; };
+		6D4D61796FC2A65DC2FBC43F /* CatalogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB1387FBFABD73D1D859A76 /* CatalogStore.swift */; };
+		152C6AC416CD9074ACB83076 /* CatalogValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FDEB6753EE0A59CEDC5461E /* CatalogValidator.swift */; };
+		8C6177CB7B44F1A36F09500C /* catalog.json in Resources */ = {isa = PBXBuildFile; fileRef = 0D3118E1FCE82501BDC56C94 /* catalog.json */; };
+		BE78B1EAD8DE89E38C7896B0 /* ProcessRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = B49D1F7EAE127CD1463E6E4A /* ProcessRunner.swift */; };
+		A9B5163E01933FE55CA7DD37 /* CommandExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9C85E3199B1F1DB5442CA1 /* CommandExecutor.swift */; };
+		126414868D3A51FC07DF5FA8 /* OutputStreamer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BB7890A9511741A790C1F85 /* OutputStreamer.swift */; };
+		BDFFA4C0A55B8C2122A2D04E /* PreflightEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62E250ED6C3B3AC79CAFEC9 /* PreflightEngine.swift */; };
+		F853E4A5780EC15828FCBA92 /* RunRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73FE898C7C7E4640FBDD229E /* RunRecord.swift */; };
+		4CBD3B5F72843AFEBE439001 /* LogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990D6D581498E55D163993B4 /* LogStore.swift */; };
+		5B85AA8802F19E8B24B2A426 /* OllamaClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6579FF21D7500AD7264D64 /* OllamaClient.swift */; };
+		1398A730B97419AA1A4BA5D2 /* WorkflowSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1610CAE86124A01279604A99 /* WorkflowSchema.swift */; };
+		814AEADA619C7B6C3543F6FB /* PlannerAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A34AC2057532C22E44001C /* PlannerAgent.swift */; };
+		B75E9AA128D43BCF128F7397 /* PermissionCenterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7CBCD57C63D83A67AA60B70 /* PermissionCenterView.swift */; };
+		1D8E12770579D4A0FD4B3BA9 /* CapabilityLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCACEE94B843928D21513BCF /* CapabilityLogView.swift */; };
+		B77884BFE5445A6FAEE13A73 /* CatalogValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDA917C14927C9AFEA917490 /* CatalogValidatorTests.swift */; };
+		FEDDAD08060E6138632451F7 /* PreflightEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5799A1A5E37A6EE946C45DBD /* PreflightEngineTests.swift */; };
+		49B2D5D72284D30E883580E5 /* ProcessRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E684B1B490D5AE1045E915C /* ProcessRunnerTests.swift */; };
+		981D6A4688F99AD6CDF340F1 /* LogStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60571F3B3F4B88580DB45A0E /* LogStoreTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -128,6 +147,25 @@
 		F78289CCD79A928D641472B8 /* ProcessManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessManagerView.swift; sourceTree = "<group>"; };
 		F8F6221E6CFB4F658E745547 /* PrivilegeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegeService.swift; sourceTree = "<group>"; };
 		FB5748E37851D981C3F01925 /* Craig-O-Clean.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Craig-O-Clean.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		63571AE7D7CC4E76669C24EF /* Capability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Capability.swift; sourceTree = "<group>"; };
+		4BB1387FBFABD73D1D859A76 /* CatalogStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogStore.swift; sourceTree = "<group>"; };
+		9FDEB6753EE0A59CEDC5461E /* CatalogValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogValidator.swift; sourceTree = "<group>"; };
+		0D3118E1FCE82501BDC56C94 /* catalog.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = catalog.json; sourceTree = "<group>"; };
+		B49D1F7EAE127CD1463E6E4A /* ProcessRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessRunner.swift; sourceTree = "<group>"; };
+		4C9C85E3199B1F1DB5442CA1 /* CommandExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandExecutor.swift; sourceTree = "<group>"; };
+		7BB7890A9511741A790C1F85 /* OutputStreamer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputStreamer.swift; sourceTree = "<group>"; };
+		F62E250ED6C3B3AC79CAFEC9 /* PreflightEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreflightEngine.swift; sourceTree = "<group>"; };
+		73FE898C7C7E4640FBDD229E /* RunRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunRecord.swift; sourceTree = "<group>"; };
+		990D6D581498E55D163993B4 /* LogStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogStore.swift; sourceTree = "<group>"; };
+		DB6579FF21D7500AD7264D64 /* OllamaClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OllamaClient.swift; sourceTree = "<group>"; };
+		1610CAE86124A01279604A99 /* WorkflowSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkflowSchema.swift; sourceTree = "<group>"; };
+		80A34AC2057532C22E44001C /* PlannerAgent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlannerAgent.swift; sourceTree = "<group>"; };
+		B7CBCD57C63D83A67AA60B70 /* PermissionCenterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionCenterView.swift; sourceTree = "<group>"; };
+		DCACEE94B843928D21513BCF /* CapabilityLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapabilityLogView.swift; sourceTree = "<group>"; };
+		CDA917C14927C9AFEA917490 /* CatalogValidatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogValidatorTests.swift; sourceTree = "<group>"; };
+		5799A1A5E37A6EE946C45DBD /* PreflightEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreflightEngineTests.swift; sourceTree = "<group>"; };
+		9E684B1B490D5AE1045E915C /* ProcessRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessRunnerTests.swift; sourceTree = "<group>"; };
+		60571F3B3F4B88580DB45A0E /* LogStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogStoreTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -136,6 +174,7 @@
 			children = (
 				E1E60033578611EECF63ED09 /* ClearMindTests */,
 				B8A61F36CA41840EEF5A959F /* ClearMindUITests */,
+				D328B9611293EB6D9C7A94A9 /* CraigOCleanTests */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -152,6 +191,7 @@
 				F78289CCD79A928D641472B8 /* ProcessManagerView.swift */,
 				253B9B7F0FD0202F49F06356 /* SettingsPermissionsView.swift */,
 				7B0BFC84511241D18B26E6FC /* PaywallView.swift */,
+				C454586A1F4E28C340BDC1AD /* Views */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -183,6 +223,11 @@
 				5E6F7890ABCDEF0102030405 /* SubscriptionManager.swift */,
 				4CF233DB0FFB9F908AA51D49 /* SystemMetricsService.swift */,
 				6F7890ABCDEF010203040506 /* UserProfile.swift */,
+				17CF40DDDCC6FB16CBBD5F1F /* CapabilityCatalog */,
+				D610FD0DC252E1395501B5D2 /* Execution */,
+				1CB123FEFDBE6C4A9D414FE1 /* Preflight */,
+				72359F100DA6E13CD6B5431B /* Logging */,
+				A45D89AACA44A499153E49CD /* AI */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -241,6 +286,82 @@
 				3DA0C997E4BE59EFD9C1A412 /* Craig-O-CleanUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		17CF40DDDCC6FB16CBBD5F1F /* CapabilityCatalog */ = {
+			isa = PBXGroup;
+			children = (
+				63571AE7D7CC4E76669C24EF /* Capability.swift */,
+				4BB1387FBFABD73D1D859A76 /* CatalogStore.swift */,
+				9FDEB6753EE0A59CEDC5461E /* CatalogValidator.swift */,
+				0D3118E1FCE82501BDC56C94 /* catalog.json */,
+			);
+			path = CapabilityCatalog;
+			sourceTree = "<group>";
+		};
+		D610FD0DC252E1395501B5D2 /* Execution */ = {
+			isa = PBXGroup;
+			children = (
+				B49D1F7EAE127CD1463E6E4A /* ProcessRunner.swift */,
+				4C9C85E3199B1F1DB5442CA1 /* CommandExecutor.swift */,
+				7BB7890A9511741A790C1F85 /* OutputStreamer.swift */,
+			);
+			path = Execution;
+			sourceTree = "<group>";
+		};
+		1CB123FEFDBE6C4A9D414FE1 /* Preflight */ = {
+			isa = PBXGroup;
+			children = (
+				F62E250ED6C3B3AC79CAFEC9 /* PreflightEngine.swift */,
+			);
+			path = Preflight;
+			sourceTree = "<group>";
+		};
+		72359F100DA6E13CD6B5431B /* Logging */ = {
+			isa = PBXGroup;
+			children = (
+				73FE898C7C7E4640FBDD229E /* RunRecord.swift */,
+				990D6D581498E55D163993B4 /* LogStore.swift */,
+			);
+			path = Logging;
+			sourceTree = "<group>";
+		};
+		7C47BA8BE1105F73B17D2917 /* Agents */ = {
+			isa = PBXGroup;
+			children = (
+				80A34AC2057532C22E44001C /* PlannerAgent.swift */,
+			);
+			path = Agents;
+			sourceTree = "<group>";
+		};
+		A45D89AACA44A499153E49CD /* AI */ = {
+			isa = PBXGroup;
+			children = (
+				DB6579FF21D7500AD7264D64 /* OllamaClient.swift */,
+				1610CAE86124A01279604A99 /* WorkflowSchema.swift */,
+				7C47BA8BE1105F73B17D2917 /* Agents */,
+			);
+			path = AI;
+			sourceTree = "<group>";
+		};
+		C454586A1F4E28C340BDC1AD /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B7CBCD57C63D83A67AA60B70 /* PermissionCenterView.swift */,
+				DCACEE94B843928D21513BCF /* CapabilityLogView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		D328B9611293EB6D9C7A94A9 /* CraigOCleanTests */ = {
+			isa = PBXGroup;
+			children = (
+				CDA917C14927C9AFEA917490 /* CatalogValidatorTests.swift */,
+				5799A1A5E37A6EE946C45DBD /* PreflightEngineTests.swift */,
+				9E684B1B490D5AE1045E915C /* ProcessRunnerTests.swift */,
+				60571F3B3F4B88580DB45A0E /* LogStoreTests.swift */,
+			);
+			path = CraigOCleanTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -346,6 +467,7 @@
 				F5F21EDE8F69891F6A77AD61 /* Assets.xcassets in Resources */,
 				2BD1F7C12F2482E80040EA8C /* Configuration.storekit in Resources */,
 				C1CF78B065B69217240721DE /* Craig-O-Cleaner-logo.png in Resources */,
+				8C6177CB7B44F1A36F09500C /* catalog.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -366,6 +488,10 @@
 				324625357741BF0140A7A9FA /* MemoryOptimizerServiceTests.swift in Sources */,
 				34EDD517A8CA42765ED159B7 /* PermissionsServiceTests.swift in Sources */,
 				A3918E318F5B93FD0F444DBF /* SystemMetricsServiceTests.swift in Sources */,
+				B77884BFE5445A6FAEE13A73 /* CatalogValidatorTests.swift in Sources */,
+				FEDDAD08060E6138632451F7 /* PreflightEngineTests.swift in Sources */,
+				49B2D5D72284D30E883580E5 /* ProcessRunnerTests.swift in Sources */,
+				981D6A4688F99AD6CDF340F1 /* LogStoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -409,6 +535,20 @@
 				1BB559C2F26B4D2398D62009 /* DebugLogger.swift in Sources */,
 				C5E0BF15781E4F6CB83CF8D8 /* LoggingExtensions.swift in Sources */,
 				127FE76D306047399C129BD1 /* PaywallView.swift in Sources */,
+				A5B78B2B93BC2C91CF054384 /* Capability.swift in Sources */,
+				6D4D61796FC2A65DC2FBC43F /* CatalogStore.swift in Sources */,
+				152C6AC416CD9074ACB83076 /* CatalogValidator.swift in Sources */,
+				BE78B1EAD8DE89E38C7896B0 /* ProcessRunner.swift in Sources */,
+				A9B5163E01933FE55CA7DD37 /* CommandExecutor.swift in Sources */,
+				126414868D3A51FC07DF5FA8 /* OutputStreamer.swift in Sources */,
+				BDFFA4C0A55B8C2122A2D04E /* PreflightEngine.swift in Sources */,
+				F853E4A5780EC15828FCBA92 /* RunRecord.swift in Sources */,
+				4CBD3B5F72843AFEBE439001 /* LogStore.swift in Sources */,
+				5B85AA8802F19E8B24B2A426 /* OllamaClient.swift in Sources */,
+				1398A730B97419AA1A4BA5D2 /* WorkflowSchema.swift in Sources */,
+				814AEADA619C7B6C3543F6FB /* PlannerAgent.swift in Sources */,
+				B75E9AA128D43BCF128F7397 /* PermissionCenterView.swift in Sources */,
+				1D8E12770579D4A0FD4B3BA9 /* CapabilityLogView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

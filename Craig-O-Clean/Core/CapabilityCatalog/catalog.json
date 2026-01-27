@@ -1,0 +1,1468 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-01-27",
+  "capabilities": [
+    {
+      "id": "diag.memory_pressure",
+      "title": "Memory Pressure",
+      "description": "Check current system memory pressure level",
+      "category": "Diagnostics",
+      "executorType": "process",
+      "commandTemplate": "/usr/bin/memory_pressure",
+      "args": [],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [
+        {"type": "commandExists", "value": "/usr/bin/memory_pressure", "message": "memory_pressure not found"}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "custom",
+      "uiHints": {"estimatedTime": "< 1s"}
+    },
+    {
+      "id": "diag.vm_stat",
+      "title": "Virtual Memory Stats",
+      "description": "Show virtual memory statistics including page faults and swap usage",
+      "category": "Diagnostics",
+      "executorType": "process",
+      "commandTemplate": "/usr/bin/vm_stat",
+      "args": [],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "custom",
+      "uiHints": {"estimatedTime": "< 1s"}
+    },
+    {
+      "id": "diag.top_cpu",
+      "title": "Top CPU Processes",
+      "description": "Snapshot of top processes sorted by CPU usage",
+      "category": "Diagnostics",
+      "executorType": "process",
+      "commandTemplate": "/usr/bin/top",
+      "args": ["-l", "1", "-s", "0", "-o", "cpu", "-n", "15"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "custom",
+      "uiHints": {"estimatedTime": "1-2s"}
+    },
+    {
+      "id": "diag.top_mem",
+      "title": "Top Memory Processes",
+      "description": "Snapshot of top processes sorted by memory usage",
+      "category": "Diagnostics",
+      "executorType": "process",
+      "commandTemplate": "/usr/bin/top",
+      "args": ["-l", "1", "-s", "0", "-o", "mem", "-n", "15"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "custom",
+      "uiHints": {"estimatedTime": "1-2s"}
+    },
+    {
+      "id": "diag.df",
+      "title": "Disk Free Space",
+      "description": "Show disk usage and free space for all mounted volumes",
+      "category": "Diagnostics",
+      "executorType": "process",
+      "commandTemplate": "/bin/df",
+      "args": ["-h"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "custom",
+      "uiHints": {"estimatedTime": "< 1s"}
+    },
+    {
+      "id": "diag.sw_vers",
+      "title": "macOS Version",
+      "description": "Show macOS version information",
+      "category": "Diagnostics",
+      "executorType": "process",
+      "commandTemplate": "/usr/bin/sw_vers",
+      "args": [],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {"estimatedTime": "< 1s"}
+    },
+    {
+      "id": "diag.hardware_overview",
+      "title": "Hardware Overview",
+      "description": "Detailed hardware information including CPU, memory, and serial number",
+      "category": "Diagnostics",
+      "executorType": "process",
+      "commandTemplate": "/usr/sbin/system_profiler",
+      "args": ["SPHardwareDataType"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {"estimatedTime": "2-5s"}
+    },
+    {
+      "id": "diag.storage_info",
+      "title": "Storage Information",
+      "description": "Detailed storage device and volume information",
+      "category": "Diagnostics",
+      "executorType": "process",
+      "commandTemplate": "/usr/sbin/system_profiler",
+      "args": ["SPStorageDataType"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {"estimatedTime": "2-5s"}
+    },
+    {
+      "id": "diag.cpu_info",
+      "title": "CPU Information",
+      "description": "Show CPU architecture, core count, and model",
+      "category": "Diagnostics",
+      "executorType": "process",
+      "commandTemplate": "/usr/sbin/sysctl",
+      "args": ["-n", "machdep.cpu.brand_string"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {"estimatedTime": "< 1s"}
+    },
+    {
+      "id": "diag.uptime",
+      "title": "System Uptime",
+      "description": "Show how long the system has been running",
+      "category": "Diagnostics",
+      "executorType": "process",
+      "commandTemplate": "/usr/bin/uptime",
+      "args": [],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {"estimatedTime": "< 1s"}
+    },
+    {
+      "id": "diag.battery",
+      "title": "Battery Status",
+      "description": "Show battery charge level and power source",
+      "category": "Diagnostics",
+      "executorType": "process",
+      "commandTemplate": "/usr/bin/pmset",
+      "args": ["-g", "batt"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "custom",
+      "uiHints": {"estimatedTime": "< 1s"}
+    },
+    {
+      "id": "diag.sip_status",
+      "title": "SIP Status",
+      "description": "Check System Integrity Protection status",
+      "category": "Diagnostics",
+      "executorType": "process",
+      "commandTemplate": "/usr/bin/csrutil",
+      "args": ["status"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {"estimatedTime": "< 1s"}
+    },
+    {
+      "id": "diag.gatekeeper_status",
+      "title": "Gatekeeper Status",
+      "description": "Check Gatekeeper security status",
+      "category": "Diagnostics",
+      "executorType": "process",
+      "commandTemplate": "/usr/sbin/spctl",
+      "args": ["--status"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {"estimatedTime": "< 1s"}
+    },
+    {
+      "id": "diag.filevault_status",
+      "title": "FileVault Status",
+      "description": "Check FileVault encryption status",
+      "category": "Diagnostics",
+      "executorType": "process",
+      "commandTemplate": "/usr/bin/fdesetup",
+      "args": ["status"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {"estimatedTime": "< 1s"}
+    },
+    {
+      "id": "diag.network_info",
+      "title": "Network Interfaces",
+      "description": "List network hardware ports and their status",
+      "category": "Network",
+      "executorType": "process",
+      "commandTemplate": "/usr/sbin/networksetup",
+      "args": ["-listallhardwareports"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {"estimatedTime": "< 1s"}
+    },
+    {
+      "id": "diag.disk_list",
+      "title": "Disk Partitions",
+      "description": "List all disks and their partition layout",
+      "category": "Disk",
+      "executorType": "process",
+      "commandTemplate": "/usr/sbin/diskutil",
+      "args": ["list"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {"estimatedTime": "< 1s"}
+    },
+    {
+      "id": "diag.swap_usage",
+      "title": "Swap Usage",
+      "description": "Show current swap memory usage",
+      "category": "Diagnostics",
+      "executorType": "process",
+      "commandTemplate": "/usr/sbin/sysctl",
+      "args": ["vm.swapusage"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "custom",
+      "uiHints": {"estimatedTime": "< 1s"}
+    },
+    {
+      "id": "net.flush_dns",
+      "title": "Flush DNS Cache",
+      "description": "Clear the DNS resolver cache to fix DNS resolution issues",
+      "category": "Network",
+      "executorType": "helperXpc",
+      "commandTemplate": "/usr/bin/dscacheutil",
+      "args": ["-flushcache"],
+      "requiredPrivileges": "elevated",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will flush the DNS cache and restart mDNSResponder. Network connections may briefly pause.",
+        "estimatedTime": "1-2s"
+      }
+    },
+    {
+      "id": "mem.purge",
+      "title": "Purge Inactive Memory",
+      "description": "Free up inactive memory by purging the disk cache",
+      "category": "Memory",
+      "executorType": "helperXpc",
+      "commandTemplate": "/usr/bin/purge",
+      "args": [],
+      "requiredPrivileges": "elevated",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "commandExists", "value": "/usr/bin/purge", "message": "purge command not found"}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will purge inactive memory. The system may briefly slow down as caches are rebuilt.",
+        "estimatedTime": "2-5s"
+      }
+    },
+    {
+      "id": "mem.sync_purge",
+      "title": "Sync & Purge Memory",
+      "description": "Flush file system buffers to disk and then purge inactive memory",
+      "category": "Memory",
+      "executorType": "helperXpc",
+      "commandTemplate": "/bin/sync",
+      "args": [],
+      "requiredPrivileges": "elevated",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will sync file system buffers and purge inactive memory.",
+        "estimatedTime": "3-8s"
+      }
+    },
+    {
+      "id": "sys.restart_finder",
+      "title": "Restart Finder",
+      "description": "Restart the Finder application to resolve display or file browsing issues",
+      "category": "System",
+      "executorType": "process",
+      "commandTemplate": "/usr/bin/killall",
+      "args": ["Finder"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "Finder will restart. Open Finder windows will close briefly.",
+        "estimatedTime": "1-3s"
+      }
+    },
+    {
+      "id": "sys.restart_dock",
+      "title": "Restart Dock",
+      "description": "Restart the Dock to resolve visual glitches or unresponsive behavior",
+      "category": "System",
+      "executorType": "process",
+      "commandTemplate": "/usr/bin/killall",
+      "args": ["Dock"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "The Dock will restart. It will briefly disappear and reappear.",
+        "estimatedTime": "1-2s"
+      }
+    },
+    {
+      "id": "sys.restart_menubar",
+      "title": "Restart Menu Bar",
+      "description": "Restart SystemUIServer to fix menu bar glitches",
+      "category": "System",
+      "executorType": "process",
+      "commandTemplate": "/usr/bin/killall",
+      "args": ["SystemUIServer"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "The menu bar will restart briefly. Some menu extras may reload.",
+        "estimatedTime": "1-2s"
+      }
+    },
+    {
+      "id": "sys.restart_controlcenter",
+      "title": "Restart Control Center",
+      "description": "Restart Control Center to fix unresponsive controls",
+      "category": "System",
+      "executorType": "process",
+      "commandTemplate": "/usr/bin/killall",
+      "args": ["ControlCenter"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "Control Center will restart. It will briefly become unavailable.",
+        "estimatedTime": "1-2s"
+      }
+    },
+    {
+      "id": "sys.restart_audio",
+      "title": "Restart Audio Service",
+      "description": "Restart coreaudiod to fix audio issues",
+      "category": "System",
+      "executorType": "helperXpc",
+      "commandTemplate": "/usr/bin/killall",
+      "args": ["coreaudiod"],
+      "requiredPrivileges": "elevated",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "The audio daemon will restart. Audio will cut out briefly.",
+        "estimatedTime": "2-5s"
+      }
+    },
+    {
+      "id": "sys.flush_font_cache",
+      "title": "Reset Font Cache",
+      "description": "Clear font caches to fix font rendering issues",
+      "category": "System",
+      "executorType": "process",
+      "commandTemplate": "/usr/bin/atsutil",
+      "args": ["databases", "-remove"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "Font caches will be cleared. Fonts may render slowly until caches rebuild.",
+        "estimatedTime": "1-3s"
+      }
+    },
+    {
+      "id": "sys.reset_quicklook",
+      "title": "Reset Quick Look",
+      "description": "Reset Quick Look caches and preview generators",
+      "category": "System",
+      "executorType": "process",
+      "commandTemplate": "/usr/bin/qlmanage",
+      "args": ["-r", "cache"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {"estimatedTime": "1-2s"}
+    },
+    {
+      "id": "sys.spotlight_status",
+      "title": "Spotlight Status",
+      "description": "Check the status of Spotlight indexing",
+      "category": "System",
+      "executorType": "process",
+      "commandTemplate": "/usr/bin/mdutil",
+      "args": ["-s", "/"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {"estimatedTime": "< 1s"}
+    },
+    {
+      "id": "clean.user_caches",
+      "title": "Clear User Caches",
+      "description": "Remove cached files from ~/Library/Caches (apps will rebuild as needed)",
+      "category": "Quick Clean",
+      "executorType": "process",
+      "commandTemplate": "/bin/rm",
+      "args": ["-rf"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "pathExists", "value": "~/Library/Caches", "message": "Caches directory not found"}
+      ],
+      "dryRunSupport": true,
+      "dryRunVariant": "du -sh ~/Library/Caches",
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will remove all files from ~/Library/Caches. Apps will rebuild their caches as needed.",
+        "warningText": "Close apps first for best results.",
+        "closeAppsFirst": ["Safari", "Google Chrome", "Firefox"]
+      }
+    },
+    {
+      "id": "clean.user_logs",
+      "title": "Clear User Logs",
+      "description": "Remove log files from ~/Library/Logs",
+      "category": "Quick Clean",
+      "executorType": "process",
+      "commandTemplate": "/bin/rm",
+      "args": ["-rf"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "pathExists", "value": "~/Library/Logs", "message": "Logs directory not found"}
+      ],
+      "dryRunSupport": true,
+      "dryRunVariant": "du -sh ~/Library/Logs",
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will remove all log files from ~/Library/Logs."
+      }
+    },
+    {
+      "id": "clean.crash_reports",
+      "title": "Clear Crash Reports",
+      "description": "Remove application crash reports",
+      "category": "Quick Clean",
+      "executorType": "process",
+      "commandTemplate": "/bin/rm",
+      "args": ["-rf"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [
+        {"type": "pathExists", "value": "~/Library/Application Support/CrashReporter", "message": "No crash reports found"}
+      ],
+      "dryRunSupport": true,
+      "dryRunVariant": "du -sh ~/Library/Application\\ Support/CrashReporter",
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will remove crash reports from ~/Library/Application Support/CrashReporter."
+      }
+    },
+    {
+      "id": "clean.saved_app_state",
+      "title": "Clear Saved App State",
+      "description": "Remove saved application states to free disk space",
+      "category": "Quick Clean",
+      "executorType": "process",
+      "commandTemplate": "/bin/rm",
+      "args": ["-rf"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "pathExists", "value": "~/Library/Saved Application State", "message": "No saved states found"}
+      ],
+      "dryRunSupport": true,
+      "dryRunVariant": "du -sh ~/Library/Saved\\ Application\\ State",
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will remove saved window positions and states for all apps. Apps will start fresh."
+      }
+    },
+    {
+      "id": "dev.xcode_derived_data",
+      "title": "Clear Xcode Derived Data",
+      "description": "Remove Xcode build artifacts to reclaim disk space",
+      "category": "Dev Tools",
+      "executorType": "process",
+      "commandTemplate": "/bin/rm",
+      "args": ["-rf"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "pathExists", "value": "~/Library/Developer/Xcode/DerivedData", "message": "DerivedData not found. Xcode may not be installed."}
+      ],
+      "dryRunSupport": true,
+      "dryRunVariant": "du -sh ~/Library/Developer/Xcode/DerivedData",
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will remove all Xcode build caches. Projects will need to rebuild.",
+        "warningText": "Close Xcode first for best results.",
+        "closeAppsFirst": ["Xcode"]
+      }
+    },
+    {
+      "id": "dev.xcode_archives",
+      "title": "Clear Xcode Archives",
+      "description": "Remove old Xcode build archives",
+      "category": "Dev Tools",
+      "executorType": "process",
+      "commandTemplate": "/bin/rm",
+      "args": ["-rf"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "destructive",
+      "preflightChecks": [
+        {"type": "pathExists", "value": "~/Library/Developer/Xcode/Archives", "message": "Archives not found."}
+      ],
+      "dryRunSupport": true,
+      "dryRunVariant": "du -sh ~/Library/Developer/Xcode/Archives",
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will permanently delete all Xcode archives. You cannot undo this.",
+        "warningText": "Archives contain signed app bundles needed for App Store submissions. Make sure you don't need them."
+      }
+    },
+    {
+      "id": "dev.simulator_caches",
+      "title": "Clear Simulator Caches",
+      "description": "Remove iOS/watchOS simulator caches",
+      "category": "Dev Tools",
+      "executorType": "process",
+      "commandTemplate": "/bin/rm",
+      "args": ["-rf"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "pathExists", "value": "~/Library/Developer/CoreSimulator/Caches", "message": "Simulator caches not found."}
+      ],
+      "dryRunSupport": true,
+      "dryRunVariant": "du -sh ~/Library/Developer/CoreSimulator/Caches",
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will remove simulator caches. They will be rebuilt as needed."
+      }
+    },
+    {
+      "id": "dev.simulator_delete_unavailable",
+      "title": "Delete Unavailable Simulators",
+      "description": "Remove simulator devices that are no longer available",
+      "category": "Dev Tools",
+      "executorType": "process",
+      "commandTemplate": "/usr/bin/xcrun",
+      "args": ["simctl", "delete", "unavailable"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "commandExists", "value": "/usr/bin/xcrun", "message": "Xcode Command Line Tools not installed."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will remove simulator devices for SDK versions no longer installed."
+      }
+    },
+    {
+      "id": "dev.ios_device_support",
+      "title": "Clear iOS Device Support",
+      "description": "Remove cached iOS device support files (re-downloaded on demand)",
+      "category": "Dev Tools",
+      "executorType": "process",
+      "commandTemplate": "/bin/rm",
+      "args": ["-rf"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "pathExists", "value": "~/Library/Developer/Xcode/iOS DeviceSupport", "message": "iOS Device Support not found."}
+      ],
+      "dryRunSupport": true,
+      "dryRunVariant": "du -sh ~/Library/Developer/Xcode/iOS\\ DeviceSupport",
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will remove cached device support files. They will be re-downloaded when you connect a device."
+      }
+    },
+    {
+      "id": "dev.cocoapods_cache",
+      "title": "Clear CocoaPods Cache",
+      "description": "Remove CocoaPods download cache",
+      "category": "Dev Tools",
+      "executorType": "process",
+      "commandTemplate": "/bin/rm",
+      "args": ["-rf"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [
+        {"type": "pathExists", "value": "~/Library/Caches/CocoaPods", "message": "CocoaPods cache not found."}
+      ],
+      "dryRunSupport": true,
+      "dryRunVariant": "du -sh ~/Library/Caches/CocoaPods",
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will remove CocoaPods download cache. Pods will be re-downloaded as needed."
+      }
+    },
+    {
+      "id": "dev.swiftpm_cache",
+      "title": "Clear Swift Package Manager Cache",
+      "description": "Remove SwiftPM resolved package cache",
+      "category": "Dev Tools",
+      "executorType": "process",
+      "commandTemplate": "/bin/rm",
+      "args": ["-rf"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [
+        {"type": "pathExists", "value": "~/Library/Caches/org.swift.swiftpm", "message": "SwiftPM cache not found."}
+      ],
+      "dryRunSupport": true,
+      "dryRunVariant": "du -sh ~/Library/Caches/org.swift.swiftpm",
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will remove Swift Package Manager download cache."
+      }
+    },
+    {
+      "id": "dev.npm_cache",
+      "title": "Clear npm Cache",
+      "description": "Clean the npm package cache",
+      "category": "Dev Tools",
+      "executorType": "process",
+      "commandTemplate": "/usr/local/bin/npm",
+      "args": ["cache", "clean", "--force"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [
+        {"type": "commandExists", "value": "/usr/local/bin/npm", "message": "npm not installed."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will clean the npm download cache."
+      }
+    },
+    {
+      "id": "dev.yarn_cache",
+      "title": "Clear Yarn Cache",
+      "description": "Clean the Yarn package cache",
+      "category": "Dev Tools",
+      "executorType": "process",
+      "commandTemplate": "/usr/local/bin/yarn",
+      "args": ["cache", "clean"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [
+        {"type": "commandExists", "value": "/usr/local/bin/yarn", "message": "Yarn not installed."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will clean the Yarn download cache."
+      }
+    },
+    {
+      "id": "dev.homebrew_cleanup",
+      "title": "Homebrew Cleanup",
+      "description": "Remove old versions of installed formulae and clear download cache",
+      "category": "Dev Tools",
+      "executorType": "process",
+      "commandTemplate": "/opt/homebrew/bin/brew",
+      "args": ["cleanup", "-s"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [
+        {"type": "commandExists", "value": "/opt/homebrew/bin/brew", "message": "Homebrew not installed."}
+      ],
+      "dryRunSupport": true,
+      "dryRunVariant": "brew cleanup -n",
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will remove old versions of Homebrew formulae and clear the download cache."
+      }
+    },
+    {
+      "id": "dev.homebrew_autoremove",
+      "title": "Homebrew Autoremove",
+      "description": "Remove unused Homebrew dependencies",
+      "category": "Dev Tools",
+      "executorType": "process",
+      "commandTemplate": "/opt/homebrew/bin/brew",
+      "args": ["autoremove"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "commandExists", "value": "/opt/homebrew/bin/brew", "message": "Homebrew not installed."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will remove Homebrew formulae that are no longer needed as dependencies."
+      }
+    },
+    {
+      "id": "dev.docker_df",
+      "title": "Docker Disk Usage",
+      "description": "Show Docker disk usage breakdown",
+      "category": "Dev Tools",
+      "executorType": "process",
+      "commandTemplate": "/usr/local/bin/docker",
+      "args": ["system", "df"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [
+        {"type": "commandExists", "value": "/usr/local/bin/docker", "message": "Docker not installed."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {"estimatedTime": "1-3s"}
+    },
+    {
+      "id": "dev.docker_prune",
+      "title": "Docker System Prune",
+      "description": "Remove unused Docker images, containers, and volumes",
+      "category": "Dev Tools",
+      "executorType": "process",
+      "commandTemplate": "/usr/local/bin/docker",
+      "args": ["system", "prune", "-af", "--volumes"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "destructive",
+      "preflightChecks": [
+        {"type": "commandExists", "value": "/usr/local/bin/docker", "message": "Docker not installed."},
+        {"type": "appRunning", "value": "Docker", "message": "Docker is not running."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will remove ALL unused Docker images, containers, networks, and volumes. This is irreversible.",
+        "warningText": "All stopped containers, unused images, and dangling volumes will be permanently deleted."
+      }
+    },
+    {
+      "id": "browser.safari.tab_count",
+      "title": "Safari Tab Count",
+      "description": "Count open tabs across all Safari windows",
+      "category": "Browsers",
+      "executorType": "appleEvents",
+      "appleScript": "tell application \"Safari\" to return count of tabs of every window",
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["automation(Safari)"],
+      "riskClass": "safe",
+      "preflightChecks": [
+        {"type": "appRunning", "value": "Safari", "message": "Safari is not running."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "custom",
+      "uiHints": {"estimatedTime": "< 1s"}
+    },
+    {
+      "id": "browser.safari.list_tabs",
+      "title": "Safari List Tabs",
+      "description": "List all open tab URLs in Safari",
+      "category": "Browsers",
+      "executorType": "appleEvents",
+      "appleScript": "tell application \"Safari\"\nset urlList to {}\nrepeat with w in windows\nrepeat with t in tabs of w\nset end of urlList to URL of t\nend repeat\nend repeat\nreturn urlList\nend tell",
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["automation(Safari)"],
+      "riskClass": "safe",
+      "preflightChecks": [
+        {"type": "appRunning", "value": "Safari", "message": "Safari is not running."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "custom",
+      "uiHints": {"estimatedTime": "< 1s"}
+    },
+    {
+      "id": "browser.safari.close_tabs_by_pattern",
+      "title": "Safari Close Tabs by Pattern",
+      "description": "Close Safari tabs matching a URL pattern",
+      "category": "Browsers",
+      "executorType": "appleEvents",
+      "appleScript": "tell application \"Safari\"\nset targetPattern to \"__PATTERN__\"\nrepeat with w in windows\nset tabList to tabs of w\nrepeat with t in tabList\nif URL of t contains targetPattern then\nclose t\nend if\nend repeat\nend repeat\nend tell",
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["automation(Safari)"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "appRunning", "value": "Safari", "message": "Safari is not running."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will close all Safari tabs whose URL contains the specified pattern."
+      }
+    },
+    {
+      "id": "browser.safari.close_all_tabs",
+      "title": "Safari Close All Tabs",
+      "description": "Close all tabs in all Safari windows",
+      "category": "Browsers",
+      "executorType": "appleEvents",
+      "appleScript": "tell application \"Safari\"\nrepeat with w in windows\ntry\ntell w to close (tabs)\nend try\nend repeat\nend tell",
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["automation(Safari)"],
+      "riskClass": "destructive",
+      "preflightChecks": [
+        {"type": "appRunning", "value": "Safari", "message": "Safari is not running."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will close ALL tabs in ALL Safari windows. This cannot be undone.",
+        "warningText": "All unsaved work in Safari tabs will be lost."
+      }
+    },
+    {
+      "id": "browser.safari.quit",
+      "title": "Quit Safari",
+      "description": "Gracefully quit Safari",
+      "category": "Browsers",
+      "executorType": "appleEvents",
+      "appleScript": "tell application \"Safari\" to quit",
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["automation(Safari)"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "appRunning", "value": "Safari", "message": "Safari is not running."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will gracefully quit Safari."
+      }
+    },
+    {
+      "id": "browser.chrome.tab_count",
+      "title": "Chrome Tab Count",
+      "description": "Count open tabs across all Chrome windows",
+      "category": "Browsers",
+      "executorType": "appleEvents",
+      "appleScript": "tell application \"Google Chrome\"\nset tabCount to 0\nrepeat with w in windows\nset tabCount to tabCount + (count of tabs of w)\nend repeat\nreturn tabCount\nend tell",
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["automation(Google Chrome)"],
+      "riskClass": "safe",
+      "preflightChecks": [
+        {"type": "appRunning", "value": "Google Chrome", "message": "Chrome is not running."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "custom",
+      "uiHints": {"estimatedTime": "< 1s"}
+    },
+    {
+      "id": "browser.chrome.list_tabs",
+      "title": "Chrome List Tabs",
+      "description": "List all open tab URLs in Chrome",
+      "category": "Browsers",
+      "executorType": "appleEvents",
+      "appleScript": "tell application \"Google Chrome\"\nset urlList to {}\nrepeat with w in windows\nrepeat with t in tabs of w\nset end of urlList to URL of t\nend repeat\nend repeat\nreturn urlList\nend tell",
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["automation(Google Chrome)"],
+      "riskClass": "safe",
+      "preflightChecks": [
+        {"type": "appRunning", "value": "Google Chrome", "message": "Chrome is not running."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "custom",
+      "uiHints": {"estimatedTime": "< 1s"}
+    },
+    {
+      "id": "browser.chrome.close_tabs_by_pattern",
+      "title": "Chrome Close Tabs by Pattern",
+      "description": "Close Chrome tabs matching a URL pattern",
+      "category": "Browsers",
+      "executorType": "appleEvents",
+      "appleScript": "tell application \"Google Chrome\"\nset targetPattern to \"__PATTERN__\"\nrepeat with w in windows\nset tabList to tabs of w\nrepeat with t in tabList\nif URL of t contains targetPattern then\nclose t\nend if\nend repeat\nend repeat\nend tell",
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["automation(Google Chrome)"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "appRunning", "value": "Google Chrome", "message": "Chrome is not running."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will close all Chrome tabs whose URL contains the specified pattern."
+      }
+    },
+    {
+      "id": "browser.chrome.close_all_tabs",
+      "title": "Chrome Close All Tabs",
+      "description": "Close all tabs in all Chrome windows",
+      "category": "Browsers",
+      "executorType": "appleEvents",
+      "appleScript": "tell application \"Google Chrome\"\nrepeat with w in windows\nclose tabs of w\nend repeat\nend tell",
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["automation(Google Chrome)"],
+      "riskClass": "destructive",
+      "preflightChecks": [
+        {"type": "appRunning", "value": "Google Chrome", "message": "Chrome is not running."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will close ALL tabs in ALL Chrome windows. This cannot be undone.",
+        "warningText": "All unsaved work in Chrome tabs will be lost."
+      }
+    },
+    {
+      "id": "browser.chrome.quit",
+      "title": "Quit Chrome",
+      "description": "Gracefully quit Google Chrome",
+      "category": "Browsers",
+      "executorType": "appleEvents",
+      "appleScript": "tell application \"Google Chrome\" to quit",
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["automation(Google Chrome)"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "appRunning", "value": "Google Chrome", "message": "Chrome is not running."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will gracefully quit Google Chrome."
+      }
+    },
+    {
+      "id": "browser.edge.tab_count",
+      "title": "Edge Tab Count",
+      "description": "Count open tabs across all Edge windows",
+      "category": "Browsers",
+      "executorType": "appleEvents",
+      "appleScript": "tell application \"Microsoft Edge\"\nset tabCount to 0\nrepeat with w in windows\nset tabCount to tabCount + (count of tabs of w)\nend repeat\nreturn tabCount\nend tell",
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["automation(Microsoft Edge)"],
+      "riskClass": "safe",
+      "preflightChecks": [
+        {"type": "appRunning", "value": "Microsoft Edge", "message": "Edge is not running."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "custom",
+      "uiHints": {"estimatedTime": "< 1s"}
+    },
+    {
+      "id": "browser.edge.close_tabs_by_pattern",
+      "title": "Edge Close Tabs by Pattern",
+      "description": "Close Edge tabs matching a URL pattern",
+      "category": "Browsers",
+      "executorType": "appleEvents",
+      "appleScript": "tell application \"Microsoft Edge\"\nset targetPattern to \"__PATTERN__\"\nrepeat with w in windows\nset tabList to tabs of w\nrepeat with t in tabList\nif URL of t contains targetPattern then\nclose t\nend if\nend repeat\nend repeat\nend tell",
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["automation(Microsoft Edge)"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "appRunning", "value": "Microsoft Edge", "message": "Edge is not running."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will close all Edge tabs whose URL contains the specified pattern."
+      }
+    },
+    {
+      "id": "browser.edge.close_all_tabs",
+      "title": "Edge Close All Tabs",
+      "description": "Close all tabs in all Edge windows",
+      "category": "Browsers",
+      "executorType": "appleEvents",
+      "appleScript": "tell application \"Microsoft Edge\"\nrepeat with w in windows\nclose tabs of w\nend repeat\nend tell",
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["automation(Microsoft Edge)"],
+      "riskClass": "destructive",
+      "preflightChecks": [
+        {"type": "appRunning", "value": "Microsoft Edge", "message": "Edge is not running."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will close ALL tabs in ALL Edge windows.",
+        "warningText": "All unsaved work in Edge tabs will be lost."
+      }
+    },
+    {
+      "id": "browser.edge.quit",
+      "title": "Quit Edge",
+      "description": "Gracefully quit Microsoft Edge",
+      "category": "Browsers",
+      "executorType": "appleEvents",
+      "appleScript": "tell application \"Microsoft Edge\" to quit",
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["automation(Microsoft Edge)"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "appRunning", "value": "Microsoft Edge", "message": "Edge is not running."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will gracefully quit Microsoft Edge."
+      }
+    },
+    {
+      "id": "browser.brave.tab_count",
+      "title": "Brave Tab Count",
+      "description": "Count open tabs across all Brave windows",
+      "category": "Browsers",
+      "executorType": "appleEvents",
+      "appleScript": "tell application \"Brave Browser\"\nset tabCount to 0\nrepeat with w in windows\nset tabCount to tabCount + (count of tabs of w)\nend repeat\nreturn tabCount\nend tell",
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["automation(Brave Browser)"],
+      "riskClass": "safe",
+      "preflightChecks": [
+        {"type": "appRunning", "value": "Brave Browser", "message": "Brave is not running."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "custom",
+      "uiHints": {"estimatedTime": "< 1s"}
+    },
+    {
+      "id": "browser.brave.close_tabs_by_pattern",
+      "title": "Brave Close Tabs by Pattern",
+      "description": "Close Brave tabs matching a URL pattern",
+      "category": "Browsers",
+      "executorType": "appleEvents",
+      "appleScript": "tell application \"Brave Browser\"\nset targetPattern to \"__PATTERN__\"\nrepeat with w in windows\nset tabList to tabs of w\nrepeat with t in tabList\nif URL of t contains targetPattern then\nclose t\nend if\nend repeat\nend repeat\nend tell",
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["automation(Brave Browser)"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "appRunning", "value": "Brave Browser", "message": "Brave is not running."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will close all Brave tabs whose URL contains the specified pattern."
+      }
+    },
+    {
+      "id": "browser.brave.close_all_tabs",
+      "title": "Brave Close All Tabs",
+      "description": "Close all tabs in all Brave windows",
+      "category": "Browsers",
+      "executorType": "appleEvents",
+      "appleScript": "tell application \"Brave Browser\"\nrepeat with w in windows\nclose tabs of w\nend repeat\nend tell",
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["automation(Brave Browser)"],
+      "riskClass": "destructive",
+      "preflightChecks": [
+        {"type": "appRunning", "value": "Brave Browser", "message": "Brave is not running."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will close ALL tabs in ALL Brave windows.",
+        "warningText": "All unsaved work in Brave tabs will be lost."
+      }
+    },
+    {
+      "id": "browser.brave.quit",
+      "title": "Quit Brave",
+      "description": "Gracefully quit Brave Browser",
+      "category": "Browsers",
+      "executorType": "appleEvents",
+      "appleScript": "tell application \"Brave Browser\" to quit",
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["automation(Brave Browser)"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "appRunning", "value": "Brave Browser", "message": "Brave is not running."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will gracefully quit Brave Browser."
+      }
+    },
+    {
+      "id": "browser.arc.quit",
+      "title": "Quit Arc",
+      "description": "Gracefully quit Arc browser",
+      "category": "Browsers",
+      "executorType": "appleEvents",
+      "appleScript": "tell application \"Arc\" to quit",
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["automation(Arc)"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "appRunning", "value": "Arc", "message": "Arc is not running."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will gracefully quit Arc."
+      }
+    },
+    {
+      "id": "browser.firefox.quit",
+      "title": "Quit Firefox",
+      "description": "Gracefully quit Firefox",
+      "category": "Browsers",
+      "executorType": "appleEvents",
+      "appleScript": "tell application \"Firefox\" to quit",
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["automation(Firefox)"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "appRunning", "value": "Firefox", "message": "Firefox is not running."}
+      ],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will gracefully quit Firefox."
+      }
+    },
+    {
+      "id": "browser.safari.clear_cache",
+      "title": "Clear Safari Cache",
+      "description": "Remove Safari browser cache files",
+      "category": "Browsers",
+      "executorType": "process",
+      "commandTemplate": "/bin/rm",
+      "args": ["-rf"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "pathExists", "value": "~/Library/Caches/com.apple.Safari", "message": "Safari cache not found."}
+      ],
+      "dryRunSupport": true,
+      "dryRunVariant": "du -sh ~/Library/Caches/com.apple.Safari",
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will clear Safari's browser cache. You may need to re-login to some sites.",
+        "closeAppsFirst": ["Safari"]
+      }
+    },
+    {
+      "id": "browser.chrome.clear_cache",
+      "title": "Clear Chrome Cache",
+      "description": "Remove Chrome browser cache files",
+      "category": "Browsers",
+      "executorType": "process",
+      "commandTemplate": "/bin/rm",
+      "args": ["-rf"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "pathExists", "value": "~/Library/Caches/Google/Chrome", "message": "Chrome cache not found."}
+      ],
+      "dryRunSupport": true,
+      "dryRunVariant": "du -sh ~/Library/Caches/Google/Chrome",
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will clear Chrome's browser cache.",
+        "closeAppsFirst": ["Google Chrome"]
+      }
+    },
+    {
+      "id": "browser.edge.clear_cache",
+      "title": "Clear Edge Cache",
+      "description": "Remove Edge browser cache files",
+      "category": "Browsers",
+      "executorType": "process",
+      "commandTemplate": "/bin/rm",
+      "args": ["-rf"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "pathExists", "value": "~/Library/Caches/Microsoft Edge", "message": "Edge cache not found."}
+      ],
+      "dryRunSupport": true,
+      "dryRunVariant": "du -sh ~/Library/Caches/Microsoft\\ Edge",
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will clear Edge's browser cache.",
+        "closeAppsFirst": ["Microsoft Edge"]
+      }
+    },
+    {
+      "id": "browser.brave.clear_cache",
+      "title": "Clear Brave Cache",
+      "description": "Remove Brave browser cache files",
+      "category": "Browsers",
+      "executorType": "process",
+      "commandTemplate": "/bin/rm",
+      "args": ["-rf"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "pathExists", "value": "~/Library/Caches/BraveSoftware", "message": "Brave cache not found."}
+      ],
+      "dryRunSupport": true,
+      "dryRunVariant": "du -sh ~/Library/Caches/BraveSoftware",
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will clear Brave's browser cache.",
+        "closeAppsFirst": ["Brave Browser"]
+      }
+    },
+    {
+      "id": "browser.firefox.clear_cache",
+      "title": "Clear Firefox Cache",
+      "description": "Remove Firefox browser cache files",
+      "category": "Browsers",
+      "executorType": "process",
+      "commandTemplate": "/bin/rm",
+      "args": ["-rf"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "pathExists", "value": "~/Library/Caches/Firefox", "message": "Firefox cache not found."}
+      ],
+      "dryRunSupport": true,
+      "dryRunVariant": "du -sh ~/Library/Caches/Firefox",
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will clear Firefox's browser cache.",
+        "closeAppsFirst": ["Firefox"]
+      }
+    },
+    {
+      "id": "browser.arc.clear_cache",
+      "title": "Clear Arc Cache",
+      "description": "Remove Arc browser cache files",
+      "category": "Browsers",
+      "executorType": "process",
+      "commandTemplate": "/bin/rm",
+      "args": ["-rf"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [
+        {"type": "pathExists", "value": "~/Library/Caches/company.thebrowser.Browser", "message": "Arc cache not found."}
+      ],
+      "dryRunSupport": true,
+      "dryRunVariant": "du -sh ~/Library/Caches/company.thebrowser.Browser",
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will clear Arc's browser cache.",
+        "closeAppsFirst": ["Arc"]
+      }
+    },
+    {
+      "id": "diag.running_apps",
+      "title": "List Running Apps",
+      "description": "List all currently running GUI applications",
+      "category": "Diagnostics",
+      "executorType": "appleEvents",
+      "appleScript": "tell application \"System Events\" to get name of (processes where background only is false)",
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["automation(System Events)"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "custom",
+      "uiHints": {"estimatedTime": "< 1s"}
+    },
+    {
+      "id": "diag.listening_ports",
+      "title": "Listening Ports",
+      "description": "Show processes listening on TCP ports",
+      "category": "Network",
+      "executorType": "process",
+      "commandTemplate": "/usr/sbin/lsof",
+      "args": ["-nP", "-iTCP", "-sTCP:LISTEN"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {"estimatedTime": "1-2s"}
+    },
+    {
+      "id": "disk.large_files_home",
+      "title": "Large Files in Home",
+      "description": "Find files larger than 1GB in home directory",
+      "category": "Disk",
+      "executorType": "process",
+      "commandTemplate": "/usr/bin/find",
+      "args": [],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "custom",
+      "uiHints": {"estimatedTime": "10-60s"}
+    },
+    {
+      "id": "disk.home_usage",
+      "title": "Home Directory Usage",
+      "description": "Show disk usage breakdown of home directory folders",
+      "category": "Disk",
+      "executorType": "process",
+      "commandTemplate": "/usr/bin/du",
+      "args": ["-h", "-d", "1"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "safe",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "custom",
+      "uiHints": {"estimatedTime": "5-30s"}
+    },
+    {
+      "id": "sys.maintenance_daily",
+      "title": "Run Daily Maintenance",
+      "description": "Run macOS daily periodic maintenance scripts",
+      "category": "System",
+      "executorType": "helperXpc",
+      "commandTemplate": "/usr/sbin/periodic",
+      "args": ["daily"],
+      "requiredPrivileges": "elevated",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will run macOS daily maintenance tasks (log rotation, temporary file cleanup, etc.).",
+        "estimatedTime": "30-120s"
+      }
+    },
+    {
+      "id": "sys.maintenance_all",
+      "title": "Run All Maintenance",
+      "description": "Run macOS daily, weekly, and monthly periodic maintenance scripts",
+      "category": "System",
+      "executorType": "helperXpc",
+      "commandTemplate": "/usr/sbin/periodic",
+      "args": ["daily", "weekly", "monthly"],
+      "requiredPrivileges": "elevated",
+      "requiredPermissions": ["none"],
+      "riskClass": "moderate",
+      "preflightChecks": [],
+      "dryRunSupport": false,
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will run all macOS periodic maintenance tasks. This may take several minutes.",
+        "estimatedTime": "60-300s"
+      }
+    },
+    {
+      "id": "clean.trash",
+      "title": "Empty Trash",
+      "description": "Empty the user Trash folder",
+      "category": "Quick Clean",
+      "executorType": "process",
+      "commandTemplate": "/bin/rm",
+      "args": ["-rf"],
+      "requiredPrivileges": "user",
+      "requiredPermissions": ["none"],
+      "riskClass": "destructive",
+      "preflightChecks": [
+        {"type": "pathExists", "value": "~/.Trash", "message": "Trash folder not found."}
+      ],
+      "dryRunSupport": true,
+      "dryRunVariant": "du -sh ~/.Trash",
+      "outputParsing": "none",
+      "uiHints": {
+        "confirmText": "This will permanently delete all items in the Trash. This cannot be undone.",
+        "warningText": "Files in Trash will be permanently deleted."
+      }
+    }
+  ]
+}
