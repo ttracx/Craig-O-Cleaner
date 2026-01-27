@@ -6,10 +6,15 @@ set -e
 
 # Parse arguments
 QUIET=false
+EXCLUDE_TESTS=false
 for arg in "$@"; do
     case $arg in
         --quiet|-q)
             QUIET=true
+            shift
+            ;;
+        --exclude-tests)
+            EXCLUDE_TESTS=true
             shift
             ;;
     esac
@@ -42,7 +47,11 @@ if [ "$QUIET" = false ]; then
     echo -e "\n${BLUE}Finding all Swift files...${NC}"
 fi
 
-SWIFT_FILES=$(find "$SOURCE_DIR" -name "*.swift" -type f | grep -v "/.build/" | grep -v "/build/" | grep -v "/DerivedData/")
+if [ "$EXCLUDE_TESTS" = true ]; then
+    SWIFT_FILES=$(find "$SOURCE_DIR" -name "*.swift" -type f | grep -v "/.build/" | grep -v "/build/" | grep -v "/DerivedData/" | grep -v "/Tests/")
+else
+    SWIFT_FILES=$(find "$SOURCE_DIR" -name "*.swift" -type f | grep -v "/.build/" | grep -v "/build/" | grep -v "/DerivedData/")
+fi
 
 TOTAL_FILES=$(echo "$SWIFT_FILES" | wc -l | tr -d ' ')
 
