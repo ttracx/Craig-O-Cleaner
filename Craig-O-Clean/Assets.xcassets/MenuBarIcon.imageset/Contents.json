@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "craig-o-clean-iconmenu16.png",
+      "filename" : "craig-o-clean-iconmenu16-3.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "craig-o-clean-iconmenu32.png",
+      "filename" : "craig-o-clean-iconmenu32-2.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "craig-o-clean-iconmenu64.png",
+      "filename" : "craig-o-clean-iconmenu64-2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
