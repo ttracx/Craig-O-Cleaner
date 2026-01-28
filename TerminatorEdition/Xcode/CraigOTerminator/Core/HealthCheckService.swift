@@ -74,7 +74,7 @@ final class HealthCheckService: ObservableObject {
     private func checkSystemInfo() async {
         logger.debug("Checking system info...")
 
-        let processInfo = ProcessInfo.processInfo
+        let processInfo = Foundation.ProcessInfo.processInfo
 
         addResult(
             category: "System",
@@ -103,7 +103,7 @@ final class HealthCheckService: ObservableObject {
         )
 
         // Check sandbox status
-        let isSandboxed = ProcessInfo.processInfo.environment["APP_SANDBOX_CONTAINER_ID"] != nil
+        let isSandboxed = Foundation.ProcessInfo.processInfo.environment["APP_SANDBOX_CONTAINER_ID"] != nil
         addResult(
             category: "System",
             name: "App Sandbox",

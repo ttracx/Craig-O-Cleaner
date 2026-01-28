@@ -11,7 +11,7 @@ import os.log
 
 /// Executor for elevated (privileged) commands using the privileged helper tool
 @Observable
-final class ElevatedExecutor: CommandExecutor {
+final class ElevatedExecutor: CapabilityExecutor {
 
     // MARK: - Dependencies
 
@@ -293,11 +293,10 @@ final class ElevatedExecutor: CommandExecutor {
         )
         builder.setPreviousHash(previousHash)
 
-        // Add metadata indicating elevated execution
-        builder.setMetadata([
-            "executionType": "elevated",
-            "helperVersion": HelperConstants.currentVersion
-        ])
+        // NOTE: Metadata not yet implemented in RunRecord
+        // Future: Add metadata indicating elevated execution
+        // - executionType: "elevated"
+        // - helperVersion: HelperConstants.currentVersion
 
         let record = builder.build()
 

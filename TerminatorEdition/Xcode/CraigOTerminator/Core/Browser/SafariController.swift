@@ -246,8 +246,9 @@ final class SafariController: BrowserController {
             let tabIndex = Int(components[i + 3]) ?? 0
 
             let tab = BrowserTab(
-                url: url,
+                browser: app.toBrowserType,
                 title: title,
+                url: url,
                 windowIndex: windowIndex,
                 tabIndex: tabIndex
             )

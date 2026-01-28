@@ -70,7 +70,7 @@ struct PermissionStatusView: View {
                 .foregroundStyle(.secondary)
 
             ForEach(BrowserApp.allCases, id: \.self) { browser in
-                PermissionRow(
+                BrowserPermissionRow(
                     icon: browser.icon,
                     title: browser.rawValue,
                     state: permissions.automationPermissions[browser] ?? .unknown,
@@ -99,7 +99,7 @@ struct PermissionStatusView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            PermissionRow(
+            BrowserPermissionRow(
                 icon: "internaldrive",
                 title: "Full Disk Access",
                 state: permissions.fullDiskAccess,
@@ -112,7 +112,7 @@ struct PermissionStatusView: View {
                 }
             )
 
-            PermissionRow(
+            BrowserPermissionRow(
                 icon: "shield.checkered",
                 title: "Privileged Helper",
                 state: permissions.helperInstalled ? .granted : .denied,
@@ -173,9 +173,9 @@ struct PermissionStatusView: View {
     }
 }
 
-// MARK: - Permission Row
+// MARK: - Browser Permission Row
 
-struct PermissionRow: View {
+struct BrowserPermissionRow: View {
     let icon: String
     let title: String
     let state: PermissionState
@@ -313,7 +313,7 @@ struct PermissionRow: View {
 }
 
 #Preview("Permission Row - Granted") {
-    PermissionRow(
+    BrowserPermissionRow(
         icon: "safari",
         title: "Safari",
         state: .granted,
@@ -326,7 +326,7 @@ struct PermissionRow: View {
 }
 
 #Preview("Permission Row - Denied") {
-    PermissionRow(
+    BrowserPermissionRow(
         icon: "globe",
         title: "Google Chrome",
         state: .denied,
@@ -339,7 +339,7 @@ struct PermissionRow: View {
 }
 
 #Preview("Permission Row - Not Determined") {
-    PermissionRow(
+    BrowserPermissionRow(
         icon: "flame",
         title: "Firefox",
         state: .notDetermined,
@@ -352,7 +352,7 @@ struct PermissionRow: View {
 }
 
 #Preview("Permission Row - Not Installed") {
-    PermissionRow(
+    BrowserPermissionRow(
         icon: "globe",
         title: "Brave Browser",
         state: .unknown,

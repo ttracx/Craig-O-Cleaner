@@ -164,7 +164,7 @@ final class HelperInstaller {
         )
 
         // Free the duplicated string
-        free(rightItem.name)
+        free(UnsafeMutableRawPointer(mutating: rightItem.name))
 
         if let error = error?.takeRetainedValue() {
             logger.error("SMJobRemove failed: \(error.localizedDescription)")
@@ -360,6 +360,6 @@ final class HelperInstaller {
             throw HelperError.invalidAuthData
         }
 
-        return Data(bytes: &authExtForm.bytes, count: kAuthorizationExternalFormLength)
+        return Data(bytes: &authExtForm.bytes, count: Int(kAuthorizationExternalFormLength))
     }
 }

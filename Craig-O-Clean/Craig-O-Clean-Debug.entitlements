@@ -6,9 +6,6 @@
 	<array>
 		<string>Default</string>
 	</array>
-	<!-- SANDBOX DISABLED FOR DEBUG TO ALLOW FORCE QUIT -->
-	<!-- <key>com.apple.security.app-sandbox</key>
-	<true/> -->
 	<key>com.apple.security.automation.apple-events</key>
 	<true/>
 	<key>com.apple.security.files.user-selected.read-write</key>

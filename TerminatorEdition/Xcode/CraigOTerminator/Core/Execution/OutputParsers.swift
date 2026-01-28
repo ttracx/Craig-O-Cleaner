@@ -40,7 +40,11 @@ enum ParsedOutput: Codable {
             try container.encode(captures, forKey: .value)
         case .table(let headers, let rows):
             try container.encode("table", forKey: .type)
-            try container.encode(["headers": headers, "rows": rows], forKey: .value)
+            struct TableData: Codable {
+                let headers: [String]
+                let rows: [[String]]
+            }
+            try container.encode(TableData(headers: headers, rows: rows), forKey: .value)
         case .memoryPressure(let info):
             try container.encode("memoryPressure", forKey: .type)
             try container.encode(info, forKey: .value)

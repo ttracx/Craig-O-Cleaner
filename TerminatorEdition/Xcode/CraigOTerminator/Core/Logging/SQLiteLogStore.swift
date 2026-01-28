@@ -10,6 +10,10 @@ import Foundation
 import SQLite3
 import os.log
 
+// MARK: - SQLite Constants
+
+private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
+
 // MARK: - Log Store Protocol
 
 protocol LogStore {

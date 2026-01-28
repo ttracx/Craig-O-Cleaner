@@ -42,7 +42,10 @@ struct ProcessManagerView: View {
     
     var filteredAndSortedProcesses: [ProcessInfo] {
         var processes = processManager.processes
-        
+
+        // Always exclude Craig-O-Clean from the process list
+        processes = processes.filter { $0.name != "Craig-O-Clean" }
+
         // Apply filter
         switch filterOption {
         case .all:

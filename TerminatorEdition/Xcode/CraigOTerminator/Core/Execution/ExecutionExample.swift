@@ -132,9 +132,10 @@ func exampleCapabilityFiltering() async {
     let executor = UserExecutor()
 
     // Get all user-level capabilities
-    let userCapabilities = catalog.allCapabilities { capability in
-        Task {
-            await executor.canExecute(capability)
+    var userCapabilities: [Capability] = []
+    for capability in catalog.allCapabilities() {
+        if await executor.canExecute(capability) {
+            userCapabilities.append(capability)
         }
     }
 

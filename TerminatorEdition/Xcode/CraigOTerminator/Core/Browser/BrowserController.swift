@@ -7,35 +7,8 @@
 //
 
 import Foundation
+import AppKit
 import os.log
-
-// MARK: - Browser Tab Model
-
-/// Represents a single browser tab
-struct BrowserTab: Identifiable, Codable, Equatable {
-    let id: UUID
-    let url: String
-    let title: String
-    let windowIndex: Int
-    let tabIndex: Int
-    var memoryUsage: Int64? // bytes, optional
-
-    init(url: String, title: String, windowIndex: Int, tabIndex: Int, memoryUsage: Int64? = nil) {
-        self.id = UUID()
-        self.url = url
-        self.title = title
-        self.windowIndex = windowIndex
-        self.tabIndex = tabIndex
-        self.memoryUsage = memoryUsage
-    }
-
-    /// Formatted memory usage string
-    var memoryUsageFormatted: String? {
-        guard let bytes = memoryUsage else { return nil }
-        let mb = Double(bytes) / 1_048_576
-        return String(format: "%.1f MB", mb)
-    }
-}
 
 // MARK: - Browser Error
 

@@ -180,7 +180,7 @@ final class PlannerAgent {
     // MARK: - Helper Methods
 
     private func buildCatalogContext() -> String {
-        let capabilities = capabilityCatalog.getAllCapabilities()
+        let capabilities = capabilityCatalog.allCapabilities()
 
         var context = "Available capabilities:\n\n"
 
@@ -248,7 +248,7 @@ final class PlannerAgent {
 
         // Validate all capability IDs exist
         for step in plan.workflow {
-            guard capabilityCatalog.capability(withId: step.capabilityId) != nil else {
+            guard capabilityCatalog.capability(id: step.capabilityId) != nil else {
                 throw PlannerError.invalidCapabilityId(step.capabilityId)
             }
         }

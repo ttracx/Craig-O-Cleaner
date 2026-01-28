@@ -128,18 +128,18 @@ final class SafetyAgent {
         var requiresElevation = false
 
         for step in plan.workflow {
-            guard let capability = capabilityCatalog.capability(withId: step.capabilityId) else {
+            guard let capability = capabilityCatalog.capability(id: step.capabilityId) else {
                 continue
             }
 
             // Track maximum risk level
             let risk = mapRiskClass(capability.riskClass)
-            if risk.rawValue > maxRisk.rawValue {
+            if risk.priority > maxRisk.priority {
                 maxRisk = risk
             }
 
             // Check privilege requirements
-            if capability.privilegeLevel == .elevated {
+            if capability.privilegeLevel == PrivilegeLevel.elevated {
                 requiresElevation = true
                 warnings.append("'\(capability.title)' requires administrator privileges")
             }
@@ -209,7 +209,7 @@ final class SafetyAgent {
         var context = "Workflow: \(plan.summary)\n\nSteps:\n"
 
         for (index, step) in plan.workflow.enumerated() {
-            if let capability = capabilityCatalog.capability(withId: step.capabilityId) {
+            if let capability = capabilityCatalog.capability(id: step.capabilityId) {
                 context += """
                 \(index + 1). [\(step.capabilityId)] \(capability.title)
                    Description: \(capability.description)
@@ -289,7 +289,7 @@ enum RiskLevel: String, Codable, Comparable {
     case moderate
     case destructive
 
-    var rawValue: Int {
+    var priority: Int {
         switch self {
         case .safe: return 0
         case .moderate: return 1
@@ -307,7 +307,7 @@ enum RiskLevel: String, Codable, Comparable {
     }
 
     static func < (lhs: RiskLevel, rhs: RiskLevel) -> Bool {
-        lhs.rawValue < rhs.rawValue
+        lhs.priority < rhs.priority
     }
 }
 

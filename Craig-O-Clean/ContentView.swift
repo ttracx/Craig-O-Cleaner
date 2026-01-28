@@ -27,11 +27,14 @@ struct ContentView: View {
 
     var filteredProcesses: [ProcessInfo] {
         var processes = processManager.processes
-        
+
+        // Always exclude Craig-O-Clean from the process list
+        processes = processes.filter { $0.name != "Craig-O-Clean" }
+
         if showOnlyUserProcesses {
             processes = processes.filter { $0.isUserProcess }
         }
-        
+
         if showHeavyProcessesOnly {
             processes = processes.filter { $0.memoryUsage > 500 * 1024 * 1024 }
         }
@@ -344,6 +347,15 @@ struct ContentView: View {
     }
 
     private func terminateProcess(_ process: ProcessInfo) async {
+        // Protect Craig-O-Clean from being terminated
+        guard process.name != "Craig-O-Clean" else {
+            await MainActor.run {
+                alertMessage = "Cannot terminate Craig-O-Clean (self-protection)."
+                showingAlert = true
+            }
+            return
+        }
+
         let success = await processManager.terminateProcess(process)
         await MainActor.run {
             alertMessage = success ?
@@ -359,6 +371,14 @@ struct ContentView: View {
     }
 
     private func forceQuitProcess(_ process: ProcessInfo) async {
+        // Protect Craig-O-Clean from being force quit
+        guard process.name != "Craig-O-Clean" else {
+            await MainActor.run {
+                alertMessage = "Cannot force quit Craig-O-Clean (self-protection)."
+                showingAlert = true
+            }
+            return
+        }
         // First try standard force quit
         let success = await processManager.forceQuitProcess(process)
 

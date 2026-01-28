@@ -123,7 +123,7 @@
 		A2000014 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A2000015 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A2000016 /* CraigOTerminator.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CraigOTerminator.entitlements; sourceTree = "<group>"; };
-		A2000017 /* PermissionMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/PermissionMonitor.swift; sourceTree = "<group>"; };
+		A2000017 /* PermissionMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionMonitor.swift; sourceTree = "<group>"; };
 		A2000018 /* ProcessMonitorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessMonitorService.swift; sourceTree = "<group>"; };
 		A2000019 /* BrowserTabListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabListView.swift; sourceTree = "<group>"; };
 		A2000020 /* BrowserTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTab.swift; sourceTree = "<group>"; };
@@ -306,7 +306,6 @@
 				A2000014 /* Assets.xcassets */,
 				A5000007 /* Core */,
 				A2000016 /* CraigOTerminator.entitlements */,
-				A2000017 /* PermissionMonitor.swift */,
 				2B36F9A82F2587640064518A /* Helper */,
 				A2000015 /* Info.plist */,
 				2B36F9A52F25875B0064518A /* Models */,
@@ -370,6 +369,7 @@
 			isa = PBXGroup;
 			children = (
 				2B71CC312F25955200AF867B /* PermissionsManager.swift */,
+				A2000017 /* PermissionMonitor.swift */,
 				A2000018 /* ProcessMonitorService.swift */,
 				A2000021 /* HealthCheckService.swift */,
 				A2000013 /* CommandExecutor.swift */,
@@ -652,7 +652,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				AUTOMATION_APPLE_EVENTS = YES;
-				CODE_SIGN_ENTITLEMENTS = "CraigOTerminator/CraigOTerminator-Debug.entitlements";
+				CODE_SIGN_ENTITLEMENTS = CraigOTerminator/CraigOTerminator.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;

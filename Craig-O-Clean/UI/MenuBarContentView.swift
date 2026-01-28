@@ -460,7 +460,7 @@ struct MenuBarDashboardTab: View {
 
             VStack(spacing: 4) {
                 let topProcesses = Array(processManager.processes
-                    .filter { $0.isUserProcess }
+                    .filter { $0.isUserProcess && $0.name != "Craig-O-Clean" }
                     .sorted { $0.memoryUsage > $1.memoryUsage }
                     .prefix(5))
 
@@ -516,6 +516,14 @@ struct MenuBarDashboardTab: View {
     }
 
     private func quitProcess(_ process: ProcessInfo) {
+        // Protect Craig-O-Clean from being quit
+        guard process.name != "Craig-O-Clean" else {
+            self.alertTitle = "❌ Protected"
+            self.alertMessage = "Cannot quit Craig-O-Clean (self-protection)."
+            self.showingAlert = true
+            return
+        }
+
         Task {
             let success = await processManager.terminateProcess(process)
             if success {
@@ -525,9 +533,21 @@ struct MenuBarDashboardTab: View {
     }
 
     private func forceQuitProcess(_ process: ProcessInfo) {
+        // Protect Craig-O-Clean from being force quit
+        guard process.name != "Craig-O-Clean" else {
+            self.alertTitle = "❌ Protected"
+            self.alertMessage = "Cannot force quit Craig-O-Clean (self-protection)."
+            self.showingAlert = true
+            return
+        }
+
+        print("[MenuBar] Force quit requested for: \(process.name) (PID: \(process.pid))")
+
         Task {
             // First try standard force quit
+            print("[MenuBar] Attempting standard force quit for PID \(process.pid)")
             let success = await processManager.forceQuitProcess(process)
+            print("[MenuBar] Standard force quit result: \(success)")
 
             if success {
                 await MainActor.run {
@@ -538,7 +558,9 @@ struct MenuBarDashboardTab: View {
                 }
             } else {
                 // Standard method failed, try with admin privileges as fallback
+                print("[MenuBar] Standard failed, trying admin privileges for PID \(process.pid)")
                 let adminSuccess = await processManager.forceQuitWithAdminPrivileges(process)
+                print("[MenuBar] Admin force quit result: \(adminSuccess)")
 
                 await MainActor.run {
                     if adminSuccess {

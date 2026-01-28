@@ -60,7 +60,7 @@ final class CapabilityCoordinator: ObservableObject {
 
                 if check.type == .automationPermission {
                     missingPermissions.append(PermissionRequirement(
-                        type: .automation,
+                        type: "Automation",
                         target: check.target,
                         description: check.failureMessage
                     ))

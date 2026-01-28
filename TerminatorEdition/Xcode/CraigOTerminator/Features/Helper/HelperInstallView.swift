@@ -104,11 +104,11 @@ struct HelperInstallView: View {
                         .fontWeight(.semibold)
 
                     VStack(alignment: .leading, spacing: 4) {
-                        CapabilityRow(title: "Flush DNS Cache", icon: "network")
-                        CapabilityRow(title: "Purge Inactive Memory", icon: "memorychip")
-                        CapabilityRow(title: "System Maintenance", icon: "gearshape.2")
-                        CapabilityRow(title: "Rebuild Spotlight", icon: "magnifyingglass")
-                        CapabilityRow(title: "Empty All Trashes", icon: "trash.fill")
+                        HelperCapabilityRow(title: "Flush DNS Cache", icon: "network")
+                        HelperCapabilityRow(title: "Purge Inactive Memory", icon: "memorychip")
+                        HelperCapabilityRow(title: "System Maintenance", icon: "gearshape.2")
+                        HelperCapabilityRow(title: "Rebuild Spotlight", icon: "magnifyingglass")
+                        HelperCapabilityRow(title: "Empty All Trashes", icon: "trash.fill")
                     }
                 }
                 .font(.caption)
@@ -235,7 +235,7 @@ struct HelperInstallView: View {
 
 // MARK: - Capability Row
 
-private struct CapabilityRow: View {
+private struct HelperCapabilityRow: View {
     let title: String
     let icon: String
 

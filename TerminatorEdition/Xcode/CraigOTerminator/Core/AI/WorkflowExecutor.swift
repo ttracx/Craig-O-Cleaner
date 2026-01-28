@@ -127,40 +127,40 @@ final class WorkflowExecutor {
     // MARK: - Step Execution
 
     private func executeStep(_ step: WorkflowStep, index: Int) async throws -> WorkflowStepResult {
-        guard let capability = capabilityCatalog.capability(withId: step.capabilityId) else {
+        guard let capability = capabilityCatalog.capability(id: step.capabilityId) else {
             throw WorkflowError.capabilityNotFound(step.capabilityId)
         }
 
         let startTime = Date()
 
         do {
-            let executionResult: ExecutionResult
+            let executionResult: ExecutionResultWithOutput
 
             // Route to appropriate executor based on privilege level
             switch capability.privilegeLevel {
             case .user:
                 executionResult = try await userExecutor.execute(
-                    capability: capability,
+                    capability,
                     arguments: step.arguments
                 )
 
             case .elevated:
                 executionResult = try await elevatedExecutor.execute(
-                    capability: capability,
+                    capability,
                     arguments: step.arguments
                 )
 
             case .automation:
                 // Automation capabilities (browser operations) go through user executor
                 executionResult = try await userExecutor.execute(
-                    capability: capability,
+                    capability,
                     arguments: step.arguments
                 )
 
             case .fullDiskAccess:
                 // Full disk access capabilities also use user executor
                 executionResult = try await userExecutor.execute(
-                    capability: capability,
+                    capability,
                     arguments: step.arguments
                 )
             }
@@ -168,8 +168,8 @@ final class WorkflowExecutor {
             let endTime = Date()
             let duration = endTime.timeIntervalSince(startTime)
 
-            // Log execution
-            try? await logStore.save(executionResult.record)
+            // Note: Execution logging is handled by individual executors
+            // try? await logStore.save(executionResult.record)
 
             return WorkflowStepResult(
                 step: step,

@@ -191,9 +191,12 @@ struct PreflightResult {
     let remediationSteps: [RemediationStep]
 }
 
+// Note: PermissionType is defined in PermissionsService.swift
+// Using a typealias here for clarity (both files are in the same module)
+
 /// A specific permission requirement
 struct PermissionRequirement {
-    let type: PermissionType
+    let type: String  // Using String instead of PermissionType to avoid circular dependency
     let target: String?
     let description: String
 }

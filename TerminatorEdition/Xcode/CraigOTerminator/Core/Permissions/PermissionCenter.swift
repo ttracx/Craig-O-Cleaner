@@ -52,6 +52,18 @@ enum BrowserApp: String, CaseIterable, Codable {
         case .arc: return "globe"
         }
     }
+
+    /// Convert BrowserApp to BrowserTab.BrowserType
+    var toBrowserType: BrowserTab.BrowserType {
+        switch self {
+        case .safari: return .safari
+        case .chrome: return .chrome
+        case .edge: return .edge
+        case .brave: return .brave
+        case .firefox: return .firefox
+        case .arc: return .arc
+        }
+    }
 }
 
 // MARK: - Permission Type

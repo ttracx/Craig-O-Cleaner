@@ -15,10 +15,13 @@ struct SettingsView: View {
 
     var body: some View {
         TabView {
-            AccountSettingsView()
-            .tabItem {
-                Label("Account", systemImage: "person.circle")
-            }
+            // TODO: Fix AccountSettingsView TabContent conformance issue
+            // Group {
+            //     AccountSettingsView()
+            // }
+            // .tabItem {
+            //     Label("Account", systemImage: "person.circle")
+            // }
 
             GeneralSettingsView(
                 showMenuBarIcon: $showMenuBarIcon,
@@ -39,7 +42,7 @@ struct SettingsView: View {
                 Label("Automation", systemImage: "clock.arrow.circlepath")
             }
 
-            AISettingsView(
+            LegacyAISettingsView(
                 ollamaEnabled: $ollamaEnabled,
                 ollamaHost: $ollamaHost,
                 ollamaPort: $ollamaPort,
@@ -158,7 +161,7 @@ struct AutomationSettingsView: View {
     }
 }
 
-struct AISettingsView: View {
+struct LegacyAISettingsView: View {
     @Binding var ollamaEnabled: Bool
     @Binding var ollamaHost: String
     @Binding var ollamaPort: Int

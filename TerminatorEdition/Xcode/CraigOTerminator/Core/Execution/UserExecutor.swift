@@ -7,11 +7,12 @@
 //
 
 import Foundation
+import AppKit
 import os.log
 
-// MARK: - Command Executor Protocol
+// MARK: - Capability Executor Protocol
 
-protocol CommandExecutor {
+protocol CapabilityExecutor {
     func canExecute(_ capability: Capability) async -> Bool
     func execute(
         _ capability: Capability,
@@ -64,7 +65,7 @@ enum UserExecutorError: LocalizedError {
 
 /// Executor for user-level (non-privileged) commands with full logging support
 @Observable
-final class UserExecutor: CommandExecutor {
+final class UserExecutor: CapabilityExecutor {
 
     // MARK: - Dependencies
     private let processRunner: ProcessRunner

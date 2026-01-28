@@ -405,7 +405,7 @@ final class BrowserAutomationService: ObservableObject {
             throw BrowserAutomationError.unsupportedBrowser(browser)
         }
         
-        let output = try await executeAppleScript(script)
+        let output = try await executeAppleScript(script, for: browser)
         return try parseTabOutput(output, for: browser)
     }
     
@@ -443,7 +443,7 @@ final class BrowserAutomationService: ObservableObject {
             throw BrowserAutomationError.unsupportedBrowser(tab.browser)
         }
 
-        _ = try await executeAppleScript(script)
+        _ = try await executeAppleScript(script, for: tab.browser)
         logger.info("Closed tab: \(tab.title) in \(appName)")
 
         // Refresh tabs after closing
@@ -474,7 +474,7 @@ final class BrowserAutomationService: ObservableObject {
         end tell
         """
 
-        _ = try await executeAppleScript(script)
+        _ = try await executeAppleScript(script, for: browser)
         logger.info("Closed all tabs in window \(windowIndex) of \(appName)")
 
         await fetchAllTabs()
@@ -532,7 +532,7 @@ final class BrowserAutomationService: ObservableObject {
     
     // MARK: - Private Methods
     
-    private func executeAppleScript(_ script: String) async throws -> String {
+    private func executeAppleScript(_ script: String, for browser: SupportedBrowser? = nil) async throws -> String {
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async { [weak self] in
                 var error: NSDictionary?
@@ -547,12 +547,14 @@ final class BrowserAutomationService: ObservableObject {
 
                     // Handle various permission-related error codes
                     // -1743 = "Not authorized to send Apple events"
-                    // -10004 = "A privilege violation occurred" (Safari-specific)
+                    // -10004 = "A privilege violation occurred"
                     // -1728 = "Can't get <object>" (often means permission denied)
                     // -600 = "Application isn't running" or permission issue
                     if errorNumber == -1743 || errorNumber == -10004 || errorNumber == -1728 {
-                        self?.logger.warning("Automation permission denied for Safari. User needs to grant permission in System Settings.")
-                        continuation.resume(throwing: BrowserAutomationError.automationPermissionDenied(.safari))
+                        // Use the provided browser, or default to Safari for backwards compatibility
+                        let targetBrowser = browser ?? .safari
+                        self?.logger.warning("Automation permission denied for \(targetBrowser.rawValue). User needs to grant permission in System Settings.")
+                        continuation.resume(throwing: BrowserAutomationError.automationPermissionDenied(targetBrowser))
                     } else {
                         continuation.resume(throwing: BrowserAutomationError.scriptExecutionFailed(errorMessage))
                     }

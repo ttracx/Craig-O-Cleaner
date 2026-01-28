@@ -34,7 +34,7 @@ struct BrowsersView: View {
                     .padding()
 
                 List(browsers, selection: $selectedBrowser) { browser in
-                    BrowserRow(browser: browser)
+                    LegacyBrowserRow(browser: browser)
                         .tag(browser)
                 }
                 .listStyle(.inset)
@@ -194,7 +194,7 @@ struct BrowsersView: View {
     }
 }
 
-struct BrowserRow: View {
+struct LegacyBrowserRow: View {
     let browser: BrowsersView.BrowserInfo
 
     var body: some View {

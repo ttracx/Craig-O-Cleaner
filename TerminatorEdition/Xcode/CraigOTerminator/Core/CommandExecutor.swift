@@ -104,7 +104,7 @@ public final class CommandExecutor: ObservableObject {
             }
 
             // Set environment
-            var environment = ProcessInfo.processInfo.environment
+            var environment = Foundation.ProcessInfo.processInfo.environment
             environment["PATH"] = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin"
             process.environment = environment
 
