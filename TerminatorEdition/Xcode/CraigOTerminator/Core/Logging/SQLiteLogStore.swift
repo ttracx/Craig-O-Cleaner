@@ -84,13 +84,19 @@ actor SQLiteLogStore: LogStore {
             let dbPath = appDirectory.appendingPathComponent("logs.sqlite")
             let outputDir = appDirectory.appendingPathComponent("logs", isDirectory: true)
 
-            return try SQLiteLogStore(dbPath: dbPath, outputDirectory: outputDir)
+            let store = try SQLiteLogStore(dbPath: dbPath, outputDirectory: outputDir)
+            Task {
+                try await store.ensureInitialized()
+            }
+            return store
         } catch {
             fatalError("Failed to initialize SQLiteLogStore: \(error)")
         }
     }()
 
     // MARK: - Initialization
+
+    private var isInitialized = false
 
     init(dbPath: URL, outputDirectory: URL) throws {
         self.dbPath = dbPath
@@ -113,10 +119,13 @@ actor SQLiteLogStore: LogStore {
         }
 
         self.db = db
+        logger.info("SQLite database opened successfully")
+    }
 
-        // Initialize schema
+    func ensureInitialized() async throws {
+        guard !isInitialized else { return }
         try initializeSchema()
-
+        isInitialized = true
         logger.info("SQLite log store initialized successfully")
     }
 
@@ -169,6 +178,7 @@ actor SQLiteLogStore: LogStore {
     // MARK: - Save
 
     func save(_ record: RunRecord) async throws {
+        try await ensureInitialized()
         logger.info("Saving run record: \(record.id.uuidString)")
 
         // Encode arguments as JSON
@@ -227,6 +237,7 @@ actor SQLiteLogStore: LogStore {
     // MARK: - Fetch
 
     func fetch(limit: Int, offset: Int) async throws -> [RunRecord] {
+        try await ensureInitialized()
         let sql = """
         SELECT * FROM run_records
         ORDER BY timestamp DESC
@@ -240,6 +251,7 @@ actor SQLiteLogStore: LogStore {
     }
 
     func fetch(capabilityId: String, limit: Int) async throws -> [RunRecord] {
+        try await ensureInitialized()
         let sql = """
         SELECT * FROM run_records
         WHERE capability_id = ?
@@ -254,6 +266,7 @@ actor SQLiteLogStore: LogStore {
     }
 
     func fetchRecent(hours: Int) async throws -> [RunRecord] {
+        try await ensureInitialized()
         let cutoffTime = Date().addingTimeInterval(-Double(hours * 3600))
         let cutoffTimestamp = Int(cutoffTime.timeIntervalSince1970)
 
@@ -269,6 +282,7 @@ actor SQLiteLogStore: LogStore {
     }
 
     func getLastError() async throws -> RunRecord? {
+        try await ensureInitialized()
         let sql = """
         SELECT * FROM run_records
         WHERE status = 'failed' OR status = 'timeout'
@@ -281,6 +295,7 @@ actor SQLiteLogStore: LogStore {
     }
 
     func getLastRecordHash() async throws -> String? {
+        try await ensureInitialized()
         let sql = """
         SELECT record_hash FROM run_records
         ORDER BY timestamp DESC
@@ -307,6 +322,7 @@ actor SQLiteLogStore: LogStore {
     // MARK: - Export
 
     func exportLogs(from: Date, to: Date) async throws -> URL {
+        try await ensureInitialized()
         logger.info("Exporting logs from \(from) to \(to)")
 
         let fromTimestamp = Int(from.timeIntervalSince1970)

@@ -89,7 +89,7 @@ final class OllamaClient {
 
                 // Refresh model list if connected
                 if status && availableModels.isEmpty {
-                    try? await listModels()
+                    _ = try? await listModels()
                 }
 
                 try? await Task.sleep(for: .seconds(Constants.connectionCheckInterval))

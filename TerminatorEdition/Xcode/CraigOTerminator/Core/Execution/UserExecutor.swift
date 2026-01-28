@@ -421,8 +421,8 @@ final class UserExecutor: CapabilityExecutor {
             return "Memory: \(info.level), \(ByteCountFormatter.string(fromByteCount: info.availableBytes, countStyle: .memory)) available"
 
         case .diskUsage(let entries):
-            let totalSize = entries.reduce(0) { sum, entry in
-                // Try to parse size string
+            _ = entries.reduce(0) { sum, _ in
+                // Try to parse size string (not implemented yet)
                 return sum
             }
             return "Disk: \(entries.count) entries"

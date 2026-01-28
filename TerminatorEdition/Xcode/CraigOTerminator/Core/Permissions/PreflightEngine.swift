@@ -358,8 +358,7 @@ final class PreflightEngine {
         let upperString = string.uppercased().trimmingCharacters(in: .whitespaces)
 
         let scanner = Scanner(string: upperString)
-        var value: Double = 0
-        guard scanner.scanDouble(&value) else { return nil }
+        guard let value = scanner.scanDouble() else { return nil }
 
         let remaining = String(upperString[scanner.currentIndex...])
 
