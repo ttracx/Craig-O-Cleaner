@@ -144,7 +144,8 @@ struct MainAppView: View {
                     Text("Craig-O-Clean")
                         .font(.caption2)
                         .foregroundColor(.secondary)
-                    Text(Bundle.main.displayVersion)
+                    // TODO: Use Bundle.main.displayVersion after adding AppVersion.swift to project
+                    Text("Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0") (\(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"))")
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }

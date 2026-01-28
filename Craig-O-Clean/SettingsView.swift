@@ -2,10 +2,11 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject private var launchAtLoginManager = LaunchAtLoginManager.shared
-    @State private var avatarManager = AvatarManager.shared
-    @State private var showingAvatarPicker = false
-    @State private var showingAlert = false
-    @State private var alertMessage = ""
+    // TODO: Avatar feature - uncomment after adding AvatarManager.swift and AppVersion.swift to Xcode project
+    // @State private var avatarManager = AvatarManager.shared
+    // @State private var showingAvatarPicker = false
+    // @State private var showingAlert = false
+    // @State private var alertMessage = ""
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -18,8 +19,8 @@ struct SettingsView: View {
             // Settings content
             ScrollView {
                 VStack(spacing: 20) {
-                    // User Profile section
-                    userProfileSection
+                    // TODO: Avatar feature - uncomment after adding files to project
+                    // userProfileSection
 
                     // Launch at Login section
                     VStack(alignment: .leading, spacing: 12) {
@@ -112,7 +113,8 @@ struct SettingsView: View {
                                     .fontWeight(.bold)
                                     .foregroundColor(.accentColor)
 
-                                Text(Bundle.main.displayVersion)
+                                // TODO: Use Bundle.main.displayVersion after adding AppVersion.swift to project
+                                Text("Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0") (\(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"))")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
@@ -159,11 +161,12 @@ struct SettingsView: View {
             footerView
         }
         .frame(width: 440, height: 600)
-        .alert("Avatar Upload", isPresented: $showingAlert) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text(alertMessage)
-        }
+        // TODO: Avatar feature - uncomment after adding files to project
+        // .alert("Avatar Upload", isPresented: $showingAlert) {
+        //     Button("OK", role: .cancel) { }
+        // } message: {
+        //     Text(alertMessage)
+        // }
     }
     
     private var headerView: some View {
@@ -182,6 +185,8 @@ struct SettingsView: View {
         .background(Color(NSColor.controlBackgroundColor))
     }
 
+    // TODO: Avatar feature - uncomment after adding AvatarManager.swift to Xcode project
+    /*
     private var userProfileSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("User Profile")
@@ -256,6 +261,7 @@ struct SettingsView: View {
         .background(Color(NSColor.controlBackgroundColor))
         .cornerRadius(8)
     }
+    */
     
     private var footerView: some View {
         VStack(spacing: 12) {
@@ -319,6 +325,8 @@ struct SettingsView: View {
         .background(Color(NSColor.controlBackgroundColor))
     }
 
+    // TODO: Avatar feature - uncomment after adding AvatarManager.swift to Xcode project
+    /*
     // MARK: - Avatar Actions
 
     private func selectAvatar() {
@@ -355,6 +363,7 @@ struct SettingsView: View {
         alertMessage = "Avatar removed successfully."
         showingAlert = true
     }
+    */
 }
 
 struct SettingsView_Previews: PreviewProvider {
