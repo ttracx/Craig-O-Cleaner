@@ -45,6 +45,12 @@ enum Browser: String, CaseIterable, Identifiable, Hashable {
         default: return "globe"
         }
     }
+
+    /// SF Symbol icon name for UI display
+    var iconName: String { icon }
+
+    /// Human-readable display name
+    var displayName: String { rawValue }
 }
 
 // MARK: - Tab Model
@@ -62,6 +68,9 @@ struct Tab: Identifiable, Hashable {
         guard let url = URL(string: url), let host = url.host else { return "" }
         return host
     }
+
+    /// Alias for domain for UI compatibility
+    var urlHost: String { domain }
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
