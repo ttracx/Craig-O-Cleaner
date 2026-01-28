@@ -1578,13 +1578,15 @@ struct MenuBarBrowserTab: View {
             if !selectedTabs.isEmpty {
                 // Enhanced close button with animation
                 Button {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                        Task {
-                            for tab in selectedTabs {
-                                try? await browserAutomation.closeTab(tab)
-                                try? await Task.sleep(nanoseconds: 50_000_000)
+                    Task {
+                        for tab in selectedTabs {
+                            try? await browserAutomation.closeTab(tab)
+                            try? await Task.sleep(nanoseconds: 50_000_000)
+                        }
+                        await MainActor.run {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                selectedTabs.removeAll()
                             }
-                            selectedTabs.removeAll()
                         }
                     }
                 } label: {
@@ -2862,7 +2864,7 @@ struct EnhancedTrialBadge: View {
                         )
                 )
         )
-        .shadow(color: (isExpired ? .red : .vibeTeal).opacity(0.3), radius: 3, x: 0, y: 2)
+        .shadow(color: (isExpired ? Color.red : Color.vibeTeal).opacity(0.3), radius: 3, x: 0, y: 2)
     }
 }
 

@@ -20,12 +20,19 @@
 		2B36F9A92F2587640064518A /* PrivilegedHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B36F9A72F2587640064518A /* PrivilegedHelper.swift */; };
 		2B71CC302F25953500AF867B /* PermissionsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B71CC2F2F25953500AF867B /* PermissionsSheet.swift */; };
 		2B71CC322F25955200AF867B /* PermissionsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B71CC312F25955200AF867B /* PermissionsManager.swift */; };
+		2BC4BE522F299D110090BDF5 /* ElevatedExecutorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BC4BE502F299D110090BDF5 /* ElevatedExecutorTests.swift */; };
+		2BC4BE532F299D110090BDF5 /* AIWorkflowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BC4BE4E2F299D110090BDF5 /* AIWorkflowTests.swift */; };
+		2BC4BE542F299D110090BDF5 /* PermissionSystemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BC4BE4C2F299D110090BDF5 /* PermissionSystemTests.swift */; };
+		2BC4BE552F299D110090BDF5 /* BrowserOperationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BC4BE4F2F299D110090BDF5 /* BrowserOperationsTests.swift */; };
+		2BC4BE562F299D110090BDF5 /* ExecutionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BC4BE4A2F299D110090BDF5 /* ExecutionTests.swift */; };
+		2BC4BE572F299D110090BDF5 /* CatalogLoadingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BC4BE482F299D110090BDF5 /* CatalogLoadingTests.swift */; };
 		31D3D1F8A127E68E8C89FA84 /* StatusSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F128C84FC9CCFBBA9DE1B66 /* StatusSection.swift */; };
 		357F1F74AF2ACAA072931BA4 /* BrowserOperationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59499F32AAC7FF3996649A3A /* BrowserOperationsView.swift */; };
 		406F89DFEAC526E6B1DEFD48 /* Capability.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8CD280168A0CF727792FCF8 /* Capability.swift */; };
 		43F1679A9E659AB455D7EBCD /* OutputParsers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2540AEB61785EDD004DC4DB0 /* OutputParsers.swift */; };
 		521EC96E1AC365579F8066B3 /* HelperProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1638846095B3A82AC1EA3 /* HelperProtocol.swift */; };
 		545AF1E9BD3E7BAD6D4B3D05 /* WorkflowExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6473163B088A92F3B22EE413 /* WorkflowExecutor.swift */; };
+		5523248E1AAB408AB874FB84 /* AutoPermissionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 082DABFDF8104067B6747149 /* AutoPermissionHandler.swift */; };
 		5DF5A8FD14FCB24E62D7B7AC /* WorkflowApprovalSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66C4B0241E15C2C4C92200C /* WorkflowApprovalSheet.swift */; };
 		6AF176C503DEDA737885BC95 /* MenuBarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 511646081918B43EE53D707C /* MenuBarContentView.swift */; };
 		7A1BEB6E5798839926573E9B /* BrowserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AAE1BF3351B94ED881B8808 /* BrowserController.swift */; };
@@ -50,7 +57,7 @@
 		A1000012 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000012 /* MenuBarView.swift */; };
 		A1000013 /* CommandExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000013 /* CommandExecutor.swift */; };
 		A1000014 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000014 /* Assets.xcassets */; };
-		A1000015 /* PermissionMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000017 /* PermissionMonitor.swift */; };
+		A1000015 /* Core/PermissionMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000017 /* Core/PermissionMonitor.swift */; };
 		A1000016 /* ProcessMonitorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000018 /* ProcessMonitorService.swift */; };
 		A1000017 /* BrowserTabListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000019 /* BrowserTabListView.swift */; };
 		A1000018 /* BrowserTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000020 /* BrowserTab.swift */; };
@@ -70,10 +77,10 @@
 		FAD608AD34106879E2798812 /* PlannerAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DD265ABF43D8A06ABCD77CB /* PlannerAgent.swift */; };
 		FCBB1338EB27CE8069B51ADB /* PermissionStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75874698C29C1CF92D7CCCA4 /* PermissionStatusView.swift */; };
 		FFA6AB932002F61B01898FE4 /* SQLiteLogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B9F4AF6FA1ECC0A1B98C6C5 /* SQLiteLogStore.swift */; };
-		5523248E1AAB408AB874FB84 /* AutoPermissionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 082DABFDF8104067B6747149 /* AutoPermissionHandler.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		082DABFDF8104067B6747149 /* AutoPermissionHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AutoPermissionHandler.swift; sourceTree = "<group>"; };
 		0B9F4AF6FA1ECC0A1B98C6C5 /* SQLiteLogStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SQLiteLogStore.swift; sourceTree = "<group>"; };
 		17E2A0667416BE2FEF2D2CAC /* PermissionCenter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PermissionCenter.swift; sourceTree = "<group>"; };
 		1ED59BB4320449E9634174FE /* BrowserManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowserManager.swift; sourceTree = "<group>"; };
@@ -85,6 +92,12 @@
 		2B36F9A72F2587640064518A /* PrivilegedHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedHelper.swift; sourceTree = "<group>"; };
 		2B71CC2F2F25953500AF867B /* PermissionsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsSheet.swift; sourceTree = "<group>"; };
 		2B71CC312F25955200AF867B /* PermissionsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsManager.swift; sourceTree = "<group>"; };
+		2BC4BE482F299D110090BDF5 /* CatalogLoadingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogLoadingTests.swift; sourceTree = "<group>"; };
+		2BC4BE4A2F299D110090BDF5 /* ExecutionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionTests.swift; sourceTree = "<group>"; };
+		2BC4BE4C2F299D110090BDF5 /* PermissionSystemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionSystemTests.swift; sourceTree = "<group>"; };
+		2BC4BE4E2F299D110090BDF5 /* AIWorkflowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWorkflowTests.swift; sourceTree = "<group>"; };
+		2BC4BE4F2F299D110090BDF5 /* BrowserOperationsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserOperationsTests.swift; sourceTree = "<group>"; };
+		2BC4BE502F299D110090BDF5 /* ElevatedExecutorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElevatedExecutorTests.swift; sourceTree = "<group>"; };
 		301C4C5E80590F2F558EC9DD /* RemediationSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemediationSheet.swift; sourceTree = "<group>"; };
 		3642860FD44D1FB8490D2972 /* EdgeController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EdgeController.swift; sourceTree = "<group>"; };
 		370207D71592AAA94380AB59 /* AIChatView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIChatView.swift; sourceTree = "<group>"; };
@@ -124,7 +137,7 @@
 		A2000014 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A2000015 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A2000016 /* CraigOTerminator.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CraigOTerminator.entitlements; sourceTree = "<group>"; };
-		A2000017 /* PermissionMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/PermissionMonitor.swift; sourceTree = "<group>"; };
+		A2000017 /* Core/PermissionMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/PermissionMonitor.swift; sourceTree = "<group>"; };
 		A2000018 /* ProcessMonitorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessMonitorService.swift; sourceTree = "<group>"; };
 		A2000019 /* BrowserTabListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabListView.swift; sourceTree = "<group>"; };
 		A2000020 /* BrowserTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTab.swift; sourceTree = "<group>"; };
@@ -140,7 +153,6 @@
 		EC32FF1AA15675F4CE0B207B /* HelperInstaller.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HelperInstaller.swift; sourceTree = "<group>"; };
 		F54E1BC6F4D89A5519D84588 /* ChromeController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChromeController.swift; sourceTree = "<group>"; };
 		F66C4B0241E15C2C4C92200C /* WorkflowApprovalSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorkflowApprovalSheet.swift; sourceTree = "<group>"; };
-		082DABFDF8104067B6747149 /* AutoPermissionHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AutoPermissionHandler.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -218,6 +230,43 @@
 				2B36F9A72F2587640064518A /* PrivilegedHelper.swift */,
 			);
 			path = Helper;
+			sourceTree = "<group>";
+		};
+		2BC4BE492F299D110090BDF5 /* CapabilityTests */ = {
+			isa = PBXGroup;
+			children = (
+				2BC4BE482F299D110090BDF5 /* CatalogLoadingTests.swift */,
+			);
+			path = CapabilityTests;
+			sourceTree = "<group>";
+		};
+		2BC4BE4B2F299D110090BDF5 /* ExecutionTests */ = {
+			isa = PBXGroup;
+			children = (
+				2BC4BE4A2F299D110090BDF5 /* ExecutionTests.swift */,
+			);
+			path = ExecutionTests;
+			sourceTree = "<group>";
+		};
+		2BC4BE4D2F299D110090BDF5 /* PermissionTests */ = {
+			isa = PBXGroup;
+			children = (
+				2BC4BE4C2F299D110090BDF5 /* PermissionSystemTests.swift */,
+			);
+			path = PermissionTests;
+			sourceTree = "<group>";
+		};
+		2BC4BE512F299D110090BDF5 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				2BC4BE492F299D110090BDF5 /* CapabilityTests */,
+				2BC4BE4B2F299D110090BDF5 /* ExecutionTests */,
+				2BC4BE4D2F299D110090BDF5 /* PermissionTests */,
+				2BC4BE4E2F299D110090BDF5 /* AIWorkflowTests.swift */,
+				2BC4BE4F2F299D110090BDF5 /* BrowserOperationsTests.swift */,
+				2BC4BE502F299D110090BDF5 /* ElevatedExecutorTests.swift */,
+			);
+			path = Tests;
 			sourceTree = "<group>";
 		};
 		2F3CCDFCF0219C06F73E7A8D /* AI */ = {
@@ -305,11 +354,12 @@
 		A5000002 /* CraigOTerminator */ = {
 			isa = PBXGroup;
 			children = (
+				2BC4BE512F299D110090BDF5 /* Tests */,
 				A5000004 /* App */,
 				A2000014 /* Assets.xcassets */,
 				A5000007 /* Core */,
 				A2000016 /* CraigOTerminator.entitlements */,
-				A2000017 /* PermissionMonitor.swift */,
+				A2000017 /* Core/PermissionMonitor.swift */,
 				2B36F9A82F2587640064518A /* Helper */,
 				A2000015 /* Info.plist */,
 				2B36F9A52F25875B0064518A /* Models */,
@@ -465,7 +515,7 @@
 				2B36F9A32F25874B0064518A /* AccountSettingsView.swift in Sources */,
 				A1000005 /* CleanupView.swift in Sources */,
 				A1000006 /* BrowsersView.swift in Sources */,
-				A1000007 /* ProcessesView.swift in Sources */,
+				2BC4BE522F299D110090BDF5 /* ElevatedExecutorTests.swift in Sources */,				2BC4BE542F299D110090BDF5 /* PermissionSystemTests.swift in Sources */,				2BC4BE562F299D110090BDF5 /* ExecutionTests.swift in Sources */,				A1000007 /* ProcessesView.swift in Sources */,
 				A1000008 /* DiagnosticsView.swift in Sources */,
 				A1000009 /* AgentsView.swift in Sources */,
 				A1000010 /* SettingsView.swift in Sources */,
@@ -474,7 +524,7 @@
 				2B36F9A62F25875B0064518A /* UserProfile.swift in Sources */,
 				A1000012 /* MenuBarView.swift in Sources */,
 				A1000013 /* CommandExecutor.swift in Sources */,
-				A1000015 /* PermissionMonitor.swift in Sources */,
+				A1000015 /* Core/PermissionMonitor.swift in Sources */,
 				A1000016 /* ProcessMonitorService.swift in Sources */,
 				A1000017 /* BrowserTabListView.swift in Sources */,
 				A1000018 /* BrowserTab.swift in Sources */,
