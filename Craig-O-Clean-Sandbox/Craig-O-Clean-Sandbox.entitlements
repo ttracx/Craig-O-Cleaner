@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- App Sandbox: REQUIRED for Mac App Store -->
+    <key>com.apple.security.app-sandbox</key>
+    <true/>
+
+    <!-- Network: Required for subscription validation, updates, and API calls -->
+    <key>com.apple.security.network.client</key>
+    <true/>
+
+    <!-- User-Selected Files: Allow read/write access to user-selected folders via NSOpenPanel -->
+    <!-- This is used for cache cleanup where user explicitly selects folders to clean -->
+    <key>com.apple.security.files.user-selected.read-write</key>
+    <true/>
+
+    <!-- Bookmarks: Allow creating and resolving security-scoped bookmarks -->
+    <!-- This enables persistent access to user-selected folders across app launches -->
+    <key>com.apple.security.files.bookmarks.app-scope</key>
+    <true/>
+
+    <!-- Apple Events Automation: Required for browser tab management -->
+    <key>com.apple.security.automation.apple-events</key>
+    <true/>
+
+    <!-- Scripting Targets: Explicit list of apps we can script (browser automation) -->
+    <key>com.apple.security.scripting-targets</key>
+    <dict>
+        <!-- Safari -->
+        <key>com.apple.Safari</key>
+        <array>
+            <string>com.apple.Safari.scripting</string>
+        </array>
+        <!-- Safari Technology Preview -->
+        <key>com.apple.SafariTechnologyPreview</key>
+        <array>
+            <string>com.apple.SafariTechnologyPreview.scripting</string>
+        </array>
+        <!-- Google Chrome -->
+        <key>com.google.Chrome</key>
+        <array>
+            <string>com.google.Chrome.scripting</string>
+        </array>
+        <!-- Microsoft Edge -->
+        <key>com.microsoft.edgemac</key>
+        <array>
+            <string>com.microsoft.edgemac.scripting</string>
+        </array>
+        <!-- Brave Browser -->
+        <key>com.brave.Browser</key>
+        <array>
+            <string>com.brave.Browser.scripting</string>
+        </array>
+        <!-- Arc Browser -->
+        <key>company.thebrowser.Browser</key>
+        <array>
+            <string>company.thebrowser.Browser.scripting</string>
+        </array>
+        <!-- System Events: For UI automation with Accessibility permission -->
+        <key>com.apple.systemevents</key>
+        <array>
+            <string>com.apple.systemevents.scripting</string>
+        </array>
+    </dict>
+
+    <!-- Sign in with Apple (if using Apple Sign In) -->
+    <key>com.apple.developer.applesignin</key>
+    <array>
+        <string>Default</string>
+    </array>
+</dict>
+</plist>
