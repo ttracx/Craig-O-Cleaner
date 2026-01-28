@@ -359,16 +359,29 @@ struct ContentView: View {
     }
 
     private func forceQuitProcess(_ process: ProcessInfo) async {
+        // First try standard force quit
         let success = await processManager.forceQuitProcess(process)
-        await MainActor.run {
-            alertMessage = success ?
-                "Process '\(process.name)' force quit successfully." :
-                "Failed to force quit process '\(process.name)'."
-            showingAlert = true
 
-            if success {
+        if success {
+            await MainActor.run {
+                alertMessage = "Process '\(process.name)' force quit successfully."
+                showingAlert = true
                 selectedProcess = nil
                 processManager.updateProcessList()
+            }
+        } else {
+            // Standard method failed, try with admin privileges as fallback
+            let adminSuccess = await processManager.forceQuitWithAdminPrivileges(process)
+
+            await MainActor.run {
+                if adminSuccess {
+                    alertMessage = "Process '\(process.name)' force quit successfully using administrator privileges."
+                    selectedProcess = nil
+                    processManager.updateProcessList()
+                } else {
+                    alertMessage = "Failed to force quit process '\(process.name)' even with administrator privileges. The process may be protected by the system."
+                }
+                showingAlert = true
             }
         }
     }

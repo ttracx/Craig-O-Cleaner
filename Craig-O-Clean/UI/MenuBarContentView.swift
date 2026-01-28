@@ -526,19 +526,40 @@ struct MenuBarDashboardTab: View {
 
     private func forceQuitProcess(_ process: ProcessInfo) {
         Task {
+            // First try standard force quit
             let success = await processManager.forceQuitProcess(process)
+
             if success {
                 await MainActor.run {
-                    self.alertTitle = "Success"
+                    self.alertTitle = "✅ Success"
                     self.alertMessage = "'\(process.name)' was force quit successfully."
                     self.showingAlert = true
                     self.processManager.updateProcessList()
                 }
             } else {
+                // Standard method failed, try with admin privileges as fallback
+                let adminSuccess = await processManager.forceQuitWithAdminPrivileges(process)
+
                 await MainActor.run {
-                    self.alertTitle = "Failed"
-                    self.alertMessage = "Failed to force quit '\(process.name)'. The process may require administrator privileges or be protected by the system."
-                    self.showingAlert = true
+                    if adminSuccess {
+                        self.alertTitle = "✅ Success"
+                        self.alertMessage = "'\(process.name)' was force quit successfully using administrator privileges."
+                        self.showingAlert = true
+                        self.processManager.updateProcessList()
+                    } else {
+                        self.alertTitle = "❌ Failed"
+                        self.alertMessage = """
+                        Failed to force quit '\(process.name)'.
+
+                        Possible reasons:
+                        • System-protected process (like Safari)
+                        • Admin password was cancelled
+                        • Process requires special privileges
+
+                        Try using Activity Monitor instead.
+                        """
+                        self.showingAlert = true
+                    }
                 }
             }
         }
@@ -979,68 +1000,148 @@ struct MenuBarBrowserTab: View {
     }
 
     private func errorStateView(error: BrowserAutomationError) -> some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) {
             ZStack {
                 Circle()
                     .fill(Color.orange.opacity(0.15))
-                    .frame(width: 70, height: 70)
+                    .frame(width: 60, height: 60)
 
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: 28))
+                    .font(.system(size: 24))
                     .foregroundColor(.orange)
             }
 
-            Text("Unable to Access Tabs")
-                .font(.system(size: 14, weight: .semibold))
-
-            Text(error.localizedDescription)
-                .font(.system(size: 12))
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 24)
+            Text("Permission Required")
+                .font(.system(size: 13, weight: .semibold))
 
             if case .automationPermissionDenied = error {
+                VStack(spacing: 8) {
+                    Text("Grant automation permission for \(browserAutomation.runningBrowsers.map { $0.rawValue }.joined(separator: ", "))")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 20)
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 4) {
+                            Text("1.")
+                                .font(.system(size: 10, weight: .bold))
+                            Text("Open System Settings")
+                                .font(.system(size: 10))
+                        }
+                        HStack(spacing: 4) {
+                            Text("2.")
+                                .font(.system(size: 10, weight: .bold))
+                            Text("Privacy & Security → Automation")
+                                .font(.system(size: 10))
+                        }
+                        HStack(spacing: 4) {
+                            Text("3.")
+                                .font(.system(size: 10, weight: .bold))
+                            Text("Enable Craig-O-Clean → Safari")
+                                .font(.system(size: 10))
+                        }
+                        HStack(spacing: 4) {
+                            Text("4.")
+                                .font(.system(size: 10, weight: .bold))
+                            Text("Click Refresh below")
+                                .font(.system(size: 10))
+                        }
+                    }
+                    .foregroundColor(.secondary)
+                    .padding(8)
+                    .background(Color(NSColor.controlBackgroundColor).opacity(0.5))
+                    .cornerRadius(6)
+                }
+
+                VStack(spacing: 8) {
+                    Button {
+                        // Open System Settings to Automation
+                        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation") {
+                            NSWorkspace.shared.open(url)
+                        }
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "gear")
+                                .font(.system(size: 11))
+                            Text("Open System Settings")
+                                .font(.system(size: 11, weight: .medium))
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(Color.vibePurple)
+                        .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+
+                    Button {
+                        Task {
+                            isRefreshing = true
+                            await browserAutomation.fetchAllTabs()
+                            isRefreshing = false
+                        }
+                    } label: {
+                        HStack(spacing: 6) {
+                            if isRefreshing {
+                                ProgressView()
+                                    .controlSize(.small)
+                                    .scaleEffect(0.7)
+                            } else {
+                                Image(systemName: "arrow.clockwise")
+                                    .font(.system(size: 11))
+                            }
+                            Text(isRefreshing ? "Refreshing..." : "Refresh Tabs")
+                                .font(.system(size: 11, weight: .medium))
+                        }
+                        .foregroundColor(.vibePurple)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(Color.vibePurple.opacity(0.15))
+                        .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(isRefreshing)
+                }
+                .padding(.horizontal, 12)
+            } else {
+                Text(error.localizedDescription)
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+
                 Button {
-                    // Open System Settings to Automation
-                    if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation") {
-                        NSWorkspace.shared.open(url)
+                    Task {
+                        isRefreshing = true
+                        await browserAutomation.fetchAllTabs()
+                        isRefreshing = false
                     }
                 } label: {
                     HStack(spacing: 6) {
-                        Image(systemName: "gear")
-                            .font(.system(size: 11))
-                        Text("Open System Settings")
+                        if isRefreshing {
+                            ProgressView()
+                                .controlSize(.small)
+                                .scaleEffect(0.7)
+                        } else {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.system(size: 11))
+                        }
+                        Text(isRefreshing ? "Refreshing..." : "Refresh Tabs")
                             .font(.system(size: 11, weight: .medium))
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.vibePurple)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 8)
-                    .background(Color.vibePurple)
+                    .background(Color.vibePurple.opacity(0.15))
                     .clipShape(Capsule())
                 }
                 .buttonStyle(.plain)
+                .disabled(isRefreshing)
             }
-
-            Button {
-                Task {
-                    await browserAutomation.fetchAllTabs()
-                }
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "arrow.clockwise")
-                        .font(.system(size: 11))
-                    Text("Try Again")
-                        .font(.system(size: 11, weight: .medium))
-                }
-                .foregroundColor(.vibePurple)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .background(Color.vibePurple.opacity(0.15))
-                .clipShape(Capsule())
-            }
-            .buttonStyle(.plain)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.vertical, 8)
     }
 
     private var browserHeaderSection: some View {
@@ -1614,16 +1715,14 @@ struct ModernProcessRow: View {
                 .font(.system(size: 11, weight: .medium, design: .monospaced))
                 .foregroundColor(.secondary)
 
-            // Close button (on hover)
-            if isHovered {
-                Button(action: onForceQuit) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 14))
-                        .foregroundColor(.red.opacity(0.8))
-                }
-                .buttonStyle(.plain)
-                .transition(.scale.combined(with: .opacity))
+            // Force Quit button (always visible, highlighted on hover)
+            Button(action: onForceQuit) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 14))
+                    .foregroundColor(isHovered ? .red : .red.opacity(0.5))
             }
+            .buttonStyle(.plain)
+            .help("Force Quit")
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)

@@ -892,7 +892,28 @@ class ProcessManager: ObservableObject {
                     }
                     continuation.resume(returning: true)
                 } else {
-                    print("[ProcessManager] Admin kill failed: \(error ?? [:])")
+                    // Log detailed error information
+                    if let errorDict = error {
+                        let errorNumber = errorDict[NSAppleScript.errorNumber] as? Int ?? 0
+                        let errorMessage = errorDict[NSAppleScript.errorMessage] as? String ?? "Unknown error"
+
+                        logger.error("AppleScript force kill PID \(process.pid) failed: \(errorMessage)")
+                        logger.error("Error code: \(errorNumber)")
+
+                        // Error -128 means user cancelled the password dialog
+                        // Error -10006 means process doesn't exist or already terminated
+                        if errorNumber == -128 {
+                            logger.info("User cancelled administrator password prompt for PID \(process.pid)")
+                        } else if errorNumber == -10006 {
+                            logger.info("Process \(process.pid) already terminated or doesn't exist")
+                            // Consider this a success since the process is gone
+                            Task { @MainActor in
+                                await self.cleanupProcessHistory(for: process.pid)
+                            }
+                            continuation.resume(returning: true)
+                            return
+                        }
+                    }
                     continuation.resume(returning: false)
                 }
             } else {

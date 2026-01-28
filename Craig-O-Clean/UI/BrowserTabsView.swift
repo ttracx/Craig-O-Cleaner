@@ -54,6 +54,9 @@ struct BrowserTabsView: View {
                     noBrowsersRunningView
                 } else if browserAutomation.isLoading {
                     loadingView
+                } else if browserAutomation.allTabs.isEmpty && browserAutomation.lastError != nil {
+                    // Show error state when tabs are empty AND there's an error
+                    automationErrorView
                 } else if browserAutomation.allTabs.isEmpty {
                     noTabsView
                 } else {
@@ -61,9 +64,9 @@ struct BrowserTabsView: View {
                     HStack(spacing: 0) {
                         // Browser sidebar
                         browserSidebar
-                        
+
                         Divider()
-                        
+
                         // Tab list
                         tabListSection
                     }
@@ -260,6 +263,110 @@ struct BrowserTabsView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
+    // MARK: - Automation Error View
+
+    private var automationErrorView: some View {
+        VStack(spacing: 24) {
+            Spacer()
+
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 60))
+                .foregroundColor(.orange)
+
+            Text("Browser Automation Permission Required")
+                .font(.title2)
+                .fontWeight(.bold)
+
+            if let error = browserAutomation.lastError {
+                Text(error.localizedDescription)
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: 500)
+                    .padding(.horizontal)
+            } else {
+                Text("Craig-O-Clean needs permission to access your browser tabs.")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: 500)
+            }
+
+            VStack(alignment: .leading, spacing: 12) {
+                Text("To fix this:")
+                    .font(.headline)
+
+                HStack(alignment: .top, spacing: 8) {
+                    Text("1.")
+                        .fontWeight(.bold)
+                    Text("Open System Settings")
+                }
+
+                HStack(alignment: .top, spacing: 8) {
+                    Text("2.")
+                        .fontWeight(.bold)
+                    Text("Go to Privacy & Security → Automation")
+                }
+
+                HStack(alignment: .top, spacing: 8) {
+                    Text("3.")
+                        .fontWeight(.bold)
+                    Text("Find Craig-O-Clean and enable \(browserAutomation.runningBrowsers.map { $0.rawValue }.joined(separator: ", "))")
+                }
+
+                HStack(alignment: .top, spacing: 8) {
+                    Text("4.")
+                        .fontWeight(.bold)
+                    Text("Restart Safari if needed")
+                }
+
+                HStack(alignment: .top, spacing: 8) {
+                    Text("5.")
+                        .fontWeight(.bold)
+                    Text("Click 'Refresh' in Browser Tabs view")
+                }
+            }
+            .padding()
+            .background(Color(NSColor.controlBackgroundColor))
+            .cornerRadius(12)
+            .frame(maxWidth: 500)
+
+            HStack(spacing: 16) {
+                Button("Open System Settings") {
+                    if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation") {
+                        NSWorkspace.shared.open(url)
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+
+                Button {
+                    Task {
+                        isRefreshing = true
+                        await browserAutomation.fetchAllTabs()
+                        isRefreshing = false
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        if isRefreshing {
+                            ProgressView()
+                                .controlSize(.small)
+                                .scaleEffect(0.8)
+                        } else {
+                            Image(systemName: "arrow.clockwise")
+                        }
+                        Text(isRefreshing ? "Refreshing..." : "Refresh Tabs")
+                    }
+                }
+                .buttonStyle(.bordered)
+                .disabled(isRefreshing)
+            }
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding()
+    }
+
     // MARK: - No Tabs View
 
     private var noTabsView: some View {

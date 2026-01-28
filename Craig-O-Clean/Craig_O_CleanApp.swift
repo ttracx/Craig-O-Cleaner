@@ -627,16 +627,26 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                         print("🔴 forceTerminate() failed, trying ProcessManager")
                         // Try using ProcessManager's more aggressive methods
                         if let process = processManager?.processes.first(where: { $0.pid == pid }) {
+                            // First try standard force quit
                             let success = await processManager?.forceQuitProcess(process) ?? false
                             if success {
                                 print("🔴 ProcessManager successfully force quit \(appName)")
                                 showNotification(title: "App Terminated", body: "\"\(appName)\" has been force quit.")
                             } else {
-                                print("🔴 ProcessManager also failed")
-                                showNotification(title: "Force Quit Failed", body: "Unable to quit \"\(appName)\". It may require administrator privileges.")
+                                print("🔴 ProcessManager standard method failed, trying with admin privileges")
+                                // Standard method failed, automatically try with admin privileges
+                                let adminSuccess = await processManager?.forceQuitWithAdminPrivileges(process) ?? false
+                                if adminSuccess {
+                                    print("🔴 ProcessManager successfully force quit \(appName) with admin privileges")
+                                    showNotification(title: "App Terminated", body: "\"\(appName)\" has been force quit using administrator privileges.")
+                                } else {
+                                    print("🔴 ProcessManager failed even with admin privileges")
+                                    showNotification(title: "Force Quit Failed", body: "Unable to quit \"\(appName)\" even with administrator privileges. The process may be protected by the system.")
+                                }
                             }
                         } else {
                             print("🔴 Could not find process in ProcessManager")
+                            showNotification(title: "Force Quit Failed", body: "Unable to find process for \"\(appName)\".")
                         }
                     }
                     processManager?.updateProcessList()
