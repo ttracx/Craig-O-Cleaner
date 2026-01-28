@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- App Sandbox - Required for App Store submission -->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+
+	<!-- Apple Sign In -->
+	<key>com.apple.developer.applesignin</key>
+	<array>
+		<string>Default</string>
+	</array>
+
+	<!-- Automation - AppleScript and Apple Events -->
+	<key>com.apple.security.automation.apple-events</key>
+	<true/>
+
+	<!-- File Access - User selected files only -->
+	<key>com.apple.security.files.user-selected.read-write</key>
+	<true/>
+
+	<!-- Network - Required for API calls -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+
+	<!-- Browser Scripting Targets -->
+	<key>com.apple.security.scripting-targets</key>
+	<dict>
+		<key>com.apple.Safari</key>
+		<array>
+			<string>com.apple.Safari.scripting</string>
+		</array>
+		<key>com.apple.systemevents</key>
+		<array>
+			<string>com.apple.systemevents.scripting</string>
+		</array>
+		<key>com.brave.Browser</key>
+		<array>
+			<string>com.brave.Browser.scripting</string>
+		</array>
+		<key>com.google.Chrome</key>
+		<array>
+			<string>com.google.Chrome.scripting</string>
+		</array>
+		<key>com.microsoft.edgemac</key>
+		<array>
+			<string>com.microsoft.edgemac.scripting</string>
+		</array>
+		<key>company.thebrowser.Browser</key>
+		<array>
+			<string>company.thebrowser.Browser.scripting</string>
+		</array>
+	</dict>
+
+	<!-- Temporary Exception - Launch Services (required for browser detection) -->
+	<key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
+	<array>
+		<string>com.apple.coreservices.launchservicesd</string>
+	</array>
+</dict>
+</plist>

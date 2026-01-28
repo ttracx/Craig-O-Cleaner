@@ -48,9 +48,13 @@ struct MainAppView: View {
     @StateObject private var browserAutomation = BrowserAutomationService()
     @StateObject private var permissions = PermissionsService()
     @StateObject private var autoCleanup: AutoCleanupService
+    @StateObject private var permissionFlow = AutomaticPermissionFlow.shared
+    @StateObject private var migrationManager = SandboxMigrationManager.shared
 
     @State private var selectedItem: NavigationItem = .dashboard
     @State private var showOnboarding = false
+    @State private var showPermissionFlow = false
+    @State private var showMigrationNotice = false
 
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
 
@@ -158,9 +162,21 @@ struct MainAppView: View {
         }
         .onAppear {
             systemMetrics.startMonitoring()
-            
-            if !hasCompletedOnboarding {
+
+            // Check for sandbox migration first
+            if migrationManager.shouldShowMigrationNotice {
+                showMigrationNotice = true
+            } else if !hasCompletedOnboarding {
+                // Show onboarding if this is first launch
                 showOnboarding = true
+            } else {
+                // Check permissions and offer automated flow if any are missing
+                Task {
+                    await permissions.checkAllPermissions()
+                    if !permissions.hasAllCriticalPermissions {
+                        showPermissionFlow = true
+                    }
+                }
             }
         }
         .sheet(isPresented: $showOnboarding) {
@@ -168,12 +184,33 @@ struct MainAppView: View {
                 hasCompletedOnboarding = true
             }
         }
+        .sheet(isPresented: $showMigrationNotice) {
+            SandboxMigrationNotice()
+                .environmentObject(migrationManager)
+                .environmentObject(permissions)
+                .onDisappear {
+                    // After migration notice, check if permissions are needed
+                    if !permissions.hasAllCriticalPermissions {
+                        showPermissionFlow = true
+                    }
+                }
+        }
+        .sheet(isPresented: $showPermissionFlow) {
+            AutomaticPermissionFlowView()
+                .environmentObject(permissionFlow)
+                .environmentObject(permissions)
+                .onAppear {
+                    permissionFlow.startFlow(permissionsService: permissions)
+                }
+        }
         .environmentObject(systemMetrics)
         .environmentObject(processManager)
         .environmentObject(memoryOptimizer)
         .environmentObject(browserAutomation)
         .environmentObject(permissions)
         .environmentObject(autoCleanup)
+        .environmentObject(permissionFlow)
+        .environmentObject(migrationManager)
         .environmentObject(AuthManager.shared)
         .environmentObject(LocalUserStore.shared)
         .environmentObject(SubscriptionManager.shared)

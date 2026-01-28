@@ -534,16 +534,28 @@ final class BrowserAutomationService: ObservableObject {
     
     private func executeAppleScript(_ script: String, for browser: SupportedBrowser? = nil) async throws -> String {
         return try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            // NSAppleScript must execute on main thread when sandboxed to avoid crashes
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else {
+                    continuation.resume(throwing: BrowserAutomationError.scriptExecutionFailed("Service deallocated"))
+                    return
+                }
+
+                // Create and execute AppleScript on main thread
+                guard let appleScript = NSAppleScript(source: script) else {
+                    self.logger.error("Failed to create NSAppleScript object")
+                    continuation.resume(throwing: BrowserAutomationError.scriptExecutionFailed("Failed to create AppleScript"))
+                    return
+                }
+
                 var error: NSDictionary?
-                let appleScript = NSAppleScript(source: script)
-                let output = appleScript?.executeAndReturnError(&error)
+                let output = appleScript.executeAndReturnError(&error)
 
                 if let error = error {
                     let errorMessage = error[NSAppleScript.errorMessage] as? String ?? "Unknown AppleScript error"
                     let errorNumber = error[NSAppleScript.errorNumber] as? Int ?? 0
 
-                    self?.logger.error("AppleScript error \(errorNumber): \(errorMessage)")
+                    self.logger.error("AppleScript error \(errorNumber): \(errorMessage)")
 
                     // Handle various permission-related error codes
                     // -1743 = "Not authorized to send Apple events"
@@ -553,7 +565,7 @@ final class BrowserAutomationService: ObservableObject {
                     if errorNumber == -1743 || errorNumber == -10004 || errorNumber == -1728 {
                         // Use the provided browser, or default to Safari for backwards compatibility
                         let targetBrowser = browser ?? .safari
-                        self?.logger.warning("Automation permission denied for \(targetBrowser.rawValue). User needs to grant permission in System Settings.")
+                        self.logger.warning("Automation permission denied for \(targetBrowser.rawValue). User needs to grant permission in System Settings.")
                         continuation.resume(throwing: BrowserAutomationError.automationPermissionDenied(targetBrowser))
                     } else {
                         continuation.resume(throwing: BrowserAutomationError.scriptExecutionFailed(errorMessage))
@@ -561,8 +573,8 @@ final class BrowserAutomationService: ObservableObject {
                     return
                 }
 
-                let result = output?.stringValue ?? ""
-                self?.logger.debug("AppleScript output: \(result.prefix(200))...")
+                let result = output.stringValue ?? ""
+                self.logger.debug("AppleScript output: \(result.prefix(200))...")
                 continuation.resume(returning: result)
             }
         }

@@ -39,6 +39,8 @@ struct MenuBarContentView: View {
     @StateObject private var browserAutomation = BrowserAutomationService()
     @StateObject private var permissions = PermissionsService()
     @StateObject private var autoCleanupHolder = AutoCleanupHolder()
+    @StateObject private var permissionFlow = AutomaticPermissionFlow.shared
+    @StateObject private var migrationManager = SandboxMigrationManager.shared
 
     @EnvironmentObject var auth: AuthManager
     @EnvironmentObject var userStore: LocalUserStore
@@ -54,6 +56,8 @@ struct MenuBarContentView: View {
     @State private var showingAlert = false
     @State private var alertMessage = ""
     @State private var alertTitle = ""
+    @State private var showPermissionFlow = false
+    @State private var showMigrationNotice = false
     @Namespace private var tabAnimation
 
     var body: some View {
@@ -94,10 +98,21 @@ struct MenuBarContentView: View {
                 hasSetupPermissionIntegration = true
             }
 
-            Task {
-                await memoryOptimizer.analyzeMemoryUsage()
-                await permissions.checkAllPermissions()
-                await browserAutomation.fetchAllTabs()
+            // Check for sandbox migration first
+            if migrationManager.shouldShowMigrationNotice {
+                showMigrationNotice = true
+            } else {
+                // Check permissions and offer automated flow if any are missing
+                Task {
+                    await memoryOptimizer.analyzeMemoryUsage()
+                    await permissions.checkAllPermissions()
+
+                    if !permissions.hasAllCriticalPermissions {
+                        showPermissionFlow = true
+                    }
+
+                    await browserAutomation.fetchAllTabs()
+                }
             }
         }
         .onDisappear {
@@ -109,6 +124,25 @@ struct MenuBarContentView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text(alertMessage)
+        }
+        .sheet(isPresented: $showMigrationNotice) {
+            SandboxMigrationNotice()
+                .environmentObject(migrationManager)
+                .environmentObject(permissions)
+                .onDisappear {
+                    // After migration notice, check if permissions are needed
+                    if !permissions.hasAllCriticalPermissions {
+                        showPermissionFlow = true
+                    }
+                }
+        }
+        .sheet(isPresented: $showPermissionFlow) {
+            AutomaticPermissionFlowView()
+                .environmentObject(permissionFlow)
+                .environmentObject(permissions)
+                .onAppear {
+                    permissionFlow.startFlow(permissionsService: permissions)
+                }
         }
     }
 
