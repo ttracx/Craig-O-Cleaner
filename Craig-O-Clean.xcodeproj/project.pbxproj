@@ -70,6 +70,12 @@
 		2BC5E1B22F1FFFEC00093C17 /* PrivilegeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8F6221E6CFB4F658E745547 /* PrivilegeService.swift */; };
 		2BC5E1B32F1FFFEC00093C17 /* DebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D350B359D5421F816720F5 /* DebugLogger.swift */; };
 		2BC5E1B42F1FFFEC00093C17 /* LoggingExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7313236940042A799441B8A /* LoggingExtensions.swift */; };
+		2BD042BB2F29B60500F4D23F /* SandboxMigrationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD042BA2F29B60500F4D23F /* SandboxMigrationManager.swift */; };
+		2BD042BC2F29B60500F4D23F /* AutomaticPermissionFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD042B92F29B60500F4D23F /* AutomaticPermissionFlow.swift */; };
+		2BD042BD2F29B60500F4D23F /* SandboxMigrationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD042BA2F29B60500F4D23F /* SandboxMigrationManager.swift */; };
+		2BD042BE2F29B60500F4D23F /* AutomaticPermissionFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD042B92F29B60500F4D23F /* AutomaticPermissionFlow.swift */; };
+		2BD042BF2F29B60500F4D23F /* SandboxMigrationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD042BA2F29B60500F4D23F /* SandboxMigrationManager.swift */; };
+		2BD042C02F29B60500F4D23F /* AutomaticPermissionFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD042B92F29B60500F4D23F /* AutomaticPermissionFlow.swift */; };
 		2BD1F7C12F2482E80040EA8C /* Configuration.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 2BD1F7C02F2482E80040EA8C /* Configuration.storekit */; };
 		2FE223FFC5AB086E1F390837 /* SystemCPUMonitorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23FD6D8224281B502229F05E /* SystemCPUMonitorView.swift */; };
 		320BA199692F2B0CE464C826 /* ClearMindUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3347C167919A7F97FE2CDE86 /* ClearMindUITests.swift */; };
@@ -151,6 +157,10 @@
 		2B12F1AA2F29558000C7CE84 /* CapabilityMenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapabilityMenuBarView.swift; sourceTree = "<group>"; };
 		2B12F1AC2F29558000C7CE84 /* PermissionStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionStatusView.swift; sourceTree = "<group>"; };
 		2B3C4D5E6F7890ABCDEF0102 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
+		2BD042AF2F29B4FD00F4D23F /* Craig-O-Clean-Debug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Craig-O-Clean-Debug.entitlements"; sourceTree = "<group>"; };
+		2BD042B02F29B4FD00F4D23F /* Craig-O-Clean-Release.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Craig-O-Clean-Release.entitlements"; sourceTree = "<group>"; };
+		2BD042B92F29B60500F4D23F /* AutomaticPermissionFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomaticPermissionFlow.swift; sourceTree = "<group>"; };
+		2BD042BA2F29B60500F4D23F /* SandboxMigrationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SandboxMigrationManager.swift; sourceTree = "<group>"; };
 		2BD1F7C02F2482E80040EA8C /* Configuration.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Configuration.storekit; sourceTree = "<group>"; };
 		2D668FCC2D3BE0E8F1A7F1A0 /* AppVersion.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppVersion.swift; sourceTree = "<group>"; };
 		3347C167919A7F97FE2CDE86 /* ClearMindUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClearMindUITests.swift; sourceTree = "<group>"; };
@@ -334,6 +344,8 @@
 		5CB23B38D6DD33656D6F1EE6 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				2BD042B92F29B60500F4D23F /* AutomaticPermissionFlow.swift */,
+				2BD042BA2F29B60500F4D23F /* SandboxMigrationManager.swift */,
 				2B12F1802F29556F00C7CE84 /* Capabilities */,
 				2B12F1852F29556F00C7CE84 /* Execution */,
 				2B12F1892F29556F00C7CE84 /* Logging */,
@@ -363,6 +375,8 @@
 		AAA8B2312C2FDE28DD3FAF8F /* Craig-O-Clean */ = {
 			isa = PBXGroup;
 			children = (
+				2BD042AF2F29B4FD00F4D23F /* Craig-O-Clean-Debug.entitlements */,
+				2BD042B02F29B4FD00F4D23F /* Craig-O-Clean-Release.entitlements */,
 				2B12F1AE2F29558000C7CE84 /* Features */,
 				2B12F1782F29555400C7CE84 /* Automation */,
 				2B12F1732F29554000C7CE84 /* App */,
@@ -545,6 +559,8 @@
 				2B12F1752F29554000C7CE84 /* AppEnvironment.swift in Sources */,
 				2B12F17B2F29555400C7CE84 /* BrowserController.swift in Sources */,
 				2BC5E1B12F1FFFEC00093C17 /* TrialManager.swift in Sources */,
+				2BD042BD2F29B60500F4D23F /* SandboxMigrationManager.swift in Sources */,
+				2BD042BE2F29B60500F4D23F /* AutomaticPermissionFlow.swift in Sources */,
 				2BC5E1B22F1FFFEC00093C17 /* PrivilegeService.swift in Sources */,
 				2BC5E1B32F1FFFEC00093C17 /* DebugLogger.swift in Sources */,
 				2BC5E1B42F1FFFEC00093C17 /* LoggingExtensions.swift in Sources */,
@@ -611,6 +627,8 @@
 				C5E0BF15781E4F6CB83CF8D8 /* LoggingExtensions.swift in Sources */,
 				127FE76D306047399C129BD1 /* PaywallView.swift in Sources */,
 				C1D444615A5CEA3017A16469 /* BrowserPermissionManager.swift in Sources */,
+				2BD042BF2F29B60500F4D23F /* SandboxMigrationManager.swift in Sources */,
+				2BD042C02F29B60500F4D23F /* AutomaticPermissionFlow.swift in Sources */,
 				14AA9922366E1795DDE5E3BC /* PermissionNotificationBanner.swift in Sources */,
 				E81759E66A5D7650C6C281D7 /* AppVersion.swift in Sources */,
 				6E6ED9384A891B8D2ADF8D81 /* AvatarManager.swift in Sources */,
@@ -629,6 +647,8 @@
 				2B12F1972F29556F00C7CE84 /* ProcessRunner.swift in Sources */,
 				2B12F1982F29556F00C7CE84 /* CapabilityCatalog.swift in Sources */,
 				2B12F1992F29556F00C7CE84 /* CommandExecutor.swift in Sources */,
+				2BD042BB2F29B60500F4D23F /* SandboxMigrationManager.swift in Sources */,
+				2BD042BC2F29B60500F4D23F /* AutomaticPermissionFlow.swift in Sources */,
 				2B12F19A2F29556F00C7CE84 /* UserExecutor.swift in Sources */,
 				2B12F19B2F29556F00C7CE84 /* LogStore.swift in Sources */,
 				2B12F17A2F29555400C7CE84 /* BrowserController.swift in Sources */,
@@ -684,7 +704,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = K36LFHM32T;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_FILE_ACCESS_DOWNLOADS_FOLDER = readwrite;
@@ -911,14 +931,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				AUTOMATION_APPLE_EVENTS = YES;
-				CODE_SIGN_ENTITLEMENTS = "Craig-O-Clean/Craig-O-Clean-Debug.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Craig-O-Clean/Craig-O-Clean-Release.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = K36LFHM32T;
-				ENABLE_APP_SANDBOX = NO;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_FILE_ACCESS_DOWNLOADS_FOLDER = readwrite;
 				ENABLE_FILE_ACCESS_MOVIES_FOLDER = readwrite;
 				ENABLE_FILE_ACCESS_MUSIC_FOLDER = readwrite;
