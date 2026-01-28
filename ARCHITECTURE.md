@@ -1,10 +1,10 @@
-# ClearMind Control Center Architecture
+# Craig-O-Clean Architecture
 
-This document describes the technical architecture and design of ClearMind Control Center, a production-ready macOS system utility for Apple Silicon.
+This document describes the technical architecture and design of Craig-O-Clean, a production-ready macOS system utility for Apple Silicon.
 
 ## Overview
 
-ClearMind Control Center is a native macOS application built with:
+Craig-O-Clean is a native macOS application built with:
 - **SwiftUI** for the user interface
 - **Combine** for reactive data flow
 - **AppKit interop** for system integration (menu bar, process management)
@@ -14,7 +14,7 @@ ClearMind Control Center is a native macOS application built with:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────┐
-│                           ClearMind Control Center                          │
+│                           Craig-O-Clean                          │
 ├────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │

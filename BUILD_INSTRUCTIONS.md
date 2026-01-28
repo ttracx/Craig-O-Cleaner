@@ -1,6 +1,6 @@
-# ClearMind Control Center - Build Instructions
+# Craig-O-Clean - Build Instructions
 
-This document provides detailed instructions for building ClearMind Control Center from source.
+This document provides detailed instructions for building Craig-O-Clean from source.
 
 ## Prerequisites
 
@@ -53,8 +53,8 @@ Craig-O-Clean/
 │   ├── SettingsPermissionsView.swift
 │   └── MenuBarContentView.swift
 ├── Tests/
-│   ├── ClearMindTests/            # Unit tests
-│   └── ClearMindUITests/          # UI tests
+│   ├── Craig-O-CleanTests/            # Unit tests
+│   └── Craig-O-CleanUITests/          # UI tests
 ├── Assets.xcassets/               # App icons and assets
 ├── Craig_O_CleanApp.swift         # App entry point
 ├── ProcessManager.swift           # Process management
@@ -127,18 +127,18 @@ Key build settings (already configured):
 
 ```bash
 # Run all unit tests
-xcodebuild test -scheme Craig-O-Clean -destination 'platform=macOS' -only-testing:ClearMindTests
+xcodebuild test -scheme Craig-O-Clean -destination 'platform=macOS' -only-testing:Craig-O-CleanTests
 
 # Run specific test file
 xcodebuild test -scheme Craig-O-Clean -destination 'platform=macOS' \
-  -only-testing:ClearMindTests/SystemMetricsServiceTests
+  -only-testing:Craig-O-CleanTests/SystemMetricsServiceTests
 ```
 
 ### UI Tests
 
 ```bash
 # Run UI tests
-xcodebuild test -scheme Craig-O-Clean -destination 'platform=macOS' -only-testing:ClearMindUITests
+xcodebuild test -scheme Craig-O-Clean -destination 'platform=macOS' -only-testing:Craig-O-CleanUITests
 ```
 
 ### In Xcode
@@ -157,7 +157,7 @@ xcodebuild clean -scheme Craig-O-Clean
 # Create archive
 xcodebuild archive \
   -scheme Craig-O-Clean \
-  -archivePath build/ClearMind.xcarchive \
+  -archivePath build/Craig-O-Clean.xcarchive \
   -configuration Release
 ```
 
@@ -180,7 +180,7 @@ Create `ExportOptions.plist`:
 Export:
 ```bash
 xcodebuild -exportArchive \
-  -archivePath build/ClearMind.xcarchive \
+  -archivePath build/Craig-O-Clean.xcarchive \
   -exportPath build/ \
   -exportOptionsPlist ExportOptions.plist
 ```
@@ -189,27 +189,27 @@ xcodebuild -exportArchive \
 
 ```bash
 # Create ZIP for notarization
-ditto -c -k --keepParent "build/ClearMind Control Center.app" build/ClearMind.zip
+ditto -c -k --keepParent "build/Craig-O-Clean.app" build/Craig-O-Clean.zip
 
 # Submit for notarization
-xcrun notarytool submit build/ClearMind.zip \
+xcrun notarytool submit build/Craig-O-Clean.zip \
   --apple-id "your@email.com" \
   --team-id "YOUR_TEAM_ID" \
   --password "@keychain:AC_PASSWORD" \
   --wait
 
 # Staple the ticket
-xcrun stapler staple "build/ClearMind Control Center.app"
+xcrun stapler staple "build/Craig-O-Clean.app"
 ```
 
 ### Create DMG
 
 ```bash
 # Create DMG installer
-hdiutil create -volname "ClearMind Control Center" \
-  -srcfolder "build/ClearMind Control Center.app" \
+hdiutil create -volname "Craig-O-Clean" \
+  -srcfolder "build/Craig-O-Clean.app" \
   -ov -format UDZO \
-  build/ClearMind.dmg
+  build/Craig-O-Clean.dmg
 ```
 
 ## Troubleshooting

@@ -1,6 +1,6 @@
-# ClearMind Control Center
+# Craig-O-Clean
 
-A powerful, production-ready macOS system utility for Apple Silicon Macs. ClearMind provides comprehensive system monitoring, process management, memory optimization, and browser tab control—all in a beautiful, native SwiftUI interface.
+A powerful, production-ready macOS system utility for Apple Silicon Macs. Craig-O-Clean provides comprehensive system monitoring, process management, memory optimization, and browser tab control—all in a beautiful, native SwiftUI interface.
 
 ![macOS 14+](https://img.shields.io/badge/macOS-14%2B-blue)
 ![Swift 5.9+](https://img.shields.io/badge/Swift-5.9%2B-orange)
@@ -128,7 +128,7 @@ Cross-browser tab management:
 ### From Release
 
 1. Download the latest `.dmg` from Releases
-2. Drag ClearMind to Applications
+2. Drag Craig-O-Clean to Applications
 3. Launch and grant requested permissions
 
 ## Development
@@ -180,14 +180,14 @@ make watch-sync        # Start file watcher for real-time syncing
 
 ## Permissions Required
 
-ClearMind requires certain permissions for full functionality:
+Craig-O-Clean requires certain permissions for full functionality:
 
 ### Automation (Required for Browser Tab Management)
-Allows ClearMind to control Safari, Chrome, Edge, and other browsers to list and close tabs.
+Allows Craig-O-Clean to control Safari, Chrome, Edge, and other browsers to list and close tabs.
 
 **To enable:**
 1. Open System Settings → Privacy & Security → Automation
-2. Find ClearMind Control Center
+2. Find Craig-O-Clean
 3. Enable access for each browser you want to manage
 
 ### Accessibility (Optional)
@@ -196,7 +196,7 @@ Enables advanced system interactions and window management.
 **To enable:**
 1. Open System Settings → Privacy & Security → Accessibility
 2. Click the lock to make changes
-3. Enable ClearMind Control Center
+3. Enable Craig-O-Clean
 
 ## Usage
 
@@ -235,8 +235,8 @@ Craig-O-Clean/
 │   ├── SettingsPermissionsView.swift # Settings and permissions
 │   └── MenuBarContentView.swift   # Menu bar popover
 ├── Tests/
-│   ├── ClearMindTests/            # Unit tests
-│   └── ClearMindUITests/          # UI tests
+│   ├── Craig-O-CleanTests/        # Unit tests
+│   └── Craig-O-CleanUITests/      # UI tests
 ├── Craig_O_CleanApp.swift         # App entry point
 ├── ProcessManager.swift           # Process management
 ├── SystemMemoryManager.swift      # Legacy memory manager
@@ -245,7 +245,7 @@ Craig-O-Clean/
 
 ## Architecture
 
-ClearMind follows a clean, modular architecture:
+Craig-O-Clean follows a clean, modular architecture:
 
 - **Services Layer**: Core business logic with Combine publishers
 - **UI Layer**: SwiftUI views with environment objects
@@ -255,7 +255,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed documentation.
 
 ## Security
 
-ClearMind is designed with security in mind:
+Craig-O-Clean is designed with security in mind:
 
 - **No network connections** - All processing happens locally
 - **No data collection** - Your data never leaves your Mac
@@ -273,25 +273,25 @@ xcodebuild test -scheme Craig-O-Clean -destination 'platform=macOS'
 
 ### Run UI Tests
 ```bash
-xcodebuild test -scheme Craig-O-Clean -destination 'platform=macOS' -only-testing:ClearMindUITests
+xcodebuild test -scheme Craig-O-Clean -destination 'platform=macOS' -only-testing:Craig-O-CleanUITests
 ```
 
 ## Building for Distribution
 
 1. **Archive**:
    ```bash
-   xcodebuild archive -scheme Craig-O-Clean -archivePath build/ClearMind.xcarchive
+   xcodebuild archive -scheme Craig-O-Clean -archivePath build/Craig-O-Clean.xcarchive
    ```
 
 2. **Export**:
    ```bash
-   xcodebuild -exportArchive -archivePath build/ClearMind.xcarchive \
+   xcodebuild -exportArchive -archivePath build/Craig-O-Clean.xcarchive \
      -exportPath build/ -exportOptionsPlist ExportOptions.plist
    ```
 
 3. **Notarize** (requires Apple Developer account):
    ```bash
-   xcrun notarytool submit build/ClearMind.app.zip --wait
+   xcrun notarytool submit build/Craig-O-Clean.app.zip --wait
    ```
 
 ## Contributing

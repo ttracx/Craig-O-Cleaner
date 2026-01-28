@@ -1,4 +1,4 @@
-# Craig-O-Clean (ClearMind Control Center) - Comprehensive Feature & API Mapping
+# Craig-O-Clean - Comprehensive Feature & API Mapping
 
 > **Generated:** December 2024
 > **Platform:** macOS 14+ (Apple Silicon optimized)

@@ -111,9 +111,9 @@ XcodeGen generates your Xcode project from a YAML specification file (`project.y
 The project structure is defined in `project.yml`:
 
 ```yaml
-name: ClearMind
+name: Craig-O-Clean
 targets:
-  ClearMind:
+  Craig-O-Clean:
     sources:
       - path: Craig-O-Clean
         excludes:
@@ -236,7 +236,7 @@ Add exclusions to `project.yml`:
 
 ```yaml
 targets:
-  ClearMind:
+  Craig-O-Clean:
     sources:
       - path: Craig-O-Clean
         excludes:
@@ -249,14 +249,14 @@ targets:
 ### Multiple Targets
 
 The project has three targets defined:
-1. **ClearMind** - Main app
-2. **ClearMindTests** - Unit tests
-3. **ClearMindUITests** - UI tests
+1. **Craig-O-Clean** - Main app
+2. **Craig-O-CleanTests** - Unit tests
+3. **Craig-O-CleanUITests** - UI tests
 
 Files are automatically assigned based on path:
-- `Craig-O-Clean/*.swift` → ClearMind
-- `Craig-O-Clean/Tests/ClearMindTests/*.swift` → ClearMindTests
-- `Craig-O-Clean/Tests/ClearMindUITests/*.swift` → ClearMindUITests
+- `Craig-O-Clean/*.swift` → Craig-O-Clean
+- `Craig-O-Clean/Tests/Craig-O-CleanTests/*.swift` → Craig-O-CleanTests
+- `Craig-O-Clean/Tests/Craig-O-CleanUITests/*.swift` → Craig-O-CleanUITests
 
 ---
 

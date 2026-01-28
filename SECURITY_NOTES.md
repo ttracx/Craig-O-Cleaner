@@ -1,10 +1,10 @@
-# ClearMind Control Center - Security Notes
+# Craig-O-Clean - Security Notes
 
-This document describes the security architecture, permission requirements, and privacy considerations for ClearMind Control Center.
+This document describes the security architecture, permission requirements, and privacy considerations for Craig-O-Clean.
 
 ## Overview
 
-ClearMind Control Center is designed with security and privacy as core principles:
+Craig-O-Clean is designed with security and privacy as core principles:
 
 - **No network connections** - All data stays on your Mac
 - **No data collection** - No analytics, telemetry, or crash reporting
@@ -26,14 +26,14 @@ ClearMind Control Center is designed with security and privacy as core principle
 - User explicitly grants access via System Settings
 
 **Security implications:**
-- ClearMind can read tab titles and URLs when permission is granted
-- ClearMind can close tabs in permitted browsers
+- Craig-O-Clean can read tab titles and URLs when permission is granted
+- Craig-O-Clean can close tabs in permitted browsers
 - Cannot access browser history, passwords, or cookies
 - Cannot access files or data beyond tab information
 
 **To enable:**
 1. Open System Settings → Privacy & Security → Automation
-2. Find ClearMind Control Center
+2. Find Craig-O-Clean
 3. Enable each browser you want to manage
 
 ### 2. Accessibility Permission (Optional)
@@ -46,18 +46,18 @@ ClearMind Control Center is designed with security and privacy as core principle
 
 **Security implications:**
 - When granted, could theoretically observe UI elements
-- ClearMind does NOT use this to monitor user activity
+- Craig-O-Clean does NOT use this to monitor user activity
 - Only used for legitimate system control features
 
 **To enable:**
 1. Open System Settings → Privacy & Security → Accessibility
-2. Enable ClearMind Control Center
+2. Enable Craig-O-Clean
 
 ## Process Management Security
 
 ### Protected Processes
 
-ClearMind maintains a list of critical system processes that are protected from termination:
+Craig-O-Clean maintains a list of critical system processes that are protected from termination:
 
 ```swift
 private let criticalProcessNames: Set<String> = [
@@ -147,7 +147,7 @@ All AppleScript is:
 
 ### Data Collection: None
 
-ClearMind Control Center does **NOT**:
+Craig-O-Clean does **NOT**:
 - Collect any user data
 - Send any data over the network
 - Track usage patterns
@@ -172,7 +172,7 @@ The only data stored locally:
 
 ### No Network Access
 
-ClearMind Control Center:
+Craig-O-Clean:
 - Makes zero network connections
 - Has no network code
 - Does not check for updates online
@@ -255,7 +255,7 @@ If you discover a security vulnerability:
 
 ### Privacy Regulations
 
-ClearMind Control Center is compliant with:
+Craig-O-Clean is compliant with:
 - **GDPR** - No personal data processing
 - **CCPA** - No personal information collection
 - **Apple App Store Guidelines** - Follows all privacy requirements

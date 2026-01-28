@@ -1,4 +1,4 @@
-# ClearMind Control Center Feature & Functionality Map
+# Craig-O-Clean Feature & Functionality Map
 
 This document maps major features to their implementations, UI routes (SwiftUI views), and API endpoints (if any). The app is a native macOS utility; most functionality relies on local system APIs rather than remote services.
 
