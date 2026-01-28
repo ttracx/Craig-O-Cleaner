@@ -74,15 +74,175 @@ final class AutoPermissionHandler {
             return
         }
 
-        // Open System Settings for each missing permission
+        // Handle each permission type appropriately
         for permission in permissions {
-            await openSettingsForPermission(permission)
+            await handlePermission(permission)
 
-            // Small delay between opening multiple permission panes
+            // Small delay between handling multiple permissions
             if permissions.count > 1 {
-                try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+                try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
             }
         }
+    }
+
+    /// Handle a specific permission by triggering the appropriate flow
+    @MainActor
+    private func handlePermission(_ permission: PermissionType) async {
+        let permissionKey = permission.displayName
+
+        // Check if we've already handled this permission in this session
+        guard !autoOpenedPermissions.contains(permissionKey) else {
+            logger.debug("Already handled \(permissionKey) in this session, skipping")
+            return
+        }
+
+        logger.info("Handling permission: \(permissionKey)")
+
+        // Mark as handled
+        autoOpenedPermissions.insert(permissionKey)
+        saveAutoOpenedPermissions()
+
+        switch permission {
+        case .automation(let browser):
+            // Trigger the actual permission dialog by attempting automation
+            await triggerAutomationDialog(for: browser)
+
+        case .fullDiskAccess:
+            // Show step-by-step guide and open System Settings
+            await handleFullDiskAccessPermission()
+
+        case .helper:
+            // Show installation instructions
+            await handleHelperPermission()
+        }
+    }
+
+    /// Trigger the macOS automation permission dialog
+    @MainActor
+    private func triggerAutomationDialog(for browser: BrowserApp) async {
+        logger.info("Triggering automation permission dialog for \(browser.rawValue)")
+
+        // Show info alert
+        let alert = NSAlert()
+        alert.messageText = "Grant \(browser.rawValue) Automation Permission"
+        alert.informativeText = """
+        A system permission dialog will appear asking you to allow Craig-O-Clean to control \(browser.rawValue).
+
+        Click "OK" or "Allow" in the dialog to grant permission.
+
+        If \(browser.rawValue) is not running, it will be launched automatically.
+        """
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "Continue")
+        alert.addButton(withTitle: "Cancel")
+
+        let response = alert.runModal()
+        guard response == .alertFirstButtonReturn else {
+            logger.info("User cancelled automation permission request")
+            return
+        }
+
+        // Try to trigger the permission dialog using AutomationChecker
+        let state = await AutomationChecker.requestPermission(for: browser)
+
+        // Give it a moment to show the dialog
+        try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
+
+        // If still not granted, open System Settings as fallback
+        if state != .granted {
+            logger.warning("Permission dialog may not have appeared, opening System Settings as fallback")
+            permissionCenter.openSystemSettings(for: .automation(browser))
+
+            // Show manual instructions
+            await showManualInstructions(for: browser)
+        } else {
+            // Success!
+            logger.info("Successfully granted automation permission for \(browser.rawValue)")
+        }
+    }
+
+    /// Handle Full Disk Access permission
+    @MainActor
+    private func handleFullDiskAccessPermission() async {
+        logger.info("Handling Full Disk Access permission")
+
+        // Show detailed instructions
+        let alert = NSAlert()
+        alert.messageText = "Grant Full Disk Access"
+        alert.informativeText = """
+        Follow these steps to grant Full Disk Access:
+
+        1. System Settings will open to Privacy & Security
+        2. Scroll down and click "Full Disk Access" in the left sidebar
+        3. Click the lock icon 🔒 and enter your password
+        4. Click the "+" button
+        5. Navigate to Applications and select "Craig-O-Clean"
+        6. Check the box next to Craig-O-Clean
+        7. Restart Craig-O-Clean for changes to take effect
+
+        Click "Open Settings" to continue.
+        """
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "Open Settings")
+        alert.addButton(withTitle: "Cancel")
+
+        let response = alert.runModal()
+        guard response == .alertFirstButtonReturn else {
+            return
+        }
+
+        // Open System Settings
+        permissionCenter.openSystemSettings(for: .fullDiskAccess)
+    }
+
+    /// Handle helper installation
+    @MainActor
+    private func handleHelperPermission() async {
+        logger.info("Handling privileged helper installation")
+
+        let alert = NSAlert()
+        alert.messageText = "Install Privileged Helper"
+        alert.informativeText = """
+        The privileged helper tool is required for elevated operations.
+
+        To install:
+        1. Go to Craig-O-Clean Settings
+        2. Click "Install Helper" in the Permissions section
+        3. Enter your administrator password when prompted
+
+        Would you like to open Settings now?
+        """
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "Open Settings")
+        alert.addButton(withTitle: "Later")
+
+        let response = alert.runModal()
+        if response == .alertFirstButtonReturn {
+            // TODO: Open app settings window
+            // For now, just log
+            logger.info("User chose to open settings for helper installation")
+        }
+    }
+
+    /// Show manual instructions for automation permission
+    @MainActor
+    private func showManualInstructions(for browser: BrowserApp) async {
+        let alert = NSAlert()
+        alert.messageText = "Manual Permission Grant Required"
+        alert.informativeText = """
+        The automatic permission dialog didn't appear.
+
+        Please grant permission manually:
+
+        1. In System Settings, find "Automation" in the left sidebar
+        2. Look for "Craig-O-Clean" in the list
+        3. Check the box next to "\(browser.rawValue)"
+
+        The System Settings window is already open for you.
+        """
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "OK")
+        alert.runModal()
     }
 
     /// Open System Settings for a specific permission

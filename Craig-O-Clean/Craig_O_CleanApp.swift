@@ -168,7 +168,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     // Menu items that need dynamic updates
     private var runningAppsMenuItem: NSMenuItem?
-    
+    private var contextMenu: NSMenu?
+
     // Easter egg tracking
     private var hasShownEasterEggToday = false
 
@@ -377,6 +378,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func createContextMenu() {
         let menu = NSMenu()
         menu.delegate = self
+        menu.autoenablesItems = true
 
         // Memory Status header (updated dynamically)
         let memoryStatusItem = NSMenuItem(title: "Memory: Loading...", action: nil, keyEquivalent: "")
@@ -447,15 +449,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         quitItem.target = self
         menu.addItem(quitItem)
 
-        statusItem?.menu = menu
+        // DON'T attach menu to statusItem - we'll show it manually in statusBarButtonClicked
+        // statusItem?.menu = menu
+        // Store menu as instance variable instead
+        self.contextMenu = menu
     }
     
     // MARK: - NSMenuDelegate
 
     func menuNeedsUpdate(_ menu: NSMenu) {
         // Update menu items synchronously - this is called on the main thread
-        updateMemoryStatusItem(menu)
-        updateRunningAppsMenu()
+        // Only update if this is our context menu
+        if menu == contextMenu {
+            updateMemoryStatusItem(menu)
+            updateRunningAppsMenu()
+        }
     }
 
     func menuWillOpen(_ menu: NSMenu) {
@@ -689,17 +697,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         if event.type == .rightMouseUp {
             // Right-click: show context menu
-            statusItem?.menu?.popUp(positioning: nil, at: NSPoint(x: 0, y: sender.bounds.height + 5), in: sender)
+            contextMenu?.popUp(positioning: nil, at: NSPoint(x: 0, y: sender.bounds.height + 5), in: sender)
         } else {
             // Left-click: toggle popover
-            // Temporarily remove menu to allow popover to show
-            let menu = statusItem?.menu
-            statusItem?.menu = nil
             togglePopover()
-            // Restore menu after a short delay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-                self?.statusItem?.menu = menu
-            }
         }
     }
 

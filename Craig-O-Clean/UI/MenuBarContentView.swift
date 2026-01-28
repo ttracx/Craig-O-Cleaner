@@ -116,30 +116,43 @@ struct MenuBarContentView: View {
 
     private var headerSection: some View {
         ZStack {
-            // Enhanced gradient background with mesh gradient effect
+            // SUPER VIBRANT gradient background - IMPOSSIBLE TO MISS!
             ZStack {
+                // Primary vibrant gradient
                 LinearGradient(
                     colors: [
-                        Color.vibePurple.opacity(0.25),
-                        Color.vibeTeal.opacity(0.15),
-                        Color.vibeAmber.opacity(0.1)
+                        Color.vibePurple.opacity(0.50),
+                        Color.vibeTeal.opacity(0.40),
+                        Color.vibeAmber.opacity(0.30)
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
 
-                // Subtle animated shimmer overlay
+                // Animated shimmer overlay - VERY OBVIOUS
                 LinearGradient(
                     colors: [
-                        Color.white.opacity(0.1),
+                        Color.white.opacity(0.25),
                         Color.clear,
-                        Color.white.opacity(0.05)
+                        Color.white.opacity(0.15)
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
-                .opacity(isRefreshing ? 0.5 : 0.2)
-                .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: isRefreshing)
+                .opacity(isRefreshing ? 0.7 : 0.4)
+                .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: isRefreshing)
+
+                // Top accent border for extra visibility
+                VStack {
+                    LinearGradient(
+                        colors: [.vibePurple, .vibeTeal, .vibeAmber],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    .frame(height: 3)
+
+                    Spacer()
+                }
             }
 
             // Content
@@ -199,15 +212,16 @@ struct MenuBarContentView: View {
 
                 VStack(alignment: .leading, spacing: 5) {
                     HStack(spacing: 8) {
-                        Text("Craig-O-Clean")
+                        Text("✨ Craig-O-Clean ✨")
                             .font(.system(size: 17, weight: .bold, design: .rounded))
                             .foregroundStyle(
                                 LinearGradient(
-                                    colors: [.primary, .primary.opacity(0.8)],
+                                    colors: [.vibePurple, .vibeTeal],
                                     startPoint: .leading,
                                     endPoint: .trailing
                                 )
                             )
+                            .shadow(color: .vibePurple.opacity(0.5), radius: 3, x: 0, y: 2)
 
                         // Enhanced version badge
                         Text("v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
@@ -366,13 +380,14 @@ struct MenuBarContentView: View {
 
     private var modernTabBar: some View {
         ZStack {
-            // Background with subtle gradient
+            // VIBRANT Background with colorful gradient
             RoundedRectangle(cornerRadius: 14)
                 .fill(
                     LinearGradient(
                         colors: [
-                            Color(NSColor.controlBackgroundColor).opacity(0.7),
-                            Color(NSColor.controlBackgroundColor).opacity(0.5)
+                            Color.vibePurple.opacity(0.15),
+                            Color.vibeTeal.opacity(0.10),
+                            Color(NSColor.controlBackgroundColor).opacity(0.9)
                         ],
                         startPoint: .top,
                         endPoint: .bottom
@@ -383,15 +398,17 @@ struct MenuBarContentView: View {
                         .strokeBorder(
                             LinearGradient(
                                 colors: [
-                                    Color.white.opacity(0.2),
-                                    Color.white.opacity(0.05)
+                                    Color.vibePurple.opacity(0.4),
+                                    Color.vibeTeal.opacity(0.3),
+                                    Color.white.opacity(0.1)
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
-                            lineWidth: 0.5
+                            lineWidth: 2
                         )
                 )
+                .shadow(color: .vibePurple.opacity(0.15), radius: 8, x: 0, y: 3)
 
             HStack(spacing: 4) {
                 ForEach(MenuBarTab.allCases, id: \.self) { tab in
@@ -2038,7 +2055,22 @@ struct ModernActionButton: View {
     @State private var isPressed = false
 
     var body: some View {
-        Button(action: action) {
+        Button {
+            // Haptic feedback
+            NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
+
+            // Visual feedback
+            withAnimation(.spring(response: 0.25, dampingFraction: 0.6)) {
+                isPressed = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                withAnimation(.spring()) {
+                    isPressed = false
+                }
+            }
+
+            action()
+        } label: {
             VStack(spacing: 6) {
                 ZStack {
                     Circle()
@@ -2074,7 +2106,12 @@ struct ModernActionButton: View {
             withAnimation(.easeInOut(duration: 0.15)) {
                 isHovered = hovering
             }
+            if hovering {
+                // Light haptic on hover
+                NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .now)
+            }
         }
+        .help(title)
     }
 }
 

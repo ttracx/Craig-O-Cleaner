@@ -24,12 +24,14 @@ extension Color {
     static let vibeModerate = vibeWarning
     static let vibeDestructive = vibeError
 
-    // MARK: UI Grays (Dark Mode Compatible)
+    // MARK: UI Grays (Adaptive for Light/Dark Mode)
     static let vibeBackground = Color(hex: "#1F2937")   // Dark slate
     static let vibeSurface = Color(hex: "#374151")      // Medium slate
     static let vibeBorder = Color(hex: "#4B5563")       // Light slate
-    static let vibeText = Color(hex: "#F9FAFB")         // Near white
-    static let vibeTextSecondary = Color(hex: "#D1D5DB") // Gray
+
+    // Adaptive text colors that work in both light and dark modes
+    static let vibeText = Color.primary                  // System adaptive primary text
+    static let vibeTextSecondary = Color.secondary       // System adaptive secondary text
 
     // MARK: Helper for hex initialization
     init(hex: String) {
