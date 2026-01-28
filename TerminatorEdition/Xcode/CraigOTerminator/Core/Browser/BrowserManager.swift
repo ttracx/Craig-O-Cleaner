@@ -122,8 +122,9 @@ final class BrowserManager {
             newBrowsers.append(info)
         }
 
+        let browsersToSet = newBrowsers
         await MainActor.run {
-            self.browsers = newBrowsers
+            self.browsers = browsersToSet
             self.lastRefreshDate = Date()
             self.isRefreshing = false
         }

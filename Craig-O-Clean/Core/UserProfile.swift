@@ -102,6 +102,10 @@ struct UserProfile: Codable, Equatable {
     /// Device identifier for trial tracking
     var deviceId: String?
 
+    /// Avatar image data (managed separately by AvatarManager for iCloud sync)
+    /// Note: This is stored separately in UserDefaults and iCloud, not in this struct
+    // var avatarImageData: Data? - Managed by AvatarManager
+
     // MARK: - Computed Properties
 
     /// Trial duration in days

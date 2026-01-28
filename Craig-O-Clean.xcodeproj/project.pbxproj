@@ -105,6 +105,8 @@
 		F541442A3FE6B7F6A73BFFD7 /* MemoryOptimizerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2EB8AA1C4FD005E3B8801FF /* MemoryOptimizerService.swift */; };
 		F5F21EDE8F69891F6A77AD61 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44536121E1A03039EB5C837E /* Assets.xcassets */; };
 		F67890ABCDEF010203040506 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F7890ABCDEF010203040506 /* UserProfile.swift */; };
+		BB01234567890ABCDEF01234 /* AvatarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01234567890ABCDEF01234 /* AvatarManager.swift */; };
+		DD01234567890ABCDEF01234 /* AppVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC01234567890ABCDEF01234 /* AppVersion.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -192,6 +194,8 @@
 		F78289CCD79A928D641472B8 /* ProcessManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessManagerView.swift; sourceTree = "<group>"; };
 		F8F6221E6CFB4F658E745547 /* PrivilegeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegeService.swift; sourceTree = "<group>"; };
 		FB5748E37851D981C3F01925 /* Craig-O-Clean.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Craig-O-Clean.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA01234567890ABCDEF01234 /* AvatarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarManager.swift; sourceTree = "<group>"; };
+		CC01234567890ABCDEF01234 /* AppVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersion.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -349,7 +353,9 @@
 				5E6F7890ABCDEF0102030405 /* SubscriptionManager.swift */,
 				4CF233DB0FFB9F908AA51D49 /* SystemMetricsService.swift */,
 				6F7890ABCDEF010203040506 /* UserProfile.swift */,
-				B156E588EABB9F3E895ECCE4 /* BrowserPermissionManager.swift */,
+				B156E588EABB9F3E895ECCE4 /* BrowserPermissionManager.swift */,,
+				AA01234567890ABCDEF01234 /* AvatarManager.swift */,
+				CC01234567890ABCDEF01234 /* AppVersion.swift */
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -545,7 +551,9 @@
 				980877B7ED3E66AB16FECA4B /* BrowserAutomationServiceTests.swift in Sources */,
 				324625357741BF0140A7A9FA /* MemoryOptimizerServiceTests.swift in Sources */,
 				34EDD517A8CA42765ED159B7 /* PermissionsServiceTests.swift in Sources */,
-				A3918E318F5B93FD0F444DBF /* SystemMetricsServiceTests.swift in Sources */,
+				A3918E318F5B93FD0F444DBF /* SystemMetricsServiceTests.swift in Sources */,,
+				BB01234567890ABCDEF01234 /* AvatarManager.swift in Sources */,
+				DD01234567890ABCDEF01234 /* AppVersion.swift in Sources */
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

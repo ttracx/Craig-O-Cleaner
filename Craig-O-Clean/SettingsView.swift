@@ -2,6 +2,10 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject private var launchAtLoginManager = LaunchAtLoginManager.shared
+    @State private var avatarManager = AvatarManager.shared
+    @State private var showingAvatarPicker = false
+    @State private var showingAlert = false
+    @State private var alertMessage = ""
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -14,6 +18,9 @@ struct SettingsView: View {
             // Settings content
             ScrollView {
                 VStack(spacing: 20) {
+                    // User Profile section
+                    userProfileSection
+
                     // Launch at Login section
                     VStack(alignment: .leading, spacing: 12) {
                         Text("General")
@@ -105,8 +112,7 @@ struct SettingsView: View {
                                     .fontWeight(.bold)
                                     .foregroundColor(.accentColor)
 
-
-                                Text("Version 1.0")
+                                Text(Bundle.main.displayVersion)
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
@@ -153,6 +159,11 @@ struct SettingsView: View {
             footerView
         }
         .frame(width: 440, height: 600)
+        .alert("Avatar Upload", isPresented: $showingAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(alertMessage)
+        }
     }
     
     private var headerView: some View {
@@ -160,15 +171,90 @@ struct SettingsView: View {
             Image(systemName: "gearshape.fill")
                 .font(.title2)
                 .foregroundColor(.accentColor)
-            
+
             Text("Settings")
                 .font(.title2)
                 .fontWeight(.bold)
-            
+
             Spacer()
         }
         .padding()
         .background(Color(NSColor.controlBackgroundColor))
+    }
+
+    private var userProfileSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("User Profile")
+                .font(.headline)
+                .foregroundColor(.primary)
+
+            HStack(spacing: 16) {
+                // Avatar display
+                if let avatarImage = avatarManager.avatarImage {
+                    Image(nsImage: avatarImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 80, height: 80)
+                        .clipShape(Circle())
+                        .overlay(
+                            Circle()
+                                .stroke(Color.accentColor, lineWidth: 2)
+                        )
+                } else {
+                    // Default avatar
+                    ZStack {
+                        Circle()
+                            .fill(Color.accentColor.opacity(0.2))
+                            .frame(width: 80, height: 80)
+
+                        Image(systemName: "person.fill")
+                            .font(.system(size: 36))
+                            .foregroundColor(.accentColor)
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Button(action: {
+                        selectAvatar()
+                    }) {
+                        HStack {
+                            Image(systemName: "photo")
+                            Text(avatarManager.avatarImage == nil ? "Upload Avatar" : "Change Avatar")
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.regular)
+
+                    if avatarManager.avatarImage != nil {
+                        Button(action: {
+                            deleteAvatar()
+                        }) {
+                            HStack {
+                                Image(systemName: "trash")
+                                Text("Remove Avatar")
+                            }
+                            .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                        .foregroundColor(.red)
+                    }
+
+                    Text("Synced with iCloud")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .italic()
+                }
+            }
+
+            Text("Upload a profile picture. Your avatar will be saved locally and synced across your devices via iCloud.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .padding(20)
+        .background(Color(NSColor.controlBackgroundColor))
+        .cornerRadius(8)
     }
     
     private var footerView: some View {
@@ -231,6 +317,43 @@ struct SettingsView: View {
         }
         .padding()
         .background(Color(NSColor.controlBackgroundColor))
+    }
+
+    // MARK: - Avatar Actions
+
+    private func selectAvatar() {
+        avatarManager.selectAvatarImage { result in
+            switch result {
+            case .success(let imageData):
+                Task {
+                    do {
+                        try await avatarManager.saveAvatar(imageData)
+                        await MainActor.run {
+                            alertMessage = "Avatar uploaded successfully and synced to iCloud."
+                            showingAlert = true
+                        }
+                    } catch {
+                        await MainActor.run {
+                            alertMessage = "Failed to save avatar: \(error.localizedDescription)"
+                            showingAlert = true
+                        }
+                    }
+                }
+            case .failure(let error):
+                if case AvatarError.userCancelled = error {
+                    // User cancelled, no alert needed
+                    return
+                }
+                alertMessage = "Failed to select image: \(error.localizedDescription)"
+                showingAlert = true
+            }
+        }
+    }
+
+    private func deleteAvatar() {
+        avatarManager.deleteAvatar()
+        alertMessage = "Avatar removed successfully."
+        showingAlert = true
     }
 }
 

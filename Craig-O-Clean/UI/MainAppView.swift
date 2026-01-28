@@ -144,7 +144,7 @@ struct MainAppView: View {
                     Text("Craig-O-Clean")
                         .font(.caption2)
                         .foregroundColor(.secondary)
-                    Text("Version 1.0")
+                    Text(Bundle.main.displayVersion)
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }

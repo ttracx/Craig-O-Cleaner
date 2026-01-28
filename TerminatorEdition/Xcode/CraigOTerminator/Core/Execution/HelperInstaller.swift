@@ -148,10 +148,8 @@ final class HelperInstaller {
             AuthorizationFree(authRef, [])
         }
 
-        // Create authorization item
-        var rightName = HelperConstants.authorizationRight
-        var rightItem = AuthorizationItem(name: rightName.withCString { strdup($0) }, valueLength: 0, value: nil, flags: 0)
-        var rights = AuthorizationRights(count: 1, items: &rightItem)
+        // Note: SMJobRemove doesn't actually require authorization rights to be set up
+        // The authRef from requestAuthorization() is sufficient
 
         // Remove helper using SMJobRemove
         var error: Unmanaged<CFError>?
@@ -162,9 +160,6 @@ final class HelperInstaller {
             true,
             &error
         )
-
-        // Free the duplicated string
-        free(UnsafeMutableRawPointer(mutating: rightItem.name))
 
         if let error = error?.takeRetainedValue() {
             logger.error("SMJobRemove failed: \(error.localizedDescription)")
@@ -191,16 +186,29 @@ final class HelperInstaller {
         logger.info("Requesting authorization...")
 
         var authRef: AuthorizationRef?
+
+        // Create authorization item with proper pointer handling
+        guard let rightName = strdup(kSMRightBlessPrivilegedHelper) else {
+            throw HelperError.installationFailed(NSError(
+                domain: "HelperInstaller",
+                code: -5,
+                userInfo: [NSLocalizedDescriptionKey: "Failed to allocate authorization right name"]
+            ))
+        }
+        defer { free(UnsafeMutableRawPointer(mutating: rightName)) }
+
         var authItem = AuthorizationItem(
-            name: kSMRightBlessPrivilegedHelper,
+            name: rightName,
             valueLength: 0,
             value: nil,
             flags: 0
         )
-        var authRights = AuthorizationRights(count: 1, items: &authItem)
-        let authFlags: AuthorizationFlags = [.interactionAllowed, .extendRights, .preAuthorize]
 
-        let status = AuthorizationCreate(&authRights, nil, authFlags, &authRef)
+        let status = withUnsafePointer(to: &authItem) { itemPtr in
+            var authRights = AuthorizationRights(count: 1, items: UnsafeMutablePointer(mutating: itemPtr))
+            let authFlags: AuthorizationFlags = [.interactionAllowed, .extendRights, .preAuthorize]
+            return AuthorizationCreate(&authRights, nil, authFlags, &authRef)
+        }
 
         guard status == errAuthorizationSuccess, let auth = authRef else {
             logger.error("Authorization failed with status: \(status)")

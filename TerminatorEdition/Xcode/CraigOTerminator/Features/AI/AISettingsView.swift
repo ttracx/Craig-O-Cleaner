@@ -282,7 +282,7 @@ struct AISettingsView: View {
 
         Task {
             do {
-                try await ollamaClient.listModels()
+                _ = try await ollamaClient.listModels()
             } catch {
                 print("Failed to load models: \(error)")
             }
