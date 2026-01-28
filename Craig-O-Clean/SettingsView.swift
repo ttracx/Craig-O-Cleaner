@@ -6,6 +6,7 @@ struct SettingsView: View {
     @State private var showingAlert = false
     @State private var alertMessage = ""
     @State private var displayName: String = ""
+    @State private var email: String = ""
     @State private var bio: String = ""
     @Environment(\.dismiss) var dismiss
     
@@ -264,6 +265,19 @@ struct SettingsView: View {
                     }
             }
 
+            // Email field
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Email Address")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                TextField("your.email@example.com", text: $email)
+                    .textFieldStyle(.roundedBorder)
+                    .textContentType(.emailAddress)
+                    .onChange(of: email) { _, newValue in
+                        saveProfileInfo()
+                    }
+            }
+
             // Bio field
             VStack(alignment: .leading, spacing: 6) {
                 Text("About Me")
@@ -400,12 +414,18 @@ struct SettingsView: View {
     private func loadProfileInfo() {
         // Load from UserDefaults
         displayName = UserDefaults.standard.string(forKey: "com.craigoclean.profile.displayName") ?? ""
+        email = UserDefaults.standard.string(forKey: "com.craigoclean.profile.email") ?? ""
         bio = UserDefaults.standard.string(forKey: "com.craigoclean.profile.bio") ?? ""
 
         // Also try to load from iCloud
         if let cloudName = NSUbiquitousKeyValueStore.default.string(forKey: "profileDisplayName"), !cloudName.isEmpty {
             displayName = cloudName
             UserDefaults.standard.set(cloudName, forKey: "com.craigoclean.profile.displayName")
+        }
+
+        if let cloudEmail = NSUbiquitousKeyValueStore.default.string(forKey: "profileEmail"), !cloudEmail.isEmpty {
+            email = cloudEmail
+            UserDefaults.standard.set(cloudEmail, forKey: "com.craigoclean.profile.email")
         }
 
         if let cloudBio = NSUbiquitousKeyValueStore.default.string(forKey: "profileBio"), !cloudBio.isEmpty {
@@ -417,10 +437,12 @@ struct SettingsView: View {
     private func saveProfileInfo() {
         // Save to local storage
         UserDefaults.standard.set(displayName, forKey: "com.craigoclean.profile.displayName")
+        UserDefaults.standard.set(email, forKey: "com.craigoclean.profile.email")
         UserDefaults.standard.set(bio, forKey: "com.craigoclean.profile.bio")
 
         // Save to iCloud
         NSUbiquitousKeyValueStore.default.set(displayName, forKey: "profileDisplayName")
+        NSUbiquitousKeyValueStore.default.set(email, forKey: "profileEmail")
         NSUbiquitousKeyValueStore.default.set(bio, forKey: "profileBio")
         NSUbiquitousKeyValueStore.default.synchronize()
     }
