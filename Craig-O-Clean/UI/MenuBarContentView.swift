@@ -116,149 +116,365 @@ struct MenuBarContentView: View {
 
     private var headerSection: some View {
         ZStack {
-            // Gradient background
-            LinearGradient(
-                colors: [
-                    Color.vibePurple.opacity(0.8),
-                    Color.vibeTeal.opacity(0.6)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            // Enhanced gradient background with mesh gradient effect
+            ZStack {
+                LinearGradient(
+                    colors: [
+                        Color.vibePurple.opacity(0.25),
+                        Color.vibeTeal.opacity(0.15),
+                        Color.vibeAmber.opacity(0.1)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+
+                // Subtle animated shimmer overlay
+                LinearGradient(
+                    colors: [
+                        Color.white.opacity(0.1),
+                        Color.clear,
+                        Color.white.opacity(0.05)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .opacity(isRefreshing ? 0.5 : 0.2)
+                .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: isRefreshing)
+            }
 
             // Content
-            HStack(spacing: 12) {
-                // App Icon with glow
+            HStack(spacing: 14) {
+                // App Icon with enhanced glow and shadow
                 ZStack {
+                    // Outer glow
                     Circle()
-                        .fill(Color.white.opacity(0.2))
+                        .fill(
+                            RadialGradient(
+                                colors: [
+                                    Color.vibePurple.opacity(0.3),
+                                    Color.vibePurple.opacity(0.1),
+                                    Color.clear
+                                ],
+                                center: .center,
+                                startRadius: 0,
+                                endRadius: 28
+                            )
+                        )
+                        .frame(width: 56, height: 56)
+                        .blur(radius: 6)
+
+                    // Icon background with gradient
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.vibePurple.opacity(0.2),
+                                    Color.vibeTeal.opacity(0.15)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
                         .frame(width: 44, height: 44)
-                        .blur(radius: 8)
 
                     if let appIcon = NSImage(named: "AppIcon") {
                         Image(nsImage: appIcon)
                             .resizable()
-                            .frame(width: 36, height: 36)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .frame(width: 38, height: 38)
+                            .clipShape(RoundedRectangle(cornerRadius: 9))
+                            .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
                     } else {
                         Image(systemName: "brain.head.profile")
-                            .font(.system(size: 24, weight: .medium))
-                            .foregroundColor(.white)
+                            .font(.system(size: 26, weight: .medium))
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [.vibePurple, .vibeTeal],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .shadow(color: .vibePurple.opacity(0.3), radius: 3, x: 0, y: 2)
                     }
                 }
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 5) {
                     HStack(spacing: 8) {
                         Text("Craig-O-Clean")
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .font(.system(size: 17, weight: .bold, design: .rounded))
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [.primary, .primary.opacity(0.8)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+
+                        // Enhanced version badge
+                        Text("v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
+                            .font(.system(size: 9, weight: .bold, design: .monospaced))
                             .foregroundColor(.white)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 3)
+                            .background(
+                                Capsule()
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [.vibePurple, .vibeTeal],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                            )
+                            .shadow(color: .vibePurple.opacity(0.4), radius: 3, x: 0, y: 2)
 
                         // Show appropriate badge based on subscription status
                         if subscriptions.isPro {
-                            ProBadge()
+                            EnhancedProBadge()
                         } else if trialManager.isTrialActive {
-                            TrialBadge(
+                            EnhancedTrialBadge(
                                 daysRemaining: trialManager.trialDaysRemaining,
                                 isExpired: false
                             )
                         } else if trialManager.subscriptionStatus == .trialExpired {
-                            TrialBadge(daysRemaining: 0, isExpired: true)
+                            EnhancedTrialBadge(daysRemaining: 0, isExpired: true)
                         }
                     }
 
-                    // Status indicator
+                    // Enhanced status indicator with better visuals
                     if let memory = systemMetrics.memoryMetrics {
-                        HStack(spacing: 6) {
-                            PulsingStatusDot(color: pressureColor(memory.pressureLevel))
+                        HStack(spacing: 7) {
+                            EnhancedPulsingDot(color: pressureColor(memory.pressureLevel))
+
                             Text(memory.pressureLevel.rawValue)
-                                .font(.system(size: 11, weight: .medium))
-                                .foregroundColor(.white.opacity(0.9))
-                            Text("\(Int(memory.usedPercentage))% used")
-                                .font(.system(size: 11))
-                                .foregroundColor(.white.opacity(0.7))
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(pressureColor(memory.pressureLevel))
+
+                            Text("•")
+                                .font(.system(size: 8))
+                                .foregroundColor(.secondary.opacity(0.5))
+
+                            Text("\(Int(memory.usedPercentage))%")
+                                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                                .foregroundColor(.secondary)
+
+                            // Memory bar indicator
+                            GeometryReader { geometry in
+                                ZStack(alignment: .leading) {
+                                    Capsule()
+                                        .fill(Color.secondary.opacity(0.15))
+
+                                    Capsule()
+                                        .fill(
+                                            LinearGradient(
+                                                colors: [
+                                                    pressureColor(memory.pressureLevel),
+                                                    pressureColor(memory.pressureLevel).opacity(0.7)
+                                                ],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
+                                        .frame(width: geometry.size.width * CGFloat(memory.usedPercentage / 100))
+                                }
+                            }
+                            .frame(width: 50, height: 4)
                         }
                     }
                 }
 
                 Spacer()
 
-                // Refresh button
+                // Enhanced refresh button with ripple effect
                 Button {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.65)) {
                         isRefreshing = true
                     }
                     Task {
                         await systemMetrics.refreshAllMetrics()
                         await memoryOptimizer.analyzeMemoryUsage()
                         processManager.updateProcessList()
-                        withAnimation { isRefreshing = false }
+                        await browserAutomation.fetchAllTabs()
+                        try? await Task.sleep(nanoseconds: 500_000_000)
+                        withAnimation(.spring()) { isRefreshing = false }
                     }
                 } label: {
                     ZStack {
+                        // Ripple effect when refreshing
+                        if isRefreshing {
+                            Circle()
+                                .stroke(Color.vibePurple.opacity(0.3), lineWidth: 2)
+                                .frame(width: 38, height: 38)
+                                .scaleEffect(isRefreshing ? 1.2 : 1.0)
+                                .opacity(isRefreshing ? 0 : 1)
+                                .animation(.easeOut(duration: 1).repeatForever(autoreverses: false), value: isRefreshing)
+                        }
+
                         Circle()
-                            .fill(Color.white.opacity(0.2))
-                            .frame(width: 32, height: 32)
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color.vibePurple.opacity(0.2),
+                                        Color.vibeTeal.opacity(0.15)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(width: 36, height: 36)
+                            .overlay(
+                                Circle()
+                                    .strokeBorder(
+                                        LinearGradient(
+                                            colors: [
+                                                Color.vibePurple.opacity(0.3),
+                                                Color.clear
+                                            ],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ),
+                                        lineWidth: 1
+                                    )
+                            )
 
                         Image(systemName: "arrow.clockwise")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(.white)
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [.vibePurple, .vibeTeal],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
                             .rotationEffect(isRefreshing ? .degrees(360) : .degrees(0))
-                            .animation(isRefreshing ? .linear(duration: 0.8).repeatForever(autoreverses: false) : .default, value: isRefreshing)
+                            .animation(isRefreshing ? .linear(duration: 0.8).repeatForever(autoreverses: false) : .spring(), value: isRefreshing)
+                            .scaleEffect(isRefreshing ? 0.9 : 1.0)
+                            .animation(.spring(response: 0.3), value: isRefreshing)
                     }
                 }
                 .buttonStyle(.plain)
                 .disabled(isRefreshing)
+                .scaleEffect(isRefreshing ? 0.95 : 1.0)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 16)
         }
-        .frame(height: 70)
+        .frame(height: 84)
+        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
     }
 
     // MARK: - Modern Tab Bar
 
     private var modernTabBar: some View {
-        HStack(spacing: 0) {
-            ForEach(MenuBarTab.allCases, id: \.self) { tab in
-                Button {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
-                        selectedTab = tab
-                    }
-                } label: {
-                    VStack(spacing: 6) {
-                        ZStack {
-                            if selectedTab == tab {
-                                Circle()
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [.vibePurple, .vibeTeal],
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        )
-                                    )
-                                    .frame(width: 36, height: 36)
-                                    .matchedGeometryEffect(id: "tabIndicator", in: tabAnimation)
-                            }
+        ZStack {
+            // Background with subtle gradient
+            RoundedRectangle(cornerRadius: 14)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(NSColor.controlBackgroundColor).opacity(0.7),
+                            Color(NSColor.controlBackgroundColor).opacity(0.5)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .strokeBorder(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.2),
+                                    Color.white.opacity(0.05)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 0.5
+                        )
+                )
 
-                            Image(systemName: tab.icon)
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundColor(selectedTab == tab ? .white : .secondary)
+            HStack(spacing: 4) {
+                ForEach(MenuBarTab.allCases, id: \.self) { tab in
+                    Button {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                            selectedTab = tab
                         }
-                        .frame(width: 36, height: 36)
+                    } label: {
+                        VStack(spacing: 7) {
+                            ZStack {
+                                // Selected background with enhanced gradient
+                                if selectedTab == tab {
+                                    ZStack {
+                                        Circle()
+                                            .fill(
+                                                LinearGradient(
+                                                    colors: [.vibePurple, .vibeTeal],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                )
+                                            )
+                                            .frame(width: 40, height: 40)
+                                            .shadow(color: .vibePurple.opacity(0.5), radius: 6, x: 0, y: 3)
+                                            .matchedGeometryEffect(id: "tabIndicator", in: tabAnimation)
 
-                        Text(tab.rawValue)
-                            .font(.system(size: 10, weight: selectedTab == tab ? .semibold : .regular))
-                            .foregroundColor(selectedTab == tab ? .primary : .secondary)
+                                        // Subtle inner glow
+                                        Circle()
+                                            .stroke(
+                                                LinearGradient(
+                                                    colors: [
+                                                        Color.white.opacity(0.4),
+                                                        Color.clear
+                                                    ],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                ),
+                                                lineWidth: 1.5
+                                            )
+                                            .frame(width: 40, height: 40)
+                                    }
+                                }
+
+                                Image(systemName: tab.icon)
+                                    .font(.system(size: 16, weight: selectedTab == tab ? .semibold : .medium))
+                                    .foregroundStyle(
+                                        selectedTab == tab
+                                            ? LinearGradient(
+                                                colors: [.white, .white.opacity(0.9)],
+                                                startPoint: .top,
+                                                endPoint: .bottom
+                                            )
+                                            : LinearGradient(
+                                                colors: [.secondary, .secondary],
+                                                startPoint: .top,
+                                                endPoint: .bottom
+                                            )
+                                    )
+                                    .shadow(color: selectedTab == tab ? .black.opacity(0.2) : .clear, radius: 2, x: 0, y: 1)
+                                    .scaleEffect(selectedTab == tab ? 1.05 : 1.0)
+                            }
+                            .frame(width: 40, height: 40)
+
+                            Text(tab.rawValue)
+                                .font(.system(size: 10, weight: selectedTab == tab ? .bold : .medium, design: .rounded))
+                                .foregroundColor(selectedTab == tab ? .vibePurple : .secondary)
+                                .scaleEffect(selectedTab == tab ? 1.0 : 0.95)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 4)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(selectedTab == tab ? Color.vibePurple.opacity(0.08) : Color.clear)
+                        )
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(Color(NSColor.controlBackgroundColor).opacity(0.5))
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
     }
 
     // MARK: - Tab Content
@@ -1167,58 +1383,142 @@ struct MenuBarBrowserTab: View {
     }
 
     private var browserHeaderSection: some View {
-        GlassCard {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 6) {
+        EnhancedGlassCard {
+            HStack(spacing: 14) {
+                // Icon with gradient background
+                ZStack {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.vibePurple.opacity(0.2),
+                                    Color.vibeTeal.opacity(0.15)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 40, height: 40)
+
+                    Image(systemName: "safari")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [.vibePurple, .vibeTeal],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                }
+
+                VStack(alignment: .leading, spacing: 5) {
+                    HStack(spacing: 8) {
                         Text("Browser Tabs")
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .foregroundColor(.primary)
 
                         if browserAutomation.isLoading {
                             ProgressView()
                                 .controlSize(.small)
-                                .scaleEffect(0.7)
+                                .scaleEffect(0.75)
+                                .tint(.vibePurple)
                         }
                     }
 
                     if browserAutomation.isLoading {
-                        Text("Fetching tabs...")
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
+                        HStack(spacing: 4) {
+                            Image(systemName: "arrow.down.circle.dotted")
+                                .font(.system(size: 10))
+                                .foregroundColor(.vibeTeal)
+
+                            Text("Fetching tabs...")
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundColor(.secondary)
+                        }
                     } else {
-                        Text("\(browserAutomation.allTabs.count) tabs across \(browserAutomation.runningBrowsers.count) browsers")
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
+                        HStack(spacing: 6) {
+                            HStack(spacing: 4) {
+                                Text("\(browserAutomation.allTabs.count)")
+                                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                    .foregroundColor(.vibePurple)
+
+                                Text("tabs")
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(
+                                Capsule()
+                                    .fill(Color.vibePurple.opacity(0.1))
+                            )
+
+                            Text("•")
+                                .font(.system(size: 8))
+                                .foregroundColor(.secondary.opacity(0.5))
+
+                            HStack(spacing: 4) {
+                                Text("\(browserAutomation.runningBrowsers.count)")
+                                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                    .foregroundColor(.vibeTeal)
+
+                                Text("browsers")
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(
+                                Capsule()
+                                    .fill(Color.vibeTeal.opacity(0.1))
+                            )
+                        }
                     }
                 }
 
                 Spacer()
 
+                // Enhanced refresh button
                 Button {
-                    withAnimation(.spring()) { isRefreshing = true }
-                    // Clear selected tabs to prevent stale references after refresh
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.65)) { isRefreshing = true }
                     selectedTabs.removeAll()
                     Task {
                         await browserAutomation.fetchAllTabs()
-                        withAnimation { isRefreshing = false }
+                        try? await Task.sleep(nanoseconds: 300_000_000)
+                        withAnimation(.spring()) { isRefreshing = false }
                     }
                 } label: {
                     ZStack {
                         Circle()
-                            .fill(Color.vibePurple.opacity(0.15))
-                            .frame(width: 32, height: 32)
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color.vibePurple.opacity(0.2),
+                                        Color.vibeTeal.opacity(0.15)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(width: 36, height: 36)
 
                         Image(systemName: "arrow.clockwise")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(.vibePurple)
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [.vibePurple, .vibeTeal],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
                             .rotationEffect((isRefreshing || browserAutomation.isLoading) ? .degrees(360) : .degrees(0))
-                            .animation((isRefreshing || browserAutomation.isLoading) ? .linear(duration: 0.8).repeatForever(autoreverses: false) : .default, value: isRefreshing || browserAutomation.isLoading)
+                            .animation((isRefreshing || browserAutomation.isLoading) ? .linear(duration: 0.8).repeatForever(autoreverses: false) : .spring(), value: isRefreshing || browserAutomation.isLoading)
                     }
                 }
                 .buttonStyle(.plain)
                 .disabled(isRefreshing || browserAutomation.isLoading)
             }
-            .padding(14)
+            .padding(16)
         }
         .padding(.horizontal, 12)
         .padding(.top, 8)
@@ -1274,51 +1574,130 @@ struct MenuBarBrowserTab: View {
     }
 
     private var actionsSection: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 12) {
             if !selectedTabs.isEmpty {
+                // Enhanced close button with animation
                 Button {
-                    Task {
-                        for tab in selectedTabs {
-                            try? await browserAutomation.closeTab(tab)
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                        Task {
+                            for tab in selectedTabs {
+                                try? await browserAutomation.closeTab(tab)
+                                try? await Task.sleep(nanoseconds: 50_000_000)
+                            }
+                            selectedTabs.removeAll()
                         }
-                        selectedTabs.removeAll()
                     }
                 } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 11))
-                        Text("Close \(selectedTabs.count)")
-                            .font(.system(size: 11, weight: .medium))
+                    HStack(spacing: 6) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.white.opacity(0.25))
+                                .frame(width: 20, height: 20)
+
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 14))
+                                .foregroundColor(.white)
+                        }
+
+                        Text("Close \(selectedTabs.count) Tab\(selectedTabs.count > 1 ? "s" : "")")
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
                     }
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color.red)
-                    .clipShape(Capsule())
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(
+                        Capsule()
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color.red.opacity(0.9),
+                                        Color.red.opacity(0.8)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .shadow(color: .red.opacity(0.4), radius: 6, x: 0, y: 3)
+                    )
                 }
                 .buttonStyle(.plain)
+                .transition(.scale.combined(with: .opacity))
             }
 
             Spacer()
 
-            Button("Select All") {
-                selectedTabs = Set(browserAutomation.allTabs)
-            }
-            .font(.system(size: 11, weight: .medium))
-            .buttonStyle(.bordered)
-            .controlSize(.small)
+            // Enhanced utility buttons
+            HStack(spacing: 8) {
+                Button {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        selectedTabs = Set(browserAutomation.allTabs)
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle")
+                            .font(.system(size: 11))
 
-            Button("Clear") {
-                selectedTabs.removeAll()
+                        Text("All")
+                            .font(.system(size: 11, weight: .semibold))
+                    }
+                    .foregroundColor(.vibePurple)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .background(
+                        Capsule()
+                            .fill(Color.vibePurple.opacity(0.12))
+                            .overlay(
+                                Capsule()
+                                    .strokeBorder(Color.vibePurple.opacity(0.3), lineWidth: 1)
+                            )
+                    )
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        selectedTabs.removeAll()
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "xmark.circle")
+                            .font(.system(size: 11))
+
+                        Text("Clear")
+                            .font(.system(size: 11, weight: .semibold))
+                    }
+                    .foregroundColor(selectedTabs.isEmpty ? .secondary.opacity(0.5) : .secondary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .background(
+                        Capsule()
+                            .fill(Color.secondary.opacity(selectedTabs.isEmpty ? 0.05 : 0.12))
+                            .overlay(
+                                Capsule()
+                                    .strokeBorder(Color.secondary.opacity(selectedTabs.isEmpty ? 0.1 : 0.3), lineWidth: 1)
+                            )
+                    )
+                }
+                .buttonStyle(.plain)
+                .disabled(selectedTabs.isEmpty)
             }
-            .font(.system(size: 11, weight: .medium))
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-            .disabled(selectedTabs.isEmpty)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .background(Color(NSColor.controlBackgroundColor).opacity(0.8))
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(
+            ZStack {
+                Color(NSColor.controlBackgroundColor).opacity(0.9)
+
+                LinearGradient(
+                    colors: [
+                        Color.white.opacity(0.05),
+                        Color.clear
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            }
+        )
     }
 }
 
@@ -1873,61 +2252,159 @@ struct ModernBrowserTabRow: View {
     let onClose: () -> Void
 
     @State private var isHovered = false
+    @State private var isPressed = false
 
     var body: some View {
-        HStack(spacing: 10) {
-            // Selection indicator
-            Button(action: onToggle) {
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 16))
-                    .foregroundColor(isSelected ? .vibePurple : .secondary.opacity(0.5))
+        HStack(spacing: 12) {
+            // Enhanced selection indicator
+            Button(action: {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                    onToggle()
+                }
+            }) {
+                ZStack {
+                    if isSelected {
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    colors: [.vibePurple, .vibeTeal],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(width: 20, height: 20)
+                            .shadow(color: .vibePurple.opacity(0.4), radius: 3, x: 0, y: 2)
+
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.white)
+                    } else {
+                        Circle()
+                            .strokeBorder(Color.secondary.opacity(0.4), lineWidth: 2)
+                            .frame(width: 20, height: 20)
+                    }
+                }
             }
             .buttonStyle(.plain)
+            .scaleEffect(isPressed ? 0.9 : 1.0)
 
-            // Browser icon
-            Image(systemName: tab.browser.icon)
-                .font(.system(size: 12))
-                .foregroundColor(.secondary)
-                .frame(width: 16)
+            // Enhanced browser icon with background
+            ZStack {
+                Circle()
+                    .fill(browserIconColor.opacity(0.15))
+                    .frame(width: 28, height: 28)
 
-            // Tab info
-            VStack(alignment: .leading, spacing: 2) {
-                Text(tab.title)
-                    .font(.system(size: 11))
+                Image(systemName: tab.browser.icon)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(browserIconColor)
+            }
+
+            // Tab info with enhanced typography
+            VStack(alignment: .leading, spacing: 3) {
+                Text(tab.title.isEmpty ? "Untitled" : tab.title)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.primary)
                     .lineLimit(1)
-                Text(tab.domain)
-                    .font(.system(size: 9))
-                    .foregroundColor(Color(NSColor.tertiaryLabelColor))
-                    .lineLimit(1)
+
+                HStack(spacing: 4) {
+                    Image(systemName: "globe")
+                        .font(.system(size: 8))
+                        .foregroundColor(.secondary.opacity(0.6))
+
+                    Text(tab.domain)
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                }
             }
 
             Spacer()
 
-            // Close button
-            if isHovered {
-                Button(action: onClose) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 14))
-                        .foregroundColor(.red.opacity(0.7))
+            // Enhanced close button
+            Button(action: {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    onClose()
                 }
-                .buttonStyle(.plain)
-                .transition(.scale.combined(with: .opacity))
+            }) {
+                ZStack {
+                    Circle()
+                        .fill(isHovered ? Color.red.opacity(0.15) : Color.clear)
+                        .frame(width: 24, height: 24)
+
+                    Image(systemName: "xmark")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundColor(isHovered ? .red : .secondary.opacity(0.6))
+                }
             }
+            .buttonStyle(.plain)
+            .opacity(isHovered ? 1.0 : 0.6)
+            .scaleEffect(isHovered ? 1.0 : 0.9)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
         .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(isSelected ? Color.vibePurple.opacity(0.1) : (isHovered ? Color(NSColor.selectedContentBackgroundColor).opacity(0.2) : Color.clear))
+            ZStack {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(
+                        isSelected
+                            ? LinearGradient(
+                                colors: [
+                                    Color.vibePurple.opacity(0.12),
+                                    Color.vibeTeal.opacity(0.08)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                            : LinearGradient(
+                                colors: [
+                                    isHovered ? Color(NSColor.selectedContentBackgroundColor).opacity(0.3) : Color.clear,
+                                    isHovered ? Color(NSColor.selectedContentBackgroundColor).opacity(0.2) : Color.clear
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                    )
+
+                RoundedRectangle(cornerRadius: 10)
+                    .strokeBorder(
+                        isSelected
+                            ? LinearGradient(
+                                colors: [.vibePurple.opacity(0.4), .vibeTeal.opacity(0.3)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                            : LinearGradient(
+                                colors: [Color.clear, Color.clear],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                        lineWidth: 1.5
+                    )
+            }
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(isSelected ? Color.vibePurple.opacity(0.3) : Color.clear, lineWidth: 1)
-        )
+        .shadow(color: isSelected ? .vibePurple.opacity(0.15) : .clear, radius: 6, x: 0, y: 3)
+        .scaleEffect(isPressed ? 0.98 : 1.0)
         .onHover { hovering in
-            withAnimation(.easeInOut(duration: 0.15)) {
+            withAnimation(.easeInOut(duration: 0.2)) {
                 isHovered = hovering
             }
+        }
+    }
+
+    private var browserIconColor: Color {
+        switch tab.browser {
+        case .safari:
+            return .blue
+        case .chrome:
+            return Color(red: 0.29, green: 0.56, blue: 0.89)
+        case .firefox:
+            return .orange
+        case .brave:
+            return Color(red: 0.98, green: 0.31, blue: 0.22)
+        case .edge:
+            return Color(red: 0.0, green: 0.47, blue: 0.84)
+        case .arc:
+            return .purple
         }
     }
 }
@@ -2287,6 +2764,154 @@ struct PurgeResultSheet: View {
         }
         .padding(24)
         .frame(width: 320)
+    }
+}
+
+// MARK: - Enhanced UI Components
+
+struct EnhancedPulsingDot: View {
+    let color: Color
+    @State private var isPulsing = false
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(color.opacity(0.3))
+                .frame(width: 12, height: 12)
+                .scaleEffect(isPulsing ? 1.3 : 1.0)
+                .opacity(isPulsing ? 0 : 1)
+
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [color, color.opacity(0.8)],
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: 5
+                    )
+                )
+                .frame(width: 8, height: 8)
+                .shadow(color: color.opacity(0.6), radius: 3, x: 0, y: 1)
+        }
+        .onAppear {
+            withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: false)) {
+                isPulsing = true
+            }
+        }
+    }
+}
+
+struct EnhancedProBadge: View {
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "crown.fill")
+                .font(.system(size: 9))
+            Text("PRO")
+                .font(.system(size: 9, weight: .black, design: .rounded))
+        }
+        .foregroundStyle(
+            LinearGradient(
+                colors: [.yellow, .orange],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+        )
+        .padding(.horizontal, 7)
+        .padding(.vertical, 3)
+        .background(
+            Capsule()
+                .fill(Color.orange.opacity(0.2))
+                .overlay(
+                    Capsule()
+                        .strokeBorder(
+                            LinearGradient(
+                                colors: [.yellow.opacity(0.6), .orange.opacity(0.6)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                )
+        )
+        .shadow(color: .orange.opacity(0.3), radius: 4, x: 0, y: 2)
+    }
+}
+
+struct EnhancedTrialBadge: View {
+    let daysRemaining: Int
+    let isExpired: Bool
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: isExpired ? "clock.badge.exclamationmark.fill" : "clock.fill")
+                .font(.system(size: 9))
+            Text(isExpired ? "EXPIRED" : "\(daysRemaining)d")
+                .font(.system(size: 9, weight: .black, design: .rounded))
+        }
+        .foregroundColor(isExpired ? .red : .vibeTeal)
+        .padding(.horizontal, 7)
+        .padding(.vertical, 3)
+        .background(
+            Capsule()
+                .fill((isExpired ? Color.red : Color.vibeTeal).opacity(0.15))
+                .overlay(
+                    Capsule()
+                        .strokeBorder(
+                            (isExpired ? Color.red : Color.vibeTeal).opacity(0.4),
+                            lineWidth: 1
+                        )
+                )
+        )
+        .shadow(color: (isExpired ? .red : .vibeTeal).opacity(0.3), radius: 3, x: 0, y: 2)
+    }
+}
+
+struct EnhancedGlassCard<Content: View>: View {
+    let content: Content
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+
+    var body: some View {
+        content
+            .background(
+                ZStack {
+                    // Base glass effect
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(NSColor.controlBackgroundColor).opacity(0.6))
+
+                    // Gradient overlay
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.15),
+                                    Color.white.opacity(0.05),
+                                    Color.clear
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+
+                    // Border
+                    RoundedRectangle(cornerRadius: 12)
+                        .strokeBorder(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.3),
+                                    Color.white.opacity(0.1)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                }
+            )
+            .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
+            .shadow(color: .black.opacity(0.04), radius: 2, x: 0, y: 1)
     }
 }
 

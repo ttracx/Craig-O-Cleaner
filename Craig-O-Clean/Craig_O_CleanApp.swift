@@ -922,10 +922,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // Close popover
         popover?.performClose(nil)
 
+        // Show app in dock BEFORE creating/showing window
+        NSApp.setActivationPolicy(.regular)
+
         // If window already exists, bring to front
         if let window = fullWindow {
-            window.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
+            window.makeKeyAndOrderFront(nil)
             return
         }
 
@@ -947,15 +950,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         window.contentView = NSHostingView(rootView: contentView)
         window.center()
         window.minSize = NSSize(width: 900, height: 600)
-        window.makeKeyAndOrderFront(nil)
-        
+
         // Set window to use toolbar style
         window.titlebarAppearsTransparent = false
         window.toolbarStyle = .unified
-
-        // Show app in dock when window is open
-        NSApp.setActivationPolicy(.regular)
-        NSApp.activate(ignoringOtherApps: true)
 
         // Handle window close
         let delegate = WindowDelegate { [weak self] in
@@ -968,6 +966,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         window.delegate = delegate
 
         fullWindow = window
+
+        // Activate and show window AFTER setup
+        NSApp.activate(ignoringOtherApps: true)
+        window.makeKeyAndOrderFront(nil)
     }
 }
 

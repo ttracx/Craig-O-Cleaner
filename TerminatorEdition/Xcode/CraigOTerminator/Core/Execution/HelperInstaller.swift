@@ -45,10 +45,36 @@ final class HelperInstaller {
     func checkStatus() async {
         logger.info("Checking helper status...")
 
-        // Try to connect to helper
+        // Use modern SMAppService API on macOS 13.0+ for initial status check
+        if #available(macOS 13.0, *) {
+            let service = SMAppService.daemon(plistName: HelperConstants.bundleID)
+
+            switch service.status {
+            case .enabled:
+                logger.info("Helper service is enabled via SMAppService")
+                // Continue to version check below
+            case .notRegistered:
+                logger.info("Helper is not registered")
+                status = .notInstalled
+                return
+            case .notFound:
+                logger.info("Helper service not found")
+                status = .notInstalled
+                return
+            case .requiresApproval:
+                logger.info("Helper requires user approval")
+                status = .notInstalled
+                return
+            @unknown default:
+                logger.warning("Unknown helper status")
+                // Continue to version check
+            }
+        }
+
+        // Try to connect to helper to verify it's running and get version
         guard let connection = createConnection() else {
             status = .notInstalled
-            logger.info("Helper is not installed")
+            logger.info("Helper is not installed or not responding")
             return
         }
 
@@ -79,7 +105,7 @@ final class HelperInstaller {
 
     // MARK: - Installation
 
-    /// Install or update the helper tool using SMJobBless
+    /// Install or update the helper tool using modern SMAppService API
     @MainActor
     func install() async throws {
         logger.info("Installing helper tool...")
@@ -95,35 +121,47 @@ final class HelperInstaller {
         isInstalling = true
         defer { isInstalling = false }
 
-        // Get authorization
-        let authRef = try await requestAuthorization()
-        defer {
-            AuthorizationFree(authRef, [])
+        // Use modern SMAppService API (macOS 13.0+)
+        if #available(macOS 13.0, *) {
+            let service = SMAppService.daemon(plistName: HelperConstants.bundleID)
+
+            do {
+                try service.register()
+                logger.info("Helper tool registered successfully via SMAppService")
+            } catch {
+                logger.error("SMAppService registration failed: \(error.localizedDescription)")
+                throw HelperError.installationFailed(error)
+            }
+        } else {
+            // Fallback to legacy SMJobBless for older macOS versions
+            let authRef = try await requestAuthorization()
+            defer {
+                AuthorizationFree(authRef, [])
+            }
+
+            var error: Unmanaged<CFError>?
+            let success = SMJobBless(
+                kSMDomainSystemLaunchd,
+                HelperConstants.bundleID as CFString,
+                authRef,
+                &error
+            )
+
+            if let error = error?.takeRetainedValue() {
+                logger.error("SMJobBless failed: \(error.localizedDescription)")
+                throw HelperError.installationFailed(error as Error)
+            }
+
+            guard success else {
+                throw HelperError.installationFailed(NSError(
+                    domain: "HelperInstaller",
+                    code: -2,
+                    userInfo: [NSLocalizedDescriptionKey: "SMJobBless returned false"]
+                ))
+            }
+
+            logger.info("Helper tool installed successfully via SMJobBless")
         }
-
-        // Use SMJobBless to install helper
-        var error: Unmanaged<CFError>?
-        let success = SMJobBless(
-            kSMDomainSystemLaunchd,
-            HelperConstants.bundleID as CFString,
-            authRef,
-            &error
-        )
-
-        if let error = error?.takeRetainedValue() {
-            logger.error("SMJobBless failed: \(error.localizedDescription)")
-            throw HelperError.installationFailed(error as Error)
-        }
-
-        guard success else {
-            throw HelperError.installationFailed(NSError(
-                domain: "HelperInstaller",
-                code: -2,
-                userInfo: [NSLocalizedDescriptionKey: "SMJobBless returned false"]
-            ))
-        }
-
-        logger.info("Helper tool installed successfully")
 
         // Verify installation
         await checkStatus()
@@ -142,39 +180,48 @@ final class HelperInstaller {
     func uninstall() async throws {
         logger.info("Uninstalling helper tool...")
 
-        // Get authorization
-        let authRef = try await requestAuthorization()
-        defer {
-            AuthorizationFree(authRef, [])
+        // Use modern SMAppService API (macOS 13.0+)
+        if #available(macOS 13.0, *) {
+            let service = SMAppService.daemon(plistName: HelperConstants.bundleID)
+
+            do {
+                try await service.unregister()
+                logger.info("Helper tool unregistered successfully via SMAppService")
+            } catch {
+                logger.error("SMAppService unregistration failed: \(error.localizedDescription)")
+                throw HelperError.installationFailed(error)
+            }
+        } else {
+            // Fallback to legacy SMJobRemove for older macOS versions
+            let authRef = try await requestAuthorization()
+            defer {
+                AuthorizationFree(authRef, [])
+            }
+
+            var error: Unmanaged<CFError>?
+            let success = SMJobRemove(
+                kSMDomainSystemLaunchd,
+                HelperConstants.bundleID as CFString,
+                authRef,
+                true,
+                &error
+            )
+
+            if let error = error?.takeRetainedValue() {
+                logger.error("SMJobRemove failed: \(error.localizedDescription)")
+                throw HelperError.installationFailed(error as Error)
+            }
+
+            guard success else {
+                throw HelperError.installationFailed(NSError(
+                    domain: "HelperInstaller",
+                    code: -4,
+                    userInfo: [NSLocalizedDescriptionKey: "SMJobRemove returned false"]
+                ))
+            }
+
+            logger.info("Helper tool uninstalled successfully via SMJobRemove")
         }
-
-        // Note: SMJobRemove doesn't actually require authorization rights to be set up
-        // The authRef from requestAuthorization() is sufficient
-
-        // Remove helper using SMJobRemove
-        var error: Unmanaged<CFError>?
-        let success = SMJobRemove(
-            kSMDomainSystemLaunchd,
-            HelperConstants.bundleID as CFString,
-            authRef,
-            true,
-            &error
-        )
-
-        if let error = error?.takeRetainedValue() {
-            logger.error("SMJobRemove failed: \(error.localizedDescription)")
-            throw HelperError.installationFailed(error as Error)
-        }
-
-        guard success else {
-            throw HelperError.installationFailed(NSError(
-                domain: "HelperInstaller",
-                code: -4,
-                userInfo: [NSLocalizedDescriptionKey: "SMJobRemove returned false"]
-            ))
-        }
-
-        logger.info("Helper tool uninstalled successfully")
 
         // Update status
         status = .notInstalled

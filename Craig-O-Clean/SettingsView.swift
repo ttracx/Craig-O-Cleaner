@@ -2,11 +2,11 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject private var launchAtLoginManager = LaunchAtLoginManager.shared
-    // TODO: Avatar feature - uncomment after adding AvatarManager.swift and AppVersion.swift to Xcode project
-    // @State private var avatarManager = AvatarManager.shared
-    // @State private var showingAvatarPicker = false
-    // @State private var showingAlert = false
-    // @State private var alertMessage = ""
+    @State private var avatarManager = AvatarManager.shared
+    @State private var showingAlert = false
+    @State private var alertMessage = ""
+    @State private var displayName: String = ""
+    @State private var bio: String = ""
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -19,8 +19,8 @@ struct SettingsView: View {
             // Settings content
             ScrollView {
                 VStack(spacing: 20) {
-                    // TODO: Avatar feature - uncomment after adding files to project
-                    // userProfileSection
+                    // User Profile section
+                    userProfileSection
 
                     // Launch at Login section
                     VStack(alignment: .leading, spacing: 12) {
@@ -161,12 +161,11 @@ struct SettingsView: View {
             footerView
         }
         .frame(width: 440, height: 600)
-        // TODO: Avatar feature - uncomment after adding files to project
-        // .alert("Avatar Upload", isPresented: $showingAlert) {
-        //     Button("OK", role: .cancel) { }
-        // } message: {
-        //     Text(alertMessage)
-        // }
+        .alert("Profile Update", isPresented: $showingAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(alertMessage)
+        }
     }
     
     private var headerView: some View {
@@ -185,10 +184,8 @@ struct SettingsView: View {
         .background(Color(NSColor.controlBackgroundColor))
     }
 
-    // TODO: Avatar feature - uncomment after adding AvatarManager.swift to Xcode project
-    /*
     private var userProfileSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             Text("User Profile")
                 .font(.headline)
                 .foregroundColor(.primary)
@@ -253,15 +250,51 @@ struct SettingsView: View {
                 }
             }
 
-            Text("Upload a profile picture. Your avatar will be saved locally and synced across your devices via iCloud.")
+            Divider()
+
+            // Name field
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Display Name")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                TextField("Enter your name", text: $displayName)
+                    .textFieldStyle(.roundedBorder)
+                    .onChange(of: displayName) { _, newValue in
+                        saveProfileInfo()
+                    }
+            }
+
+            // Bio field
+            VStack(alignment: .leading, spacing: 6) {
+                Text("About Me")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                TextEditor(text: $bio)
+                    .frame(height: 80)
+                    .font(.body)
+                    .scrollContentBackground(.hidden)
+                    .background(Color(NSColor.textBackgroundColor))
+                    .cornerRadius(6)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
+                    )
+                    .onChange(of: bio) { _, newValue in
+                        saveProfileInfo()
+                    }
+            }
+
+            Text("Your profile information is saved locally and synced across devices via iCloud.")
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
         .padding(20)
         .background(Color(NSColor.controlBackgroundColor))
         .cornerRadius(8)
+        .onAppear {
+            loadProfileInfo()
+        }
     }
-    */
     
     private var footerView: some View {
         VStack(spacing: 12) {
@@ -325,8 +358,6 @@ struct SettingsView: View {
         .background(Color(NSColor.controlBackgroundColor))
     }
 
-    // TODO: Avatar feature - uncomment after adding AvatarManager.swift to Xcode project
-    /*
     // MARK: - Avatar Actions
 
     private func selectAvatar() {
@@ -363,7 +394,36 @@ struct SettingsView: View {
         alertMessage = "Avatar removed successfully."
         showingAlert = true
     }
-    */
+
+    // MARK: - Profile Info
+
+    private func loadProfileInfo() {
+        // Load from UserDefaults
+        displayName = UserDefaults.standard.string(forKey: "com.craigoclean.profile.displayName") ?? ""
+        bio = UserDefaults.standard.string(forKey: "com.craigoclean.profile.bio") ?? ""
+
+        // Also try to load from iCloud
+        if let cloudName = NSUbiquitousKeyValueStore.default.string(forKey: "profileDisplayName"), !cloudName.isEmpty {
+            displayName = cloudName
+            UserDefaults.standard.set(cloudName, forKey: "com.craigoclean.profile.displayName")
+        }
+
+        if let cloudBio = NSUbiquitousKeyValueStore.default.string(forKey: "profileBio"), !cloudBio.isEmpty {
+            bio = cloudBio
+            UserDefaults.standard.set(cloudBio, forKey: "com.craigoclean.profile.bio")
+        }
+    }
+
+    private func saveProfileInfo() {
+        // Save to local storage
+        UserDefaults.standard.set(displayName, forKey: "com.craigoclean.profile.displayName")
+        UserDefaults.standard.set(bio, forKey: "com.craigoclean.profile.bio")
+
+        // Save to iCloud
+        NSUbiquitousKeyValueStore.default.set(displayName, forKey: "profileDisplayName")
+        NSUbiquitousKeyValueStore.default.set(bio, forKey: "profileBio")
+        NSUbiquitousKeyValueStore.default.synchronize()
+    }
 }
 
 struct SettingsView_Previews: PreviewProvider {

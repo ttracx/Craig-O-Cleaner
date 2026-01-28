@@ -18,6 +18,7 @@ final class ElevatedExecutor: CapabilityExecutor {
     private let helperInstaller: HelperInstaller
     private let logStore: SQLiteLogStore
     private let preflightEngine: PreflightEngine
+    private let autoPermissionHandler: AutoPermissionHandler
     private let logger = Logger(subsystem: "com.neuralquantum.craigoclean", category: "ElevatedExecutor")
 
     // MARK: - Observable State
@@ -31,11 +32,13 @@ final class ElevatedExecutor: CapabilityExecutor {
     init(
         helperInstaller: HelperInstaller = .shared,
         logStore: SQLiteLogStore = .shared,
-        preflightEngine: PreflightEngine = PreflightEngine()
+        preflightEngine: PreflightEngine = PreflightEngine(),
+        autoPermissionHandler: AutoPermissionHandler = .shared
     ) {
         self.helperInstaller = helperInstaller
         self.logStore = logStore
         self.preflightEngine = preflightEngine
+        self.autoPermissionHandler = autoPermissionHandler
     }
 
     // MARK: - Command Executor Protocol
@@ -81,6 +84,22 @@ final class ElevatedExecutor: CapabilityExecutor {
 
         // Run preflight validation
         let preflightResult = await preflightEngine.validate(capability)
+
+        // Handle missing permissions with auto-remediation
+        if !preflightResult.missingPermissions.isEmpty {
+            logger.warning("Missing permissions detected: \(preflightResult.missingPermissions.map { $0.displayName })")
+
+            // Trigger auto-remediation
+            await autoPermissionHandler.handleMissingPermissions(
+                preflightResult.missingPermissions,
+                for: capability
+            )
+
+            // After auto-remediation, still fail the execution
+            // User needs to re-run after granting permissions
+            throw UserExecutorError.preflightValidationFailed(preflightResult)
+        }
+
         guard preflightResult.canExecute else {
             logger.error("Preflight validation failed: \(preflightResult.summary)")
             throw UserExecutorError.preflightValidationFailed(preflightResult)

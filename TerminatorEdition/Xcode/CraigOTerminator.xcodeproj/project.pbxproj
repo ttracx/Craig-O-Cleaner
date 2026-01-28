@@ -70,6 +70,7 @@
 		FAD608AD34106879E2798812 /* PlannerAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DD265ABF43D8A06ABCD77CB /* PlannerAgent.swift */; };
 		FCBB1338EB27CE8069B51ADB /* PermissionStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75874698C29C1CF92D7CCCA4 /* PermissionStatusView.swift */; };
 		FFA6AB932002F61B01898FE4 /* SQLiteLogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B9F4AF6FA1ECC0A1B98C6C5 /* SQLiteLogStore.swift */; };
+		5523248E1AAB408AB874FB84 /* AutoPermissionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 082DABFDF8104067B6747149 /* AutoPermissionHandler.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -139,6 +140,7 @@
 		EC32FF1AA15675F4CE0B207B /* HelperInstaller.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HelperInstaller.swift; sourceTree = "<group>"; };
 		F54E1BC6F4D89A5519D84588 /* ChromeController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChromeController.swift; sourceTree = "<group>"; };
 		F66C4B0241E15C2C4C92200C /* WorkflowApprovalSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorkflowApprovalSheet.swift; sourceTree = "<group>"; };
+		082DABFDF8104067B6747149 /* AutoPermissionHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AutoPermissionHandler.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -158,6 +160,7 @@
 				4446322FC4FAD7913E4AB641 /* AutomationChecker.swift */,
 				17E2A0667416BE2FEF2D2CAC /* PermissionCenter.swift */,
 				755DD5C65E7FDA61AE049102 /* PreflightEngine.swift */,
+				082DABFDF8104067B6747149 /* AutoPermissionHandler.swift */,
 			);
 			path = Permissions;
 			sourceTree = "<group>";
@@ -491,6 +494,7 @@
 				092FF65A152F0DD2AA4A5D3F /* Theme.swift in Sources */,
 				A797F4AAAFDFD63E213E3761 /* AutomationChecker.swift in Sources */,
 				1A21283FA2964E0E0E3DF512 /* PermissionCenter.swift in Sources */,
+				5523248E1AAB408AB874FB84 /* AutoPermissionHandler.swift in Sources */,
 				BE6F20217BB1034A56136E11 /* PreflightEngine.swift in Sources */,
 				FCBB1338EB27CE8069B51ADB /* PermissionStatusView.swift in Sources */,
 				1A82FB33604A46A5B488C80D /* RemediationSheet.swift in Sources */,
