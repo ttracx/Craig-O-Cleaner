@@ -1,0 +1,40 @@
+/* Craig-O-Clean Localizable Strings */
+
+/* App */
+"app.name" = "Craig-O-Clean";
+"app.tagline" = "Keep your Mac clean and running smoothly";
+
+/* Dashboard */
+"dashboard.title" = "Dashboard";
+"dashboard.welcome" = "Welcome to Craig-O-Clean";
+
+/* Cleanup */
+"cleanup.title" = "Cleanup";
+"cleanup.scan" = "Scan";
+"cleanup.clean" = "Clean Selected";
+"cleanup.empty" = "No items to clean";
+
+/* Diagnostics */
+"diagnostics.title" = "Diagnostics";
+"diagnostics.collect" = "Collect Report";
+"diagnostics.export" = "Export...";
+
+/* Settings */
+"settings.title" = "Settings";
+"settings.edition" = "Edition";
+"settings.compare" = "Compare Editions";
+
+/* Logs */
+"logs.title" = "Logs";
+"logs.clear" = "Clear Logs";
+"logs.export" = "Export Logs";
+
+/* Edition */
+"edition.pro" = "Craig-O-Clean Pro";
+"edition.lite" = "Craig-O-Clean Lite";
+"edition.compare.title" = "Compare Craig-O-Clean Editions";
+"edition.pro.info.link" = "Copy Pro Info Link";
+
+/* Pro Feature */
+"profeature.unavailable.title" = "Not Available in This Edition";
+"profeature.unavailable.copy" = "Copy Pro Info Link";
