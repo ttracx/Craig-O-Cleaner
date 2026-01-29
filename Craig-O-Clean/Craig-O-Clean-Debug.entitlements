@@ -43,5 +43,10 @@
 	<array>
 		<string>com.apple.coreservices.launchservicesd</string>
 	</array>
+
+	<!-- Read-only access to all files (for process info and browser detection) -->
+	<!-- This makes Debug builds more similar to Release/Sandbox behavior -->
+	<key>com.apple.security.files.all</key>
+	<string>read-only</string>
 </dict>
 </plist>

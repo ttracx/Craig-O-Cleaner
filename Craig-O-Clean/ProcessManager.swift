@@ -570,6 +570,9 @@ class ProcessManager: ObservableObject {
     func forceQuitProcess(_ process: ProcessInfo) async -> Bool {
         logger.info("Attempting to force quit process: \(process.name) (PID: \(process.pid))")
 
+        // Check if app is sandboxed - if so, use admin privileges approach for non-app processes
+        let isSandboxed = SandboxMigrationManager.shared.isSandboxed
+
         // Method 1: Try NSRunningApplication.forceTerminate() (works for user apps within sandbox)
         if let app = NSWorkspace.shared.runningApplications.first(where: { $0.processIdentifier == process.pid }) {
             logger.info("Found NSRunningApplication for \(process.name), attempting forceTerminate()")
@@ -605,7 +608,14 @@ class ProcessManager: ObservableObject {
             logger.warning("Could not find NSRunningApplication for PID \(process.pid) (\(process.name))")
         }
 
-        // Method 2: Try direct termination via process signal
+        // Method 2: Handle based on sandbox status
+        if isSandboxed {
+            // When sandboxed, kill() calls are blocked - use admin privileges
+            logger.info("App is sandboxed - using admin privileges to terminate PID \(process.pid)")
+            return await forceQuitWithAdminPrivileges(process)
+        }
+
+        // Method 2 (Non-sandboxed): Try direct termination via process signal
         // For processes that don't have an NSRunningApplication (like helper processes)
         logger.info("Attempting direct process termination for PID \(process.pid)")
 

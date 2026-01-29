@@ -145,6 +145,8 @@ final class PermissionsService: ObservableObject {
     private var checkTimer: Timer?
     private var appActivationObserver: NSObjectProtocol?
     private let hasShownOnboarding = "hasShownPermissionsOnboarding"
+    private var isCheckingInProgress = false  // Prevent concurrent checks
+    private var lastActivationCheckTime: Date?  // Debounce app activation checks
 
     // Permission manager for auto-enablement
     let permissionManager = BrowserPermissionManager()
@@ -199,8 +201,8 @@ final class PermissionsService: ObservableObject {
             // }
         }
         
-        // Start periodic checks for permission changes
-        startPeriodicCheck(interval: 5.0)
+        // Start periodic checks for permission changes (every 30 seconds to reduce overhead)
+        startPeriodicCheck(interval: 30.0)
     }
     
     deinit {
@@ -220,8 +222,19 @@ final class PermissionsService: ObservableObject {
             queue: .main
         ) { [weak self] _ in
             Task { @MainActor [weak self] in
-                self?.logger.info("App became active, refreshing permissions")
-                await self?.checkAllPermissions()
+                guard let self = self else { return }
+
+                // Debounce: Only check if at least 2 seconds have passed since last activation check
+                let now = Date()
+                if let lastCheck = self.lastActivationCheckTime,
+                   now.timeIntervalSince(lastCheck) < 2.0 {
+                    self.logger.debug("App activation check skipped (debounced)")
+                    return
+                }
+
+                self.lastActivationCheckTime = now
+                self.logger.info("App became active, refreshing permissions")
+                await self.checkAllPermissions()
             }
         }
     }
@@ -264,6 +277,13 @@ final class PermissionsService: ObservableObject {
     
     /// Check all permissions
     func checkAllPermissions() async {
+        // Prevent concurrent checks to avoid duplicate logging and unnecessary work
+        guard !isCheckingInProgress else {
+            logger.debug("Permission check already in progress, skipping duplicate request")
+            return
+        }
+
+        isCheckingInProgress = true
         isChecking = true
 
         // Check accessibility
@@ -278,22 +298,22 @@ final class PermissionsService: ObservableObject {
             let newStatus = await checkAutomationPermission(for: automationTargets[i])
             automationTargets[i].status = newStatus
 
-            // Report status changes to permission manager
-            let isGranted = newStatus == .granted
-            permissionManager.updatePermissionState(
-                bundleIdentifier: automationTargets[i].bundleIdentifier,
-                browserName: automationTargets[i].name,
-                isGranted: isGranted
-            )
-
-            // Log status changes
+            // Report status changes to permission manager (only on actual changes to reduce I/O)
             if previousStatus != newStatus {
+                let isGranted = newStatus == .granted
+                permissionManager.updatePermissionState(
+                    bundleIdentifier: automationTargets[i].bundleIdentifier,
+                    browserName: automationTargets[i].name,
+                    isGranted: isGranted
+                )
+
                 logger.info("Permission status changed for \(self.automationTargets[i].name): \(previousStatus.rawValue) → \(newStatus.rawValue)")
             }
         }
 
         lastCheckTime = Date()
         isChecking = false
+        isCheckingInProgress = false
 
         logger.info("Permission check completed - Accessibility: \(self.accessibilityStatus.rawValue), Full Disk Access: \(self.fullDiskAccessStatus.rawValue)")
     }
