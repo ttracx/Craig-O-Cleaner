@@ -1,0 +1,50 @@
+// File: CraigOClean-vNext/CraigOClean/Config/AppStoreLite.xcconfig
+// Craig-O-Clean - App Store Lite Build Settings
+// Configuration for Mac App Store (Lite) edition
+
+#include "BuildSettings.xcconfig"
+
+// MARK: - Product Identity
+PRODUCT_NAME = Craig-O-Clean
+PRODUCT_BUNDLE_IDENTIFIER = com.craigosoft.CraigOClean.Lite
+INFOPLIST_KEY_CFBundleDisplayName = Craig-O-Clean
+
+// MARK: - Swift Compiler Flags
+// Define APPSTORE_LITE for conditional compilation
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) APPSTORE_LITE
+
+// MARK: - Preprocessor Definitions
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) APPSTORE_LITE=1
+
+// MARK: - Code Signing (App Store)
+CODE_SIGN_IDENTITY = Apple Distribution
+CODE_SIGN_STYLE = Manual
+PROVISIONING_PROFILE_SPECIFIER =
+
+// MARK: - Entitlements
+CODE_SIGN_ENTITLEMENTS = Config/Entitlements/AppStoreLite.entitlements
+
+// MARK: - Sandbox (Required for App Store)
+ENABLE_APP_SANDBOX = YES
+
+// MARK: - App Store Requirements
+// Hardened runtime not required for sandboxed apps
+ENABLE_HARDENED_RUNTIME = NO
+
+// MARK: - Info.plist Values
+INFOPLIST_KEY_NSHumanReadableCopyright = Copyright © 2024 CraigoSoft. All rights reserved.
+
+// MARK: - App Store Compliance
+// No privileged helper support
+// No external update mechanism
+// No external licensing
+
+// MARK: - Build Optimization
+SWIFT_OPTIMIZATION_LEVEL[config=Release] = -O
+GCC_OPTIMIZATION_LEVEL[config=Release] = s
+
+// MARK: - Asset Catalog
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon
+
+// MARK: - Category
+INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.utilities

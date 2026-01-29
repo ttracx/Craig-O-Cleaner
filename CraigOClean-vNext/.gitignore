@@ -1,0 +1,57 @@
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+*.xcworkspace
+!*.xcworkspace/contents.xcworkspacedata
+*.xcuserdata/
+*.moved-aside
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+Packages/
+Package.resolved
+*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+
+# CocoaPods (if used)
+Pods/
+
+# Carthage (if used)
+Carthage/Build/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# Archives
+*.xcarchive
+
+# Code signing
+*.mobileprovision
+*.p12
+
+# Logs
+*.log
+
+# Build artifacts
+*.app
+*.pkg
+*.dmg
+
+# Environment files
+.env
+.env.local

@@ -1,0 +1,48 @@
+// File: CraigOClean-vNext/CraigOClean/Config/DirectPro.xcconfig
+// Craig-O-Clean - DirectPro Build Settings
+// Configuration for direct distribution (Pro) edition
+
+#include "BuildSettings.xcconfig"
+
+// MARK: - Product Identity
+PRODUCT_NAME = Craig-O-Clean Pro
+PRODUCT_BUNDLE_IDENTIFIER = com.craigosoft.CraigOClean.Pro
+INFOPLIST_KEY_CFBundleDisplayName = Craig-O-Clean Pro
+
+// MARK: - Swift Compiler Flags
+// Define DIRECT_PRO for conditional compilation
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) DIRECT_PRO
+
+// MARK: - Preprocessor Definitions
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) DIRECT_PRO=1
+
+// MARK: - Code Signing (Direct Distribution)
+CODE_SIGN_IDENTITY = Developer ID Application
+CODE_SIGN_STYLE = Manual
+ENABLE_HARDENED_RUNTIME = YES
+
+// MARK: - Entitlements
+CODE_SIGN_ENTITLEMENTS = Config/Entitlements/DirectPro.entitlements
+
+// MARK: - Capabilities
+// No sandbox for DirectPro
+ENABLE_APP_SANDBOX = NO
+
+// MARK: - Notarization
+// Enable hardened runtime for notarization
+ENABLE_HARDENED_RUNTIME = YES
+
+// MARK: - Info.plist Values
+INFOPLIST_KEY_NSHumanReadableCopyright = Copyright © 2024 CraigoSoft. All rights reserved.
+
+// MARK: - SMJobBless (Privileged Helper)
+// Add to Info.plist: SMPrivilegedExecutables
+// INFOPLIST_KEY_SMPrivilegedExecutables defined in target settings
+
+// MARK: - Sparkle Integration
+// Framework search paths for Sparkle
+FRAMEWORK_SEARCH_PATHS = $(inherited) $(PROJECT_DIR)/Frameworks
+
+// MARK: - Build Optimization
+SWIFT_OPTIMIZATION_LEVEL[config=Release] = -O
+GCC_OPTIMIZATION_LEVEL[config=Release] = s
