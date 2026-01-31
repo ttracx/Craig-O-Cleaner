@@ -1,0 +1,31 @@
+# Dependencies
+node_modules
+
+# Build output (we build inside Docker)
+dist
+
+# Development files
+*.md
+.git
+.gitignore
+.env
+.env.*
+.eslintrc*
+.prettierrc*
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# Test files
+*.test.ts
+*.spec.ts
+__tests__
+coverage
+
+# Docker files (prevent recursive inclusion)
+Dockerfile*
+docker-compose*
+.dockerignore
