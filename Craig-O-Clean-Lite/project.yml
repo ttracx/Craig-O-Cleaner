@@ -1,0 +1,42 @@
+name: Craig-O-Clean-Lite
+
+options:
+  bundleIdPrefix: com.neuralquantum
+  deploymentTarget:
+    macOS: "14.0"
+
+targets:
+  Craig-O-Clean-Lite:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+
+    sources:
+      - Craig-O-Clean-Lite
+
+    settings:
+      base:
+        PRODUCT_NAME: Craig-O-Clean Lite
+        PRODUCT_BUNDLE_IDENTIFIER: com.neuralquantum.craig-o-clean-lite
+        SWIFT_VERSION: "5.9"
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        DEVELOPMENT_TEAM: ""
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_HARDENED_RUNTIME: YES
+        INFOPLIST_FILE: Craig-O-Clean-Lite/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        COMBINE_HIDPI_IMAGES: YES
+        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: 1.0.0
+        GENERATE_INFOPLIST_FILE: NO
+
+      configs:
+        Debug:
+          SWIFT_OPTIMIZATION_LEVEL: "-Onone"
+        Release:
+          SWIFT_OPTIMIZATION_LEVEL: "-O"
+          SWIFT_COMPILATION_MODE: wholemodule
+
+    scheme:
+      testTargets: []
+      gatherCoverageData: false
