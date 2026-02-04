@@ -97,7 +97,7 @@ struct ContentView: View {
                 }
                 .buttonStyle(.borderedProminent)
 
-                Button(action: { NSApp.terminate(nil) }) {
+                Button(action: quitApp) {
                     Text("Quit")
                 }
                 .buttonStyle(.bordered)
@@ -122,6 +122,10 @@ struct ContentView: View {
         let freedMemory = systemMonitor.performQuickCleanup()
         cleanupMessage = "Freed approximately \(freedMemory) MB of memory"
         showingCleanupAlert = true
+    }
+
+    private func quitApp() {
+        NSApplication.shared.terminate(nil)
     }
 }
 
