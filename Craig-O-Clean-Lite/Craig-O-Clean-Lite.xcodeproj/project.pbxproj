@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -23,7 +23,7 @@
 		6BD4D610A6E41AC97A02DA31 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		A1DAA8067A7A983EFFE93200 /* SystemMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMonitor.swift; sourceTree = "<group>"; };
 		C0372580B3904AB1DB8D3FBD /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		C55C655B0392DB8DD9AD98D9 /* Craig-O-Clean-Lite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Craig-O-Clean-Lite.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C55C655B0392DB8DD9AD98D9 /* Craig-O-Clean Lite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Craig-O-Clean Lite.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD1336AECB78CF6C2AD3AEAC /* UpgradeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpgradeService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -54,7 +54,7 @@
 		49A0A1E5A9203F23CD719DFD /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				C55C655B0392DB8DD9AD98D9 /* Craig-O-Clean-Lite.app */,
+				C55C655B0392DB8DD9AD98D9 /* Craig-O-Clean Lite.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -77,7 +77,7 @@
 			packageProductDependencies = (
 			);
 			productName = "Craig-O-Clean-Lite";
-			productReference = C55C655B0392DB8DD9AD98D9 /* Craig-O-Clean-Lite.app */;
+			productReference = C55C655B0392DB8DD9AD98D9 /* Craig-O-Clean Lite.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -105,7 +105,6 @@
 			);
 			mainGroup = 2B57161CA0EDBC62D8233A20;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -147,11 +146,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "Craig-O-Clean-Lite/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Craig-O-Clean-Lite";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -292,11 +293,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "Craig-O-Clean-Lite/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Craig-O-Clean-Lite";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",

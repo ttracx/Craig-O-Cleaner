@@ -89,7 +89,7 @@ class SystemMonitor: ObservableObject {
         DispatchQueue.global(qos: .userInitiated).async {
             let pipe = Pipe()
             let task = Process()
-            task.launchPath = "/bin/ps"
+            task.executableURL = URL(fileURLWithPath: "/bin/ps")
             task.arguments = ["-eo", "pid,rss,comm"]
             task.standardOutput = pipe
 
