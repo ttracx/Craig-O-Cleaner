@@ -109,3 +109,4 @@ node_modules/
 APP_SPECIFIC_SHARED_SECRET_GUIDE.md
 Craig-O-Clean.xcodeproj/project.pbxproj
 errorlogs.log
+Craig-O-Clean-Lite/backend/.env
